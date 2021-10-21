@@ -1004,17 +1004,18 @@ $(document).ready(function() {
 
 
      // ----- KEYUP BARCODE -----
-     $(document).on("change", `[name="barcodeAsset"]`, function() {
-        const assetID    = $(this).attr("assetID");
-        const index    = $(this).attr("index");
-        const id    = $(this).attr("id");
+     $(document).on("keyup", `[name=barcodeAsset]`, function() {
+        const assetID        = $(this).attr("assetID");
+        const index         = $(this).attr("index");
+        const id            = $(this).attr("id");
         const withdrawalAssetID    = $(this).attr("withdrawalAssetID");
-        const valueLength = $(this).val().length+1;
+        const valueLength = $(this).val().length +1;
         const value = $(this).val();
         const characterLength = 37;
-
+        let warningCondition = false;
+        let isInvalid        = false;
+        // $("#"+id).addClass("is-invalid").addClass("validate");
         if(valueLength >= characterLength){
-
             const validatebarcode = getTableData(`ims_stock_in_assets_tbl`,
             `barcode`,
             `stockOutDate IS NUll 
@@ -1022,35 +1023,84 @@ $(document).ready(function() {
             AND assetID = ${assetID} AND barcode = '${value}'`);
             if(validatebarcode.length<=0){
                $("#"+id).addClass("is-invalid").removeClass("validate")
-               $("#invalid-barcodeAsset"+index).text("Barcode not exist!")
+               $("#invalid-barcodeAssetID"+index).text("Barcode not exist!");
+                warningCondition = true;
+                isInvalid        = true;
             }else{
-                $("#"+id).removeClass("is-invalid").addClass("validate")
-                $("#invalid-barcodeAsset"+index).text("")
+                $("#"+id).removeClass("is-invalid").addClass("validate");
+                $("#invalid-barcodeAssetID"+index).text("")
             }
             
         }
-        // else{
-        //     $("#"+id).addClass("is-invalid").removeClass("validate")
-        //     $("#invalid-barcodeAsset"+index).text("Please enter at least "+characterLength+" characters.")
-        // }
+        else{ 
+            warningCondition = true;
+            isInvalid = true;
+            $("#"+id).addClass("is-invalid").addClass("validate");
+            $("#invalid-barcodeAssetID"+index).text("Please enter at least "+characterLength+" characters.");
+        }
 
-        // const getRemainingItem = +$(`[name="remainingAsset"][assetID="${assetID}"]`).attr("remainingValueItem").replaceAll(",","");
-        // var computeRemainingItem =0;
-        // computeRemainingItem = getRemainingItem - value;
-        
-        
+      
         if(value == 0){
             $(this).closest("tr").find("span").eq(3).text("-");
-            // $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(getRemainingItem));
 
 
         }else{
             $(this).closest("tr").find("span").eq(3).text(moment().format("MMMM DD, YYYY"));
-            // $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(computeRemainingItem));
 
         }
+        
+        if(warningCondition && isInvalid){
+            setTimeout(() => {  
+                if(valueLength >= characterLength){
+                    $("#"+id).addClass("is-invalid").removeClass("validate")
+                    $("#invalid-barcodeAssetID"+index).text("Barcode not exist!");
+                }else{
+                    $("#"+id).addClass("is-invalid").addClass("validate");
+                    $("#invalid-barcodeAssetID"+index).text("Please enter at least "+characterLength+" characters.");
+                }     
+            }, 1000);    
+        }
+        
+
 
     });
+
+    $(document).on("change",`[name="barcodeAsset"],[name="borrowed"]`,function(){
+    	var getBarcode = $(this).closest("tr").find(`[name="barcodeAsset"]`).val();
+    	var getQuantity = +$(this).closest("tr").find(`[name="borrowed"]`).val();
+
+        if(getBarcode == "" && getQuantity != 0){
+        	$(this).closest("tr").find(`[name="barcodeAsset"]`).addClass("is-invalid");
+        	$(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("Please input barcode.");
+
+        	$(this).closest("tr").find(`[name="borrowed"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("");
+        }
+
+        if(getBarcode != "" && getQuantity == 0){
+        	$(this).closest("tr").find(`[name="borrowed"]`).addClass("is-invalid");
+        	$(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("Please input quantity.");
+
+        	$(this).closest("tr").find(`[name="barcodeAsset"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
+        }
+
+        if(getBarcode != "" && getQuantity != 0 ){
+            $(this).closest("tr").find(`[name="barcodeAsset"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
+
+        	$(this).closest("tr").find(`[name="borrowed"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("");
+        }else{
+        	 if(getBarcode == "" && getQuantity == 0 ){
+				$(this).closest("tr").find(`[name="barcodeAsset"]`).removeClass("is-invalid").removeClass("is-valid");
+				$(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
+
+				$(this).closest("tr").find(`[name="borrowed"]`).removeClass("is-invalid").removeClass("is-valid");
+				$(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("");
+			}
+        }    
+    })
 
     // ----- END KEYUP BARCODE -----  
 
@@ -1452,7 +1502,7 @@ $(document).ready(function() {
 
         // KEYUP CHECK COMPLETE DATA EACH ROW //
 
-        $(document).on("keyup",`[name="barcodeAsset"],[name="borrowed"]`,function(){
+        $(document).on("change",`[name="barcodeAsset"],[name="borrowed"]`,function(){
             var getBarcode = $(this).closest("tr").find(`[name="barcodeAsset"]`).val();
             var getQuantity = +$(this).closest("tr").find(`[name="borrowed"]`).val();
     

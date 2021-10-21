@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 18, 2021 at 03:11 AM
+-- Generation Time: Oct 21, 2021 at 02:31 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -6852,7 +6852,21 @@ INSERT INTO `hris_employee_attendance_tbl` (`attendanceID`, `employeeID`, `sched
 (137, 20, '2021-10-14', '2021-10-14 00:00:00', '2021-10-14 00:00:00', '0.00', '0.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
 (138, 21, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
 (139, 22, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
-(140, 23, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28');
+(140, 23, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(141, 1, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(142, 2, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(143, 3, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(144, 4, '2021-10-19', '2021-10-19 06:00:00', '2021-10-19 17:00:00', '1.00', '10.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(145, 5, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(146, 6, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(147, 7, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(148, 8, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(149, 9, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(150, 19, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(151, 20, '2021-10-19', '2021-10-19 06:00:00', '2021-10-19 17:00:00', '1.00', '10.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(152, 21, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(153, 22, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(154, 23, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46');
 
 -- --------------------------------------------------------
 
@@ -11969,6 +11983,10 @@ CREATE TABLE `pms_employee_taskboard_status_tbl` (
   `timelineBuilderID` bigint(20) DEFAULT NULL,
   `projectMilestoneID` bigint(20) DEFAULT NULL,
   `taskID` bigint(20) DEFAULT NULL,
+  `employeeStartDate` timestamp NULL DEFAULT NULL,
+  `employeeEndDate` timestamp NULL DEFAULT NULL,
+  `employeeManHours` decimal(10,2) DEFAULT NULL,
+  `employeeUsedHours` decimal(10,2) DEFAULT NULL,
   `employeeTaskStatus` int(50) DEFAULT NULL,
   `createdBy` bigint(20) DEFAULT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
@@ -12372,6 +12390,8 @@ CREATE TABLE `web_applicant_list_tbl` (
   `applicantZipCode` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `applicantStatus` int(11) NOT NULL,
   `reset_link` int(11) NOT NULL,
+  `applicantDesignationID` bigint(20) NOT NULL,
+  `examStatus` int(50) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -13508,7 +13528,7 @@ ALTER TABLE `hris_designation_tbl`
 -- AUTO_INCREMENT for table `hris_employee_attendance_tbl`
 --
 ALTER TABLE `hris_employee_attendance_tbl`
-  MODIFY `attendanceID` bigint(21) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=141;
+  MODIFY `attendanceID` bigint(21) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=155;
 
 --
 -- AUTO_INCREMENT for table `hris_employee_documents_tbl`

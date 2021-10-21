@@ -837,15 +837,14 @@ $(document).ready(function () {
 						<td class="text-center">${item.quantity}</td>
 						<td class="text-center">${(parseFloat(item.quantity) - parseFloat(item.remaining)).toFixed(2)}</td>
 						<td>`;
-						html += `<a class="btn btn-primary btn-barcode btn-sm btn-block" 
-									href="javascript:void(0);" 
-									number="" 
-									referenceCode="${item.referenceCode}" 
-									itemID="${item.itemID}">
-									<i class="fas fa-barcode"></i> Barcode
-									</a>`;
+						html += `
+								<select class="form-control select2 btn-barcode" name="barcode" id="barcode" referenceCode="${item.referenceCode}" itemID="${item.itemID}">
+								<option value=""selected disabled>Select Print</option>
+								<option value="0">QR Code</option>
+								<option value="1">Barcode</option>
+								</select>`;
 						if(totalQuantity == totalremaining){
-							//html += `<span class="badge badge-success w-100">Completed</span>`;
+							// html += `<span class="badge badge-success w-100">Completed</span>`;
 						}else{
 							html += `<a class="btn btn-secondary btnRecord btn-sm btn-block mt-1" 
 										href="javascript:void(0);" 
@@ -1238,17 +1237,16 @@ $(document).ready(function () {
 										</td>`;
 								}
 									html +=`
-									</td>
+								
 										<td>
 											<input 
 												type="text"
-												class="form-control barcode" recordID="${recordID}"
+												class="form-control barcode" recordID="${item.recordID}"
 												ReturnItemID="${moduleReturnItemID}"
 												MaterialUsageID="${moduleMaterialUsageID}"
 												InventoryReceivingID="${moduleInventoryReceivingID}"
 												number="${index}"
 												name="barcode"
-												itemid="${itemID}"
 												itemName="${itemName}"
 												brand="${Brand}"
 												classificationName="${classificationName}"
@@ -1262,47 +1260,49 @@ $(document).ready(function () {
 													class="form-control serialnumber"
 													id="serialnumber${index}"
 													name="serialnumber"
+													itemid="${item.itemID}"
 													value="${item.serialNumber}"
 													disabled>	
 										</td>
 										<td>
 											<select style="width:100%;"
-													class="form-control select2 validate inventoryStorageID"
-													number="${index}"
-													name="inventoryStorageID"
-													id="inventoryStorageID${index}" required>
-													</select>
-													<div class="invalid-feedback d-block" id="invalid-input_inventoryStorageID"></div>
+											class="form-control select2 validate inventoryStorageID"
+											number="${index}"
+											name="inventoryStorageID"
+											id="inventoryStorageID${index}" 
+											required
+											recordID="${recordID}">
+											</select>
+											<div class="invalid-feedback d-block" id="invalid-input_inventoryStorageID"></div>
 										</td>	
 										<td>
 											<input type="text"
-												  class="form-control inventorydetail"
-												  id="inventorydetail${index}"
-												  name="inventorydetail"
-												  disabled>
+											class="form-control inventorydetail"
+											id="inventorydetail${index}"
+											name="inventorydetail"
+											disabled>
 										</td>
 										<td>
 											<input 
-												type="date" 
-												class="form-control manufactureDate" 
-												number="${index}"
-												name="manufactureDate" 
-												id="manufactureDate${index}">
+											type="date" 
+											class="form-control manufactureDate" 
+											number="${index}"
+											name="manufactureDate" 
+											id="manufactureDate${index}">
 										</td>
-										<td>
-										<input 
-												type="date" 
-												class="form-control expirationdate  validate expirationdateoncheck" 
-												number="${index}"
-												max="2040-04-30"
-												name="expirationdate"
-												value="${today}"
-												id="expirationdate${index}">
-										</td>
-									
+								<td>
+								<input 
+										type="date" 
+										class="form-control expirationdate  validate expirationdateoncheck" 
+										number="${index}"
+										max="2040-04-30"
+										name="expirationdate"
+										value="${today}"
+										id="expirationdate${index}">
+								</td>
 								</tr>`;
-					})
-		html += `
+					});
+						html += `
 									</tbody>
 								</table>
 							</div>
@@ -1319,56 +1319,56 @@ $(document).ready(function () {
 		return html;
 
 	}
-		$(document).on("change", ".manufactureDate", function() {
-			const val = $(this).val();
-			const number = $(this).attr("number");
-			const todaydate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
-			var dateString = moment(todaydate).format('YYYY-MM-DD');
-			const inventoryStorageID = $(`#inventoryStorageID${number}`).val();
-			var inventoryStorageRoom 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageRoom");
-			var inventoryStorageFloor 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageFloor");
-			var inventoryStorageBay 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageBay");
-			var inventoryStorageLevel 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageLevel");
-			var inventoryStorageShelves 	= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageShelves");
-			var inventoryStorageCode 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageCode");
-			var consolidatevalue = 'W'+val+inventoryStorageRoom+inventoryStorageFloor+inventoryStorageBay+inventoryStorageLevel+inventoryStorageShelves;
-			var warehouse = '';
-			var storageCode = '';
-			if(inventoryStorageID =="" || inventoryStorageID === null){
-				warehouse ='0000000000';
-			}else{
-				warehouse = consolidatevalue;	
-			}
-			// start date today split //
-			const todaydateSplit = dateString.split("-");
-			const todaymyYear = todaydateSplit[0].substring(2);
-			const todaymyMonth = todaydateSplit[1].length < 2 ? "0"+todaydateSplit[1] : todaydateSplit[1];
-			const todaymyDate = todaydateSplit[2].length < 2 ? "0"+todaydateSplit[2] : todaydateSplit[2];
-			const mytodayDate = `${todaymyMonth}${todaymyDate}${todaymyYear}`;
-			// END DATE TODAY SPLIT //
+		// $(document).on("change", ".manufactureDate", function() {
+		// 	const val = $(this).val();
+		// 	const number = $(this).attr("number");
+		// 	const todaydate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
+		// 	var dateString = moment(todaydate).format('YYYY-MM-DD');
+		// 	const inventoryStorageID = $(`#inventoryStorageID${number}`).val();
+		// 	var inventoryStorageRoom 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageRoom");
+		// 	var inventoryStorageFloor 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageFloor");
+		// 	var inventoryStorageBay 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageBay");
+		// 	var inventoryStorageLevel 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageLevel");
+		// 	var inventoryStorageShelves 	= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageShelves");
+		// 	var inventoryStorageCode 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageCode");
+		// 	var consolidatevalue = 'W'+val+inventoryStorageRoom+inventoryStorageFloor+inventoryStorageBay+inventoryStorageLevel+inventoryStorageShelves;
+		// 	var warehouse = '';
+		// 	var storageCode = '';
+		// 	if(inventoryStorageID =="" || inventoryStorageID === null){
+		// 		warehouse ='0000000000';
+		// 	}else{
+		// 		warehouse = consolidatevalue;	
+		// 	}
+		// 	// start date today split //
+		// 	const todaydateSplit = dateString.split("-");
+		// 	const todaymyYear = todaydateSplit[0].substring(2);
+		// 	const todaymyMonth = todaydateSplit[1].length < 2 ? "0"+todaydateSplit[1] : todaydateSplit[1];
+		// 	const todaymyDate = todaydateSplit[2].length < 2 ? "0"+todaydateSplit[2] : todaydateSplit[2];
+		// 	const mytodayDate = `${todaymyMonth}${todaymyDate}${todaymyYear}`;
+		// 	// END DATE TODAY SPLIT //
 
-			// START EXPIRATION DATE //	
-			const expirationdate = $(`#expirationdate${number}`).val();
-			const dateSplit = expirationdate.split("-");
-			const myxYear = dateSplit[0].substring(2);
-			const myxMonth = dateSplit[1].length < 2 ? "0"+dateSplit[1] : dateSplit[1];
-			const myxDate = dateSplit[2].length < 2 ? "0"+dateSplit[2] : dateSplit[2];
-			const myExpDate = `${myxMonth}${myxDate}${myxYear}`;
-			// END EXPIRATION DATE//
-			// START FOR MANUFACTURE DATE //
-			const mdateSplit = val.split("-");
-			const mmyYear = mdateSplit[0].substring(2);
-			const mmyMonth = mdateSplit[1].length < 2 ? "0"+mdateSplit[1] : mdateSplit[1];
-			const mmyDate = mdateSplit[2].length < 2 ? "0"+mdateSplit[2] : mdateSplit[2];
-			const myManufactureDate = `${mmyMonth}${mmyDate}${mmyYear}`;
-			// END OF MANUFACTURE DATE //
+		// 	// START EXPIRATION DATE //	
+		// 	const expirationdate = $(`#expirationdate${number}`).val();
+		// 	const dateSplit = expirationdate.split("-");
+		// 	const myxYear = dateSplit[0].substring(2);
+		// 	const myxMonth = dateSplit[1].length < 2 ? "0"+dateSplit[1] : dateSplit[1];
+		// 	const myxDate = dateSplit[2].length < 2 ? "0"+dateSplit[2] : dateSplit[2];
+		// 	const myExpDate = `${myxMonth}${myxDate}${myxYear}`;
+		// 	// END EXPIRATION DATE//
+		// 	// START FOR MANUFACTURE DATE //
+		// 	const mdateSplit = val.split("-");
+		// 	const mmyYear = mdateSplit[0].substring(2);
+		// 	const mmyMonth = mdateSplit[1].length < 2 ? "0"+mdateSplit[1] : mdateSplit[1];
+		// 	const mmyDate = mdateSplit[2].length < 2 ? "0"+mdateSplit[2] : mdateSplit[2];
+		// 	const myManufactureDate = `${mmyMonth}${mmyDate}${mmyYear}`;
+		// 	// END OF MANUFACTURE DATE //
 
-			const itemcodeSplit = $("#itemCode").val().split("-");
-			const myItemcode = itemcodeSplit[3];
-			var getlastthreedigititemcode = myItemcode.slice(-5);
-			const barcode = `${warehouse}-${myManufactureDate}-${myExpDate}-${mytodayDate}-${getlastthreedigititemcode}`;
-			$("#barcode" + number).val(barcode);
-		});	
+		// 	const itemcodeSplit = $("#itemCode").val().split("-");
+		// 	const myItemcode = itemcodeSplit[3];
+		// 	var getlastthreedigititemcode = myItemcode.slice(-5);
+		// 	const barcode = `${warehouse}-${myManufactureDate}-${myExpDate}-${mytodayDate}-${getlastthreedigititemcode}`;
+		// 	$("#barcode" + number).val(barcode);
+		// });	
 		
 		$(document).on("change", ".expirationdate", function() {
 			const val = $(this).val();
@@ -1402,12 +1402,12 @@ $(document).ready(function () {
 			// END DATE TODAY SPLIT //
 
 			// START MANUFACTURE DATE SPLIT //
-			const manufactureDate = $(`#manufactureDate${number}`).val();
-			const mdatedateSplit = manufactureDate.split("-");
-			const mmyYear = mdatedateSplit[0].substring(2);
-			const mmyMonth = mdatedateSplit[1].length < 2 ? "0"+mdatedateSplit[1] : mdatedateSplit[1];
-			const mmyDate = mdatedateSplit[2].length < 2 ? "0"+mdatedateSplit[2] : mdatedateSplit[2];
-			const mmyMDate = `${mmyMonth}${mmyDate}${mmyYear}`;
+			// const manufactureDate = $(`#manufactureDate${number}`).val();
+			// const mdatedateSplit = manufactureDate.split("-");
+			// const mmyYear = mdatedateSplit[0].substring(2);
+			// const mmyMonth = mdatedateSplit[1].length < 2 ? "0"+mdatedateSplit[1] : mdatedateSplit[1];
+			// const mmyDate = mdatedateSplit[2].length < 2 ? "0"+mdatedateSplit[2] : mdatedateSplit[2];
+			// const mmyMDate = `${mmyMonth}${mmyDate}${mmyYear}`;
 		// END OF MANUFACTURE DATE SPLIT //
 
 			// start date expiration date split //
@@ -1423,7 +1423,7 @@ $(document).ready(function () {
 			var getlastthreedigititemcode = myItemcode.slice(-5);
 			
 		//const barcode = `${warehouse}-${myExpDate}-${getlastthreedigititemcode}`;
-		const barcode = `${warehouse}-${mmyMDate}-${myExpDate}-${mytodayDate}-${getlastthreedigititemcode}`;
+		const barcode = `${warehouse}-${myExpDate}-${getlastthreedigititemcode}-${mytodayDate}`;
 		$("#barcode" + number).val(barcode);
 	  });
 	
@@ -1455,7 +1455,9 @@ $(document).ready(function () {
 	
 	$(document).on("change", ".inventoryStorageID", function () {
 		const number = $(this).attr("number");
-		const val = $(this).val();
+		const recordID = $(this).attr("recordID");
+		if(recordID =="0"){
+			const val = $(this).val();
 		const todaydate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
 		var dateString = moment(todaydate).format('YYYY-MM-DD');
 		//let formatted_date = todaydate.getFullYear() + "-" + (todaydate.getMonth() + 1) + "-" + todaydate.getDate();
@@ -1477,12 +1479,67 @@ $(document).ready(function () {
 		// END TODAY DATE SPLIT //
 
 		// START MANUFACTURE DATE SPLIT //
-		const manufactureDate = $(`#manufactureDate${number}`).val();
-		const mdatedateSplit = manufactureDate.split("-");
-		const mmyYear = mdatedateSplit[0].substring(2);
-		const mmyMonth = mdatedateSplit[1].length < 2 ? "0"+mdatedateSplit[1] : mdatedateSplit[1];
-		const mmyDate = mdatedateSplit[2].length < 2 ? "0"+mdatedateSplit[2] : mdatedateSplit[2];
-		const mmyMDate = `${mmyMonth}${mmyDate}${mmyYear}`;
+		// const manufactureDate = $(`#manufactureDate${number}`).val();
+		// const mdatedateSplit = manufactureDate.split("-");
+		// const mmyYear = mdatedateSplit[0].substring(2);
+		// const mmyMonth = mdatedateSplit[1].length < 2 ? "0"+mdatedateSplit[1] : mdatedateSplit[1];
+		// const mmyDate = mdatedateSplit[2].length < 2 ? "0"+mdatedateSplit[2] : mdatedateSplit[2];
+		// const mmyMDate = `${mmyMonth}${mmyDate}${mmyYear}`;
+		// END OF MANUFACTURE DATE SPLIT //
+		// START EXPIRATION DATE SPLIT //
+		// const expirationdate = $(`#expirationdate${number}`).val();
+		// const dateSplit = expirationdate.split("-");
+		// const myYear = dateSplit[0].substring(2);
+		// const myMonth = dateSplit[1].length < 2 ? "0"+dateSplit[1] : dateSplit[1];
+		// const myDate = dateSplit[2].length < 2 ? "0"+dateSplit[2] : dateSplit[2];
+		// const myExpDate = `${myMonth}${myDate}${myYear}`;
+		// END EXPIRATION DATE SPLIT //
+		var inventoryStorageID = "";
+		// const data = getTableData("ims_inventory_storage_tbl",
+		// 	"inventoryStorageID  ,inventoryStorageOfficeName,inventoryStorageCode", `inventoryStorageStatus=1 AND inventoryStorageID =${storageID}`, "");
+		// data.map((item) => {
+		// 	inventoryStorageCode = item.inventoryStorageCode;
+		// }); 
+		const itemcodeSplit = $("#itemCode").val().split("-");
+		const myItemcode = itemcodeSplit[3];
+		var getlastthreedigititemcode = myItemcode.slice(-5);
+		// const inventoryStorageCodeSplit = inventoryStorageCode.split("-");
+		// const myInventorycode = inventoryStorageCodeSplit[2];
+		// var getlastthreedigitinventorycode = myInventorycode.slice(-3);
+		
+		//const barcode = `${myItemcode}-${myInventorycode}-${serialnumberlastFive}`;
+		const barcode = `${consolidatevalue}-${getlastthreedigititemcode}`;
+		$("#barcode" + number).val(barcode);
+		//$(".inventorystorageIDquantity"+storageID);
+		}else{
+			const val = $(this).val();
+		const todaydate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
+		var dateString = moment(todaydate).format('YYYY-MM-DD');
+		//let formatted_date = todaydate.getFullYear() + "-" + (todaydate.getMonth() + 1) + "-" + todaydate.getDate();
+		var inventoryStorageRoom 		= $('option:selected', this).attr("inventoryStorageRoom");
+		var inventoryStorageFloor 		= $('option:selected', this).attr("inventoryStorageFloor");
+		var inventoryStorageBay 		= $('option:selected', this).attr("inventoryStorageBay");
+		var inventoryStorageLevel 		= $('option:selected', this).attr("inventoryStorageLevel");
+		var inventoryStorageShelves 	= $('option:selected', this).attr("inventoryStorageShelves");
+		var inventoryStorageCode 		= $('option:selected', this).attr("inventoryStorageCode");
+		var consolidatevalue = 'W'+val+inventoryStorageRoom+inventoryStorageFloor+inventoryStorageBay+inventoryStorageLevel+inventoryStorageShelves;
+		$(`#inventorydetail${number}`).val(consolidatevalue);
+		var storageID = $(this).val();
+		// START TODAY DATE SPLIT //
+		const todaySplit = dateString.split("-");
+		const todaymyYear = todaySplit[0].substring(2);
+		const todaymyMonth = todaySplit[1].length < 2 ? "0"+todaySplit[1] : todaySplit[1];
+		const todaymyDate = todaySplit[2].length < 2 ? "0"+todaySplit[2] : todaySplit[2];
+		const todaymyMDate = `${todaymyMonth}${todaymyDate}${todaymyYear}`;
+		// END TODAY DATE SPLIT //
+
+		// START MANUFACTURE DATE SPLIT //
+		// const manufactureDate = $(`#manufactureDate${number}`).val();
+		// const mdatedateSplit = manufactureDate.split("-");
+		// const mmyYear = mdatedateSplit[0].substring(2);
+		// const mmyMonth = mdatedateSplit[1].length < 2 ? "0"+mdatedateSplit[1] : mdatedateSplit[1];
+		// const mmyDate = mdatedateSplit[2].length < 2 ? "0"+mdatedateSplit[2] : mdatedateSplit[2];
+		// const mmyMDate = `${mmyMonth}${mmyDate}${mmyYear}`;
 		// END OF MANUFACTURE DATE SPLIT //
 		// START EXPIRATION DATE SPLIT //
 		const expirationdate = $(`#expirationdate${number}`).val();
@@ -1506,9 +1563,11 @@ $(document).ready(function () {
 		// var getlastthreedigitinventorycode = myInventorycode.slice(-3);
 		
 		//const barcode = `${myItemcode}-${myInventorycode}-${serialnumberlastFive}`;
-		const barcode = `${consolidatevalue}-${mmyMDate}-${myExpDate}-${todaymyMDate}-${getlastthreedigititemcode}`;
+		const barcode = `${consolidatevalue}-${myExpDate}-${todaymyMDate}-${getlastthreedigititemcode}`;
 		$("#barcode" + number).val(barcode);
 		//$(".inventorystorageIDquantity"+storageID);
+		}
+		
 
 	});
 	$(document).on("click", "#btnSave", function () {
@@ -1535,44 +1594,46 @@ $(document).ready(function () {
 			var quantity = [];
 			//var ForStockin = [];
 			//var itemCode = $("#itemCode").val();
-			var recordID = $("[name=barcode]").attr("recordID");
+			var recordID = $(".barcode").attr("recordID");
+			//alert(recordID);
+			
 			var uom		=  $("#uom").val();
 			// $("[name=barcode]").each(function () {
 			// 	recordID.push($(this).attr("recordID"));
 			// });
-			$("[name=barcode]").each(function () {	
+			$(".barcode").each(function () {	
 				barcode.push($(this).val());
 			});
-			$("[name=barcode]").each(function () {
+			$(".serialnumber").each(function () {
 				itemID.push($(this).attr("itemid"));
 			});
-			$("[name=barcode]").each(function () {
+			$(".barcode").each(function () {
 				itemName.push($(this).attr("itemName"));
 			});
-			$("[name=barcode]").each(function () {
+			$(".barcode").each(function () {
 				brand.push($(this).attr("brand"));
 			});
-			$("[name=barcode]").each(function () {
+			$(".barcode").each(function () {
 				classificationName.push($(this).attr("classificationName"));
 			});
-			$("[name=barcode]").each(function () {
+			$(".barcode").each(function () {
 				categoryName.push($(this).attr("categoryName"));
 			});
-			$("[name=barcode]").each(function () {
+			$(".barcode").each(function () {
 				ReturnItemID.push($(this).attr("ReturnItemID"));
 			});
-			$("[name=barcode]").each(function () {
+			$(".barcode").each(function () {
 				MaterialUsageID.push($(this).attr("MaterialUsageID"));
 			});
-			$("[name=barcode]").each(function () {
+			$(".barcode").each(function () {
 				InventoryReceivingID.push($(this).attr("InventoryReceivingID"));
 			});
-			$("[name=serialnumber]").each(function () {
+			$(".serialnumber").each(function () {
 				serialnumber.push($(this).val());
 			});
-			$("[name=serialnumber]").each(function () {
-				serialnumber.push($(this).val());
-			});
+			// $("[name=serialnumber]").each(function () {
+			// 	serialnumber.push($(this).val());
+			// });
 
 			$(".quantity").each(function () {
 				quantity.push($(this).val());
@@ -1585,16 +1646,18 @@ $(document).ready(function () {
 				inventoryStorageID.push($(this).val());
 			});
 			
+			
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageOfficeName.push($('option:selected', this).attr("inventoryStorageOfficeName"));
 			});
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageCode.push($('option:selected', this).attr("inventoryStorageCode"));
 			});
-			$(".manufactureDate").each(function () {
-				manufactureDate.push($(this).val());
-				//manufactureDate = moment(manufactureDate1).format("YYYY-MM-DD HH:mm:ss");
-			});
+			// $(".manufactureDate").each(function () {
+			// 	manufactureDate.push($(this).val());
+			// 	alert(manufactureDate);
+			// 	//manufactureDate = moment(manufactureDate1).format("YYYY-MM-DD HH:mm:ss");
+			// });
 			$(".manufactureDate").each(function () {
 				manufactureDate.push($(this).val());
 				//manufactureDate = moment(manufactureDate1).format("YYYY-MM-DD HH:mm:ss");
@@ -1677,9 +1740,12 @@ $(document).ready(function () {
 		}
 	});
 
-	$(document).on("click", ".btn-barcode", function () {
+	$(document).on("change", ".btn-barcode", function () {
 		var referenceCode = $(this).attr("referenceCode");
 		var itemID = $(this).attr("itemID");
+		var recordID = $(this).val();
+
+	
 		// console.log(data);
 		$.ajax({
 			url: `${base_url}ims/inventory_stock_in/printStockInBarcode`,
@@ -1687,6 +1753,7 @@ $(document).ready(function () {
 			data: {
 				referenceCode: referenceCode,
 				itemID: 	  itemID,
+				recordID:	  recordID,
 
 			},
 			success: function (data) {

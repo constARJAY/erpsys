@@ -1,3 +1,8 @@
+<style>
+    .editMilestoneBuilder:hover{
+        cursor: pointer;
+    }
+</style>
 <div class="body_area after_bg">
     <div class="block-header pb-0">
         <div class="container" id="headerContainer">

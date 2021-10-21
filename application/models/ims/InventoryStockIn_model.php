@@ -6,6 +6,7 @@ class InventoryStockIn_model extends CI_Model {
     public function __construct()
     {
         parent::__construct();
+        $this->load->library('phpqrcode/qrlib');
     }
     public function getStockIn()
     {
@@ -30,18 +31,22 @@ class InventoryStockIn_model extends CI_Model {
 
     }
 
-    public function savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode, $uom)
+    public function savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode, $uom)
     {
-
-       // $recordID       = implode(",", $recordID);
        
+       // $recordID       = implode(",", $recordID);
+       $SERVERFILEPATH = $_SERVER['DOCUMENT_ROOT'].'/erpsys/assets/upload-files/images/';
+       $folder = $SERVERFILEPATH;
         if($recordID =='0'){
+            //$SERVERFILEPATH = $_SERVER['DOCUMENT_ROOT'].'/erpsys/images/';
             $record  = array();
            // $insert_id = "";
             if(is_array($barcode)){ 
+               
                 if(count($barcode)!=0){
                 for($count = 0; $count<count($barcode); $count++)
                 {
+               
                  $record[$count] = array
                  (
                             'ReturnItemID'		        =>$ReturnItemID[$count],
@@ -66,8 +71,33 @@ class InventoryStockIn_model extends CI_Model {
                             "inventoryCode"             =>$inventoryCode
                         
                 );
+                
+                
+                // $barcode = $barcode[$count].".png";
+                // QRcode::png($barcode);
+                // echo "<center><img src=".`${base_url}`.$barcode."></center";
+            // print_r($barcode);
+            // exit;
+
                 } 
+                
                 $this->db->insert_batch('ims_stock_in_item_tbl', $record);
+
+                if(is_array($barcode)){ 
+               
+                    if(count($barcode)!=0){
+                        foreach ($barcode as $value) 
+                    {
+                    $barcode = $value;
+                   
+                    $barcode1 = $value.".png";
+                    $file_name = $folder.$barcode1;
+                    QRcode::png($barcode,$file_name);
+                    }
+                    "<center><img src=".base_url().'/assets/upload-files/images/'.$file_name."></center";
+                    }
+                }
+              
                
                 }
             }
@@ -76,9 +106,11 @@ class InventoryStockIn_model extends CI_Model {
             $record  = array();
            // $insert_id = "";
             if(is_array($barcode)){ 
+                //$SERVERFILEPATH = $_SERVER['DOCUMENT_ROOT'].'/erpsys/images/';
                 if(count($barcode)!=0){
                 for($count = 0; $count<count($barcode); $count++)
                 {
+                
                  $record[$count] = array
                  (
                             'ReturnItemID'		        =>$ReturnItemID[$count],
@@ -104,8 +136,28 @@ class InventoryStockIn_model extends CI_Model {
 
                         
                 );
+                // $barcode = $barcode[$count].".png";
+                // QRcode::png($barcode);
+                // "<center><img src=".`${base_url}`.$barcode."></center";
                 } 
                 $this->db->insert_batch('ims_stock_in_assets_tbl', $record);
+               
+
+                if(is_array($barcode)){ 
+               
+                    if(count($barcode)!=0){
+                        foreach ($barcode as $value) 
+                    {
+                    $barcode = $value;
+                   
+                    $barcode1 = $value.".png";
+                    $file_name = $folder.$barcode1;
+                    QRcode::png($barcode,$file_name);
+                    }
+                    "<center><img src=".base_url().'/assets/upload-files/images/'.$file_name."></center>";
+                    }
+                }
+              
                
                 }
             }    
@@ -206,10 +258,10 @@ class InventoryStockIn_model extends CI_Model {
     public function getBarcodes($referenceCode,$itemID)
     {
         $sql = "
-                SELECT quantity ,barcode FROM ims_stock_in_item_tbl
+                SELECT quantityForStockin, barcode FROM ims_stock_in_item_tbl
                 WHERE inventoryCode ='".$referenceCode."' AND itemID = ".$itemID."
                 UNION ALL 
-                SELECT quantity ,barcode FROM ims_stock_in_assets_tbl
+                SELECT quantityForStockin, barcode FROM ims_stock_in_assets_tbl
                 WHERE inventoryCode = '".$referenceCode."' AND assetID = ".$itemID."";
         $query = $this->db->query($sql);
         //return $query->result($query);

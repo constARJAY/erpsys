@@ -6,6 +6,7 @@ class Inventory_stock_in extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
+        //$this->load->library('phpqrcode/qrlib');
         $this->load->model("ims/InventoryStockIn_model", "inventorystockin");
         //$this->load->model("ims/PurchaseRequest_model", "purchaserequest");
         isAllowed(129);
@@ -30,7 +31,7 @@ class Inventory_stock_in extends CI_Controller {
 
     public function insertbarcode()
     {
-
+       
         $itemID = $this->input->post("itemID");
         $itemName = $this->input->post("itemName");
         $brand = $this->input->post("brand");
@@ -52,8 +53,8 @@ class Inventory_stock_in extends CI_Controller {
         $inventoryCode = $this->input->post("inventoryCode");
         $itemCode = $this->input->post("itemCode");
         $uom = $this->input->post("uom");
-        //$quantityForStockin = $this->input->post("ForStockin");
-        $savereceivingreport = $this->inventorystockin->savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode, $uom);
+      
+        $savereceivingreport = $this->inventorystockin->savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode, $uom);
         $result = explode("|", $savereceivingreport);
         if ($result[0] == "true") {
             $this->session->set_flashdata('success', $result[1]);
@@ -71,9 +72,11 @@ class Inventory_stock_in extends CI_Controller {
             
             $referenceCode = $this->input->post("referenceCode");
             $itemID = $this->input->post("itemID");
+            $recordID = $this->input->post("recordID");
             $data["barcodes"] = $this->inventorystockin->getBarcodes($referenceCode,$itemID);
 			//$data["barcodes"] = $this->input->post("data");
 			$data["title"] = "PRINT BARCODES";
+            $data["recordID"] = $recordID;
 			return $this->load->view("ims/inventory_stock_in/print",$data);
 		}
 

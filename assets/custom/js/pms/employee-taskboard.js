@@ -461,24 +461,90 @@ $(document).ready(function() {
 
 
     // ----- DISPLAY ASSIGNED EMPLOYEE -----
-    const displayAssignedEmployee = (employees = [],  taskBoardID=null,subtaskboardID=null) => {
+    const displayAssignedEmployee = (employees = [],taskBoardID=0,subtaskboardID=0,taskID=0,taskName,timelineBuilderID=0,projectMilestoneID=0,milestoneID=0,milestoneName,phase) => {
         let html = "";
         // if (employees.length > 0 && taskBoardID) {
             if (employees.length > 0 ) {
             html +=`<span class="avatar">`;
             employees.map((employee, index) => {
-                const { id, fullname, image } = employee;
+                const { id, fullname, image, departmentName, designationName, employeeCode} = employee;
 
                 var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                 if(lastIndex.toLowerCase() == "null"){
                     image = image.replace("null","default.png");
                 }
 
+                // EMPLOYEE STATUS:
+                // PASSED = 7
+                // FAILED = 6
+                // PENDING = 9
+                let getSubStatus = '9';
+                let getcolorSubStatus = '#ffc107';
+                getSubStatus = getTableData("pms_employee_taskboard_status_tbl",
+                `employeeTaskStatus`,
+                `taskBoardID=${taskBoardID || 0} AND subtaskboardID=${subtaskboardID} AND employeeID=${id} AND timelineBuilderID =${timelineBuilderID} AND projectMilestoneID=${projectMilestoneID} AND taskID =${taskID}`);
+
+                if(getSubStatus.length > 0){
+                    if(getSubStatus[0].employeeTaskStatus == "7"){
+                        getcolorSubStatus = '#99CC00';
+                    }
+
+                    else if(getSubStatus[0].employeeTaskStatus == "6"){
+                        getcolorSubStatus = '#dc3545';
+                    }
+                    else{
+                        getcolorSubStatus = '#ffc107';
+                    }
+                }else{
+                    getcolorSubStatus = '#ffc107';
+                }
+
                 if (index <= 5) {
                     html += `
-                    <span class="avatar"><img src="${image}" 
+                    <span class="avatar">
+                    <span class='c-avatar__status btnAssignee' 
+                    style="background:${getcolorSubStatus}"
+                    name="assignEmployeeTask"
+                    condition = "employeeProfile"
+                    taskBoardID="${taskBoardID}"
+                    index = "${index}"
+                    subtaskboardID="${subtaskboardID}"
+                    employeeID        = "${id}"
+                    departmentName    = "${departmentName}"
+                    designationName   = "${designationName}"
+                    employeeCode      = "${employeeCode}"
+                    taskID = "${taskID}"
+                    taskName = "${taskName}"
+                    timelineBuilderID = "${timelineBuilderID}"
+                    projectMilestoneID = "${projectMilestoneID}"
+                    milestoneID = "${milestoneID}"
+                    milestoneName = "${milestoneName}"
+                    phase             = "${phase}"
+                    image             = "${image}"
+                    fullname             = "${fullname}"
+                    ></span>
+                    <img src="${image}" 
                     width="45" height="45"
                     title="${fullname}"></span>`;
+
+                    // src="${image}" 
+                    // width="45" 
+                    // height="45"
+                    // style="cursor: pointer;"
+                    // taskBoardID="${taskBoardID}"
+                    // phase             = "${phaseCode}"
+                    // taskID            = "${taskID}"
+                    // taskName = "${taskName}"
+                    // timelineBuilderID="${timelineBuilderID}"
+                    // projectMilestoneID="${projectMilestoneID}"
+                    // milestoneID = "${milestoneID}"
+                    // milestoneName = "${milestoneName}"
+                    // employeeID        = "${id}"
+                    // departmentName    = "${departmentName}"
+                    // designationName   = "${designationName}"
+                    // employeeCode      = "${employeeCode}"
+                    // title="${fullname}"
+                    
                 }
                 // if (index == 6) {
                 //     html += `
@@ -517,7 +583,10 @@ $(document).ready(function() {
                     employeeID.map(tempID => {
                         const fullname = $(`option:selected[value="${tempID}"]`, this).attr("fullname");
                         const image    = $(`option:selected[value="${tempID}"]`, this).attr("image");
-                        let temp = { id: tempID, fullname, image };
+                        const designationName    = $(`option:selected[value="${tempID}"]`, this).attr("designationName");
+                        const departmentName    = $(`option:selected[value="${tempID}"]`, this).attr("departmentName");
+                        const employeeCode    = $(`option:selected[value="${tempID}"]`, this).attr("employeeCode");
+                        let temp = { id: tempID, fullname, image,designationName,departmentName,employeeCode };
                      
                         const id = employees.map(emp => emp.id);
                         if (!id.includes(tempID)) {
@@ -534,9 +603,18 @@ $(document).ready(function() {
         const taskBoardID     = $(this).attr("taskBoardID");
         const subtaskboardID  = $(this).attr("subtaskboardID");
         const subTaskAssignee  = $(this).attr("subTaskAssignee");
+
+        const taskID  = $(this).find("option:selected").attr("taskID");
+        const taskName  = $(this).find("option:selected").attr("taskName");
+        const timelineBuilderID  = $(this).find("option:selected").attr("timelineBuilderID");
+        const projectMilestoneID  = $(this).find("option:selected").attr("projectMilestoneID");
+        const milestoneID  = $(this).find("option:selected").attr("milestoneID");
+        const milestoneName  = $(this).find("option:selected").attr("milestoneName");
+        const phase  = $(this).find("option:selected").attr("phase");
+
         const employees = getSubAssignedEmployee(taskBoardID, subtaskboardID);
    
-        displayAssignedEmployee(employees, taskBoardID,subtaskboardID);
+        displayAssignedEmployee(employees, taskBoardID,subtaskboardID,taskID,taskName,timelineBuilderID,projectMilestoneID,milestoneID,milestoneName,phase);
         $parent = $(this).closest(".form-group");
         $(this).parent()
             .find(".selection")
@@ -673,7 +751,7 @@ $(document).ready(function() {
         }
     })
 
-    $(document).on("change", `.statusBadge,.modalStatusBadge,.assignedEmployeeStatusBadge`, function() {
+    $(document).on("change", `.statusBadge,.modalStatusBadge`, function() {
         var value = $(this).val();
         
         if(value ==""){
@@ -790,6 +868,65 @@ $(document).ready(function() {
             $(this).addClass("badge-outline-info");
         }
     })
+
+    $(document).on("change", `.assignedEmployeeStatusBadge`, function() {
+        var value = $(this).val();
+        var taskboardID = $(this).attr("taskboardID");
+        var subtaskboardID = $(this).attr("subtaskboardID") || "";
+        var employeeID = $(this).attr("employeeID");
+        var condition = ``;
+
+        if(subtaskboardID){
+            condition=`span[taskBoardID=${taskboardID}][subtaskboardID=${subtaskboardID}]`;
+        }else{
+            condition=`span[taskBoardID=${taskboardID}]`;
+
+        }
+        
+        
+        if(value ==6){
+            $(this).removeClass("badge-primary");
+            $(this).removeClass("badge-info");
+            $(this).removeClass("badge-warning");
+            $(this).removeClass("badge-outline-secondary");
+            $(this).removeClass("badge-outline-warning");
+            $(this).addClass("badge-danger");
+            $(this).removeClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
+
+            $(`${condition}[employeeID=${employeeID}]`).css('background','#dc3545');
+        }
+        if(value ==7){
+            $(this).removeClass("badge-primary");
+            $(this).removeClass("badge-info");
+            $(this).removeClass("badge-warning");
+            $(this).removeClass("badge-outline-secondary");
+            $(this).removeClass("badge-outline-warning");
+            $(this).removeClass("badge-danger");
+            $(this).addClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
+
+            $(`${condition}[employeeID=${employeeID}]`).css('background','#99CC00');
+
+        }
+        if(value ==9){
+            $(this).removeClass("badge-primary");
+            $(this).removeClass("badge-info");
+            $(this).removeClass("badge-warning");
+            $(this).removeClass("badge-outline-secondary");
+            $(this).removeClass("badge-outline-warning");
+            $(this).removeClass("badge-danger");
+            $(this).removeClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).addClass("badge-outline-info");
+
+            $(`span ${condition}[employeeID=${employeeID}]`).css('background','#ffc107');
+
+        }
+
+    })
     // ----- END SELECT ASSIGNED EMPLOYEE -----
 
 
@@ -818,25 +955,27 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
     
 
 //   console.log(phase)
-        const getAssigneeList = (subtaskboardID = null, subTask=[],teamMembers = {} ) => { 
+        const getAssigneeList = (subtaskboardID = null, subTask=[],teamMembers = {},taskID,subTaskName,timelineBuilderID,projectMilestoneID,milestoneID,milestoneName,phaseCode ) => { 
+            let taskAssignedByContent = "";
             let taskAssigneeContent = "";
           
             const subTaskData = (subtaskboardID = null) => {
                 let data = subTask.filter(st => st.subtaskboardID == subtaskboardID);
-                let taskBoardID="",subTaskAssignee = "";
+                let taskBoardID="",subTaskAssignee = "",createdBy ="";
                 if (data && data.length > 0) {
                    
                     taskBoardID = data[0]?.taskBoardID;
                     subTaskAssignee = data[0]?.subTaskAssignee;
+                    createdBy = data[0]?.createdBy;
                    
                 }
-                return {taskBoardID,subTaskAssignee};
+                return {taskBoardID,subTaskAssignee,createdBy};
             };
             
 
             // milestones.map(milestone => {
                 // const { milestoneID, milestoneName } = milestone;
-                const {taskBoardID,subTaskAssignee } = subTaskData(subtaskboardID);
+                const {taskBoardID,subTaskAssignee,createdBy } = subTaskData(subtaskboardID);
                
 
  
@@ -852,6 +991,17 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                     <option 
                         value    = "${id}"
                         fullname = "${fullname}"
+                        designationName = "${designationName}"
+                        departmentName = "${departmentName}"
+                        employeeCode = "${employeeCode}"
+                        taskID = "${taskID}"
+                        taskName = "${subTaskName}"
+                        timelineBuilderID = "${timelineBuilderID}"
+                        projectMilestoneID = "${projectMilestoneID}"
+                        milestoneID = "${milestoneID}"
+                        milestoneName = "${milestoneName}"
+                        employeeID = "${id}"
+                        phase = "${phaseCode}"
                         image    = "${image}">${fullname}</option>`;
                 }).join("");
 
@@ -872,11 +1022,44 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                 </div>`;
             // })
 
-            return [taskAssigneeContent];
+
+
+            taskAssignedByContent += `<span class="avatar">`;
+                                        
+            teamMembers.filter(employee => employee.id == createdBy).map((employee, index) => {
+                const { id, fullname, image ,designationName, departmentName, employeeCode } = employee;
+
+                var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
+                if(lastIndex.toLowerCase() == "null"){
+                    image = image.replace("null","default.png");
+                }
+
+
+                if (index <= 5) {
+                    taskAssignedByContent += `
+                    
+                    <span class="avatar">
+                    <img 
+                    class=""
+                    src="${image}" 
+                    width="45" 
+                    height="45"
+                    title="${fullname}"
+                    style="margin: auto;">
+                   
+                    </span>`;
+                }
+               
+              
+            })
+                
+            taskAssignedByContent += `</span>`;
+
+            return [taskAssignedByContent,taskAssigneeContent];
         }
 
     // ------------------------ START OF SUB TASK LIST------------------------------------------------- //
-    const getSubTaskList = (subTask =[],attachedUniqueID,taskBoardIDTask,teamMembers) => {
+    const getSubTaskList = (subTask=[],attachedUniqueID,taskBoardID,teamMembers,milestoneName,milestoneID,phaseCode) => {
         var subTaskContent     = "";
             // console.log(teamMembers.length)
         subTask.map((subtasks,index) => {
@@ -900,10 +1083,13 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                 taskBoardID,
                 subtaskboardID,
                 extension,
-                createdAt
+                createdAt,
+                createdBy
                 } = subtasks;
 
-            const getAssignee = getAssigneeList(subtaskboardID,subTask,teamMembers);
+                // console.log(createdBy)
+
+            const getAssignee = getAssigneeList(subtaskboardID,subTask,teamMembers,taskID,subTaskName,timelineBuilderID,projectMilestoneID,milestoneID,milestoneName,phaseCode);
     
 
                 // console.log(subtasks)
@@ -919,6 +1105,9 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                     timelineBuilderID="${timelineBuilderID}"
                     projectMilestoneID="${projectMilestoneID}"
                     milestoneBuilderID="${milestoneBuilderID}"
+                    milestoneID="${milestoneID}"
+                    milestoneName="${milestoneName}"
+                    phaseCode="${phaseCode}"
                     taskBoardID="${taskBoardID ? taskBoardID:taskBoardIDTask}"
                     subtaskboardID="${subtaskboardID}"
                     createdAt="${createdAt}"
@@ -928,6 +1117,36 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                      name="subtaskName"><small>${subTaskName}</small></span>
                 </div>
             </td>
+
+
+            <td>
+            <div class="d-flex align-items-center justify-content-start " 
+                taskID="${taskID}"
+                    taskName = "${subTaskName}"
+                    style="
+                        min-height: 70px;
+                        height: auto;
+                        max-height: 70px;
+                        padding: 1rem;
+                        top: 0">
+                    <div class="" 
+                        taskName="${subTaskName}" 
+                        taskID="${taskID}"
+                        taskBoardID="${taskBoardID ? taskBoardID:taskBoardIDTask}"
+                        subtaskboardID="${subtaskboardID}"
+                        createdBy="${createdBy}"
+                        display="false"
+                        style="position: relative;
+                            top: 0;
+                            white-space: nowrap;
+                        ">
+                        ${getAssignee[0]}`;
+
+    subTaskContent += `</div>
+                </div>
+            </td>
+
+
             <td>
             <div class="d-flex align-items-center justify-content-start " 
                 taskID="${taskID}"
@@ -957,7 +1176,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                         taskBoardID="${taskBoardID ? taskBoardID:taskBoardIDTask}"
                         subtaskboardID="${subtaskboardID}"
                         >
-                        ${getAssignee[0]}
+                        ${getAssignee[1]}
                         </div>
                 </div>
             </td>
@@ -1139,7 +1358,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
             let changemilestoneName = milestoneName.replaceAll("/","slash").replaceAll(' ','');
 
             attachedUniqueID = milestoneBuilderID+''+changemilestoneName+''+index;
-            const subTaskList = getSubTaskList(subTask,attachedUniqueID,taskBoardID,teamMembers);
+            const subTaskList = getSubTaskList(subTask,attachedUniqueID,taskBoardID,teamMembers,milestoneName,milestoneID,phaseCode);
 
 
             taskNameContent += `
@@ -1182,6 +1401,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                 <td style="position: relative;">
                 <div class="d-flex align-items-center justify-content-start" 
                     name="assignEmployeeTask"
+                    taskBoardID="${taskBoardID}"
                     taskID="${taskID}"
                     taskName = "${taskName}"
                     milestoneID = "${milestoneID}"
@@ -1210,10 +1430,43 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                     if(lastIndex.toLowerCase() == "null"){
                                         image = image.replace("null","default.png");
                                     }
+
+                                    // EMPLOYEE STATUS:
+                                    // PASSED = 7
+                                    // FAILED = 6
+                                    // PENDING = 9
+                                    let getStatus = '9';
+                                    let getcolorStatus = '#ffc107';
+                                    getStatus = getTableData("pms_employee_taskboard_status_tbl",
+                                    `employeeTaskStatus`,
+                                    `taskBoardID=${taskBoardID || 0} AND subtaskboardID =0 AND employeeID=${id} AND timelineBuilderID =${timelineBuilderID} AND projectMilestoneID=${projectMilestoneID} AND taskID =${taskID}`);
+
+                                    if(getStatus.length > 0){
+                                        if(getStatus[0].employeeTaskStatus == "7"){
+                                            getcolorStatus = '#99CC00';
+                                        }
+    
+                                        else if(getStatus[0].employeeTaskStatus == "6"){
+                                            getcolorStatus = '#dc3545';
+                                        }
+                                        else{
+                                            getcolorStatus = '#ffc107';
+                                        }
+                                    }else{
+                                        getcolorStatus = '#ffc107';
+                                    }
+                                    
                                    
                                     if (index <= 5) {
                                         taskNameContent += `
+                                        
                                         <span class="avatar">
+                                        <span class='c-avatar__status' 
+                                        style="background:${getcolorStatus}"
+                                        taskBoardID="${taskBoardID}";'
+                                        employeeID        = "${id}"
+                                        ></span>
+                                        
                                         <img 
                                         class="employeeProfile"
                                         src="${image}" 
@@ -1232,7 +1485,9 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                         departmentName    = "${departmentName}"
                                         designationName   = "${designationName}"
                                         employeeCode      = "${employeeCode}"
-                                        title="${fullname}"></span>`;
+                                        title="${fullname}">
+                                       
+                                        </span>`;
                                     }
                                     // if (index == 6) {
                                     //     taskNameContent += `
@@ -1415,6 +1670,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                     <thead class="text-nowrap">
                         <tr class="bg-dark nowrap">
                         <th class="text-white"  style="min-width: 150px;">Subtasks</th>
+                        <th class="text-white"  style="min-width: 100px;">Assigned By</th>
                         <th class="text-white"  style="min-width: 150px;">Assignees</th>
                         <th class="text-white"  style="min-width: 100px;">Description</th>
                         <th class="text-white"  style="min-width: 100px;">Man Hours</th>
@@ -1440,6 +1696,9 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                             timelineBuilderID="${timelineBuilderID}"
                             projectMilestoneID="${projectMilestoneID}"
                             milestoneBuilderID="${milestoneBuilderID}"
+                            milestoneID="${milestoneID}"
+                            milestoneName="${milestoneName}"
+                            phaseCode="${phaseCode}"
                             taskBoardID="${taskBoardID}"
                             startDate = "${taskStartDate}"
                             endDate="${taskEndDate}"
@@ -1589,37 +1848,31 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
 
         // ----- ASSIGN EMPLOYEE STATUS ----//
-        function assignEmployeeStatus(taskBoardID,employeeID,timelineBuilderID,projectMilestoneID,taskID){
+        function assignEmployeeStatus(taskBoardID=0,subtaskboardID=0,employeeID=0,timelineBuilderID=0,projectMilestoneID=0,taskID=0){
             let html ='';
             let taskStatus  =1;
+            let condition = "";
+
+                if(subtaskboardID){
+                    condition = `taskBoardID=${taskBoardID || 0} AND subtaskboardID=${subtaskboardID}`;
+                }else{
+                    condition = `taskBoardID=${taskBoardID || 0} AND subtaskboardID= 0`;
+                }
 
                 getStatus = getTableData("pms_employee_taskboard_status_tbl",
                 `employeeTaskStatus`,
-                `taskBoardID=${taskBoardID} AND employeeID=${employeeID} AND timelineBuilderID =${timelineBuilderID} AND projectMilestoneID=${projectMilestoneID} AND taskID =${taskID}`);
+                ` ${condition} AND employeeID=${employeeID} AND timelineBuilderID =${timelineBuilderID} AND projectMilestoneID=${projectMilestoneID} AND taskID =${taskID}`);
 
             if(getStatus.length >0){
                 html =` <option value="">---</option>
-                <option class="badge badge-primary" value="1" ${getStatus[0].employeeTaskStatus == 1 ? "selected" : ""}>ON HOLD DEVELOPMENT</option>
-                <option class="badge badge-info" value="2" ${getStatus[0].employeeTaskStatus == 2 ? "selected" : ""}>ON DEVELOPMENT</option>
-                <option class="badge badge-warning" value="3" ${getStatus[0].employeeTaskStatus == 3 ? "selected" : ""}>FOR TESTING</option>
-                <option class="badge badge-outline-secondary" value="4" ${getStatus[0].employeeTaskStatus == 4 ? "selected" : ""}>ON HOLD TESTING</option>
-                <option class="badge badge-outline-warning" value="5" ${getStatus[0].employeeTaskStatus == 5 ? "selected" : ""}>ON TESTING</option>
                 <option class="badge badge badge-danger" value="6" ${getStatus[0].employeeTaskStatus == 6 ? "selected" : ""}>FAILED</option>
                 <option class="badge badge-success" value="7" ${getStatus[0].employeeTaskStatus == 7 ? "selected" : ""}>PASSED</option>
-                <option class="badge badge-outline-primary" value="8" ${getStatus[0].employeeTaskStatus == 8 ? "selected" : ""}>TODO</option>
                 <option class="badge badge-outline-info" value="9" ${getStatus[0].employeeTaskStatus == 9 ? "selected" : ""}>PENDING</option>`;
             }else{
                 html =`  
-                <option value="">---</option>
-                <option class="badge badge-primary" value="1">ON HOLD DEVELOPMENT</option>
-                <option class="badge badge-info" value="2">ON DEVELOPMENT</option>
-                <option class="badge badge-warning" value="3">FOR TESTING</option>
-                <option class="badge badge-outline-secondary" value="4">ON HOLD TESTING</option>
-                <option class="badge badge-outline-warning" value="5">ON TESTING</option>
                 <option class="badge badge badge-danger" value="6">FAILED</option>
                 <option class="badge badge-success" value="7">PASSED</option>
-                <option class="badge badge-outline-primary" value="8">TODO</option>
-                <option class="badge badge-outline-info" value="9">PENDING</option>`;
+                <option class="badge badge-outline-info" selected value="9">PENDING</option>`;
             }
             
 
@@ -1636,15 +1889,16 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
             let regularHours  = ""; 
             let overtimeHours = "";
             if (data) {
-                employeeID          = data.employeeID ?? "";
+                employeeID          = data.employeeID ?? 0;
                 startDate          = data.startDate ?? "";
                 endDate          = data.endDate ?? "";
                 manHours      = data.manHours ?? "";
                 regularHours  = data.regularHours ?? "";
                 overtimeHours = data.overtimeHours ?? "";
-                taskBoardID = data.taskBoardID ?? "";
-                timelineBuilderID = data.timelineBuilderID ?? "";
-                projectMilestoneID = data.projectMilestoneID ?? "";
+                taskBoardID = data.taskBoardID ?? 0;
+                subtaskboardID = data.subtaskboardID ?? 0;
+                timelineBuilderID = data.timelineBuilderID ?? 0;
+                projectMilestoneID = data.projectMilestoneID ?? 0;
                 taskID = data.taskID ?? "";
             }
             
@@ -1679,14 +1933,15 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                     <select class="badge  assignedEmployeeStatusBadge form-control" 
                     name="employeeTaskStatus" 
                     label="status" 
-                    style=" width: fit-content;" 
+                    style=" width: 80%;" 
                     taskBoardID ="${taskBoardID}"
+                    subtaskboardID ="${subtaskboardID}"
                     timelineBuilderID ="${timelineBuilderID}"
                     projectMilestoneID = "${projectMilestoneID}"
                     taskID = "${taskID}"
                     employeeID = "${employeeID}"
                     >
-                       ${assignEmployeeStatus(taskBoardID,employeeID,timelineBuilderID,projectMilestoneID,taskID)}
+                       ${assignEmployeeStatus(taskBoardID,subtaskboardID,employeeID,timelineBuilderID,projectMilestoneID,taskID)}
                     </select>
                     </div>
                 </div>
@@ -1706,7 +1961,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         // ----- END GET TABLE DATE ROW -----
 
         // ----- EMPLOYEE MODAL CONTENT -----
-        function employeeModalContent(taskBoardID ="",timelineBuilderID = "",projectMilestoneID ="", phase = "", taskID = "", taskName ="", milestoneName ="", employeeData = false, taskData = [], isReadOnly = false) {
+        function employeeModalContent(taskBoardID ="",subtaskboardID="",timelineBuilderID = "",projectMilestoneID ="", phase = "", taskID = "", taskName ="", milestoneName ="", employeeData = false, taskData = [], isReadOnly = false) {
 
             let html = "";
             if (employeeData && taskData && taskData.length > 0) {
@@ -1782,6 +2037,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                regularHours:employeeTotalRegularHours, 
                                overtimeHours:employeeTotalOvertimeHours,
                                taskBoardID,
+                               subtaskboardID,
                                timelineBuilderID,
                                projectMilestoneID,
                                taskID
@@ -1892,6 +2148,73 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         }
         // ----- END EMPLOYEE MODAL CONTENT -----
 
+        function getEmployeeProfile(data = null,subtaskboardID="", index =false){
+            let = {
+                isReadOnly,
+                taskBoardID,
+                timelineBuilderID,
+                projectMilestoneID,
+                milestoneID, 
+                milestoneName   ,
+                phase,
+                taskID ,
+                taskName ,
+                employeeID,
+                fullname,
+                image ,
+                employeeCode ,
+                departmentName,
+                designationName ,
+                title
+            } = data;
+            let employeeData = {
+                employeeID, fullname, image, employeeCode, departmentName, designationName
+            };
+            let nameCondition;
+            if(subtaskboardID){
+                 nameCondition =`[subtaskboardID="${subtaskboardID}"][index="${index}"]`;
+            }else{
+                 nameCondition =`[taskBoardID="${taskBoardID}"]`;
+            }
+    
+            let taskData = [];
+            $(`[name="assignEmployeeTask"]${nameCondition}[taskID="${taskID}"][taskName="${taskName}"][milestoneID="${milestoneID}"]`).each(function() {
+                const milestoneID = $(this).attr("milestoneID");
+                const employeeArr = $(this).val();
+                // if (employeeArr.includes(employeeID)) {
+                    taskData.push({
+                        employeeID, timelineBuilderID, taskID, milestoneID
+                    })
+                // }
+            })
+            
+            $(`#modal_project_management_board .page-title`).text(title);
+            $(`#modal_project_management_board_content`).html(preloader);
+            $(`#modal_project_management_board`).modal("show");
+            setTimeout(() => {
+                    let content = employeeModalContent(taskBoardID,subtaskboardID,timelineBuilderID, projectMilestoneID, phase, taskID, taskName , milestoneName, employeeData, taskData, isReadOnly);
+                    $(`#modal_project_management_board_content`).html(content);
+        
+                    initHours();
+                    // initDatatables();
+                    // updateTables();
+                    // updateTableDateItems();
+        
+                    $(".assignedEmployeeStatusBadge").each(function() {
+                        $(this).trigger("change");
+                    })
+        
+                    $(`[name="employeeDate"]`).each(function() {
+                        const elementID = "#"+this.id;
+                        const dateValue = $(this).attr("dateValue") || taskStartDate;
+                        initDatePicker(elementID, taskStartDate, taskEndDate, dateValue);
+                        manipulateDatePicker(elementID, dateValue);
+                    });
+                    $(".assigneeContent").hide();
+                }, 500);
+        }   
+
+
     // ----- CLICK EMPLOYEE PROFILE -----
     $(document).on("click", `.employeeProfile`, function() {
         const isReadOnly        = $(this).attr("isReadOnly") == "true";
@@ -1910,52 +2233,32 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         const departmentName    = $(this).attr("departmentName");
         const designationName   = $(this).attr("designationName");
         let title =  "ASSIGNED MAN HOURS";
+        let data = {
+            isReadOnly,
+            taskBoardID,
+            timelineBuilderID,
+            projectMilestoneID,
+            milestoneID, 
+            milestoneName   ,
+            phase,
+            taskID ,
+            taskName ,
+            employeeID,
+            fullname,
+            image ,
+            employeeCode ,
+            departmentName,
+            designationName ,
+            title
+        }
+        getEmployeeProfile(data);
+        // $parent = $(this).closest("tr");
+        // const taskStartDate = $parent.find(`[phase="${phase}"][taskID="${taskID}"][basis="true"]`).attr("taskStartDate");
+        // const taskEndDate   = $parent.find(`[phase="${phase}"][taskID="${taskID}"][basis="true"]`).attr("taskEndDate");
+        // $parent.find(`[name="manHours"][phase="${phase}"][taskID="${taskID}"]`).removeClass("is-invalid").removeClass("is-valid");
+        // $parent.find(`.invalid-feedback`).text("");
+
         
-        $parent = $(this).closest("tr");
-        const taskStartDate = $parent.find(`[phase="${phase}"][taskID="${taskID}"][basis="true"]`).attr("taskStartDate");
-        const taskEndDate   = $parent.find(`[phase="${phase}"][taskID="${taskID}"][basis="true"]`).attr("taskEndDate");
-        $parent.find(`[name="manHours"][phase="${phase}"][taskID="${taskID}"]`).removeClass("is-invalid").removeClass("is-valid");
-        $parent.find(`.invalid-feedback`).text("");
-
-        let employeeData = {
-            employeeID, fullname, image, employeeCode, departmentName, designationName
-        };
-
-        let taskData = [];
-        $(`[name="assignEmployeeTask"][taskID="${taskID}"][taskName="${taskName}"][milestoneID="${milestoneID}"]`).each(function() {
-            const milestoneID = $(this).attr("milestoneID");
-            const employeeArr = $(this).val();
-            // if (employeeArr.includes(employeeID)) {
-                taskData.push({
-                    employeeID, timelineBuilderID, taskID, milestoneID
-                })
-            // }
-        })
-
-        $(`#modal_project_management_board .page-title`).text(title);
-        $(`#modal_project_management_board_content`).html(preloader);
-        $(`#modal_project_management_board`).modal("show");
-        setTimeout(() => {
-            let content = employeeModalContent(taskBoardID,timelineBuilderID, projectMilestoneID, phase, taskID, taskName , milestoneName, employeeData, taskData, isReadOnly);
-            $(`#modal_project_management_board_content`).html(content);
-
-            initHours();
-            // initDatatables();
-            // updateTables();
-            // updateTableDateItems();
-
-            $(".assignedEmployeeStatusBadge").each(function() {
-                $(this).trigger("change");
-            })
-
-            $(`[name="employeeDate"]`).each(function() {
-                const elementID = "#"+this.id;
-                const dateValue = $(this).attr("dateValue") || taskStartDate;
-                initDatePicker(elementID, taskStartDate, taskEndDate, dateValue);
-                manipulateDatePicker(elementID, dateValue);
-            });
-
-        }, 500);
     })
 
     $(document).on('shown.bs.modal', '#modal_project_management_board', function () {
@@ -2596,9 +2899,10 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 			const getProjectData  = getTableData(
 				`
                 pms_timeline_builder_tbl AS ptbt
-				LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID`,
+				LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID
+                LEFT JOIN pms_management_board_tbl AS pmb ON pmb.timelineBuilderID = ptbt.timelineBuilderID `,
 				`DISTINCT pplt.projectListName AS projectName,ptbt.timelineBuilderID,ptbt.timelineTeamMember`,
-				`ptbt.timelineBuilderStatus =2 AND FIND_IN_SET(${sessionID},replace(ptbt.timelineTeamMember,'|',','))`);
+				`ptbt.timelineBuilderStatus =2  AND pmb.managementBoardStatus = 2 AND FIND_IN_SET(${sessionID},replace(ptbt.timelineTeamMember,'|',','))`);
 	
                 // console.log(sessionID)
 	
@@ -2695,6 +2999,9 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         var timelineBuilderID = $(this).attr("timelineBuilderID");
         var projectMilestoneID = $(this).attr("projectMilestoneID");
         var milestoneBuilderID = $(this).attr("milestoneBuilderID");
+        var milestoneID = $(this).attr("milestoneID");
+        var milestoneName = $(this).attr("milestoneName");
+        var phaseCode = $(this).attr("phaseCode");
         var taskBoardID = $(this).attr("taskBoardID");
         var taskStartDate = $(this).attr("startDate");
         var taskEndDate = $(this).attr("endDate");
@@ -2719,35 +3026,48 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         }
         // subtaskboardID = parseFloat(getLastSubtask[0].subtaskboardID) +1;
         // console.log(subtaskboardID)
-        const getAssigneeList = (subtaskboardID = null, subTask=[],teamMembers = {} ) => { 
+        const getAssigneeList = (subtaskboardID = null, subTask=[],teamMembers = {},taskID,taskName,timelineBuilderID,projectMilestoneID,milestoneID,milestoneName,phaseCode ) => { 
+            let taskAssignedByContent = "";
             let taskAssigneeContent = "";
           
             const subTaskData = (subtaskboardID = null) => {
                 let data = subTask.filter(st => st.subtaskboardID == subtaskboardID);
-                let taskBoardID="",subTaskAssignee = "";
+                let subTaskAssignee = "",createdBy="";
                 if (data && data.length > 0) {
                    
-                    taskBoardID = data[0]?.taskBoardID;
+                    // taskBoardID = data[0]?.taskBoardID;
                     subTaskAssignee = data[0]?.subTaskAssignee;
+                    createdBy = data[0]?.createdBy;
                    
                 }
-                return {taskBoardID,subTaskAssignee};
+                return {/*taskBoardID,*/subTaskAssignee,createdBy};
             };
             
 
             // milestones.map(milestone => {
                 // const { milestoneID, milestoneName } = milestone;
-                const {taskBoardID,subTaskAssignee } = subTaskData(subtaskboardID);
+                const {subTaskAssignee,createdBy } = subTaskData(subtaskboardID);
                
 
     
                 const teamMemberOptions = teamMembers.map(member => {
-                    const { id, fullname, image } = member;
+                    const { id, fullname, image ,designationName, departmentName, employeeCode } = member;
                     
                     return `
                     <option 
                         value    = "${id}"
                         fullname = "${fullname}"
+                        designationName = "${designationName}"
+                        departmentName = "${departmentName}"
+                        employeeCode = "${employeeCode}"
+                        taskID = "${taskID}"
+                        taskName = "${taskName}"
+                        timelineBuilderID = "${timelineBuilderID}"
+                        projectMilestoneID = "${projectMilestoneID}"
+                        milestoneID = "${milestoneID}"
+                        milestoneName = "${milestoneName}"
+                        employeeID = "${id}"
+                        phase = "${phaseCode}"
                         image    = "${image}">${fullname}</option>`;
                 }).join("");
 
@@ -2756,6 +3076,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                     <select class="form-control validate select2"
                         name="assignEmployee"
                         multiple="multiple"
+                        asd
                         taskBoardID="${taskBoardID}"
                         subtaskboardID="${subtaskboardID}"
                         subTaskAssignee="${subTaskAssignee}"
@@ -2768,11 +3089,43 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                 </div>`;
             // })
 
-            return [taskAssigneeContent];
+
+            taskAssignedByContent += `<span class="avatar">`;
+                                        
+            teamMembers.filter(employee => employee.id == sessionID).map((employee, index) => {
+                const { id, fullname, image ,designationName, departmentName, employeeCode } = employee;
+
+                var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
+                if(lastIndex.toLowerCase() == "null"){
+                    image = image.replace("null","default.png");
+                }
+
+
+                if (index <= 5) {
+                    taskAssignedByContent += `
+                    
+                    <span class="avatar">
+                    <img 
+                    class=""
+                    src="${image}" 
+                    width="45" 
+                    height="45"
+                    title="${fullname}"
+                    style="margin: auto;">
+                   
+                    </span>`;
+                }
+               
+              
+            })
+                
+            taskAssignedByContent += `</span>`;
+
+            return [taskAssignedByContent,taskAssigneeContent];
         }
         // ----------------------------GET ASSIGNEE---------------------//
      
-        const getAssignee = getAssigneeList(subtaskboardID,subTask,teamMembers);
+        const getAssignee = getAssigneeList(subtaskboardID,subTask,teamMembers,taskID,taskName,timelineBuilderID,projectMilestoneID,milestoneID,milestoneName,phaseCode);
 
         let html = `<tr>
             <td class="text-nowrap">
@@ -2792,6 +3145,33 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                      name="subtaskName"><small>TSK-${generateSubtaskCode(taskName.toUpperCase().replaceAll(" ",""),subTableLength ) }</small></span>
                 </div>
             </td>
+
+            <td>
+            <div class="d-flex align-items-center justify-content-start " 
+                taskID="${taskID}"
+                    taskName = ""
+                    style="
+                        min-height: 70px;
+                        height: auto;
+                        max-height: 70px;
+                        padding: 1rem;
+                        top: 0">
+                    <div class="" 
+                        taskName="" 
+                        taskID="${taskID}"
+                        taskBoardID="${taskBoardID}"
+                        subtaskboardID=""
+                        createdBy=""
+                        display="false"
+                        style="position: relative;
+                            top: 0;
+                            white-space: nowrap;
+                        ">
+                        ${getAssignee[0]}
+                    </div>
+                </div>
+            </td>
+
            
             <td>
             <div class="d-flex align-items-center justify-content-start " 
@@ -2822,7 +3202,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                         taskBoardID="${taskBoardID}"
                         subtaskboardID=""
                         >
-                        ${getAssignee[0]}
+                        ${getAssignee[1]}
                         </div>
                 </div>
             </td>
@@ -3043,62 +3423,107 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
      // ------------------SUBTASK ASSIGNEE-------------//
      $(document).on("click", ".btnAssignee", function() {
-        $parent  = $(this).closest("tr");
-        const listAssignee = $parent.find("[name=assignEmployee]").val();
-        const label = $parent.find("[name=assignEmployee]").attr("label");
-        // console.log($parent.find("[name=assignEmployee]").val())
-        const taskBoardID = $(this).attr("taskBoardID");
-        const subtaskboardID    = $(this).attr("subtaskboardID");
-        const display  = $(this).attr("display") == "true";
-        $(this).attr("display", !display);
-        if (display) {
-            $parent.find(`.assigneeContent[taskBoardID="${taskBoardID}"][subtaskboardID="${subtaskboardID}"]`).slideUp(500, function() {
-                $(this).addClass("d-none");
+       let thisCondition = $(this).attr("condition");
 
-                if(listAssignee.length > 0){
+       if(thisCondition == "employeeProfile"){
+            // $(".employeeProfile",this).click();
+            let isReadOnly        = $(this).attr("isReadOnly") == "true";
+            let index             = $(this).attr("index");
+            let taskBoardID = $(this).attr("taskBoardID");
+            let subtaskboardID = $(this).attr("subtaskboardID");
+            let timelineBuilderID = $(this).attr("timelineBuilderID");
+            let projectMilestoneID = $(this).attr("projectMilestoneID");
+            let milestoneID = $(this).attr("milestoneID");
+            let milestoneName = $(this).attr("milestoneName");
+            let phase             = $(this).attr("phase");
+            let taskID            = $(this).attr("taskID");
+            let taskName            = $(this).attr("taskName");
+            let employeeID        = $(this).attr("employeeID");
+            let fullname          = $(this).attr("fullname");
+            let image             = $(this).attr("image");
+            let employeeCode      = $(this).attr("employeeCode");
+            let departmentName    = $(this).attr("departmentName");
+            let designationName   = $(this).attr("designationName");
+            let title =  "ASSIGNED MAN HOURS";
+            let data = {
+                isReadOnly,
+                taskBoardID,
+                subtaskboardID,
+                timelineBuilderID,
+                projectMilestoneID,
+                milestoneID, 
+                milestoneName   ,
+                phase,
+                taskID ,
+                taskName ,
+                employeeID,
+                fullname,
+                image ,
+                employeeCode ,
+                departmentName,
+                designationName ,
+                title
+            }
+            getEmployeeProfile(data,subtaskboardID, index);
+       }else{
+                $parent  = $(this).closest("tr");
+                const listAssignee = $parent.find("[name=assignEmployee]").val();
+                const label = $parent.find("[name=assignEmployee]").attr("label");
+                // console.log($parent.find("[name=assignEmployee]").val())
+                const taskBoardID = $(this).attr("taskBoardID");
+                const subtaskboardID    = $(this).attr("subtaskboardID");
+                const display  = $(this).attr("display") == "true";
+                $(this).attr("display", !display);
+                if (display) {
+                    $parent.find(`.assigneeContent[taskBoardID="${taskBoardID}"][subtaskboardID="${subtaskboardID}"]`).slideUp(500, function() {
+                        $(this).addClass("d-none");
 
-                    var data = new FormData();
+                        if(listAssignee.length > 0){
 
-                 
-                    data.append('listAssignee', listAssignee);
-                    data.append('label', label);
-                    data.append('subtaskboardID', subtaskboardID);
+                            var data = new FormData();
 
-                    $.ajax({
-                        url           :"Employee_taskboard/updateAssignee",
-                        method        : "POST",
-                        dataType      : 'text', // what to expect back from the server
-                        cache         : false,
-                        contentType   : false,
-                        processData   : false,
-                        data          : data,
-                        async         : true,
-                        dataType      : 'json',
-                        success       : function(data){
-    
-                        },
-                        error: function() {
-                            setTimeout(() => {
-                                // $("#loader").hide();
-                                showNotification("danger", "System error: Please contact the system administrator for assistance!");
-                            }, 500);
-                        }
                         
+                            data.append('listAssignee', listAssignee);
+                            data.append('label', label);
+                            data.append('subtaskboardID', subtaskboardID);
+
+                            $.ajax({
+                                url           :"Employee_taskboard/updateAssignee",
+                                method        : "POST",
+                                dataType      : 'text', // what to expect back from the server
+                                cache         : false,
+                                contentType   : false,
+                                processData   : false,
+                                data          : data,
+                                async         : true,
+                                dataType      : 'json',
+                                success       : function(data){
+            
+                                },
+                                error: function() {
+                                    setTimeout(() => {
+                                        // $("#loader").hide();
+                                        showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                                    }, 500);
+                                }
+                                
+                            });
+
+                        }
+
                     });
-
-                }
-
-            });
-        } else {
-            $parent.find(`.assigneeContent[taskBoardID="${taskBoardID}"][subtaskboardID="${subtaskboardID}"]`).hide().removeClass("d-none").slideDown(500);
-        }
+                } else {
+                    $parent.find(`.assigneeContent[taskBoardID="${taskBoardID}"][subtaskboardID="${subtaskboardID}"]`).hide().removeClass("d-none").slideDown(500);
+                } 
+       }
     })
      // ------------------END SUBTASK ASSIGNEE-------------//
 
 
     //  ------------------- ASSIGNEE EMPLOYEE STATUS ----------------------//
     $(document).on("change", "[name='employeeTaskStatus']", function() {
-        var taskBoardID = $(this).attr("taskBoardID");
+        var taskBoardID = +$(this).attr("taskBoardID") || 0;
+        var subtaskboardID = +$(this).attr("subtaskboardID") || 0;
         var timelineBuilderID = $(this).attr("timelineBuilderID");
         var projectMilestoneID = $(this).attr("projectMilestoneID");
         var taskID = $(this).attr("taskID");
@@ -3109,6 +3534,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
             var data = new FormData();
 
             data.append('taskBoardID', taskBoardID);
+            data.append('subtaskboardID', subtaskboardID);
             data.append('timelineBuilderID', timelineBuilderID);
             data.append('projectMilestoneID', projectMilestoneID);
             data.append('taskID', taskID);
@@ -3887,7 +4313,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
        
         let data = { subtask: [] }, formData = new FormData;
 
-        var label = $(this).attr("label");
+        var label = $(this).attr("label") ||"";
         formData.append(`label`,label);
         
         $(this).closest("tr").each(function(i, obj) {
@@ -3947,6 +4373,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                 formData.append(`subtask[${i}][subTaskTimeLeft]`,        subTaskTimeLeft);
                 formData.append(`subtask[${i}][subTaskStatus]`,        subTaskStatus);
                 formData.append(`subtask[${i}][subTaskNotes]`,        subTaskNotes);
+                formData.append(`subtask[${i}][createdBy]`,        sessionID);
 
                 data["subtask"].push(temp);
 

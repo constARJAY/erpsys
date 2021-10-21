@@ -20,6 +20,7 @@ class Consolidated_document extends CI_Controller
         $thisMethod     = $this;
         $excelType      = $this->input->get("exeltype")   ?? null;
         $countArray     = $this->input->get("datacount");
+        $projectCount   =  str_pad(intval($this->input->get("projectcount")) + 1, 5, "0", STR_PAD_LEFT);
         $data           = [];
         $category       = $excelType != "cost_estimate" ? "Bill of Materials" : "Cost Estimate";
        
@@ -30,20 +31,32 @@ class Consolidated_document extends CI_Controller
             $timelineBuilderID  = $thisMethod->input->get("ptbid".$i);
             $costEstimateID     = $thisMethod->input->get("ceid".$i);
             $billMaterialID     = $thisMethod->input->get("bomid".$i);
-            $tempData = $this->billmaterial->getExcelData($timelineBuilderID, $costEstimateID, $billMaterialID , $category);
+            $tempData           = $this->billmaterial->getExcelData($timelineBuilderID, $costEstimateID, $billMaterialID , $category);
             array_push($data, $tempData);
         }
         
-        $consolidateData    =   $this->consolidateArray($data, $excelType);
+        $consolidateData    =   $this->consolidateArray($data, $excelType, $projectCount);
         // echo json_encode($consolidateData);
         downloadExcel($category, $consolidateData);
     }
 
-    public function consolidateArray($data = false, $category = false){
+    public function consolidateArray($data = false, $category = false, $projectCount = 1){
         $shortcutDocument   = $category == "cost_estimate" ? "CEF" : "BOM";
+        $subject            = $shortcutDocument == "CEF" ? "Cost Estimate" : "Bill of Materials";
+        $clientCode         = "";
+        $tempProjectCode            = [];
+        $tempDocumentNumber         = [];
+        for ($i=0; $i < count($data) ; $i++) {
+            $dataResult         = $data[$i];
+            $exlodeProjectCode  = explode("-", $dataResult["project"]["code"]);
+            $clientCode         = $exlodeProjectCode[1];
+            array_push($tempDocumentNumber, $dataResult["project"]["costEstimate"]);
+            array_push($tempProjectCode, $dataResult["project"]["code"]);
+        }
+
         $consolidateData    =   [
-            "filename"  => "CON-".$shortcutDocument."-21-GTC-PRJ-00001.xlsx",
-            "code"      => "CON-".$shortcutDocument."-21-GTC-PRJ-00001",
+            "filename"  => "CON-".$shortcutDocument."-".date("y")."-".$clientCode."-".$projectCount.".xlsx",
+            "code"      => "CON-".$shortcutDocument."-".date("y")."-".$clientCode."-".$projectCount,
             "title"     => "CONSOLIDATED ".strtoupper($category),
             "project"   => [],
             "body"      => [
@@ -54,13 +67,16 @@ class Consolidated_document extends CI_Controller
                            ],
             "footer"    => []
         ];
-
+        
         $footerItemTotalCost        = 0;
         $footerLaborTotalCost       = 0;
     
         $footerEquipmentTotalCost   = 0;
         $footerTravelTotalCost      = 0;
         
+        
+
+
         for ($i=0; $i < count($data) ; $i++) {
             // GLOBAL VARIABLE ON THIS LOOP
             $dataResult         = $data[$i];
@@ -72,14 +88,13 @@ class Consolidated_document extends CI_Controller
             $bodyOthersArray    = $bodyArray["others"]      ?? [];
             
             // END GLOBAL VARIABLE ON THIS LOOP
-            
             $consolidateData["project"] = [
-                "code"         => $dataResult["project"]["code"],
+                "code"         => join(", ", $tempProjectCode),
                 "name"         => $dataResult["project"]["name"],
                 "location"     => $dataResult["project"]["location"],
                 "owner"        => $dataResult["project"]["owner"],
-                "subject"      => strtoupper($category)." –  Biday Satellite Warehouse and TemFacil",
-                "costEstimate" => "CON-".$shortcutDocument."-21-GTC-PRJ-00001.xlsx",
+                "subject"      => $subject." – ".str_replace('BILL OF MATERIALS - ', '', $dataResult["project"]["subject"]),
+                "costEstimate" => join(", ", $tempDocumentNumber ),
                 "timeline"     => ""
             ];
 
@@ -108,41 +123,42 @@ class Consolidated_document extends CI_Controller
             // END CONSOLIDATE ARRAY OF OTHERS
             
             // FOOTER COMPUTATION
-               $footerItemTotalCost         += floatval($footerArray["costSummary"]["items"][0]["totalCost"]);
-               $footerLaborTotalCost        += floatval($footerArray["costSummary"]["items"][1]["totalCost"]);
+               $footerItemTotalCost         += floatval(  str_replace(',', '', $footerArray["costSummary"]["items"][0]["totalCost"]) );
+               $footerLaborTotalCost        += floatval( str_replace(',', '', $footerArray["costSummary"]["items"][1]["totalCost"]) );
 
-               $footerEquipmentTotalCost    += floatval($footerArray["costSummary"]["overhead"][0]["totalCost"]);
-               $footerTravelTotalCost       += floatval($footerArray["costSummary"]["overhead"][1]["totalCost"]);
+               $footerEquipmentTotalCost    += floatval(str_replace(',', '',$footerArray["costSummary"]["overhead"][0]["totalCost"]));
+               $footerTravelTotalCost       += floatval(str_replace(',', '',$footerArray["costSummary"]["overhead"][1]["totalCost"]));
             // END FOOTER COMPUTATION
 
         }
-        
 
+        // $consolidateData["project"]["costEstimate"] = $tempDocumentNumber.join(", "); 
+            
         $footerTempArray        =   [
             "costSummary" => [
                 "items" => [
                     [
                         "name" => "Materials",
-                        "totalCost" => $category == "cost_estimate" ? "" : $footerItemTotalCost
+                        "totalCost" => $category == "cost_estimate" ? "" : formatAmount($footerItemTotalCost, true)
                     ],
                     [
                         "name" => "Labor",
-                        "totalCost" => $category == "cost_estimate" ? "" : $footerLaborTotalCost
+                        "totalCost" => $category == "cost_estimate" ? "" : formatAmount($footerLaborTotalCost)
                     ],
                 ],
-                "itemTotalCost" => $category == "cost_estimate" ? "" : (floatval($footerItemTotalCost) + floatval($footerLaborTotalCost)),
+                "itemTotalCost" => $category == "cost_estimate" ? "" : formatAmount((floatval($footerItemTotalCost) + floatval($footerLaborTotalCost)) ),
                 "overhead" => [
                     [
                         "name" => "Equipment",
-                        "totalCost" => $category == "cost_estimate" ? "" : $footerEquipmentTotalCost
+                        "totalCost" => $category == "cost_estimate" ? "" : formatAmount($footerEquipmentTotalCost)
                     ],
                     [
                         "name" => "Travel",
-                        "totalCost" => $category == "cost_estimate" ? "" : $footerTravelTotalCost
+                        "totalCost" => $category == "cost_estimate" ? "" : formatAmount($footerTravelTotalCost)
                     ],
                 ],
                 "contigency"          => "",
-                "subtotal"            => $category == "cost_estimate" ? "" : (floatval($footerItemTotalCost) + floatval($footerLaborTotalCost)) + (floatval($footerEquipmentTotalCost) + floatval($footerTravelTotalCost)),
+                "subtotal"            => $category == "cost_estimate" ? "" : formatAmount((floatval($footerItemTotalCost) + floatval($footerLaborTotalCost)) + (floatval($footerEquipmentTotalCost) + floatval($footerTravelTotalCost)) ,true),
                 "markUp"              => "",
                 "contractPriceVATEX"  => "",
                 "vat"                 => "",
@@ -151,7 +167,7 @@ class Consolidated_document extends CI_Controller
         ];
 
 
-        array_push($consolidateData["footer"], $footerTempArray);
+        $consolidateData["footer"] = $footerTempArray;
 
         return $consolidateData;
 

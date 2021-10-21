@@ -91,14 +91,15 @@ $(document).ready(function(){
                         </div>
                         <div class="col-2"></div>
                     </div>`;
-
-        let projectList  = clientList().map(x=>{
+        // console.log(clientList());
+        let projectListCondition  = clientList().map(x=>{
                                     return getProjectList(x);
-                            }).join("");
-        if(projectList){
+                            });
+        if(projectListCondition){
             html = "";
         }
         clientList().map(client=>{
+            let projectList     =   getProjectList(client);
             html += `<div class="list-group panel mb-2">
                         <a class="list-group-item list-group-item-danger project-list" style="cursor:pointer;">
                             <i type="button" class="project-icon fa fa-caret-down" aria-expanded="false"></i>
@@ -115,7 +116,7 @@ $(document).ready(function(){
 
     function getProjectList(clientName = null){
         let html = "";
-        projectList(clientName).map( project =>{
+        projectList(clientName).map( (project, index) =>{
             let documentInfo        =  projectTableData.filter(document => document.projectName == project && document.clientName == clientName);
             let timelineBuilderID   =  [];
             let costEstimateID      =  [];
@@ -127,8 +128,9 @@ $(document).ready(function(){
                 billMaterialID.push(x.billMaterialID);
             });
 
-            html += `   <div class="list-group-submenu" style="">
+            html = `   <div class="list-group-submenu" style="">
                         <a href="#" class="list-group-item nav-project-list" style="cursor:pointer;"
+                            count="${index}"
                             timelinebuilderid="${encryptString(timelineBuilderID.join("|"))}"
                             costestimateid="${encryptString(costEstimateID.join("|"))}"
                             billmaterialid="${encryptString(billMaterialID.join("|"))}"
@@ -136,16 +138,9 @@ $(document).ready(function(){
                         <i class="nav-project-list-icon fa"></i> &nbsp; 
                             <small>${project}</small>
                         </a>
-                    </div>`;
-        }).join();
+                        </div>`;
+        });
         return html;
-    }
-
-    function showDocument(timelineBuilderID = null, costEstimateID = null, billMaterialID = null){
-        let timelineBuilderArr  = timelineBuilderID.split("|");
-        let costEstimateArr     = costEstimateID.split("|");
-        let billMaterialArr     = billMaterialID.split("|");
-
     }
 
     function checkButtons(){
@@ -178,6 +173,7 @@ $(document).ready(function(){
     });
 
     $(document).on("click", ".nav-project-list", function(){
+        let projectCount    =   $(this).attr("count");
         $(".btn-excel").hide(900);
         $("#document_list").html(preloader);
         $(".nav-project-list-icon").removeClass("fa-circle");
@@ -185,7 +181,7 @@ $(document).ready(function(){
         let thisIcon        = thisParent.find(".nav-project-list-icon");
         thisIcon.addClass("fa-circle");
 
-
+        $(".btn-excel").attr("projectcount", projectCount);
 
 
         let timelineBuilderID   = decryptString($(this).attr("timelinebuilderid"));
@@ -244,6 +240,7 @@ $(document).ready(function(){
 
     $(document).on("click", ".btn-excel", function(e){
         let exelType        = $(this).attr("category");
+        let projectCount    = $(this).attr("count");
         let documentsID     = [];
         let datacount       = 0;
         let urlExtension    = "";
@@ -259,7 +256,7 @@ $(document).ready(function(){
             
         });
         if(datacount > 0){
-            const url = `${base_url}pms/consolidated_document/getConsolidateArray?datacount=${datacount}&exeltype=${exelType}${urlExtension}`;
+            const url = `${base_url}pms/consolidated_document/getConsolidateArray?datacount=${datacount}&exeltype=${exelType}&projectcount=${projectCount}${urlExtension}`;
 		    window.open(url, "_blank");
         }else{
             showNotification("warning2", "System error: Please contact the system administrator for assistance!");

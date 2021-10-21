@@ -284,7 +284,7 @@ function listOfAttachDesignation(moduleID = null){
             let checkedCondition    = approvalDesignationID.indexOf(item_designation["designationID"]);
             let checked             = checkedCondition >= 0 ? "checked": "";
             let approvers           = checked == "" ? "0" : approvalUsers[index];
-            returnData              +=  `<div class="card my-0 p-2">
+            returnData              +=  `<div class="card my-0 p-2" style="box-shadow: none !important">
                                             <div class="d-flex justify-content-start align-items-center">
                                                 <input class="list-designation" type="checkbox" approvers="${approvers}" value="${item_designation["designationID"]}" ${checked}>
                                                 <h6 class="mx-3 module-header text-gray">${item_designation["designationName"]}</h6> 
@@ -318,7 +318,7 @@ function getApproval(moduleID = null,designationID = null){
                 let approverDesignation     = approvalItems.length > 0 ? getTableData("hris_designation_tbl","","designationID="+approvalItems[0].designationID) : "Department";
                 var approverProfile         = approvalItems.length > 0 ? approvalItems[0]["employeeProfile"] : "default.jpg";
                 approvalList    +=   ` <div class="row border rounded m-2 py-1">
-                                            <div class="col-3 col-lg-3 col-xl-1 d-flex align-items-center"><img class="img-fluid rounded-circle" src="${base_url}assets/upload-files/profile-images/${approverProfile || "default.jpg" }" alt="avatar" height="70" width="70"></div>
+                                            <div class="col-3 col-lg-3 col-xl-1 d-flex align-items-center"><img class=" rounded-circle" src="${base_url}assets/upload-files/profile-images/${approverProfile || "default.jpg" }" alt="avatar" height="70" width="70"></div>
                                             <div class="col-5 col-lg-6 col-xl-9 d-flex justify-content-start align-items-center">
                                                 <span>${approverName} <br> <small class="text-primary">${approverDesignation != "Department" ? approverDesignation[0].designationName : approverDesignation}</small>    
                                                 </span>

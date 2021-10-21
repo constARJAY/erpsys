@@ -58,7 +58,7 @@ class Inventory_validation extends CI_Controller {
         $projectCode  = $this->input->post("projectCode") == "null" ? NULL : $this->input->post("projectCode"); 
         $projectName  = $this->input->post("projectName") == "null" ? NULL : $this->input->post("projectName"); 
         $projectCategory  = $this->input->post("projectCategory") == "null" ? NULL : $this->input->post("projectCategory"); 
-        $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode") == "null"; 
+        $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode"); 
         $clientName  = $this->input->post("clientName") == "null" ? NULL : $this->input->post("clientName"); 
         $clientAddress  = $this->input->post("clientAddress") == "null" ? NULL : $this->input->post("clientAddress"); 
         $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
@@ -523,7 +523,7 @@ class Inventory_validation extends CI_Controller {
 
             if(!empty($items) || !empty($assets)){
                 $clientName  = $this->input->post("clientName") == "null" ? NULL : $this->input->post("clientName"); 
-                $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode") == "null"; 
+                $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode"); 
                 $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
                 $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
                 
@@ -566,7 +566,7 @@ class Inventory_validation extends CI_Controller {
 
                         if(!empty($items)){
                             $clientName  = $this->input->post("clientName") == "null" ? NULL : $this->input->post("clientName"); 
-                            $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode") == "null"; 
+                            $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode"); 
                             $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
                             $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
                             $dataStockOutDocument =[
@@ -602,7 +602,7 @@ class Inventory_validation extends CI_Controller {
 
                         if(!empty($assets)){
                             $clientName  = $this->input->post("clientName") == "null" ? NULL : $this->input->post("clientName"); 
-                            $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode") == "null"; 
+                            $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode"); 
                             $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
                             $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
                             $dataEquipmentBorrowingDocument =[

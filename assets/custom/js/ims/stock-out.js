@@ -1009,17 +1009,18 @@ $(document).ready(function() {
 
 
      // ----- KEYUP BARCODE -----
-     $(document).on("change", `[name="barcodeItem"]`, function() {
-        const itemID    = $(this).attr("itemID");
-        const index    = $(this).attr("index");
-        const id    = $(this).attr("id");
+     $(document).on("keyup", `[name=barcodeItem]`, function() {
+        const itemID        = $(this).attr("itemID");
+        const index         = $(this).attr("index");
+        const id            = $(this).attr("id");
         const withdrawalItemID    = $(this).attr("withdrawalItemID");
         const valueLength = $(this).val().length +1;
         const value = $(this).val();
         const characterLength = 37;
-
+        let warningCondition = false;
+        let isInvalid        = false;
+        // $("#"+id).addClass("is-invalid").addClass("validate");
         if(valueLength >= characterLength){
-
             const validatebarcode = getTableData(`ims_stock_in_item_tbl`,
             `barcode`,
             `stockOutDate IS NUll 
@@ -1027,17 +1028,21 @@ $(document).ready(function() {
             AND itemID = ${itemID} AND barcode = '${value}'`);
             if(validatebarcode.length<=0){
                $("#"+id).addClass("is-invalid").removeClass("validate")
-               $("#invalid-barcodeItem"+index).text("Barcode not exist!")
+               $("#invalid-barcodeItem"+index).text("Barcode not exist!");
+                warningCondition = true;
+                isInvalid        = true;
             }else{
-                $("#"+id).removeClass("is-invalid").addClass("validate")
+                $("#"+id).removeClass("is-invalid").addClass("validate");
                 $("#invalid-barcodeItem"+index).text("")
             }
             
         }
-        // else{
-        //     $("#"+id).addClass("is-invalid").removeClass("validate")
-        //     $("#invalid-barcodeItem"+index).text("Please enter at least "+characterLength+" characters.")
-        // }
+        else{ 
+            warningCondition = true;
+            isInvalid = true;
+            $("#"+id).addClass("is-invalid").addClass("validate");
+            $("#invalid-barcodeItem"+index).text("Please enter at least "+characterLength+" characters.");
+        }
 
         // const getRemainingItem = +$(`[name="remainingItem"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
         // var computeRemainingItem =0;
@@ -1054,6 +1059,20 @@ $(document).ready(function() {
             // $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(computeRemainingItem));
 
         }
+        
+        if(warningCondition && isInvalid){
+            setTimeout(() => {  
+                if(valueLength >= characterLength){
+                    $("#"+id).addClass("is-invalid").removeClass("validate")
+                    $("#invalid-barcodeItem"+index).text("Barcode not exist!");
+                }else{
+                    $("#"+id).addClass("is-invalid").addClass("validate");
+                    $("#invalid-barcodeItem"+index).text("Please enter at least "+characterLength+" characters.");
+                }     
+            }, 1000);    
+        }
+        
+
 
     });
 
@@ -1460,7 +1479,7 @@ $(document).ready(function() {
 
     // KEYUP CHECK COMPLETE DATA EACH ROW //
 
-    $(document).on("keyup",`[name="barcodeItem"],[name="StockOut"]`,function(){
+    $(document).on("change",`[name="barcodeItem"],[name="StockOut"]`,function(){
     	var getBarcode = $(this).closest("tr").find(`[name="barcodeItem"]`).val();
     	var getQuantity = +$(this).closest("tr").find(`[name="StockOut"]`).val();
 

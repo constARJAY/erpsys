@@ -195,7 +195,8 @@ class EmployeeTaskboard_model extends CI_Model {
         petd.subTaskStatus,
         petd.subTaskNotes, 
         petd.extension, 
-        petd.createdAt 
+        petd.createdAt,
+        petd.createdBy
         FROM
         pms_employeetaskoard_tbl as pet 
         LEFT JOIN pms_employeetaskoard_details_tbl as petd ON petd.taskID = pet.taskID AND petd.timelineBuilderID = pet.timelineBuilderID AND petd.projectMilestoneID = pet.projectMilestoneID OR petd.taskBoardID = 0
@@ -226,7 +227,8 @@ class EmployeeTaskboard_model extends CI_Model {
                 "subTaskTimeLeft"  => $subtask["subTaskTimeLeft"] ? $subtask["subTaskTimeLeft"] : "",
                 "subTaskStatus"  => $subtask["subTaskStatus"] ? $subtask["subTaskStatus"] : "",
                 "subTaskNotes"  => $subtask["subTaskNotes"] ? $subtask["subTaskNotes"] : "",
-                "createdAt"  => $subtask["createdAt"] ? $subtask["createdAt"] : ""
+                "createdAt"  => $subtask["createdAt"] ? $subtask["createdAt"] : "",
+                "createdBy"  => $subtask["createdBy"] ? $subtask["createdBy"] : ""
                
             ];
             array_push($output, $temp);
@@ -505,17 +507,19 @@ class EmployeeTaskboard_model extends CI_Model {
         }
     }
 
-    public function updateEmployeeTaskStatus($data,$taskBoardID,$employeeID) {
+    public function updateEmployeeTaskStatus($data,$taskBoardID = 0,$subtaskboardID = 0,$employeeID=0) {
 
-        $this->db->query("DELETE FROM pms_employee_taskboard_status_tbl WHERE taskboardID = $taskBoardID AND employeeID = $employeeID ");
+        $condition = $subtaskboardID ? "taskboardID = $taskBoardID AND subtaskboardID = $subtaskboardID AND" : "taskboardID = $taskBoardID AND subtaskboardID =0 AND";
+        $this->db->query("DELETE FROM pms_employee_taskboard_status_tbl WHERE $condition   employeeID = $employeeID ");
+  
 
-        if (count($data) > 0) {
-          
+        if($taskBoardID || $subtaskboardID){
+            if (count($data) > 0) {
                 $query = $this->db->insert('pms_employee_taskboard_status_tbl', $data);
                 // $insertID = $subtaskboardID;
                 // $this->logHistory($label,$passListAssignee,"",$subtaskboardID);
-
-            return $query ? true : "false|System error: Please contact the system administrator for assistance!";
+                return $query ? true : "false|System error: Please contact the system administrator for assistance!";
+            }
         }
     }
 

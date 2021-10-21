@@ -3274,9 +3274,9 @@ $(document).ready(function() {
         formButtonHTML(this, true);
 		const validate  = validateForm("page_content");
         const isValid   = comparePassword();
-        const hasResume = validateResume();
+        // const hasResume = validateResume();
 
-		if (validate && isValid && hasResume) {
+		if (validate && isValid) {
             setTimeout(() => {
                 getApplicantData()
                 .then(data => {

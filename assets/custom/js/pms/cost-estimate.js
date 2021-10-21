@@ -504,6 +504,7 @@ $(document).ready(function() {
 
 
 	$(document).on("change","[name=otherCategory]", function(){
+		let thisTR  	= $(this).closest("tr");
 		let thisVal		= $(this).val();
 		let isRequired 	= thisVal.length > 0;
 
@@ -1626,6 +1627,7 @@ $(document).ready(function() {
 			approversID,
 			approversStatus,
 			approversDate,
+			dateNeeded,
 			costEstimateStatus,
 			costEstimateReason,
 			costEstimateRemarks,
@@ -1691,7 +1693,6 @@ $(document).ready(function() {
 				singleDatePicker: true,
 				showDropdowns: true,
 				autoApply: true,
-				startDate: moment().add("days", 7),
 				locale: {
 					format: 'MMMM DD, YYYY'
 				}
@@ -1873,7 +1874,7 @@ $(document).ready(function() {
 						class = "form-control daterange text-left"
 						name = "dateNeeded"
 						id="dateNeeded"  
-						value = "${moment().format("MMMM DD, YYYY")}"
+						value = "${dateNeeded ? moment(dateNeeded).format("MMMM DD, YYYY") : "" }"
 						${readOnly ? "disabled" : ``} required>
 					<div class="invalid-feedback d-block" id="invalid-dateNeeded"></div>
 				</div>
@@ -2950,7 +2951,7 @@ $(document).ready(function() {
 					formData.append("costEstimateStatus", 2);
 				}
 			}
-
+			let milestoneIndex = 0;
 			$(".table-body-inventory-request-item").each(function(i,ob){
 				let thisExtension 			= $(this).attr("invcategory");
 				let milestoneBuilderID		= $(this).attr("milestonebuilderid"); 
@@ -2966,14 +2967,15 @@ $(document).ready(function() {
 					let itemQuantity 			= 	$(this).find("[name=itemQuantity]").val();
 					let itemRemarks 			= 	$(this).find("[name=itemRemarks]").val();
 					if(itemID){
-						formData.append(`items[${i}][${j}][milestoneBuilderID]`, milestoneBuilderID);
-						formData.append(`items[${i}][${j}][phaseDescription]`, phaseDescription);
-						formData.append(`items[${i}][${j}][milestoneListID]`, milestoneListID);
-						formData.append(`items[${i}][${j}][projectMilestoneID]`, projectMilestoneID);
-						formData.append(`items[${i}][${j}][projectMilestoneName]`, projectMilestoneName);
-						formData.append(`items[${i}][${j}][itemID]`, itemID);
-						formData.append(`items[${i}][${j}][itemQuantity]`, itemQuantity);
-						formData.append(`items[${i}][${j}][itemRemarks]`, itemRemarks);
+						formData.append(`items[${milestoneIndex}][${j}][milestoneBuilderID]`, milestoneBuilderID);
+						formData.append(`items[${milestoneIndex}][${j}][phaseDescription]`, phaseDescription);
+						formData.append(`items[${milestoneIndex}][${j}][milestoneListID]`, milestoneListID);
+						formData.append(`items[${milestoneIndex}][${j}][projectMilestoneID]`, projectMilestoneID);
+						formData.append(`items[${milestoneIndex}][${j}][projectMilestoneName]`, projectMilestoneName);
+						formData.append(`items[${milestoneIndex}][${j}][itemID]`, itemID);
+						formData.append(`items[${milestoneIndex}][${j}][itemQuantity]`, itemQuantity);
+						formData.append(`items[${milestoneIndex}][${j}][itemRemarks]`, itemRemarks);
+						milestoneIndex ++;
 					}
 				});
 			});

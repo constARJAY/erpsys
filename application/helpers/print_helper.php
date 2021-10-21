@@ -1471,6 +1471,7 @@
 
     function billMaterialExcel($data = [])
     {
+        
         // $data = [
         //     "filename" => "billMaterials.xlsx",
         //     "code"     => "CMT-21-00001",
@@ -2079,7 +2080,7 @@
                 $sheet->setCellValue('A4', 'LOCATION: ');
                 $sheet->setCellValue('A5', 'OWNER: ');
                 $sheet->setCellValue('A6', 'SUBJECT: ');
-                $sheet->setCellValue('A7', 'CE#: ');
+                $sheet->setCellValue('A7', 'BOM#: ');
                 $sheet->setCellValue('A8', 'TIMELINE: ');
                 $sheet->getStyle('A2:A8')->applyFromArray($boldStyle);
 
@@ -2502,7 +2503,7 @@
                     $sheet->mergeCells("L$row:M$row");
 
                     $sheet->setCellValue("I$row", "TOTAL COST");
-                    $sheet->setCellValue("L$row", $costTotalCost);
+                    $sheet->setCellValue("L$row", $costItemTotalCost);
 
                     $sheet->getStyle("I$row:K$row")->applyFromArray($wrapTextLeftStyle);
                     $sheet->getStyle("L$row:M$row")->applyFromArray($wrapTextRightStyle);
@@ -2510,7 +2511,7 @@
                     $sheet->getStyle("I$row:M$row")->applyFromArray($topBorderStyle);
                     $row+=2;
                 }
-                
+
                 if ($costOverhead && count($costOverhead) > 0)
                 {
                     $sheet->mergeCells("I$row:M$row");

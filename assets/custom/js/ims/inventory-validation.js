@@ -1856,6 +1856,7 @@ $(document).ready(function() {
 					formData.append("approversStatus", 2);
 					formData.append("approversDate", dateToday());
 					formData.append("inventoryValidationStatus", 2);
+					formData.append("employeeID", sessionID);
 					formData = getFooterData(formData,id,2,approversID);
 
 				}
@@ -1981,7 +1982,15 @@ $(document).ready(function() {
 					computeReservedItem = Math.abs(getForPurchase - requestQuantity);
 
 			}
-			let reservedItem =  computeReservedItem || tableData.reservedItem;
+			let reservedItem =0;
+
+			if(validationStatus ==1){
+				 reservedItem =  0;
+
+			}else{
+				 reservedItem =  computeReservedItem || tableData.reservedItem;
+
+			}
 			let forPurchase 	= getForPurchase;				
 			let availableStocks = getAvailableStocks;				
 			let unitCost = tableData.unitCost;
@@ -2035,7 +2044,7 @@ $(document).ready(function() {
 			let inventoryValidationID 	= $(this).attr("inventoryValidationID");
 			let requestAssetData			= getTableData("ims_request_assets_tbl", "", `requestAssetID = '${requestAseetID}'`);
 			let tableData 				= requestAssetData[0];
-			let getForPurchase = $(this).find(".forpurchase").text()?.trim() ==""  ? +$(this).find(".forpurchase  [name='forPurchase']").val().replaceAll(",","") : +$(this).find(".forpurchase").text()?.trim();
+			let getForPurchase = +$(this).find(".forpurchase").text()?.trim() ==""  ? +$(this).find(".forpurchase  [name='forPurchase']").val().replaceAll(",","") : +$(this).find(".forpurchase").text()?.trim();
 			let getAvailableStocks = +$(this).find(".availablestocks").text()?.trim().replaceAll(",","") || $(this).find(".availablestocks").text()?.trim();
 			let getAssetRemarks = $(this).find('.assetRemarks > textarea').val()?.trim() || $(this).find('.assetRemarks').text()?.trim();
 			if(requestAssetData.length !=0){
@@ -2070,20 +2079,31 @@ $(document).ready(function() {
 
 				let computeReservedAsset  = "";
 
-				if(getForPurchase == 0 ){
-					if( getAvailableStocks ==0){
-						computeReservedAsset = 0;
+				// if(getForPurchase == 0 ){
+				// 	if( getAvailableStocks ==0){
+				// 		computeReservedAsset = 0;
 
-					}else{
-						computeReservedAsset =  requestQuantity;
+				// 	}else{
+				// 		computeReservedAsset =  requestQuantity;
 
-					}
-				}else{
-						computeReservedAsset = Math.abs(getForPurchase - requestQuantity);
+				// 	}
+				// }
+				if(getForPurchase != 0 ){
+						computeReservedAsset = Math.abs(requestQuantity);
 
 				}
+
+				let reservedAsset =0;
+				if(validationStatus ==1){
+					 reservedAsset =0;
+
+	
+				}else{
+					 reservedAsset = computeReservedAsset || tableData.reservedAsset;
+	
+				}
 				
-				let reservedAsset = computeReservedAsset || tableData.reservedAsset;
+			
 				let	requestManHours = tableData.requestManHours;
 				let	dateNeeded = tableData.dateNeeded;
 				let	dateReturn = tableData.dateReturn;

@@ -482,7 +482,7 @@ $(document).ready(function () {
 
 
 	// ----- DISPLAY EMPLOYEE SIGNATURE -----
-    function displayFile(file = null, link = true) {
+    function displayImage(file = null, link = true) {
         let html = ``;
         if (file && file != null && file != "null") {
             let otherAttr = link ? `
@@ -497,7 +497,8 @@ $(document).ready(function () {
                     width: 90%;
                     overflow: hidden;
                     white-space: nowrap;
-                    text-overflow: ellipsis;"
+                    text-overflow: ellipsis;
+					color: black;"
                     ${otherAttr}>
                     ${file}
                 </a>
@@ -510,7 +511,8 @@ $(document).ready(function () {
 
 	 // ----- REMOVE E-SIGNATURE -----
 	 $(document).on("click", `.btnRemoveFile`, function() {
-        $(`#displayFile`).empty();
+        $(`#displayImage`).empty();
+        $(`#displayImage`).css('display','none');
         $(`[name="file|vendor"]`).val("");
         $(`[name="file|vendor"]`).removeAttr("filename");
     })
@@ -525,13 +527,19 @@ $(document).ready(function () {
             const filename = this.files[0].name;
 			const type     = filetype.split("/")?.[1];
             if (filesize > 10) {
+				$(`#displayImage`).empty();
+                $(`#displayImage`).css('display','none');
                 $(this).val("");
                 showNotification("danger", "File size must be less than or equal to 10mb");
             } else if (!["png", "jpg", "jpeg", "doc", "docx", "pdf"].includes(type)) {
+				$(`#displayImage`).empty();
+                $(`#displayImage`).css('display','none');
                 $(this).val("");
                 showNotification("danger", "Invalid file type");
             } else {
-                $(`#displayFile`).html(displayFile(filename, false));
+                $("#invalid-inventoryVendorFile").text("");
+				$(`#displayImage`).css('display','block');
+                $(`#displayImage`).html(displayImage(filename, false));
             }
         }
 	})
@@ -574,6 +582,7 @@ $(document).ready(function () {
 		} = data && data[0];
 
 		const bankDetailsAttr = bankID && bankID != "null" ? "" : "disabled";
+		file = file && file != "null" ? file : null;
 
 		let button = data
 			? `
@@ -591,7 +600,7 @@ $(document).ready(function () {
                 <div class="row">
                     <div class="col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label>Supplier Name <code>*</code></label>
+                            <label>Vendor Name <code>*</code></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
@@ -603,7 +612,7 @@ $(document).ready(function () {
                                 required 
                                 value="${inventoryVendorName}"
                                 unique="${inventoryVendorID}"
-                                title="Supplier Name"
+                                title="Vendor Name"
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-supplierName"></div>
                         </div>
@@ -864,7 +873,7 @@ $(document).ready(function () {
 								id="inventoryVendorIndustry"
 								style="width: 100%"
 								required>
-								<option disabled selected>Select Enterprise</option>
+								<option disabled selected>Select Industry</option>
 								${getIndustry(inventoryVendorIndustry)}
 							</select>
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorIndustry"></div>
@@ -962,8 +971,8 @@ $(document).ready(function () {
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>File</label>
-							<div id="displayFile">
-								${displayFile(file)}
+							<div id="displayImage" style="${file ? "display: block;" : "display: none;"} font-size: 12px; border: 1px solid black; border-radius: 5px; background: #d1ffe0; padding: 2px 10px;">
+								${displayImage(file)}
 							</div>
                             <input type="file"
 								name="file|vendor"

@@ -417,9 +417,11 @@ class BillMaterial_model extends CI_Model {
                                 "size"          =>  $milestoneItemArray[$itemIndex]["itemCategory"], 
                                 "quantity"      =>  $milestoneItemArray[$itemIndex]["requestQuantity"],
                                 "unit"          =>  $milestoneItemArray[$itemIndex]["itemUom"],
-                                "unitPrice"     =>  $category == "cost_estimate" ? "" : $milestoneItemArray[$itemIndex]["unitCost"],
-                                "totalCost"     =>  $category == "cost_estimate" ? "" : floatval($milestoneItemArray[$itemIndex]["unitCost"]) * floatval($milestoneItemArray[$itemIndex]["requestQuantity"]),
+                                "unitPrice"     =>  $category == "cost_estimate" ? "" : formatAmount($milestoneItemArray[$itemIndex]["unitCost"]),
+                                "totalCost"     =>  $category == "cost_estimate" ? "" : formatAmount(floatval($milestoneItemArray[$itemIndex]["unitCost"]) * floatval($milestoneItemArray[$itemIndex]["requestQuantity"])),
                             ];
+                            $tempMilestoneItemTotalCost += floatval($milestoneItemArray[$itemIndex]["unitCost"]) * floatval($milestoneItemArray[$itemIndex]["requestQuantity"]);
+                            $tempPhaseItemTotalCost += floatval($milestoneItemArray[$itemIndex]["unitCost"]) * floatval($milestoneItemArray[$itemIndex]["requestQuantity"]);
                         }
 
                         for ($laborIndex=0; $laborIndex < count($milestoneLaborArray) ; $laborIndex++) { 
@@ -427,15 +429,17 @@ class BillMaterial_model extends CI_Model {
                                 "manHours"         => $milestoneLaborArray[$laborIndex]["designationTotalManHours"],
                                 "overtimeManHours" => $milestoneLaborArray[$laborIndex]["designationTotalOvertime"],
                                 "personnel"        => $milestoneLaborArray[$laborIndex]["designationName"],
-                                "totalLabor"       => $category == "cost_estimate" ? "" : $milestoneLaborArray[$laborIndex]["totalCost"]
+                                "totalLabor"       => $category == "cost_estimate" ? "" : formatAmount($milestoneLaborArray[$laborIndex]["totalCost"])
                             ];
+                            $tempMilestoneLaborTotalCost += floatval($milestoneLaborArray[$laborIndex]["totalCost"]);
+                            $tempPhaseLaborTotalCost += floatval($milestoneLaborArray[$laborIndex]["totalCost"]);
                         }
 
 
                         $tempMilestoneData[] = [
                             "name"          =>  $milestoneName,
-                            "totalCost"     =>  $tempMilestoneItemTotalCost,
-                            "totalLabor"    =>  $tempMilestoneLaborTotalCost,
+                            "totalCost"     =>  formatAmount($tempMilestoneItemTotalCost),
+                            "totalLabor"    =>  formatAmount($tempMilestoneLaborTotalCost),
                             "items"         =>  $tempMilestoneItemArray,
                             "labors"        =>  $tempMilestoneLaborArray,
                         ];
@@ -444,8 +448,8 @@ class BillMaterial_model extends CI_Model {
 
                 $projectPhaseData[] = [
                         "name"          => $projectPhaseName,
-                        "totalCost"     => $tempPhaseItemTotalCost,
-                        "totalLabor"    => $category == "cost_estimate" ? "" : $tempPhaseLaborTotalCost,
+                        "totalCost"     => formatAmount($tempPhaseItemTotalCost),
+                        "totalLabor"    => $category == "cost_estimate" ? "" : formatAmount($tempPhaseLaborTotalCost),
                         "milestones"    => $tempMilestoneData
                 ];
                 $footerItemTotalCost    += floatval($tempPhaseItemTotalCost);
@@ -461,8 +465,8 @@ class BillMaterial_model extends CI_Model {
                     "unit"           => $assetDetailsData["assetUom"],
                     "quantity"       => $assetDetailsData["requestQuantity"],
                     "manHours"       => $assetDetailsData["requestManHours"],
-                    "unitCost"       => $category == "cost_estimate" ? "" : $assetDetailsData["unitCost"],
-                    "totalCost"      => $category == "cost_estimate" ? "" : $assetDetailsData["totalCost"]
+                    "unitCost"       => $category == "cost_estimate" ? "" : formatAmount($assetDetailsData["hourlyRate"]),
+                    "totalCost"      => $category == "cost_estimate" ? "" : formatAmount($assetDetailsData["totalCost"])
                ];
                $footerEquipmentTotalCost += floatval($assetDetailsData["totalCost"]);
             }
@@ -476,8 +480,8 @@ class BillMaterial_model extends CI_Model {
                      "distance"         => $vehicleDetailsData["vehicleDistance"],
                      "manHours"         => $vehicleDetailsData["vehicleManHours"],
                      "fuelRate"         => $vehicleDetailsData["vehicleLiters"],
-                     "vehicleRate"      => $category == "cost_estimate" ? "" : $vehicleDetailsData["unitCost"],
-                     "totalCost"        => $category == "cost_estimate" ? "" : $vehicleDetailsData["totalCost"]
+                     "vehicleRate"      => $category == "cost_estimate" ? "" : formatAmount($vehicleDetailsData["unitCost"]),
+                     "totalCost"        => $category == "cost_estimate" ? "" : formatAmount($vehicleDetailsData["totalCost"])
                 ];
 
                 $footerTravelTotalCost += floatval($vehicleDetailsData["totalCost"]);
@@ -488,7 +492,7 @@ class BillMaterial_model extends CI_Model {
                 $projectOtherData[] =   [
                                             "category"    => $otherDetailsData["travelType"],
                                             "description" => $otherDetailsData["travelTypeDescription"],
-                                            "totalCost"   => $category == "cost_estimate" ? "" : $otherDetailsData["totalCost"]
+                                            "totalCost"   => $category == "cost_estimate" ? "" : formatAmount($otherDetailsData["totalCost"])
                                         ]; 
                 $footerTravelTotalCost += floatval($otherDetailsData["totalCost"]);
             }
@@ -509,7 +513,7 @@ class BillMaterial_model extends CI_Model {
                 "location"      =>  $billMaterialData->clientAddress,
                 "owner"         =>  $billMaterialData->clientName,
                 "subject"       =>  "BILL OF MATERIALS - ".$billMaterialData->projectName,
-                "costEstimate"  =>  $billMaterialData->costEstimateCode,
+                "costEstimate"  =>  $category == "cost_estimate" ? $billMaterialData->costEstimateCode : $billMaterialData->billMaterialCode,
                 "timeline"      =>  ""
             ],
             "body"      => [
@@ -523,26 +527,26 @@ class BillMaterial_model extends CI_Model {
                     "items"     =>  [
                                         [
                                             "name"      =>  "Material",
-                                            "totalCost" =>  $category == "cost_estimate" ? "" : $footerItemTotalCost
+                                            "totalCost" =>  $category == "cost_estimate" ? "" : formatAmount($footerItemTotalCost, true)
                                         ],
                                         [
                                             "name"      =>  "Labor",
-                                            "totalCost" =>  $category == "cost_estimate" ? "" : $footerLaborTotalCost
+                                            "totalCost" =>  $category == "cost_estimate" ? "" : formatAmount($footerLaborTotalCost)
                                         ]
                                     ],
-                    "itemTotalCost" =>  (floatval($footerItemTotalCost) + floatval($footerLaborTotalCost)),
+                    "itemTotalCost" =>  formatAmount((floatval($footerItemTotalCost) + floatval($footerLaborTotalCost))),
                     "overhead"  =>  [
                                         [
                                             "name"      => "Equipment",
-                                            "totalCost" => $category == "cost_estimate" ? "" : $footerEquipmentTotalCost
+                                            "totalCost" => $category == "cost_estimate" ? "" : formatAmount($footerEquipmentTotalCost)
                                         ],
                                         [
                                             "name"      => "Travel",
-                                            "totalCost" => $category == "cost_estimate" ? "" : $footerTravelTotalCost
+                                            "totalCost" => $category == "cost_estimate" ? "" : formatAmount($footerTravelTotalCost)
                                         ],  
                                     ], 
                     "contigency"          => "",
-                    "subtotal"            => $category == "cost_estimate" ? "" : $footerTotalCost,
+                    "subtotal"            => $category == "cost_estimate" ? "" : formatAmount($footerTotalCost, true),
                     "markUp"              => "",
                     "contractPriceVATEX"  => "",
                     "vat"                 => "",

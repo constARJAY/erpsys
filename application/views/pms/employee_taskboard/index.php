@@ -146,6 +146,18 @@ select{
   text-align-last: center;
 }
 
+.c-avatar__status {
+    z-index: 9999;
+    width: 15px;
+    height: 15px;
+    background:  #ffc107;
+    border: 2px solid white;
+    position: absolute;
+    bottom: 3%;
+    border-radius: 100%;
+    margin-left: -7px;
+}
+
 </style>
 <div class="body_area after_bg ">
 	<div class="block-header pb-0">
@@ -371,7 +383,7 @@ select{
 <div id="modal_employee_assignee" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
 		<div class="modal-content">
-			<div class="modal-header bg-primary text-balck">
+			<div class="modal-header bg-primary text-black">
 				<h6 class="page-title font-weight-bold " id="modal_title"></h6>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="text-black" aria-hidden="true">&times;</span>
@@ -383,6 +395,25 @@ select{
 	</div>
 </div>
 <!-- ----- END MODAL ASSIGNEE ----- -->
+
+
+<!-- ----- EMPLOYEE MODAL ----- -->
+<div id="modal_project_management_board" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+		<div class="modal-content">
+			<div class="modal-header bg-primary text-black">
+				<h6 class="page-title font-weight-bold " id="modal_title"></h6>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span class="text-black" aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+            <div id="modal_project_management_board_content"></div>
+        </div>
+	</div>
+</div>
+
+<!-- ----- END EMPLOYEE MODAL ----- -->
 
 
 

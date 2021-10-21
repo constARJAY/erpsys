@@ -148,32 +148,60 @@ class Employee_taskboard extends CI_Controller {
          $subTaskTimeLeft = $value["subTaskTimeLeft"];
          $subTaskStatus = $value["subTaskStatus"];
          $subTaskNotes = $value["subTaskNotes"];
+         $createdby = $value["createdBy"];
  
+         if($label == ""){
+
+              $data = array(
+                "taskID"        => $taskID,
+                "taskBoardID"        => $taskBoardID,
+                "projectMilestoneID"        => $projectMilestoneID,
+                "timelineBuilderID"                   => $timelineBuilderID,
+                "milestoneBuilderID"       => $milestoneBuilderID,
+                "subTaskName"                 => $subtaskName,
+                "subTaskDescription"         => $subTaskDescription,
+                "subTaskManHours"         => $subTaskManHours,
+                "subTaskUsedHours"                => $subTaskUsedHours,
+                "subTaskStartDates"                => $subTaskStartDates,
+                "subTaskEndDates"                => $subTaskEndDates,
+                "subTaskPriority"                => $subTaskPriority,
+                "subTaskSeverity"                => $subTaskSeverity,
+                "subTaskTimeLeft"                => $subTaskTimeLeft,
+                "subTaskStatus"                => $subTaskStatus,
+                "subTaskNotes"                => $subTaskNotes,
+                "createdBy"                => $createdby
+            );
+
+         }else{
+              $data = array(
+                "taskID"        => $taskID,
+                "taskBoardID"        => $taskBoardID,
+                "projectMilestoneID"        => $projectMilestoneID,
+                "timelineBuilderID"                   => $timelineBuilderID,
+                "milestoneBuilderID"       => $milestoneBuilderID,
+                "subTaskName"                 => $subtaskName,
+                "subTaskDescription"         => $subTaskDescription,
+                "subTaskManHours"         => $subTaskManHours,
+                "subTaskUsedHours"                => $subTaskUsedHours,
+                "subTaskStartDates"                => $subTaskStartDates,
+                "subTaskEndDates"                => $subTaskEndDates,
+                "subTaskPriority"                => $subTaskPriority,
+                "subTaskSeverity"                => $subTaskSeverity,
+                "subTaskTimeLeft"                => $subTaskTimeLeft,
+                "subTaskStatus"                => $subTaskStatus,
+                "subTaskNotes"                => $subTaskNotes
+            );
+         }
             
-         $data = array(
-             "taskID"        => $taskID,
-             "taskBoardID"        => $taskBoardID,
-             "projectMilestoneID"        => $projectMilestoneID,
-             "timelineBuilderID"                   => $timelineBuilderID,
-             "milestoneBuilderID"       => $milestoneBuilderID,
-             "subTaskName"                 => $subtaskName,
-             "subTaskDescription"         => $subTaskDescription,
-             "subTaskManHours"         => $subTaskManHours,
-             "subTaskUsedHours"                => $subTaskUsedHours,
-             "subTaskStartDates"                => $subTaskStartDates,
-             "subTaskEndDates"                => $subTaskEndDates,
-             "subTaskPriority"                => $subTaskPriority,
-             "subTaskSeverity"                => $subTaskSeverity,
-             "subTaskTimeLeft"                => $subTaskTimeLeft,
-             "subTaskStatus"                => $subTaskStatus,
-             "subTaskNotes"                => $subTaskNotes
-         );
+         
            
        
           
         }
          
-      
+        // echo "<pre>";
+        // print_r($_POST);
+        // exit;
          
         $data = $this->employee_taskboard->autoSavedSubtask($data,$subtaskboardID,$label);
  
@@ -317,6 +345,7 @@ public function updateEmployeeTaskStatus(){
   //  print_r($_POST);
   //  exit;
   $taskBoardID          =  $this->input->post('taskBoardID');
+  $subtaskboardID          =  $this->input->post('subtaskboardID');
   $timelineBuilderID          =  $this->input->post('timelineBuilderID');
   $projectMilestoneID          =  $this->input->post('projectMilestoneID');
   $taskID          =  $this->input->post('taskID');
@@ -327,6 +356,7 @@ public function updateEmployeeTaskStatus(){
 
   $data = array(
     "taskboardID" => $taskBoardID,
+    "subtaskboardID" => $subtaskboardID,
     "timelineBuilderID" => $timelineBuilderID,
     "projectMilestoneID" => $projectMilestoneID,
     "taskID" =>$taskID,
@@ -335,7 +365,7 @@ public function updateEmployeeTaskStatus(){
     "createdBy" =>$sessionID,
   );
 
-  $data = $this->employee_taskboard->updateEmployeeTaskStatus($data,$taskBoardID,$employeeID);
+  $data = $this->employee_taskboard->updateEmployeeTaskStatus($data,$taskBoardID,$subtaskboardID,$employeeID);
 
     echo json_encode($data);
 }

@@ -115,7 +115,7 @@ $(document).ready(function() {
 			scrollCollapse: true,
 			columnDefs:     [
 				{ targets: 0,  width: 150 },
-				{ targets: 1,  width: 180 },
+				{ targets: 1,  width: 250 },
 				{ targets: 2,  width: 180 },
 				{ targets: 3,  width: 100 },
 				{ targets: 4,  width: 100 },
@@ -951,6 +951,7 @@ $(document).ready(function() {
                itemClassification,
                itemCategory,
                itemUom,
+			   files,
                remarks,
                forPurchase = 0,
 			   candidateVendorID       = "0|0|0",
@@ -960,6 +961,14 @@ $(document).ready(function() {
                inventoryVendorID,
             } = item;
 
+			let fileImage = files && files != "null" ? files : "noimage.jpg";
+			let displayImage = `
+			<img 
+				src="${base_url}assets/upload-files/inventory-items/${fileImage}"
+				class="border"
+				style="width: 50px;
+					height: 50px">`;
+
             if (forPurchase && forPurchase > 0) {
                 html = `
                 <tr requestItemAssetID="${requestItemID}"
@@ -967,8 +976,13 @@ $(document).ready(function() {
                     class="request">
                     <td>${itemCode || "-"}</td>
                     <td>
-                        <div>${itemName || "-"}</div>
-                        <small>${itemBrandName}</small>
+						<div class="d-flex justify-content-start align-items-center">
+							${displayImage}
+							<div class="pl-2">
+								<div>${itemName || "-"}</div>
+								<small>${itemBrandName}</small>
+							</div>
+						</div>
                     </td>
                     <td>
                         <div>${itemClassification || "-"}</div>
@@ -992,6 +1006,7 @@ $(document).ready(function() {
 				assetClassification,
 				assetCategory,
 				assetUom,
+				files,
 				remarks,
 				forPurchase = 0,
 				candidateVendorID       = "0|0|0",
@@ -999,7 +1014,15 @@ $(document).ready(function() {
 				candidateVendorName     = "-|-|-",
 				candidateVendorPrice    = "-|-|-",
 				inventoryVendorID,
-			 } = item;
+			} = item;
+
+			let fileImage = files && files != "null" ? files : "noimage.jpg";
+			let displayImage = `
+			<img 
+				src="${base_url}assets/upload-files/inventory-asset/${fileImage}"
+				class="border"
+				style="width: 50px;
+					height: 50px">`;
 			 
 			 if (forPurchase && forPurchase > 0) {
 				 html = `
@@ -1008,8 +1031,13 @@ $(document).ready(function() {
 					 class="request">
 					 <td>${assetCode || "-"}</td>
 					 <td>
-						 <div>${assetName || "-"}</div>
-						 <small>${assetBrandName}</small>
+						<div class="d-flex justify-content-start align-items-center">
+							${displayImage}
+							<div class="pl-2">
+								<div>${assetName || "-"}</div>
+								<small>${assetBrandName}</small>
+							</div>
+						</div>
 					 </td>
 					 <td>
 						 <div>${assetClassification || "-"}</div>

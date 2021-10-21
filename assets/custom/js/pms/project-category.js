@@ -24,10 +24,9 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: "10%" },
-                { targets: 1, width: "40%" },
-                { targets: 2, width: "40%" },
-                { targets: 3, width: "10%" },
+                { targets: 0, width: "30%" },
+                { targets: 1, width: "65%" },
+                { targets: 2, width: 80 },
             ],
         });
     }
@@ -59,7 +58,6 @@ $(document).ready(function(){
                     <tr class="text-left">
                         <th>Category Code</th>
                         <th>Category Name</th>
-                        <th>Client</th>
                         <th>Status</th>
                     </tr>
                     </thead>
@@ -103,7 +101,6 @@ $(document).ready(function(){
                     feedback="${item.categoryName}">
                         <td>${item.categoryCode}</td>
                         <td>${item.categoryName}</td>
-                        <td>${item.clientName}</td>
                         <td class="text-center">${status}</td>
                     </tr>`;
                 })
@@ -201,19 +198,6 @@ $(document).ready(function(){
                             value="${categoryShortcut}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_categoryShortcut"></div>
-                    </div>
-                </div>
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                    <div class="form-group">
-                        <label>Client <span class="text-danger font-weight-bold">*</span></label>
-                        <select 
-                            class="form-control select2 validate" 
-                            id="input_companyName" 
-                            name="companyName"
-                            autocomplete="off"
-                            required>
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-input_companyName"></div>
                     </div>
                 </div>
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
