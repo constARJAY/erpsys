@@ -420,8 +420,11 @@ $(document).ready(function() {
 
 	$(document).on("change", "[name=vehicleDateToUse]", function(){
 		let thisTR  		= $(this).closest("tr");
-		let vehicleManhours = thisTR.find("[name=vehicleManhours]");
 		
+		let vehicleManhours = thisTR.find("[name=vehicleManhours]");
+		let vehicleValue 		= vehicleManhours.val().replaceAll(",","") || vehicleManhours.val();
+		let invalidFeedback = vehicleManhours.next();
+
 		let date 		= $(this).val().split(" - ");
 		let startDate 	= new Date(moment(date[0]).format("YYYY-MM-DD"));
 		let endDate		= new Date(moment(date[1]).format("YYYY-MM-DD"));
@@ -429,9 +432,20 @@ $(document).ready(function() {
 		let oneDay 		= 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
 		let diffDays 	= (Math.round(Math.abs((startDate - endDate) / oneDay)) || 1) + plusOne;
 		let maxValue 	= diffDays * 24;
-		
+
 		vehicleManhours.prop("min", "0.01");
 		vehicleManhours.prop("max", maxValue);
+		invalidFeedback.text(`Please input quantity less than ${formatAmount(maxValue)}`);
+		// Please input quantity less than 24.00
+		// vehicleManhours.removeClass("is-invalid");
+		// invalidFeedback.removeClass("d-block");
+
+		if(parseFloat(maxValue) > parseFloat(vehicleValue) ){
+			vehicleManhours.removeClass("is-invalid");
+			invalidFeedback.removeClass("d-block");
+		}
+
+		
 	});
 
 
@@ -1679,12 +1693,13 @@ $(document).ready(function() {
 			</div>
 		</div>` : "";
 
+		let minimumDate		= !readOnly && dateNeeded ? moment(dateNeeded).add("days", 7) : moment().add("days", 7);
 		let dateNeededArray = !readOnly ? {
 			singleDatePicker: true,
 			showDropdowns: true,
 			autoApply: true,
-			minDate: moment().add("days", 7),
-			startDate: moment().add("days", 7),
+			minDate: minimumDate,
+			startDate: minimumDate,
 			locale: {
 				format: 'MMMM DD, YYYY'
 			}
@@ -1948,7 +1963,11 @@ $(document).ready(function() {
 				$('#btnBack').attr("status", "2");
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
-			$(`#dateNeeded`).daterangepicker(dateNeededArray);
+
+			if(!readOnly){
+				$(`#dateNeeded`).daterangepicker(dateNeededArray);
+			}
+			
 			// $("[name=vehicleDateToUse]").change();
 			// ----- END NOT ALLOWED FOR UPDATE -----
 
@@ -2233,8 +2252,8 @@ $(document).ready(function() {
 											<th>Designation Code</th>
 											<th>Designation Name</th>
 											<th>Quantity</th>
-											<th>Total Manhours</th>
-											<th>Total Overtime Hour</th>
+											<th>Total Regular Hours</th>
+											<th>Total Overtime Hours</th>
 										</tr>
 									</thead>
 									<tbody class="table-body-personnel-request-${invCategory.toLowerCase()}">
@@ -2738,7 +2757,7 @@ $(document).ready(function() {
 										name = "vehicleDateToUse"
 										id="vehicleDateToUse0" 
 										value = "${vehicleStartDate ? moment(vehicleStartDate).format("MMMM DD, YYYY")+" - "+moment(vehicleEndDate).format("MMMM DD, YYYY") : moment().format("MMMM DD, YYYY")+" - "+moment().format("MMMM DD, YYYY")}"
-										${readOnly ? "disabled" : ``} required>` : `<div style="font-size:90%;">${moment(vehicleStartDate).format("MMMM DD, YYYY")+" - "+moment(vehicleEndDate).format("MMMM DD, YYYY")}</div>` }
+										${readOnly ? "disabled" : ``} required>` : `<div style="font-size:90%;" class="text-center">${moment(vehicleStartDate).format("MMMM DD, YYYY")+" - "+moment(vehicleEndDate).format("MMMM DD, YYYY")}</div>` }
 										<div class="invalid-feedback d-block" id="invalid-vehicleDateToUse0"></div>
 									</div>
 								</td>

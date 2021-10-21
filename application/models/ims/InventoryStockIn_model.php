@@ -6,38 +6,38 @@ class InventoryStockIn_model extends CI_Model {
     public function __construct()
     {
         parent::__construct();
+     
         $this->load->library('phpqrcode/qrlib');
     }
     public function getStockIn()
     {
-        $query = $this->db->query("SELECT '1' AS module, iri.returnItemID as ID, '' AS purchaseID, returnItemCode as referenceCode, 
-                                CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,SUM(quantity) AS quantity,
-                                DATE_FORMAT(iri.createdAt,'%M% %d%, %Y') AS daterequest 
-                                FROM ims_return_item_tbl AS iri
-                                LEFT JOIN ims_inventory_request_details_tbl AS ird ON iri.returnItemID = ird.returnItemID
-                                LEFT JOIN hris_employee_list_tbl AS empl ON iri.employeeID = empl.employeeID
-                                WHERE returnItemStatus = 2
-                                GROUP BY iri.returnItemID
-                                UNION ALL
-                                SELECT '2' AS module, muf.materialUsageID AS ID, '' AS purchaseID, materialUsageCode as referenceCode, 
-                                CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname, SUM(unused) AS quantity,
-                                DATE_FORMAT(muf.createdAt,'%M% %d%, %Y') AS daterequest  
-                                FROM ims_material_usage_tbl AS muf
-                                LEFT JOIN ims_inventory_request_details_tbl AS ird ON ird.materialUsageID = muf.materialUsageID
-                                LEFT JOIN hris_employee_list_tbl AS empl ON muf.employeeID = empl.employeeID
-                                WHERE materialUsageStatus = 2
-                                GROUP BY muf.materialUsageID");
-		return $query->result();
 
     }
 
     public function savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode, $uom)
     {
-       
+       // $this->load->helper('file');
        // $recordID       = implode(",", $recordID);
-       $SERVERFILEPATH = $_SERVER['DOCUMENT_ROOT'].'/erpsys/assets/upload-files/images/';
-       $folder = $SERVERFILEPATH;
-        if($recordID =='0'){
+       //$SERVERFILEPATH = "".site_url().'/erpsys/assets/upload-files/images/';
+       //$SERVERFILEPATH = base_url().'/erpsys/assets/upload-files/images/';
+       //$SERVERFILEPATH = base_url() . '/erpsys/assets/upload-files/images/';
+
+
+       //$SERVERFILEPATH = fopen("./erpsys/assets/upload-files/images/", "r");
+    //    print_r( $SERVERFILEPATH);
+    //  exit;
+      //plugins_url( '/assets/upload-files/images/', __FILE__ );
+      //$SERVERFILEPATH = $_SERVER['DOCUMENT_ROOT'].'/erpsys/assets/upload-files/images/';
+      $folderDir = "assets/upload-files/images/";
+      if (!is_dir($folderDir)) {
+          
+          mkdir($folderDir);
+      }
+     // $targetDir = $folderDir.$filename;
+      //$SERVERFILEPATH = '.../erpsys/assets/upload-files/images/';
+       $folder = $folderDir;
+       
+        if($recordID[0] =='0'){
             //$SERVERFILEPATH = $_SERVER['DOCUMENT_ROOT'].'/erpsys/images/';
             $record  = array();
            // $insert_id = "";
@@ -47,28 +47,31 @@ class InventoryStockIn_model extends CI_Model {
                 for($count = 0; $count<count($barcode); $count++)
                 {
                
-                 $record[$count] = array
+                 $record[] = array
                  (
-                            'ReturnItemID'		        =>$ReturnItemID[$count],
-                            'MaterialUsageID'		    =>$MaterialUsageID[$count],
-                            'InventoryReceivingID'		 =>$InventoryReceivingID[$count],
-                            'barcode'		            =>$barcode[$count],
-                            'itemID'		            =>$itemID[$count],
-                            'itemCode'		            =>$itemCode,
-                            'itemName'		            =>$itemName[$count],
-                            'brand'                     =>$brand[$count],
-                            'inventoryStorageID'        =>$inventoryStorageID[$count],
-                            'classificationName'        =>$classificationName[$count],
-                            'uom'                       =>$uom,
-                            'categoryName'              =>$categoryName[$count],
-                            'inventoryStorageCode'      =>$inventoryStorageCode[$count],
-                            'inventoryStorageOfficeName'=>$inventoryStorageOfficeName[$count],
-                            "manufactureDate"           =>$manufactureDate[$count],
-                            "expirationdate"            =>$expirationdate[$count],
-                            "quantity"                  =>$quantity[$count],
-                            "quantityForStockin"        =>$quantity[$count],
-                            "serialNumber"              =>$serialnumber[$count],
-                            "inventoryCode"             =>$inventoryCode
+                            
+                    
+                        'InventoryReceivingID'		=>$InventoryReceivingID[$count],
+                        'MaterialUsageID'		    =>$MaterialUsageID[$count],
+                        'ReturnItemID'		        =>$ReturnItemID[$count],
+                        'itemCode'		            =>$itemCode,
+                        'itemID'		            =>$itemID[$count],
+                        'itemName'		            =>$itemName[$count],
+                        'barcode'		            =>$barcode[$count],
+                        'brand'                     =>$brand[$count],
+                        'categoryName'              =>$categoryName[$count],
+                        'classificationName'        =>$classificationName[$count],
+                        'expirationdate'            =>$expirationdate[$count],
+                        'inventoryCode'             =>$inventoryCode[$count],
+                        'inventoryStorageCode'      =>$inventoryStorageCode[$count],
+                        'inventoryStorageID'        =>$inventoryStorageID[$count],
+                        'inventoryStorageOfficeName'=>$inventoryStorageOfficeName[$count],
+                        'manufactureDate'           =>$manufactureDate[$count],
+                        'quantity'                  =>$quantity[$count],
+                        'quantityForStockin'        =>$quantity[$count],
+                        'serialNumber'              =>$serialnumber[$count],
+                        'uom'                       =>$uom
+                              
                         
                 );
                 
@@ -80,6 +83,10 @@ class InventoryStockIn_model extends CI_Model {
             // exit;
 
                 } 
+                // echo "<pr>";
+                // print_r($record);
+                // echo "</pr>";
+                // exit;
                 
                 $this->db->insert_batch('ims_stock_in_item_tbl', $record);
 
@@ -94,7 +101,7 @@ class InventoryStockIn_model extends CI_Model {
                     $file_name = $folder.$barcode1;
                     QRcode::png($barcode,$file_name);
                     }
-                    "<center><img src=".base_url().'/assets/upload-files/images/'.$file_name."></center";
+                    "<center><img src=".base_url().'/assets/upload-files/images/'.$file_name."></center>";
                     }
                 }
               
@@ -113,26 +120,27 @@ class InventoryStockIn_model extends CI_Model {
                 
                  $record[$count] = array
                  (
-                            'ReturnItemID'		        =>$ReturnItemID[$count],
+                            'InventoryReceivingID'		=>$InventoryReceivingID[$count],
                             'MaterialUsageID'		    =>$MaterialUsageID[$count],
-                            'InventoryReceivingID'		 =>$InventoryReceivingID[$count],
-                            'barcode'		            =>$barcode[$count],
-                            'assetID'		            =>$itemID[$count],
+                            'ReturnItemID'		        =>$ReturnItemID[$count],
                             'assetCode'		            =>$itemCode,
+                            'assetID'		            =>$itemID[$count],
                             'assetName'		            =>$itemName[$count],
+                            'barcode'		            =>$barcode[$count],
                             'brand'                     =>$brand[$count],
-                            'inventoryStorageID'        =>$inventoryStorageID[$count],
-                            'classificationName'        =>$classificationName[$count],
-                            'uom'                       =>$uom,
                             'categoryName'              =>$categoryName[$count],
+                            'classificationName'        =>$classificationName[$count],
+                            'expirationdate'            =>$expirationdate[$count],
+                            'inventoryCode'             =>$inventoryCode[$count],
                             'inventoryStorageCode'      =>$inventoryStorageCode[$count],
+                            'inventoryStorageID'        =>$inventoryStorageID[$count],
                             'inventoryStorageOfficeName'=>$inventoryStorageOfficeName[$count],
-                            "manufactureDate"           =>$manufactureDate[$count],
-                            "expirationdate"            =>$expirationdate[$count],
-                            "quantity"                  =>$quantity[$count],
-                            "quantityForStockin"        =>$quantity[$count],
-                            "serialNumber"              =>$serialnumber[$count],
-                            "inventoryCode"             =>$inventoryCode
+                            'manufactureDate'           =>$manufactureDate[$count],
+                            'quantity'                  =>$quantity[$count],
+                            'quantityForStockin'        =>$quantity[$count],
+                            'serialNumber'              =>$serialnumber[$count],
+                            'uom'                       =>$uom
+                           
 
                         
                 );
@@ -140,6 +148,7 @@ class InventoryStockIn_model extends CI_Model {
                 // QRcode::png($barcode);
                 // "<center><img src=".`${base_url}`.$barcode."></center";
                 } 
+             
                 $this->db->insert_batch('ims_stock_in_assets_tbl', $record);
                
 

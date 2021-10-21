@@ -2305,8 +2305,14 @@ $(document).ready(function() {
 					employeeID,
 				};
 			}
+			formButtonHTML(this, true);
 
-			saveInventoryValidation(data, "submit", notificationData, pageContent);
+			setTimeout(() => {
+					saveInventoryValidation(data, "submit", notificationData, pageContent);
+					formButtonHTML(this, false);
+			}, 500);
+
+		
 		
 	});
 	// ----- END SUBMIT DOCUMENT -----

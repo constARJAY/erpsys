@@ -999,11 +999,17 @@ $(document).ready(function() {
 		let oneDay 		= 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
 		let diffDays 	= (Math.round(Math.abs((startDate - endDate) / oneDay)) || 1) + plusOne;
 		let maxValue 	= diffDays * 24;
+		let allotedHour = $(this).closest(`tr`).find("[name=allottedHours]").val().replaceAll(",", "") || $(this).closest(`tr`).find("[name=allottedHours]").val();
 		$(this).closest(`tr`).find("[name=allottedHours]").removeClass("is-invalid");
 		$(this).closest(`tr`).find("[name=allottedHours]").next().text("");
 		$(this).closest(`tr`).find("[name=allottedHours]").prop("max", maxValue);
 		$(this).closest(`tr`).find("[name=allottedHours]").prop("min", "1");
 
+		if( parseFloat(allotedHour) > parseFloat(maxValue) ){
+			$(this).closest(`tr`).find("[name=allottedHours]").addClass("is-invalid");
+			$(this).closest(`tr`).find("[name=allottedHours]").next().addClass("d-block");
+			$(this).closest(`tr`).find("[name=allottedHours]").next().text(`Please input hour less than ${formatAmount(maxValue)}`);
+		}
 
 		var dates = [];
 		$(".task-list-sub-row").each(function(){
@@ -1522,7 +1528,7 @@ $(document).ready(function() {
 							</table>
 							<div class="w-100 text-left my-2" id="taskListButtons">
 							${!readOnly ? 
-								`<button class="btn btn-primary btnSubAddRow" type="button" style="margin-left: 30px;" id="btnSubAddRow"><i class="fas fa-plus"></i></button>` : ``}
+								`<button class="btn btn-primary btnSubAddRow" type="button" id="btnSubAddRow"><i class="fas fa-plus"></i></button>` : ``}
 							</div>
 						</td>
 					</tr>`;

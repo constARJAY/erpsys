@@ -483,8 +483,99 @@ $(document).ready(function() {
         }
     // END DISPLAY ITEM SERIAL NUMBER//
 
+    // GENERATE ADD NEW ROW IN TABLE //
+         function generateAddNewRow(assetID=0,materialRequestID=0){
+            let tableStockContent = '';
+
+            const assetSerialContent = displayAssetSerialNumber();
+            const withdrawalAssetRemaining = getTableData(`ims_material_withdrawal_asset_tbl`,` ((SELECT DISTINCT(requestQuantity) FROM ims_request_assets_tbl WHERE assetID = ${assetID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` assetID = ${assetID} AND materialRequestID = ${materialRequestID}`);
+            const getAvailableStocks = getTableData(`ims_stock_in_assets_tbl AS astStock 
+            JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.assetID
+            `,
+            `CASE
+            WHEN IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0) <0 THEN 0
+            ELSE IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)
+            END AS availableStocks`,
+            ` (astStock.stockOutDate IS NUll  OR astStock.stockOutDate  = '0000-00-00')
+            AND (astStock.stockInDate IS NOT NULL OR astStock.stockInDate != '0000-00-00')
+            AND astStock.assetID = ${assetID}`);
+                tableStockContent +=  `<tr class="assetRecords-list-row" id="tableRow0" modulelistid assetID="${assetID}">
+                                           
+                                            <td>
+                                                <div class="barcode">
+                                                    <input class="form-control text-center validate"
+                                                id="barcodeAsse${assetID}0"
+                                                name="barcodeAsset"
+                                                min="36"
+                                                max="64"
+                                                minlength="36"
+                                                maxlength="64"
+                                                index="0"
+                                                assetID="${assetID}"
+                                                withdrawalAssetID="0"
+                                                materialRequestID="${materialRequestID}"
+                                                
+                                                >
+                                                    <div class="invalid-feedback d-block" id="invalid-barcodeAsset0"></div>
+                                                </div>
+                                            </td>
+                                            <td class="table-data-serial-number" index="0">
+                                                    ${assetSerialContent[0]}
+                                                    ${assetSerialContent[1]}
+                                                </td>
+                                            <td>
+                                                <div class="borrowed">
+                                                    <input class="form-control input-quantity text-center"
+                                                value="0.00"
+                                                id="borrowed0"
+                                                name="borrowed"
+                                                min="0.00"
+                                                max="9999999999"
+                                                minlength="1"
+                                                maxlength="10"
+                                                index="0"
+                                                assetID="${assetID}"
+                                                withdrawalAssetID="0"
+                                                availableStocksValue="${getAvailableStocks.length > 0 ?formatAmount(getAvailableStocks[0].availableStocks): "0.00"}"
+                                                >
+                                                    <div class="invalid-feedback d-block" id="invalid-borrowed0"></div>
+                                                </div>
+                                            </td>
+                                                <td>
+                                                    <div class="availablestocks">
+                                                        <span  name="availableStocks" assetID="${assetID}" index="0">${getAvailableStocks.length > 0 ?formatAmount(getAvailableStocks[0].availableStocks): "0.00"}</span>
+                                                    </div>
+                                            </td>
+                                            <td>
+                                                    <div class="received">
+                                                        <span>-</span>
+                                                    </div>
+                                            </td>
+                                            <td>
+                                                    <div class="remaining">
+                                                        <span  name="remaining" assetID="${assetID}" index="0">${withdrawalAssetRemaining.length > 0 ? formatAmount(withdrawalAssetRemaining[0].remainingValue) : "0.00"}</span>
+                                                    </div>
+                                            </td>
+                                            <td>
+                                                    <div class="borroweddate" >
+                                                        <span name="borrowedDate" assetID="${assetID}" index="0">-</span>
+                                                    </div>
+                                            </td>
+                                            <td>
+                                                    <div class="datereceived">
+                                                        <span>-</span>
+                                                    </div>
+                                            </td>
+                                            <td>
+                                                <textarea rows="2" style="resize: none" class="form-control" index="0" disabled></textarea>
+                                            </td>
+                                        </tr>`;
+            return tableStockContent;
+    }
+    // GENERATE ADD NEW ROW IN TABLE //
+
     //  ITEM RECORDS LIST //
-    const getAssetContent = (milestoneTask = [],assetID = null, materialRequestID =null) => {
+    const getAssetContent = (milestoneTask = [],assetID = null, materialRequestID =null,withdrawalAssetStatus = 0) => {
         let tableStockContent ="";
 
      
@@ -512,9 +603,7 @@ $(document).ready(function() {
            
 
             tableStockContent += `<tr class="assetRecords-list-row" id="tableRow${index}" modulelistid assetID="${assetID}">
-                                        <td class="text-center">
-                                           
-                                        </td>
+                                        
                                         <td>
                                             <div class="barcode">
                                                 <input class="form-control text-center"
@@ -566,94 +655,10 @@ $(document).ready(function() {
                                     </tr>`;
    
             })
+
+            withdrawalAssetStatus == 0 || withdrawalAssetStatus == null ? tableStockContent += generateAddNewRow(assetID,materialRequestID) : "";
         }else{
-            const assetSerialContent = displayAssetSerialNumber();
-            const withdrawalAssetRemaining = getTableData(`ims_material_withdrawal_asset_tbl`,` ((SELECT DISTINCT(requestQuantity) FROM ims_request_assets_tbl WHERE assetID = ${assetID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` assetID = ${assetID} AND materialRequestID = ${materialRequestID}`);
-            const getAvailableStocks = getTableData(`ims_stock_in_assets_tbl AS astStock 
-			JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.assetID
-			`,
-            `CASE
-            WHEN IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0) <0 THEN 0
-            ELSE IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)
-            END AS availableStocks`,
-            ` (astStock.stockOutDate IS NUll  OR astStock.stockOutDate  = '0000-00-00')
-			AND (astStock.stockInDate IS NOT NULL OR astStock.stockInDate != '0000-00-00')
-			AND astStock.assetID = ${assetID}`);
-               tableStockContent +=  `<tr class="assetRecords-list-row" id="tableRow0" modulelistid assetID="${assetID}">
-                                            <td class="text-center">
-                                                <div class="action">
-                                                    <input type="checkbox" class="checkboxassetrow" id="checkboxassetrow0" index ="0" assetID = "${assetID}">
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="barcode">
-                                                    <input class="form-control text-center validate"
-                                                id="barcodeAsset0"
-                                                name="barcodeAsset"
-                                                min="36"
-                                                max="64"
-                                                minlength="36"
-                                                maxlength="64"
-                                                index="0"
-                                                assetID="${assetID}"
-                                                withdrawalAssetID="0"
-                                                materialRequestID="${materialRequestID}"
-                                                
-                                                >
-                                                    <div class="invalid-feedback d-block" id="invalid-barcodeAsset0"></div>
-                                                </div>
-                                            </td>
-                                            <td class="table-data-serial-number" index="0">
-                                                    ${assetSerialContent[0]}
-                                                    ${assetSerialContent[1]}
-                                                </td>
-                                            <td>
-                                                <div class="borrowed">
-                                                    <input class="form-control input-quantity text-center"
-                                                value="0.00"
-                                                id="borrowed0"
-                                                name="borrowed"
-                                                min="0.00"
-                                                max="9999999999"
-                                                minlength="1"
-                                                maxlength="10"
-                                                index="0"
-                                                assetID="${assetID}"
-                                                withdrawalAssetID="0"
-                                                availableStocksValue="${getAvailableStocks.length > 0 ?formatAmount(getAvailableStocks[0].availableStocks): "0.00"}"
-                                                >
-                                                    <div class="invalid-feedback d-block" id="invalid-borrowed0"></div>
-                                                </div>
-                                            </td>
-                                             <td>
-                                                    <div class="availablestocks">
-                                                        <span  name="availableStocks" assetID="${assetID}" index="0">${getAvailableStocks.length > 0 ?formatAmount(getAvailableStocks[0].availableStocks): "0.00"}</span>
-                                                    </div>
-                                            </td>
-                                            <td>
-                                                    <div class="received">
-                                                        <span>-</span>
-                                                    </div>
-                                            </td>
-                                            <td>
-                                                    <div class="remaining">
-                                                        <span  name="remaining" assetID="${assetID}" index="0">${withdrawalAssetRemaining.length > 0 ? formatAmount(withdrawalAssetRemaining[0].remainingValue) : "0.00"}</span>
-                                                    </div>
-                                            </td>
-                                            <td>
-                                                    <div class="borroweddate" >
-                                                        <span name="borrowedDate" assetID="${assetID}" index="0">-</span>
-                                                    </div>
-                                            </td>
-                                            <td>
-                                                    <div class="datereceived">
-                                                        <span>-</span>
-                                                    </div>
-                                            </td>
-                                            <td>
-                                                <textarea rows="2" style="resize: none" class="form-control" index="0" disabled></textarea>
-                                            </td>
-                                        </tr>`;
+            tableStockContent += generateAddNewRow(assetID,materialRequestID);
               
         }
         
@@ -676,8 +681,8 @@ $(document).ready(function() {
             // console.log(task.milestoneTask)
 			
             const {assetID,assetCode,assetName,assetBrandName, assetClassification,assetCategory,assetUom,requestQuantity,materialRequestID,withdrawalAssetStatus = 0, milestoneTask = [] } = task;
-            const assetContent = getAssetContent(milestoneTask,assetID,materialRequestID);
             const assetStatusRecord = (withdrawalAssetStatus ==  null || withdrawalAssetStatus ==  0 )   ? `<span class="badge badge-warning w-100">Pending</span>` : `<span class="badge badge-success w-100">Completed</span>` ;
+            const assetContent = getAssetContent(milestoneTask,assetID,materialRequestID,withdrawalAssetStatus);
 
             taskHTML += `
             <tr class="assetTableRow" assetID="${assetID}">   
@@ -777,11 +782,6 @@ $(document).ready(function() {
                         <table class="table" id="pcrDetails">
                             <thead style="line-height:8px; white-space:nowrap;">
                                 <tr class="bg-dark">
-                                    <th class="text-center" style="width:50px">
-                                        <div class="action">
-                                            <input type="checkbox" class="checkboxall" index ="${index}" assetID = "${assetID}" >
-                                        </div>
-                                    </th>
                                     <th class="text-white">Barcode</th>
                                     <th class="text-white">Serial No.</th>
                                     <th class="text-white">Borrowed Quantity</th>
@@ -797,13 +797,14 @@ $(document).ready(function() {
                             <tbody class="assetProjectTableBody${index+""+assetID}" >
                                 ${assetContent[0]}
                             </tbody>
-                        </table>
-                        ${withdrawalAssetStatus == 1? '' :
-                            `<div class="w-100 text-left my-2">
-                                    <button class="btn btn-primary btnAddRow"  type="button" id="btnAddRow" index="${index}" assetID="${assetID}" materialRequestID="${materialRequestID}"><i class="fas fa-plus-circle"></i> Add Row</button>
-                                    <button class="btn btn-danger btnDeleteRow"  type="button" id="btnDeleteRow" index="${index}" assetID="${assetID}" materialRequestID="${materialRequestID}" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-                            </div>
-                        `}
+                        </table>`;
+                        // ${withdrawalAssetStatus == 1? '' :
+                        //     `<div class="w-100 text-left my-2">
+                        //             <button class="btn btn-primary btnAddRow"  type="button" id="btnAddRow" index="${index}" assetID="${assetID}" materialRequestID="${materialRequestID}"><i class="fas fa-plus-circle"></i> Add Row</button>
+                        //             <button class="btn btn-danger btnDeleteRow"  type="button" id="btnDeleteRow" index="${index}" assetID="${assetID}" materialRequestID="${materialRequestID}" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+                        //     </div>
+                        // `}
+    taskHTML += `
 					</div>
 				</td>
 			
@@ -913,8 +914,10 @@ $(document).ready(function() {
 			$("td .action .checkboxassetrow", this).attr("id", `checkboxassetrow${i}`);
 
             // INPUTS ID's
-
-            $("td [name=barcodeAsset]", this).attr("id", `barcodeAsset${i}`);
+            let assetID = 0;
+            assetID =  $("td [name=barcodeAsset]", this).attr("assetID");
+            
+            $("td [name=barcodeAsset]", this).attr("id", `barcodeAsset${assetID}${i}`);
 			$("td [name=barcodeAsset]", this).attr("index", i);
 
 			$("td [name=borrowed]", this).attr("id", `borrowed${i}`);
@@ -1004,13 +1007,13 @@ $(document).ready(function() {
 
 
      // ----- KEYUP BARCODE -----
-     $(document).on("keyup", `[name=barcodeAsset]`, function() {
-        const assetID        = $(this).attr("assetID");
-        const index         = $(this).attr("index");
-        const id            = $(this).attr("id");
-        const withdrawalAssetID    = $(this).attr("withdrawalAssetID");
-        const valueLength = $(this).val().length +1;
-        const value = $(this).val();
+     function checkBarcode(parent){
+        const assetID        = parent.attr("assetID");
+        const index         = parent.attr("index");
+        const id            = parent.attr("id");
+        const withdrawalAssetID    = parent.attr("withdrawalAssetID");
+        const valueLength = parent.val().length +1;
+        const value = parent.val();
         const characterLength = 37;
         let warningCondition = false;
         let isInvalid        = false;
@@ -1023,12 +1026,12 @@ $(document).ready(function() {
             AND assetID = ${assetID} AND barcode = '${value}'`);
             if(validatebarcode.length<=0){
                $("#"+id).addClass("is-invalid").removeClass("validate")
-               $("#invalid-barcodeAssetID"+index).text("Barcode not exist!");
+               $("#invalid-barcodeAsset"+index).text("Barcode not exist!");
                 warningCondition = true;
                 isInvalid        = true;
             }else{
                 $("#"+id).removeClass("is-invalid").addClass("validate");
-                $("#invalid-barcodeAssetID"+index).text("")
+                $("#invalid-barcodeAsset"+index).text("")
             }
             
         }
@@ -1036,38 +1039,39 @@ $(document).ready(function() {
             warningCondition = true;
             isInvalid = true;
             $("#"+id).addClass("is-invalid").addClass("validate");
-            $("#invalid-barcodeAssetID"+index).text("Please enter at least "+characterLength+" characters.");
+            $("#invalid-barcodeAsset"+index).text("Please enter at least "+characterLength+" characters.");
         }
-
-      
+        
         if(value == 0){
-            $(this).closest("tr").find("span").eq(3).text("-");
+            parent.closest("tr").find("span").eq(3).text("-");
 
 
         }else{
-            $(this).closest("tr").find("span").eq(3).text(moment().format("MMMM DD, YYYY"));
+            parent.closest("tr").find("span").eq(3).text(moment().format("MMMM DD, YYYY"));
 
         }
         
         if(warningCondition && isInvalid){
             setTimeout(() => {  
                 if(valueLength >= characterLength){
-                    $("#"+id).addClass("is-invalid").removeClass("validate")
-                    $("#invalid-barcodeAssetID"+index).text("Barcode not exist!");
+                    parent.addClass("is-invalid").removeClass("validate")
+                    $("#invalid-barcodeAsset"+index).text("Barcode not exist!");
                 }else{
-                    $("#"+id).addClass("is-invalid").addClass("validate");
-                    $("#invalid-barcodeAssetID"+index).text("Please enter at least "+characterLength+" characters.");
+                    parent.addClass("is-invalid").addClass("validate");
+                    $("#invalid-barcodeAsset"+index).text("Please enter at least "+characterLength+" characters.");
                 }     
             }, 1000);    
         }
-        
-
-
-    });
+     }
 
     $(document).on("change",`[name="barcodeAsset"],[name="borrowed"]`,function(){
     	var getBarcode = $(this).closest("tr").find(`[name="barcodeAsset"]`).val();
     	var getQuantity = +$(this).closest("tr").find(`[name="borrowed"]`).val();
+        var getID = $(this).attr("name");
+        $parent = $(this);
+
+        var getBarcodeIsInValid = $(this).closest("tr").find(`[name="barcodeAsset"]`).hasClass("is-invalid");
+    	var getQuantityIsInValid = +$(this).closest("tr").find(`[name="borrowed"]`).hasClass("is-invalid");
 
         if(getBarcode == "" && getQuantity != 0){
         	$(this).closest("tr").find(`[name="barcodeAsset"]`).addClass("is-invalid");
@@ -1085,7 +1089,8 @@ $(document).ready(function() {
         	$(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
         }
 
-        if(getBarcode != "" && getQuantity != 0 ){
+        if(getBarcode != "" &&  !getBarcodeIsInValid && getQuantity != 0 && !getQuantityIsInValid ){
+
             $(this).closest("tr").find(`[name="barcodeAsset"]`).removeClass("is-invalid").removeClass("is-valid");
         	$(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
 
@@ -1099,7 +1104,10 @@ $(document).ready(function() {
 				$(this).closest("tr").find(`[name="borrowed"]`).removeClass("is-invalid").removeClass("is-valid");
 				$(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("");
 			}
-        }    
+        } 
+        if(getID == "barcodeAsset"){
+            checkBarcode($parent);
+        }   
     })
 
     // ----- END KEYUP BARCODE -----  
@@ -1634,7 +1642,7 @@ $(document).ready(function() {
             if( !validateBarcode && !serialNumberCondition && !validateQuantity){
                 const validate     = validateForm("pcrDetails");
                 if(validate){
-                    formButtonHTML(this);
+                    formButtonHTML(this,true);
 
                 setTimeout(() => {
                     // validateInputs().then(res => {

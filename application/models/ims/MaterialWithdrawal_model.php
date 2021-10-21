@@ -433,8 +433,12 @@ class MaterialWithdrawal_model extends CI_Model {
              WHERE materialWithdrawalID = $materialWithdrawalID");
              // END UPDATE THE EQUIPMENT BORROWING DOCUMENT STATUS//
 
-            $this->db->query("CALL proc_get_material_withdrawal_approve($materialWithdrawalID)");
-            $this->db->query("CALL proc_get_equipment_borrowing_approve($materialWithdrawalID)");
+            $temp =  $this->db-query("SELECT materialWithdrawalID FROM ims_material_usage_tbl WHERE materialWithdrawalID =$materialWithdrawalID");
+
+            if($temp->num_rows() == 0){
+                $this->db->query("CALL proc_get_material_withdrawal_approve($materialWithdrawalID)");
+            }
+                $this->db->query("CALL proc_get_equipment_borrowing_approve($materialWithdrawalID)");
             // Created By: Sir Wilson September 29,2021 11:02AM
 
             // echo $query;

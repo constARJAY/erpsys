@@ -759,7 +759,7 @@ $(document).ready(function() {
                         ${clientDescription}
                     </td>
 					<td>
-						${employeeFullname(getCurrentApprover(approversID, approversDate, materialRequestStatus, true))}
+						${approversID ? employeeFullname(getCurrentApprover(approversID, approversDate, materialRequestStatus, true)) : "-"}
 					</td>
 					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
@@ -1242,6 +1242,7 @@ $(document).ready(function() {
 			costEstimateID,
 			costEstimateCode,
 			billMaterialID,
+			dateNeeded,
 			billMaterialCode,
 			employeeID,
 			timelineBuilderID,
@@ -1302,13 +1303,14 @@ $(document).ready(function() {
 				</div>
 			</div>
 		</div>` : "";
+		let minimumDate		= !readOnly && dateNeeded ? moment(dateNeeded).add("days", 7) : moment().add("days", 7);
 
 		let dateNeededArray = !readOnly ? {
 											singleDatePicker: true,
 											showDropdowns: true,
 											autoApply: true,
-											minDate: moment().add("days", 7),
-											startDate: moment().add("days", 7),
+											minDate: minimumDate,
+											startDate: minimumDate,
 											locale: {
 												format: 'MMMM DD, YYYY'
 											}
@@ -1498,7 +1500,7 @@ $(document).ready(function() {
 						class = "form-control daterange text-left"
 						name = "dateNeeded"
 						id="dateNeeded"  
-						value = "${moment().format("MMMM DD, YYYY")}"
+						value = "${moment(dateNeeded).format("MMMM DD, YYYY")}"
 						${readOnly ? "disabled" : ``} 
 						${billMaterialID ? "disabled" : ``} 
 						required>
@@ -1548,7 +1550,13 @@ $(document).ready(function() {
 			initDataTables();
 			updateTableItems();
 			initAll();
-			$(`#dateNeeded`).daterangepicker(dateNeededArray);
+
+			if(!readOnly){
+				if(!costEstimateID){
+					$(`#dateNeeded`).daterangepicker(dateNeededArray);
+				}
+			}
+
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
 				$("#page_content").find(`input, select, textarea`).each(function() {

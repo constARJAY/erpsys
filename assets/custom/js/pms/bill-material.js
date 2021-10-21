@@ -371,7 +371,7 @@ $(document).ready(function() {
 											{ targets: 3,  width: 100 },
 											{ targets: 4,  width: 100 },
 											{ targets: 5,  width: 200 },
-											{ targets: 6,  width: 120 },
+											{ targets: 6,  width: 180 },
 											{ targets: 7,  width: 110 },
 											{ targets: 8,  width: 110 },
 									 	];
@@ -395,7 +395,7 @@ $(document).ready(function() {
 					}
 			let column =  	[
 								{ targets: 0,  width: 100 },
-								{ targets: 1,  width: 1000 },
+								{ targets: 1,  width: 900 },
 								{ targets: 2,  width: 200}
 							];
 			option["columnDefs"] = column;
@@ -1112,7 +1112,7 @@ $(document).ready(function() {
 		});
 	}
 	// ----- END UPDATE TABLE ITEMS -----
-	$(document).on("keypress", "[name=fuelRate]", function(){
+	$(document).on("keyup", "[name=fuelRate]", function(){
 		let thisTR 					= $(this).closest("tr");
 		let fuelRateText 			= $(this).val();
 		let replaceFuelRate			= fuelRateText.replaceAll(",","") || fuelRateText;
@@ -2020,8 +2020,8 @@ $(document).ready(function() {
 											<th>Designation Name</th>
 											<th>Quantity</th>
 											<th>Hourly Rate</th>
-											<th>Total Regular Hour</th>
-											<th>Total Overtime Hour</th>
+											<th>Total Regular Hours</th>
+											<th>Total Overtime Hours</th>
 											<th>Total Regular Rate</th>
 											<th>Total Overtime Rate</th>
 											<th>Total Cost</th>
@@ -2231,7 +2231,7 @@ $(document).ready(function() {
 											<th>Distance (in km)</th>
 											<th>Man Hours</th>
 											<th>Days to Use</th>
-											<th>Fuel Rate</th>
+											<th>Fuel Volume x Fuel Rate</th>
 											<th>Vehicle Rate</th>
 											<th>Total Cost</th>
 										</tr>
@@ -2565,6 +2565,7 @@ $(document).ready(function() {
 		// TABLE ROW
 		let html 	= ``;
 		let disabled 	 	= readOnly ? "disabled" : "";
+		let fuelNeeded 		= (parseFloat(vehicleDistance) / parseFloat(vehicleFuelConsumption));
 		totalCost = !billMaterialID ? parseFloat(vehicleManHours) * parseFloat(unitCost) : totalCost;
 		html = `	<tr class="table-row-request-vehicle" travelrequestid="${travelRequestID}">
 								
@@ -2576,7 +2577,7 @@ $(document).ready(function() {
 									<small class="vehicle-platenumber" style="color:#848482;">${vehiclePlateNumber || "-"}</small>
 								</td>
 								<td>
-									<div class="vehicle-consumption">8.00 km/L</div>
+									<div class="vehicle-consumption">${vehicleFuelConsumption} km/L</div>
 									<small class="vehicle-fueltype" style="color:#848482;">${vehicleFuelType || "-"}</small>
 								</td>
 								<td>
@@ -2599,19 +2600,24 @@ $(document).ready(function() {
 								</td>
 								
 								<td>
-									<div class="form-group mb-0 text-right vehicle-days-to-use">
-										<input 
-										type="text" 
-										class="form-control input-quantity input-fuel-rate text-right"
-										data-allowcharacters="[0-9]" 
-										max="999999999"
-										name="fuelRate" 
-										id="fuelRate${travelRequestID}"
-										autocomplete="off"
-										required
-										value="${vehicleLiters || "0.00"}" ${!readOnly ? "" : "disabled"}>
-										<div class="invalid-feedback d-block" id="invalid-fuelRate${travelRequestID}"></div>
-									</div>
+										<div class="d-flex justify-content align-items-center">
+											<span class="mx-1">${formatAmount(fuelNeeded)}</span>
+											<span class="mx-1"><strong>x</strong></span>
+												
+											<div class="form-group col-9 mb-0 text-right vehicle-days-to-use">
+												<input 
+												type="text" 
+												class="form-control input-quantity input-fuel-rate text-right"
+												data-allowcharacters="[0-9]" 
+												max="999999999"
+												name="fuelRate" 
+												id="fuelRate${travelRequestID}"
+												autocomplete="off"
+												required
+												value="${vehicleLiters || "0.00"}" ${!readOnly ? "" : "disabled"}>
+												<div class="invalid-feedback d-block" id="invalid-fuelRate${travelRequestID}"></div>
+											</div>
+										</div>
 								</td>
 								<td>
 									<div class="form-group mb-0 text-right vehicle-rate" vehiclerate="${unitCost}">

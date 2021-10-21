@@ -1493,7 +1493,7 @@
         const getAssetLength = $(`[name="withdrawalAssetID"]`).length;
 
         if(getItemLength >0 || getAssetLength > 0 ){
-            formButtonHTML(this);
+            formButtonHTML(this,true);
             setTimeout(() => {
                 // validateInputs().then(res => {
                 //     if (res) {

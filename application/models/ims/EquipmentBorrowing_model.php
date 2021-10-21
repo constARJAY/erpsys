@@ -178,6 +178,8 @@ class equipmentBorrowing_model extends CI_Model {
             $output["employeeFullname"] = $details->employeeFullname;
             $output["employeeDepartment"] = $details->employeeDepartment;
             $output["employeeDesignation"] = $details->employeeDesignation;
+            $output["dateNeeded"] = $details->dateNeeded;
+
 
             
 
@@ -394,7 +396,7 @@ class equipmentBorrowing_model extends CI_Model {
 
              // START UPDATE THE MATERIAL WITHDRAWAL DOCUMENT STATUS AND EMPLOYEE ID//
              $query = $this->db->query("UPDATE  ims_equipment_borrowing_tbl
-             SET employeeID = IF(employeeID = '', $sessionID, (SELECT employeeID FROM ims_equipment_borrowing_tbl WHERE equipmentBorrowingID = $equipmentBorrowingID ))
+             SET employeeID = IF(employeeID = 0, $sessionID, (SELECT employeeID FROM ims_equipment_borrowing_tbl WHERE equipmentBorrowingID = $equipmentBorrowingID ))
              WHERE equipmentBorrowingID = $equipmentBorrowingID");
              // END UPDATE THE MATERIAL WITHDRAWAL DOCUMENT STATUS AND EMPLOYEE ID//
 

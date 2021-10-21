@@ -259,6 +259,8 @@ class StockOut_model extends CI_Model {
             $output["employeeFullname"] = $details->employeeFullname;
             $output["employeeDepartment"] = $details->employeeDepartment;
             $output["employeeDesignation"] = $details->employeeDesignation;
+            $output["dateNeeded"] = $details->dateNeeded;
+
 
             
 
@@ -475,7 +477,7 @@ class StockOut_model extends CI_Model {
 
              // START UPDATE THE MATERIAL WITHDRAWAL DOCUMENT STATUS AND EMPLOYEE ID//
              $query = $this->db->query("UPDATE  ims_stock_out_tbl
-             SET employeeID = IF(employeeID = '', $sessionID, (SELECT employeeID FROM ims_stock_out_tbl WHERE stockOutID = $stockOutID ))
+             SET employeeID = IF(employeeID = 0, $sessionID, (SELECT employeeID FROM ims_stock_out_tbl WHERE stockOutID = $stockOutID ))
              WHERE stockOutID = $stockOutID");
              // END UPDATE THE MATERIAL WITHDRAWAL DOCUMENT STATUS AND EMPLOYEE ID//
 

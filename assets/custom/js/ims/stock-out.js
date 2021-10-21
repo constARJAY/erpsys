@@ -483,8 +483,101 @@ $(document).ready(function() {
         }
     // END DISPLAY ITEM SERIAL NUMBER//
 
+
+    // GENERATE ADD NEW ROW IN TABLE //
+    function generateAddNewRow(itemID=0,materialRequestID=0){
+       let tableStockContent = '';
+
+        const itemSerialContent = displayItemSerialNumber();
+        const withdrawalItemRemaining = getTableData(`ims_material_withdrawal_item_tbl`,` ((SELECT DISTINCT(requestQuantity) FROM ims_request_items_tbl WHERE itemID = ${itemID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` itemID = ${itemID} AND materialRequestID = ${materialRequestID}`);
+        const getAvailableStocks = getTableData(`ims_stock_in_item_tbl AS itmStock 
+        JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
+        `,
+        `CASE
+        WHEN IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0) <0 THEN 0
+        ELSE IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)
+        END AS availableStocks`,
+        ` (itmStock.stockOutDate IS NUll OR  itmStock.stockOutDate = '0000-00-00') 
+        AND (itmStock.stockInDate IS NOT NULL OR itmStock.stockInDate != '0000-00-00') 
+        AND itmStock.itemID = ${itemID}`);
+            tableStockContent +=  `<tr class="itemRecords-list-row" id="tableRow0" modulelistid itemID="${itemID}">
+                                       
+                                        <td>
+                                            <div class="barcode">
+                                                <input class="form-control text-center validate"
+                                            id="barcodeItem${itemID}0"
+                                            name="barcodeItem"
+                                            min="36"
+                                            max="64"
+                                            minlength="36"
+                                            maxlength="64"
+                                            index="0"
+                                            itemID="${itemID}"
+                                            withdrawalItemID="0"
+                                            materialRequestID="${materialRequestID}"
+                                            
+                                            >
+                                                <div class="invalid-feedback d-block" id="invalid-barcodeItem0"></div>
+                                            </div>
+                                        </td>
+                                        <td class="table-data-serial-number" index="0">
+                                                ${itemSerialContent[0]}
+                                                ${itemSerialContent[1]}
+                                            </td>
+                                        <td>
+                                            <div class="stockout">
+                                                <input class="form-control input-quantity text-center"
+                                            value="0.00"
+                                            id="StockOut0"
+                                            name="StockOut"
+                                            min="0.00"
+                                            max="9999999999"
+                                            minlength="1"
+                                            maxlength="10"
+                                            index="0"
+                                            itemID="${itemID}"
+                                            withdrawalItemID="0"
+                                            availableStocksValue="${getAvailableStocks.length > 0 ? formatAmount(getAvailableStocks[0].availableStocks) : "0.00"}"
+                                            >
+                                                <div class="invalid-feedback d-block" id="invalid-StockOut0"></div>
+                                            </div>
+                                        </td>
+                                            <td>
+                                                <div class="availablestocks">
+                                                    <span  name="availableStocks" itemID="${itemID}" index="0">${getAvailableStocks.length > 0 ? formatAmount(getAvailableStocks[0].availableStocks) : "0.00"}</span>
+                                                </div>
+                                        </td>
+                                        <td>
+                                                <div class="received">
+                                                    <span>-</span>
+                                                </div>
+                                        </td>
+                                        <td>
+                                                <div class="remaining">
+                                                    <span  name="remaining" itemID="${itemID}" index="0">${withdrawalItemRemaining.length > 0 ? formatAmount(withdrawalItemRemaining[0].remainingValue) : "0.00"}</span>
+                                                </div>
+                                        </td>
+                                        <td>
+                                                <div class="stockoutdate" >
+                                                    <span name="stockOutDate" itemID="${itemID}" index="0">-</span>
+                                                </div>
+                                        </td>
+                                        <td>
+                                                <div class="datereceived">
+                                                    <span>-</span>
+                                                </div>
+                                        </td>
+                                        <td>
+                                            <textarea rows="2" style="resize: none" class="form-control" index="0" disabled></textarea>
+                                        </td>
+                                    </tr>`;
+
+            return tableStockContent;
+    }
+    // GENERATE ADD NEW ROW IN TABLE //
+
     //  ITEM RECORDS LIST //
-    const getItemContent = (milestoneTask = [],itemID = null, materialRequestID =null) => {
+    const getItemContent = (milestoneTask = [],itemID = null, materialRequestID =null,withdrawalItemStatus = 0) => {
         let stockOutContent     = ""; 
         let receivedContent = ""; 
         let remainingContent = "";
@@ -517,9 +610,7 @@ $(document).ready(function() {
            
 
             tableStockContent += `<tr class="itemRecords-list-row" id="tableRow${index}" modulelistid itemID="${itemID}">
-                                        <td class="text-center">
-                                           
-                                        </td>
+                                        
                                         <td>
                                             <div class="barcode">
                                                 <input class="form-control text-center"
@@ -571,95 +662,10 @@ $(document).ready(function() {
                                     </tr>`;
    
             })
+
+            withdrawalItemStatus == 0 || withdrawalItemStatus == null ? tableStockContent += generateAddNewRow(itemID,materialRequestID) : "";
         }else{
-            const itemSerialContent = displayItemSerialNumber();
-            const withdrawalItemRemaining = getTableData(`ims_material_withdrawal_item_tbl`,` ((SELECT DISTINCT(requestQuantity) FROM ims_request_items_tbl WHERE itemID = ${itemID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` itemID = ${itemID} AND materialRequestID = ${materialRequestID}`);
-            const getAvailableStocks = getTableData(`ims_stock_in_item_tbl AS itmStock 
-			JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
-			`,
-            `CASE
-            WHEN IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0) <0 THEN 0
-            ELSE IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)
-            END AS availableStocks`,
-            ` (itmStock.stockOutDate IS NUll OR  itmStock.stockOutDate = '0000-00-00') 
-			AND (itmStock.stockInDate IS NOT NULL OR itmStock.stockInDate != '0000-00-00') 
-			AND itmStock.itemID = ${itemID}`);
-               tableStockContent +=  `<tr class="itemRecords-list-row" id="tableRow0" modulelistid itemID="${itemID}">
-                                            <td class="text-center">
-                                                <div class="action">
-                                                    <input type="checkbox" class="checkboxitemrow" id="checkboxitemrow0" index ="0" itemID = "${itemID}">
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="barcode">
-                                                    <input class="form-control text-center validate"
-                                                id="barcodeItem0"
-                                                name="barcodeItem"
-                                                min="36"
-                                                max="64"
-                                                minlength="36"
-                                                maxlength="64"
-                                                index="0"
-                                                itemID="${itemID}"
-                                                withdrawalItemID="0"
-                                                materialRequestID="${materialRequestID}"
-                                                
-                                                >
-                                                    <div class="invalid-feedback d-block" id="invalid-barcodeItem0"></div>
-                                                </div>
-                                            </td>
-                                            <td class="table-data-serial-number" index="0">
-                                                    ${itemSerialContent[0]}
-                                                    ${itemSerialContent[1]}
-                                                </td>
-                                            <td>
-                                                <div class="stockout">
-                                                    <input class="form-control input-quantity text-center"
-                                                value="0.00"
-                                                id="StockOut0"
-                                                name="StockOut"
-                                                min="0.00"
-                                                max="9999999999"
-                                                minlength="1"
-                                                maxlength="10"
-                                                index="0"
-                                                itemID="${itemID}"
-                                                withdrawalItemID="0"
-                                                availableStocksValue="${getAvailableStocks.length > 0 ? formatAmount(getAvailableStocks[0].availableStocks) : "0.00"}"
-                                                >
-                                                    <div class="invalid-feedback d-block" id="invalid-StockOut0"></div>
-                                                </div>
-                                            </td>
-                                             <td>
-                                                    <div class="availablestocks">
-                                                        <span  name="availableStocks" itemID="${itemID}" index="0">${getAvailableStocks.length > 0 ? formatAmount(getAvailableStocks[0].availableStocks) : "0.00"}</span>
-                                                    </div>
-                                            </td>
-                                            <td>
-                                                    <div class="received">
-                                                        <span>-</span>
-                                                    </div>
-                                            </td>
-                                            <td>
-                                                    <div class="remaining">
-                                                        <span  name="remaining" itemID="${itemID}" index="0">${withdrawalItemRemaining.length > 0 ? formatAmount(withdrawalItemRemaining[0].remainingValue) : "0.00"}</span>
-                                                    </div>
-                                            </td>
-                                            <td>
-                                                    <div class="stockoutdate" >
-                                                        <span name="stockOutDate" itemID="${itemID}" index="0">-</span>
-                                                    </div>
-                                            </td>
-                                            <td>
-                                                    <div class="datereceived">
-                                                        <span>-</span>
-                                                    </div>
-                                            </td>
-                                            <td>
-                                                <textarea rows="2" style="resize: none" class="form-control" index="0" disabled></textarea>
-                                            </td>
-                                        </tr>`;
-              
+            tableStockContent += generateAddNewRow(itemID,materialRequestID);
         }
         
 
@@ -681,8 +687,8 @@ $(document).ready(function() {
             // console.log(task.milestoneTask)
 			
             const {itemID,itemCode,itemName,itemBrandName, itemClassification,itemCategory,itemUom,requestQuantity,materialRequestID,withdrawalItemStatus = 0, milestoneTask = [] } = task;
-            const itemContent = getItemContent(milestoneTask,itemID,materialRequestID);
             const itemStatusRecord = (withdrawalItemStatus ==  null || withdrawalItemStatus ==  0 )   ? `<span class="badge badge-warning w-100">Pending</span>` : `<span class="badge badge-success w-100">Completed</span>` ;
+            const itemContent = getItemContent(milestoneTask,itemID,materialRequestID,withdrawalItemStatus);
 
             taskHTML += `
             <tr class="itemTableRow" itemID="${itemID}">   
@@ -782,11 +788,7 @@ $(document).ready(function() {
                         <table class="table" id="pcrDetails">
                             <thead style="line-height:8px; white-space:nowrap;">
                                 <tr class="bg-dark">
-                                    <th class="text-center" style="width:50px">
-                                        <div class="action">
-                                            <input type="checkbox" class="checkboxall" index ="${index}" itemID = "${itemID}" >
-                                        </div>
-                                    </th>
+                                  
                                     <th class="text-white">Barcode</th>
                                     <th class="text-white">Serial No.</th>
                                     <th class="text-white">Stock Out</th>
@@ -802,14 +804,15 @@ $(document).ready(function() {
                             <tbody class="itemProjectTableBody${index+""+itemID}" >
                                 ${itemContent[0]}
                             </tbody>
-                        </table>
-                        ${withdrawalItemStatus == 1? '' :
-                            `<div class="w-100 text-left my-2">
-                                    <button class="btn btn-primary btnAddRow"  type="button" id="btnAddRow" index="${index}" itemID="${itemID}" materialRequestID="${materialRequestID}"><i class="fas fa-plus-circle"></i> Add Row</button>
-                                    <button class="btn btn-danger btnDeleteRow"  type="button" id="btnDeleteRow" index="${index}" itemID="${itemID}" materialRequestID="${materialRequestID}" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-                            </div>
-                        `}
-					</div>
+                        </table>`;
+                        // ${withdrawalItemStatus == 1? '' :
+                        //     `<div class="w-100 text-left my-2">
+                                    // <button class="btn btn-primary btnAddRow"  type="button" id="btnAddRow" index="${index}" itemID="${itemID}" materialRequestID="${materialRequestID}"><i class="fas fa-plus-circle"></i> Add Row</button>
+                        //             <button class="btn btn-danger btnDeleteRow"  type="button" id="btnDeleteRow" index="${index}" itemID="${itemID}" materialRequestID="${materialRequestID}" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+                        //     </div>
+                        // `}
+        taskHTML += `
+                    </div>
 				</td>
 			
 				<td style="position: relative;">    
@@ -918,8 +921,9 @@ $(document).ready(function() {
 			$("td .action .checkboxitemrow", this).attr("id", `checkboxitemrow${i}`);
 
             // INPUTS ID's
-
-            $("td [name=barcodeItem]", this).attr("id", `barcodeItem${i}`);
+            let itemID= 0;
+            itemID = $("td [name=barcodeItem]", this).attr("itemID");
+            $("td [name=barcodeItem]", this).attr("id", `barcodeItem${itemID}${i}`);
 			$("td [name=barcodeItem]", this).attr("index", i);
 
 			$("td [name=StockOut]", this).attr("id", `StockOut${i}`);
@@ -1009,13 +1013,13 @@ $(document).ready(function() {
 
 
      // ----- KEYUP BARCODE -----
-     $(document).on("keyup", `[name=barcodeItem]`, function() {
-        const itemID        = $(this).attr("itemID");
-        const index         = $(this).attr("index");
-        const id            = $(this).attr("id");
-        const withdrawalItemID    = $(this).attr("withdrawalItemID");
-        const valueLength = $(this).val().length +1;
-        const value = $(this).val();
+     function checkBarcode(parent){
+        const itemID        = parent.attr("itemID");
+        const index         = parent.attr("index");
+        const id            = parent.attr("id");
+        const withdrawalItemID    = parent.attr("withdrawalItemID");
+        const valueLength = parent.val().length +1;
+        const value = parent.val();
         const characterLength = 37;
         let warningCondition = false;
         let isInvalid        = false;
@@ -1043,30 +1047,23 @@ $(document).ready(function() {
             $("#"+id).addClass("is-invalid").addClass("validate");
             $("#invalid-barcodeItem"+index).text("Please enter at least "+characterLength+" characters.");
         }
-
-        // const getRemainingItem = +$(`[name="remainingItem"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
-        // var computeRemainingItem =0;
-        // computeRemainingItem = getRemainingItem - value;
-        
         
         if(value == 0){
-            $(this).closest("tr").find("span").eq(3).text("-");
-            // $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(getRemainingItem));
+            parent.closest("tr").find("span").eq(3).text("-");
 
 
         }else{
-            $(this).closest("tr").find("span").eq(3).text(moment().format("MMMM DD, YYYY"));
-            // $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(computeRemainingItem));
+            parent.closest("tr").find("span").eq(3).text(moment().format("MMMM DD, YYYY"));
 
         }
         
         if(warningCondition && isInvalid){
             setTimeout(() => {  
                 if(valueLength >= characterLength){
-                    $("#"+id).addClass("is-invalid").removeClass("validate")
+                    parent.addClass("is-invalid").removeClass("validate")
                     $("#invalid-barcodeItem"+index).text("Barcode not exist!");
                 }else{
-                    $("#"+id).addClass("is-invalid").addClass("validate");
+                    parent.addClass("is-invalid").addClass("validate");
                     $("#invalid-barcodeItem"+index).text("Please enter at least "+characterLength+" characters.");
                 }     
             }, 1000);    
@@ -1074,8 +1071,8 @@ $(document).ready(function() {
         
 
 
-    });
-
+     }
+     
     // ----- END KEYUP BARCODE -----  
 
     // CHECK SERIAL DUPLICATES//
@@ -1429,7 +1426,7 @@ $(document).ready(function() {
             // multipleSelect2Placeholder();
             // inputmaskHours();
             initQuantity();
-
+            updateTableRows();
             $(`[name="assignEmployee"]`).each(function() {
                 $assignedEmployee = $(this).attr("assignedEmployee");
                 const assignedEmployeeArr = $assignedEmployee?.split("|");
@@ -1482,6 +1479,11 @@ $(document).ready(function() {
     $(document).on("change",`[name="barcodeItem"],[name="StockOut"]`,function(){
     	var getBarcode = $(this).closest("tr").find(`[name="barcodeItem"]`).val();
     	var getQuantity = +$(this).closest("tr").find(`[name="StockOut"]`).val();
+        var getID = $(this).attr("name");
+        $parent = $(this);
+       
+        var getBarcodeIsInValid = $(this).closest("tr").find(`[name="barcodeItem"]`).hasClass("is-invalid");
+    	var getQuantityIsInValid = +$(this).closest("tr").find(`[name="StockOut"]`).hasClass("is-invalid");
 
         if(getBarcode == "" && getQuantity != 0){
         	$(this).closest("tr").find(`[name="barcodeItem"]`).addClass("is-invalid");
@@ -1499,7 +1501,7 @@ $(document).ready(function() {
         	$(this).closest("tr").find(`td [name="barcodeItem"]`).closest("div").find(".invalid-feedback").text("");
         }
 
-        if(getBarcode != "" && getQuantity != 0 ){
+        if(getBarcode != "" &&  !getBarcodeIsInValid && getQuantity != 0 && !getQuantityIsInValid ){
             $(this).closest("tr").find(`[name="barcodeItem"]`).removeClass("is-invalid").removeClass("is-valid");
         	$(this).closest("tr").find(`td [name="barcodeItem"]`).closest("div").find(".invalid-feedback").text("");
 
@@ -1513,7 +1515,11 @@ $(document).ready(function() {
 				$(this).closest("tr").find(`[name="StockOut"]`).removeClass("is-invalid").removeClass("is-valid");
 				$(this).closest("tr").find(`td [name="StockOut"]`).closest("div").find(".invalid-feedback").text("");
 			}
-        }    
+        }   
+        
+        if(getID == "barcodeItem"){
+            checkBarcode($parent);
+        }
     })
     
     // END KEYUP CHECK COMPLETE DATA EACH ROW //
@@ -1602,7 +1608,6 @@ $(document).ready(function() {
 		const materialRequestID = decryptString($(this).attr("materialRequestID"));
 		const stockOutID = decryptString($(this).attr("stockOutID"));
         const checkValidateData = checkData();
-
             if(checkValidateData){
 
                 const validateBarcode = $("[name=barcodeItem]").hasClass("is-invalid");
@@ -1611,7 +1616,7 @@ $(document).ready(function() {
                 if( !validateBarcode && !serialNumberCondition && !validateQuantity){
                     const validate     = validateForm("pcrDetails");
                     if(validate){
-                        formButtonHTML(this);
+                        formButtonHTML(this,true);
 
                     setTimeout(() => {
                         // validateInputs().then(res => {
