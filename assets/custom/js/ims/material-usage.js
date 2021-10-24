@@ -447,7 +447,9 @@ function myFormsContent() {
 			borrowingID,
 			dateCreatedRI,
 			borrowingCreateAt,
+			projectCode,
 			projectName,
+			clientCode,
 			clientName,
 			approversID,
 			approversDate,
@@ -481,8 +483,18 @@ function myFormsContent() {
 			<td>${getFormCode("MUF", dateCreated, materialUsageID)}</td>
 			<td>${fullname}</td>
 			<td>${materialWithdrawalCode}</td>
-			<td>${projectName}</td>
-			<td>${clientName}</td>
+			<td>
+			<div>
+				${projectCode || '-'}
+			</div>
+			<small style="color:#848482;">${projectName || ''}</small>
+		</td>
+		<td>
+			<div>
+				${clientCode || '-'}
+			</div>
+			<small style="color:#848482;">${clientName || ''}</small>
+		</td>
 			<td>
 				${employeeFullname(getCurrentApprover(approversID, approversDate, materialUsageStatus, true))}
 			</td>
@@ -640,7 +652,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 			id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 		</button>
 		<button 
-			class="btn btn-cancel px-5 p-2" 
+			class="btn btn-cancel btnCancel px-5 p-2" 
 			id="btnCancel"><i class="fas fa-ban"></i> 
 			Cancel
 		</button>`;
@@ -731,6 +743,7 @@ $(document).on("keyup change","[name=serialNumber]",function(){
 			var tmp_addressID = $(this).attr("id");
 				if(addressID !=  tmp_addressID){
 					if(tmp_Checkserial == serialval){
+					
 						$parent.removeClass("is-valid").addClass("is-invalid");
 						$parent.closest("tr").find(".invalid-feedback").text('Data already exist!');
 						flag[0]= false;
@@ -928,26 +941,29 @@ function getItemsRow(readOnly = false,materialUsageID) {
 						<div class="quantity"name="quantity" id="quantity${index}">${quantity || ""}</div>
 					</td>
 					<td>
-					<div class="text-center">
+					<div class="form-group my-1 text-center">
 						<input 
-								type="text" 
-								class="form-control input-quantity text-center unused"
+								type="text"
+								style="text-align: center !important;" 
+								class="form-control input-quantity text-center unused "
 								data-allowcharacters="[0-9]" 
-								min="0"
+								min="0.00"
 								number="${index}"
 								id="unused${index}"
 								itemID="${itemID}"
 								quantity="${quantity}" 
-								value="${inventoryRequestID ? unused : ""}" 
-								name="unused" 
-								minlength="1" 
-								maxlength="9" 
-								>
-							<div class="invalid-feedback d-block" id="invalid-unused${index}"></div>
+								autocomplete="off"
+								value="${inventoryRequestID ? unused : "0.00"}" 
+								name="unused"
+							
+								minlength="1"
+								maxlength="10"
+								required>
+							<div class="invalid-feedback d-block invalid-receivedQuantity" id="invalid-unused${index}"></div>
 					</div>
 					</td>
 					<td class="text-center">
-						<div class="used" id="used${index}" name="used">${used || ""}</div>
+						<div class="used" id="used${index}" name="used">${used || "0.00"}</div>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}
@@ -980,13 +996,14 @@ function getItemsRow(readOnly = false,materialUsageID) {
 	
 }
 
-$(document).on("change", ".unused", function() {
+$(document).on("keyup change", ".unused", function() {
 	var count = $(this).attr("number");
-	var quantity  = $(`#quantity${count}`).text();
+	var quantity  = $(`#quantity${count}`).text().replaceAll(",","");
 	var totalQuantity = parseInt(quantity);
-	var val = $(this).val() | 0;
+	var val = $(this).val().replaceAll(",","");
+
 	var totalReceived = parseInt(val);
-	var used = parseInt(quantity) - parseInt(val);
+	var used = parseFloat(quantity) - parseFloat(val);
 	var formatdecimalused = parseFloat(used).toFixed(2);
 	$(`#used${count}`).text(formatdecimalused);
 	var flag = ["true"];
@@ -996,13 +1013,14 @@ $(document).on("change", ".unused", function() {
 			$(`#invalid-unused${count}`).html("The inserted used quantity should not be greater than the received quantity.");
 		flag[0]= false;
 		
-		removeIsValid("#tableMaterialUsage");
+		//removeIsValid("#tableMaterialUsage");
 	}else{
 		$(`#unused${count}`).removeClass("is-invalid").addClass("is-valid");
 		$(this).closest("tr").find(`#invalid-unused${count}`).removeClass("is-invalid");
 		$(this).closest("tr").find(`#invalid-unused${count}`).text('');
-		removeIsValid("#tableMaterialUsage");
+		//removeIsValid("#tableMaterialUsage");
 		flag[0]= true;
+		removeIsValid("#tableMaterialUsage");
 	}
 	return flag;
 });	
@@ -1268,7 +1286,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		<div class="col-md-4 col-sm-12">
 			<div class="form-group">
 				<label>Date Needed</label>
-				<input type="text" name="materialUsageDate" id="materialUsageDate" class="form-control" disabled ="${materialUsageDate || "-"}">
+				<input type="text" name="materialUsageDate" id="materialUsageDate" class="form-control" disabled value="${materialUsageDate && moment(materialUsageDate).format("MMMM DD, YYYY")}">
 			</div>
 		</div>
 		<div class="col-md-4 col-sm-12">
@@ -1356,6 +1374,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		$("#page_content").html(html);
 		//initDataTables();
 		initAll();
+		initQuantity();
 		updateSerialNumber();
 
 		if (!allowedUpdate) {
@@ -1726,9 +1745,10 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("MUF", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		//const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getMaterialUsageData(action, "save", "0", id);
-		data["materialUsageStatus"] = 0;
+		//data["materialUsageStatus"] = 0;
 		data.append("materialUsageStatus", 0);
 		
 		if (revise) {
@@ -1736,17 +1756,17 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
 			// delete data["materialUsageID"];
 
 			if (!isFromCancelledDocument) {
-				data["reviseMaterialUsageID"] = id;
-				delete data["materialUsageID"];
+				// data["reviseMaterialUsageID"] = id;
+				// delete data["materialUsageID"];
 
 				data.append("reviseMaterialUsageID", id);
 				data.delete("materialUsageID");
 			} else {
 				// delete data["materialUsageID"];
 
-				data["materialUsageID"] = id;
-				delete data["action"];
-				data["action"] = update;
+				// data["materialUsageID"] = id;
+				// delete data["action"];
+				// data["action"] = update;
 
 				data.append("materialUsageID", id);
 				data.delete("action");
@@ -1806,6 +1826,7 @@ function checkSerialReceivedQuantity() {
 						}
 						if(tmpSerialStorage.length >= 1 && receivedQuantity !=0 && countSerial == receivedQuantity ){
 							$(`td .serial-number-table tbody > tr`, this).each(function() {
+								
 								if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
 								$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
 								$(`.servicescope .invalid-feedback`, this).text("");
@@ -1871,16 +1892,20 @@ $(document).on("click", "#btnSubmit", function () {
 			removeIsValid("#tableMaterialUsage");
 			if(validate){
 				const id             = decryptString($(this).attr("materialUsageID"));
+				const isFromCancelledDocument = $(this).attr("cancel") == "true";
 				const revise         = $(this).attr("revise") == "true";
-				const action = revise && "insert" || (id ? "update" : "insert");
+				//const action = revise && "insert" || (id ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getMaterialUsageData(action, "submit", "1", id);
 				// console.log(data["approversID"])
 				if (revise) {
-					data["reviseMaterialUsageID"] = id;
-					delete data["materialUsageID"];
+					if (!isFromCancelledDocument) {
+						// data["reviseMaterialUsageID"] = id;
+						// delete data["materialUsageID"];
 
-					data.append("reviseMaterialUsageID", id);
-					data.delete("materialUsageID");
+						data.append("reviseMaterialUsageID", id);
+						data.delete("materialUsageID");
+					}
 				}
 	
 				let approversID = "", approversDate = "";

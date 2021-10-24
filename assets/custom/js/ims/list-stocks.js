@@ -41,6 +41,7 @@ $(document).ready(function(){
 	        searching: true,
             info: true,
 	        paging: true,
+            lengthMenu: [[50, -1], [50, "All"]],
             columnDefs: [
                 { targets: 0, width: 170},
                 { targets: 1, width: 250},
@@ -70,6 +71,7 @@ $(document).ready(function(){
              searching: true,
              info: true,
             paging: true,
+            lengthMenu: [[50, -1], [50, "All"]],
              columnDefs: [
                  { targets: 0, width: 170},
                  { targets: 1, width: 250},
@@ -239,7 +241,7 @@ $(document).ready(function(){
                             <thead>
                             <tr>
                                 <th>Item Code</th>
-                                <th>Item Name/Brand</th>
+                                <th>Item Name</th>
                                 <th>Item Classification</th>
                                 <th>UOM</th>
                                 <th>Stock In</th>

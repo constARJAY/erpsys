@@ -680,8 +680,8 @@ function getSerialNumber(scope = {}, readOnly = false, checkbox) {
 							name="serialNumber"
 							id="serialNumber"
 							data-allowcharacters="[A-Z][a-z][0-9][-]"
-							minlength="5"
-							maxlength="18"
+							minlength="17"
+							maxlength="17"
 							value="${serialNumber}"
 							autocomplete="off"
 							required>
@@ -774,9 +774,9 @@ function updateSerialNumber() {
 		$(this).attr("id", `serialNumber${i}`);
 		$(this).parent().find(".invalid-feedback").attr("id", `invalid-serialNumber${i}`);
 	})
-	$(`[name="quantity"]`).each(function(i) {
-		$(this).attr("id", `quantity${i}`);
-		$(this).parent().find(".invalid-feedback").attr("id", `invalid-quantity${i}`);
+	$(`[name="receivedQuantity "]`).each(function(i) {
+		$(this).attr("id", `receivedQuantity ${i}`);
+		$(this).parent().find(".invalid-feedback").attr("id", `invalid-receivedQuantity${i}`);
 	})
 }
 // ----- END UPDATE SERIAL NUMBER -----
@@ -956,10 +956,9 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 						<div class="quantity" id="quantity${index}" name="quantity">${quantity || ""}</div>
 					</td>
 					<td>
-					<div>
 						<input 
 								type="text" 
-								class="form-control input-quantity receivedQuantity  record1111 text-center validate  mb-0"
+								class="form-control input-quantity receivedQuantity record1111 text-center"
 								data-allowcharacters="[0-9]" 
 								min="0.01"
 								number="${index}"
@@ -967,13 +966,14 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 								itemID="${itemID}"
 								data-allowcharacters="[0-9]"
 								id="receivedQuantity${index}"
-								name="receivedQuantity"  
+								name="receivedQuantity"
+								autocomplete="off"  
 								value="${inventoryRequestID ? receivedquantity : ""}" 
 								minlength="2" 
 								maxlength="9"
 								required>
 							<div class="invalid-feedback d-block invalid-receivedQuantity" id="invalid-receivedQuantity${index}"></div>
-					</div>
+
 					</td>
 					<td class="text-center">
 						<div class="remaining" id="remaining${index}"name="remaining">${remaining || ""}</div>
@@ -1008,6 +1008,40 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 	return html;
 	
 }
+$(document).on("keyup change", "[name=receivedQuantity]", function() {
+	//$(document).on("keyup", ".record1111", function() {
+		//$('.record1111').bind('click keyup', function(event) {
+		var count = $(this).attr("number");
+		//const count     		= $(this).closest("tr").first().attr("index");
+		
+		//var quantity = $(this).attr("quantity");
+		
+		var quantity  = $(`#quantity${count}`).text().replaceAll(",","");
+		var totalQuantity = parseInt(quantity);
+		var val = $(this).val().replaceAll(",","");
+		var totalReceived = parseInt(val);
+		var totalremaining = parseFloat(quantity) - parseFloat(val);
+		var formatdecimalremaining = parseFloat(totalremaining).toFixed(2);
+		
+		$(`#remaining${count}`).text(formatdecimalremaining);
+		//var flag = ["true"];
+		if(totalQuantity < totalReceived){
+			// $(`.record1111 [name="receivedQuantity"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
+			// $(`.record1111 .invalid-feedback`, this).text("Excessive amount of quantity!");
+	
+			$(this).closest("tr").find(`#receivedQuantity${count}`).removeClass("is-valid, no-error").addClass("is-invalid");
+				$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).addClass("is-invalid");
+				$(`#invalid-receivedQuantity${count}`).html("Excessive amount of quantity!");
+		}else{
+			$(`#receivedQuantity${count}`).removeClass("is-invalid").addClass("is-valid");
+				$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).removeClass("is-invalid");
+				$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).text('');
+		}
+		//return flag;
+		
+	
+	
+	});
 // get remaining value
 
 
@@ -1444,6 +1478,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		$("#page_content").html(html);
 		//initDataTables();
 		initAll();
+		initQuantity();
 		updateSerialNumber();
 		// ----- NOT ALLOWED FOR UPDATE -----
 		if (!allowedUpdate) {
@@ -1663,9 +1698,9 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 			const Brand    				= $("td [name=namebrand]", this).attr("Brand");
 			const classificationName    = $("td [name=classificationcategory]", this).attr("classificationName");
 			const categoryName    		= $("td [name=classificationcategory]", this).attr("categoryName");
-			const quantity 				=  $("td [name=quantity]", this).text();
+			const quantity 				= $("td [name=quantity]", this).text();
 			const receivedQuantity 		= $("td [name=receivedQuantity]", this).val()?.trim();
-			const remainings 			=  $("td [name=remainings]", this).text();
+			const remaining 			=  $("td [name=remaining]", this).text();
 			const uom 					=  $("td [name=uom]", this).text();
 			const remarks   			= $("td [name=remarks]", this).val()?.trim();	
 			const created 				= dateToday();
@@ -1680,7 +1715,7 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 				categoryName,
 				quantity,
 				receivedQuantity,
-				remainings,
+				remaining,
 				remarks, 
 				created,
 				uom,
@@ -1697,7 +1732,7 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 			formData.append(`items[${i}][categoryName]`, categoryName);
 			formData.append(`items[${i}][quantity]`, quantity);
 			formData.append(`items[${i}][receivedQuantity]`, receivedQuantity);
-			formData.append(`items[${i}][remainings]`, remainings);
+			formData.append(`items[${i}][remaining]`, remaining);
 			formData.append(`items[${i}][uom]`, uom);
 			formData.append(`items[${i}][created]`, created);
 			formData.append(`items[${i}][remarks]`, remarks);
@@ -1752,13 +1787,73 @@ $(document).on("click", ".btnView", function () {
 
 
 // ----- VIEW DOCUMENT -----
-$(document).on("click", "#btnRevise", function () {
-	const id = $(this).attr("inventoryReceivingID");
-	const fromCancelledDocument = $(this).attr("cancel") == "true";
-	viewDocument(id, false, true, fromCancelledDocument);
-});
+// $(document).on("click", "#btnRevise", function () {
+// 	const id = $(this).attr("inventoryReceivingID");
+// 	const fromCancelledDocument = $(this).attr("cancel") == "true";
+// 	viewDocument(id, false, true, fromCancelledDocument);
+// });
 // ----- END VIEW DOCUMENT -----
-
+$(document).on("click", "#btnRevise", function () {
+	const id     = decryptString($(this).attr("inventoryReceivingID"));
+	const status = $(this).attr("status");
+	const code    = $(this).attr("bidRecapCode");
+	const fromCancelledDocument = $(this).attr("cancel") == "true";
+	if (status == "4") {
+		$("#page_content").html(preloader);
+		setTimeout(() => {
+			viewDocument(id, false, true, fromCancelledDocument);
+		}, 10);
+	} else {
+		const confirmation = getConfirmation("revise");
+		confirmation.then(res => {
+			if (res.isConfirmed) {
+				$.ajax({
+					method:      "POST",
+					url:         `bid_recap/reviseBidRecap`,
+					data:        { bidRecapID: id },
+					cache:       false,
+					async:       false,
+					dataType:    "json",
+					beforeSend: function() {
+						$("#loader").show();
+					},
+					success: function(data) {
+						let result = data.split("|");
+						setTimeout(() => {
+							$("#loader").hide();
+							let isSuccess   = result[0];
+							let feedback   = code || (result[1] || "Bid Recap");
+							let insertedID  = result[2];
+							let dateCreated = result[3];
+			
+							if (isSuccess == "true") {
+								showNotification("success", `${feedback} revised successfully!`);
+								viewDocument(insertedID);
+							} else {
+								Swal.fire({
+									icon:              "danger",
+									title:             "There's an error revising bid recap",
+									showConfirmButton: false,
+									timer:             2000,
+								});
+							}
+						}, 500);
+					},
+					error: function() {
+						setTimeout(() => {
+							$("#loader").hide();
+							showNotification("danger", "System error: Please contact the system administrator for assistance!");
+						}, 500);
+					}
+				}).done(function() {
+					setTimeout(() => {
+						$("#loader").hide();
+					}, 500);
+				})
+			}
+		});
+	}
+});
 
 // ----- SAVE CLOSE FORM -----
 $(document).on("click", "#btnBack", function () {
@@ -1769,7 +1864,7 @@ $(document).on("click", "#btnBack", function () {
 	const feedback   = $(this).attr("code") || getFormCode("INR", dateToday(), id);
 	const status     = $(this).attr("status");
 
-	if (status != "false" && status != 0) {
+	if (status && status != 0) {
 		
 		if (revise) {
 			// const action = revise && "insert" || (id && feedback ? "update" : "insert");
@@ -1827,7 +1922,7 @@ $(document).on("click", "#btnBack", function () {
 
 // ----- SAVE DOCUMENT -----
 $(document).on("click", "#btnSave, #btnCancel", function () {
-	let receivedCondition = $("[name=quantity]").hasClass("is-invalid");
+	let receivedCondition = $("[name=receivedQuantity]").hasClass("is-invalid");
 	let serialNumberCondition = $("[name=serialNumber]").hasClass("is-invalid");
 	if(!receivedCondition && !serialNumberCondition){
 
@@ -1876,7 +1971,7 @@ function checkSerialReceivedQuantity() {
 	if ($(`.returnItemsBody tr.itemTableRow`).length > 0) {
 		$(`.itemTableRow`).each(function() {
 
-			const receivedQuantity = parseFloat($(`[name="receivedQuantity"]`, this).val()) || 0;
+			const quantity = parseFloat($(`[name="receivedQuantity"]`, this).val()) || 0;
 			const itemID = $(`[name="receivedQuantity"]`, this).attr("itemID");
 		
 			if ($(`td .serial-number-table tbody > tr`, this).length >= 1) {
@@ -1891,7 +1986,7 @@ function checkSerialReceivedQuantity() {
 						}	
 					})
 
-						if(tmpSerialStorage.length == 0 && receivedQuantity !=0 ){
+						if(tmpSerialStorage.length == 0 && quantity !=0 ){
 							$(`td .serial-number-table tbody > tr`, this).each(function() {
 								if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
 									$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
@@ -1902,8 +1997,9 @@ function checkSerialReceivedQuantity() {
 						})
 							flag[0] = true;
 						}
-						if(tmpSerialStorage.length >= 1 && receivedQuantity !=0 && countSerial == receivedQuantity ){
+						if(tmpSerialStorage.length >= 1 && quantity !=0 && countSerial == quantity ){
 							$(`td .serial-number-table tbody > tr`, this).each(function() {
+								
 								if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
 								$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
 								$(`.servicescope .invalid-feedback`, this).text("");
@@ -1912,7 +2008,7 @@ function checkSerialReceivedQuantity() {
 						})
 							flag[0] = true;
 						}
-						if(tmpSerialStorage.length !=0  && countSerial != receivedQuantity || receivedQuantity ==0 ){ // exisitng all value
+						if(tmpSerialStorage.length !=0  && countSerial != quantity || quantity ==0 ){ // exisitng all value
 							$(`.receivedQuantity [name="receivedQuantity"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
 							$(`.receivedQuantity .invalid-feedback`, this).text("Serial number is not equal on quantity items!");
 
@@ -1941,6 +2037,68 @@ function checkSerialReceivedQuantity() {
 			else{
 				flag[0] = true;
 			}
+			// if ($(`td .serial-number-table tbody > tr`, this).length >= 1) {
+			// 	let countSerial = $(`td .serial-number-table tbody > tr`, this).length;
+			// 	var tmpSerialStorage =[];
+			// 	var counter =0;
+			// 		$(`td .serial-number-table tbody > tr`, this).each(function() {
+			// 			var conSerail = $(this).find("[name=serialNumber]").val() || "";
+			// 			if(conSerail !=""){
+			// 				tmpSerialStorage[counter++] = $(this).find("[name=serialNumber]").val();
+			// 				tmpSerialStorage[counter++] = $(this).find("[name=serialNumber]").attr("itemID",itemID);
+			// 			}	
+			// 		})
+
+			// 			if(tmpSerialStorage.length == 0 && quantity !=0 ){
+			// 				$(`td .serial-number-table tbody > tr`, this).each(function() {
+			// 					if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
+			// 						$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
+			// 						$(`.servicescope .invalid-feedback`, this).text("");
+			// 					}
+							
+								
+			// 			})
+			// 				flag[0] = true;
+			// 			}
+			// 			if(tmpSerialStorage.length >= 1 && receivedQuantity !=0 && countSerial == receivedQuantity ){
+			// 				$(`td .serial-number-table tbody > tr`, this).each(function() {
+			// 					if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
+			// 					$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
+			// 					$(`.servicescope .invalid-feedback`, this).text("");
+			// 					}
+								
+			// 			})
+			// 				flag[0] = true;
+			// 			}
+			// 			if(tmpSerialStorage.length !=0  && countSerial != receivedQuantity || receivedQuantity ==0 ){ // exisitng all value
+			// 				$(`.receivedQuantity [name="receivedQuantity"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
+			// 				$(`.receivedQuantity .invalid-feedback`, this).text("Serial number is not equal on quantity items!");
+
+			// 				$(`td .serial-number-table tbody > tr`, this).each(function() {
+
+			// 						$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").addClass("is-invalid");
+			// 						$(`.servicescope .invalid-feedback`, this).text("Serial number is not equal on quantity items!");
+										
+			// 				})
+							
+			// 				flag[0] = false;
+			// 			}else{
+			// 				$(`.receivedQuantity [name="receivedQuantity"]`, this).removeClass("is-invalid");
+			// 				$(`.receivedQuantity .invalid-feedback`, this).text("");
+
+			// 				$(`td .serial-number-table tbody > tr`, this).each(function() {
+			// 					if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
+			// 						$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
+			// 						$(`.servicescope .invalid-feedback`, this).text("");
+			// 					}
+									
+			// 				})
+			// 				flag[0] = true;
+			// 			}
+			// }
+			// else{
+			// 	flag[0] = true;
+			// }
 		})
 		return flag;
 	}
@@ -1952,14 +2110,15 @@ function checkSerialReceivedQuantity() {
 // ----- SUBMIT DOCUMENT -----
 $(document).on("click", "#btnSubmit", function () {
 
-	const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid") ;
-	const receivedQuantity  = $("[name=receivedQuantity]").hasClass("is-invalid") ;
-	const validateSerialMessage  = $(".invalid-feedback").text() ;
+	const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid");
+	const receivedQuantity  = $("[name=receivedQuantity]").hasClass("is-invalid");
+	const validateSerialMessage  = $(".invalid-feedback").text();
 	//const revise        = $(this).attr("revise") == "true";
 	//let condition = $("[name=receivedQuantity]").hasClass("is-invalid");
 	// console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
 	// if(!validateDuplicateSerial || validateSerialMessage != "Data already exist!"){
 		if(!receivedQuantity){
+			removeIsValid("#tableInventoryReceived");
 			//removeIsValid("#tableInventoryReceived");
 		if(!validateDuplicateSerial){
 		const validateSerial = checkSerialReceivedQuantity();
@@ -2015,6 +2174,7 @@ $(document).on("click", "#btnSubmit", function () {
 		}
 	}
 }
+
 
 		
 	else{
@@ -2243,38 +2403,7 @@ function getApproversStatus(approversID, approversStatus, approversDate) {
 	return html;
 }
 // ----- END APPROVER STATUS --
-$(document).on("keyup", ".record1111", function() {
-	var count = $(this).attr("number");
-	//var quantity = $(this).attr("quantity");
-	
-	var quantity  = $(`#quantity${count}`).text();
-	var totalQuantity = parseInt(quantity);
-	var val = $(this).val() | 0;
-	var totalReceived = parseInt(val);
-	var totalremaining = parseFloat(quantity) - parseFloat(val);
-	var formatdecimalremaining = parseFloat(totalremaining).toFixed(2);
-	
-	$(`#remaining${count}`).text(formatdecimalremaining);
-	var flag = ["true"];
-	if(totalQuantity < totalReceived){
-			$(`#receivedQuantity${count}`).removeClass("is-valid").addClass("is-invalid");
-			$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).addClass("is-invalid");
-			$(`#invalid-receivedQuantity${count}`).html("Not less that or equal order quantity");
-		flag[0]= false;
-		
-	}else{
-		$(`#receivedQuantity${count}`).removeClass("is-invalid").addClass("is-valid");
-		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).removeClass("is-invalid");
-		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).text('');
-		
-		flag[0]= true;
-		removeIsValid("#tableInventoryReceived");
-	}
-	return flag;
-	
 
-
-});
 })
 
 

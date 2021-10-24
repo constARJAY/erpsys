@@ -119,7 +119,7 @@ $(document).ready(function () {
 
 			});
             html += ` <div class="py-2 border-top d-flex justify-content-end align-items-end">
-            <button class="btn btn-primary btn-approval-setup" designation="${roleID}" designationName="${data[0].designationName}" >Update Examination Setup</button>
+            <button class="btn btn-primary btn-approval-setup" method="update"" designation="${roleID}" designationName="${data[0].designationName}" >Update Examination Setup</button>
         </div>`;
 		} else {
 			
@@ -136,7 +136,7 @@ $(document).ready(function () {
 				</td>
             </div>
 				<div class="py-2 border-top d-flex justify-content-end align-items-end">
-					<button class="btn btn-primary btn-approval-setup" designation="${roleID}" >Add Examination Setup</button>
+					<button class="btn btn-primary btn-approval-setup" method="save" designation="${roleID}" >Add Examination Setup</button>
 				</div>`;
           
 		}
@@ -203,11 +203,11 @@ $(document).ready(function () {
 
 		let button = examSetupID
 			? `
-        <button class="btn btn-update" id="btnUpdate" roleID="${designationID}"><i class="fas fa-save"></i>
+        <button class="btn btn-update px-5 p-2" id="btnUpdate" roleID="${designationID}"><i class="fas fa-save"></i>
             Update
         </button>`
 			: `
-        <button class="btn btn-save" id="btnSave" disabled><i class="fas fa-save"></i> Save</button>`;
+        <button class="btn btn-save px-5 p-2" id="btnSave" disabled><i class="fas fa-save"></i> Save</button>`;
 
 		let html = `
         <div class="modal-body">
@@ -219,9 +219,9 @@ $(document).ready(function () {
 						<input type="checkbox" class="checkboxall" project="true">
 					</div>
 				</th>
-				<th>Exam Title <code>*</code></th>
-				<th>Time Limit <code>*</code></th>
-				<th>Percentage <code>*</code></th>
+				<th style="width:50%;">Exam Title <code>*</code></th>
+				<th style="width:25%;">Time Limit <code>*</code></th>
+				<th style="width:25%;">Percentage <code>*</code></th>
 				</tr>
 			</thead>
 			<tbody class="tableExaminationSetupTableBody">
@@ -237,16 +237,14 @@ $(document).ready(function () {
 
 			<div class="w-100 text-right my-2">
 				<h5 class="font-weight-bolder" id="percent">0.00%</h5>
-				<div class="note-feedback text-warning">
-							<strong>Note: </strong> Must equate the total percentage to 100%
-						</div>
+				
 			</div>
 			
 		</div>
         </div>
         <div class="modal-footer">
             ${button}
-            <button class="btn btn-cancel btnCancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+            <button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
 		return html;
 	}
@@ -339,10 +337,11 @@ function getItemRow(exam = {}) {
 		
 				<div class="input-group">
                         <input type="text" 
-                        class="form-control validate input-percentage text-right percentage"  
+                        class="form-control input-percentage text-right percentage"  
 						data-allowcharacters="[0-9][.]"
-                        minlength="1" 
-                        maxlength="5" 
+
+						min="1"
+						max="100"
                         id="percentage" 
 						name="percentage" 
 						value="${percentage}"
@@ -425,7 +424,9 @@ function computePercent() {
 			if(totalPercent > rate || totalPercent < rate){
 				// console.log("pasok "+i )
 					// $("#invalid_percentage"+i).html("Must equate the total percentage to 100%");
-					$('#percentage'+i).addClass("has-error").removeClass("no-error");
+					// $('#percentage'+i).addClass("has-error").removeClass("no-error");
+					$('.percentage').addClass("has-error").removeClass("no-error");
+					$('.invalid-percentage').text("Must equate the total percentage to 100%");
 					$("#btnSave").prop('disabled','true');
 					$("#btnUpdate").prop('disabled','true');
 				
@@ -433,7 +434,10 @@ function computePercent() {
 			}else{
 			
 				$("#invalid_percentage"+i).html("");
-				$('#percentage'+i).addClass("no-error").removeClass("has-error");
+				// $('#percentage'+i).addClass("no-error").removeClass("has-error");
+				$('.percentage').removeClass("has-error");
+				$('.invalid-percentage').text("");
+
 				$("#btnSave").removeAttr('disabled');
 				$("#btnUpdate").removeAttr('disabled');
 				
@@ -442,7 +446,8 @@ function computePercent() {
 		// }			
 	}else{
 		$("#invalid_percentage"+i).html("");
-		$('#percentage'+i).addClass("no-error").removeClass("has-error");
+		// $('#percentage'+i).addClass("no-error").removeClass("has-error");
+		$('.percentage').removeClass("has-error");
 
 		// return true;
 
@@ -468,6 +473,7 @@ $(document).on("keyup", "[name=percentage]", function() {
 		updateTableItems();
 		initInputmask();
 		computePercent();
+		initPercentage();
 })
 // ----- END INSERT ROW ITEM -----
 
@@ -552,57 +558,28 @@ function deleteTableRow(isProject = true) {
 		var designationName = $(this).attr("designationName");
 		
 		if (validate) {
-			// $("#modal_roles_permission").modal("hide");
-			// $("#confirmation-modal_add_roles_permission").modal("show");
-
-			let data = getFormData("modal_examination_setup", true);
-			data.tableName = "hris_examination_setup_tbl";
-			data["tableData"]["designationID"] = designationID;
-			data.feedback = designationName+" Exams ";
-
-			sweetAlertConfirmation(
-				"add",
-				"Examination Setup",
-				"modal_examination_setup",
-				null,
-				data,
-				true,
-				pageContent
-			);
+			saveExaminationData(designationID,designationName);
 		}
 	});
 	// ----- END SAVE ADD -----
 
 	// ----- SAVE UPDATE -----
 	$(document).on("click", "#btnUpdate", function () {
-		// const percentValidate = computePercent();
-		// console.log(percentValidate)
-
-		// if(percentValidate){
-		
+	
 			const validate = validateForm("modal_examination_setup");
 			var designationID = $(this).attr("designationID");
 			var designationName = $(this).attr("designationName");
 			if (validate) {
-				// $("#modal_examination_setup").modal("hide");
-				// $("#confirmation-modal_edit_roles_permission").modal("show");
-	
-				// let data = getFormData("modal_examination_setup", true);
-				// data.tableName = "hris_examination_setup_tbl";
-				// data.whereFilter = "designationID = " + designationID;
-				// data.feedback = designationName+" Exams ";
-	
-				// sweetAlertConfirmation(
-				// 	"update",
-				// 	"Examination Setup",
-				// 	"modal_examination_setup",
-				// 	null,
-				// 	"",
-				// 	true,
-				// 	pageContent
-				// );
-	
-				let data = { exams: [] }, formData = new FormData;
+				saveExaminationData(designationID,designationName);
+			}
+
+	});
+	// ----- END SAVE UPDATE -----
+
+	//  GET EXAMINATION SETUP DATA //
+		function saveExaminationData(designationID = "",designationName="")
+		{
+			let data = { exams: [] }, formData = new FormData;
 	
 				$(".tableExaminationSetupTableBody tr").each(function(i, obj) {
 			
@@ -662,7 +639,7 @@ function deleteTableRow(isProject = true) {
 							   success: function (data) {
 								   $("#loader").hide();
 								   $("#modal_examination_setup").hide();
-								//    setTimeout(() => {
+
 									   let swalTitle = "Examination setup for "+designationName+" updated successfully!";
 									   Swal.fire({
 										   icon: "success",
@@ -673,11 +650,7 @@ function deleteTableRow(isProject = true) {
 										   $("#loader").show();
 										   window.location.reload();
 									   })
-									   // 	setTimeout(() => {
-									   // }, 1000)
-	   
-									   // window.location.replace(`${base_url}ims/inventory_recieving_report`);
-								//    }, 100);
+
 	   
 							   },
 						   });	
@@ -688,11 +661,8 @@ function deleteTableRow(isProject = true) {
 				   })
 				}
 				
-			}
-		// }
-	
-	});
-	// ----- END SAVE UPDATE -----
+		}
+	//  GET EXAMINATION SETUP DATA //
 
 	// ----- SELECT USER ROLE -----
 	$(document).on("click", ".userRole", function () {
@@ -746,6 +716,7 @@ function deleteTableRow(isProject = true) {
 $(document).on("click", ".btn-approval-setup", function(){
     let designationID    =   $(this).attr("designation");
     let designationName    =   $(this).attr("designationName");
+    let method    =   $(this).attr("method");
     $("#modal_examination_setup").modal("show");
     $(".modal_examination_setup_content").html(preloader);
     // $(modalFooter).html("");
@@ -755,8 +726,9 @@ $(document).on("click", ".btn-approval-setup", function(){
 		
 		updateTableItems();
 		initInputmask();
-		// initPercentage();
-		computePercent();
+		initPercentage();
+		method == "update" ? computePercent() :"";
+		// computePercent();
 		$("#btnSave").attr("designationID",designationID);	
 		$("#btnUpdate").attr("designationID",designationID);
 		$("#btnSave").attr("designationName",designationName);	

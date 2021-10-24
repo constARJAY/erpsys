@@ -28,7 +28,7 @@ class ListStock_model extends CI_Model {
                                         SELECT i.itemID, i.itemCode, brand, i.itemName, classificationName, categoryName, uom, ROUND(stockIN,2) AS stockIN, ROUND(stockOut,2) AS stockOut,(stockOut - Unused) totalStockOut,
                                         ROUND(Unused,2) AS Unused, ROUND(notreturnUnused,2) AS notreturnUnused, ROUND(disposed,2) AS disposed, ROUND(reservedItem,2) AS reservedItem, ROUND(materiaWithdrawalQuantity,2)  AS materiaWithdrawalQuantity, 
                                         CASE WHEN materiaWithdrawalQuantity <>0 THEN (reservedItem - materiaWithdrawalQuantity)
-                                        ELSE reservedItem END reserved,(stockIN - stockOut - IFNULL(reOrderLevel,0) - reservedItem + Unused) AS available,
+                                        ELSE reservedItem END reserved,(stockIN  - IFNULL(reOrderLevel,0) - reservedItem + Unused) AS available,
                                         IFNULL(iii.reOrderLevel,0) AS reOrderLevel
                                         FROM
                                         (
@@ -115,7 +115,7 @@ class ListStock_model extends CI_Model {
                                         LEFT JOIN ims_inventory_item_tbl AS iii ON i.itemID = iii.itemID
                                         $where $AND
                                         GROUP BY itemID
-                                    )l GROUP BY itemID");       
+                                    )l GROUP BY itemID AND itemCode IS NOT NULL");       
        
         $sqlAsset = $this->db->query("SELECT assetID, assetCode, brand, assetName, classificationName, categoryName, uom, totalequipmentBorrowing,
                                     stockIN,equipmentBorrowing, Transferred, returnQuantity, disposed, reservedAsset,reserved,available,
@@ -172,7 +172,7 @@ class ListStock_model extends CI_Model {
                                         WHERE  sii.returnItemID <>0  
                                         GROUP BY sii.assetID
                                         UNION ALL
-                                        SELECT sii.assetID, 		0 AS assetCode, 	0 AS  brand,	0 AS assetName,
+                                        SELECT sii.assetID, 		NULL AS assetCode, 	0 AS  brand,	0 AS assetName,
                                         0 AS classificationName, 	0 as categoryName,	0 AS  uom,  
                                         0 AS stockIN,
                                         0 AS equipmentBorrowing,
@@ -191,7 +191,7 @@ class ListStock_model extends CI_Model {
                                     LEFT JOIN ims_inventory_asset_tbl AS iii ON i.assetID = iii.assetID
                                     $where $AND
                                     GROUP BY i.assetID
-                                    )l GROUP BY assetID");        
+                                    )l GROUP BY assetID AND assetCode IS NOT NULL");        
                                     return array('item' =>$sqlItem->result(),'assets' =>$sqlAsset->result());
         //return array('item',$this->db->query($sqlItem)->result_array(),'assets',$this->db->query($sqlAsset)->result_array());
 

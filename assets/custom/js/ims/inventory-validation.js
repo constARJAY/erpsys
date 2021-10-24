@@ -60,6 +60,9 @@ $(document).ready(function() {
 					if (inventoryValidationStatus == 0 || inventoryValidationStatus == 4) {
 						isAllowed = true; // default nito is false;
 					}
+					if (inventoryValidationStatus == 1 || inventoryValidationStatus == 1) {
+						isReadOnly = true;
+					}
 				} else if (employeeID == sessionID) {
 					if (inventoryValidationStatus == 0) {
 						isReadOnly = false; 

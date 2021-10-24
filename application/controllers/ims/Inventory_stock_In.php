@@ -33,7 +33,7 @@ class Inventory_stock_in extends CI_Controller {
     {
        
         $itemID = $this->input->post("itemID");
-        $itemName = $this->input->post("itemName");
+        $itemName = $this->input->post("itemName") ;
         $brand = $this->input->post("brand");
         $classificationName = $this->input->post("classificationName");
         $categoryName = $this->input->post("categoryName");
@@ -41,7 +41,7 @@ class Inventory_stock_in extends CI_Controller {
         $recievedQuantity = $this->input->post("recievedQuantity");
         $serialnumber = $this->input->post("serialnumber");
         $inventoryStorageID = $this->input->post("inventoryStorageID");
-        $inventoryStorageCode = $this->input->post("inventoryStorageCode");
+        $inventoryStorageCode = $this->input->post("inventoryStorgeCode");
         $inventoryStorageOfficeName = $this->input->post("inventoryStorageOfficeName");
         $manufactureDate = $this->input->post("manufactureDate");
         $expirationdate = $this->input->post("expirationdate");
@@ -53,8 +53,62 @@ class Inventory_stock_in extends CI_Controller {
         $inventoryCode = $this->input->post("inventoryCode");
         $itemCode = $this->input->post("itemCode");
         $uom = $this->input->post("uom");
-      
-        $savereceivingreport = $this->inventorystockin->savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode, $uom);
+        $data = array();
+        for ($i=0; $i < count($itemID); $i++) {
+			$itemdata[] = array(
+                 
+                     'InventoryReceivingID'		=>$InventoryReceivingID[$i],
+                     'MaterialUsageID'		    =>$MaterialUsageID[$i],
+                     'ReturnItemID'		        =>$ReturnItemID[$i],
+                     'itemCode'		            =>$itemCode[$i],
+                     'itemID'		            =>$itemID[$i],
+                     'itemName'		            =>$itemName[$i],
+                     'barcode'		            =>$barcode[$i],
+                     'brand'                     =>$brand[$i],
+                     'categoryName'              =>$categoryName[$i],
+                     'classificationName'        =>$classificationName[$i],
+                     'expirationdate'            =>$expirationdate[$i],
+                     'inventoryCode'             =>$inventoryCode,
+                     'inventoryStorageCode'      =>$inventoryStorageCode[$i],
+                     'inventoryStorageID'        =>$inventoryStorageID[$i],
+                     'inventoryStorageOfficeName'=>$inventoryStorageOfficeName[$i],
+                     'manufactureDate'           =>$manufactureDate[$i],
+                     'quantity'                  =>$quantity[$i],
+                     'quantityForStockin'        =>$quantity[$i],
+                     'serialNumber'              =>$serialnumber[$i],
+                     'uom'                       =>$uom
+            ); 
+        }
+        $assetdata = array();
+        for ($i=0; $i < count($itemID); $i++) {
+			$assetdata[] = array(
+                 
+                     'InventoryReceivingID'		=>$InventoryReceivingID[$i],
+                     'MaterialUsageID'		    =>$MaterialUsageID[$i],
+                     'ReturnItemID'		        =>$ReturnItemID[$i],
+                     'itemCode'		            =>$itemCode[$i],
+                     'itemID'		            =>$itemID[$i],
+                     'itemName'		            =>$itemName[$i],
+                     'barcode'		            =>$barcode[$i],
+                     'brand'                     =>$brand[$i],
+                     'categoryName'              =>$categoryName[$i],
+                     'classificationName'        =>$classificationName[$i],
+                     'expirationdate'            =>$expirationdate[$i],
+                     'inventoryCode'             =>$inventoryCode,
+                     'inventoryStorageCode'      =>$inventoryStorageCode[$i],
+                     'inventoryStorageID'        =>$inventoryStorageID[$i],
+                     'inventoryStorageOfficeName'=>$inventoryStorageOfficeName[$i],
+                     'manufactureDate'           =>$manufactureDate[$i],
+                     'quantity'                  =>$quantity[$i],
+                     'quantityForStockin'        =>$quantity[$i],
+                     'serialNumber'              =>$serialnumber[$i],
+                     'uom'                       =>$uom
+            );       
+          
+        }
+
+                     
+        $savereceivingreport = $this->inventorystockin->savestockin($itemdata, 	$assetdata, $itemID, $itemName, $brand, $classificationName, $categoryName, $barcode, $recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $recordID);
         $result = explode("|", $savereceivingreport);
         if ($result[0] == "true") {
             $this->session->set_flashdata('success', $result[1]);

@@ -1,4 +1,9 @@
 $(document).ready(function () {
+		$(this).find("select").each(function(x) {
+				if ($(this).hasClass("select2-hidden-accessible")) {
+					$(this).select2("destroy");
+				}
+			})
 
 	// ----- MODULE APPROVER -----
 	//const moduleApprover = getModuleApprover("inventory stock in");
@@ -548,6 +553,7 @@ $(document).ready(function () {
 		} else {
 			headerButton(false, "");	
 			formContent(data, readOnly);
+		
 		}
 	}
 	viewDocument();
@@ -562,6 +568,7 @@ $(document).ready(function () {
 
 	// ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false) {
+	
 		$("#page_content").html(preloader);
 		storageContent();
 		let {	
@@ -880,6 +887,9 @@ $(document).ready(function () {
 			storageContent();
 			// updateTableItems();
 			datevalidated();
+			//arrayselect2();
+			initSelect2();
+
 			initQuantity();
 			// expirationdatevalue();
 			initAll();
@@ -1054,6 +1064,7 @@ $(document).ready(function () {
 
 	// ----- MODAL CONTENT -----
 	function modalContent(data = true, readOnly = false) {
+		
 		console.log(data);
 		initQuantity();
 		var today = new Date();
@@ -1241,7 +1252,7 @@ $(document).ready(function () {
 										<td>
 											<input 
 												type="text"
-												class="form-control barcode" recordID="${item.recordID}"
+												class="form-control barcode" recordID="${recordID}"
 												ReturnItemID="${moduleReturnItemID}"
 												MaterialUsageID="${moduleMaterialUsageID}"
 												InventoryReceivingID="${moduleInventoryReceivingID}"
@@ -1572,6 +1583,7 @@ $(document).ready(function () {
 	});
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_product_record");
+		
 		if (validate) {
 			var itemCode = $("#itemCode").val();
 			var inventoryCode = $("#itemCode").attr("inventoryCode");
@@ -1653,11 +1665,6 @@ $(document).ready(function () {
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageCode.push($('option:selected', this).attr("inventoryStorageCode"));
 			});
-			// $(".manufactureDate").each(function () {
-			// 	manufactureDate.push($(this).val());
-			// 	alert(manufactureDate);
-			// 	//manufactureDate = moment(manufactureDate1).format("YYYY-MM-DD HH:mm:ss");
-			// });
 			$(".manufactureDate").each(function () {
 				manufactureDate.push($(this).val());
 				//manufactureDate = moment(manufactureDate1).format("YYYY-MM-DD HH:mm:ss");
@@ -1769,6 +1776,11 @@ $(document).ready(function () {
 		})
 
 	});
+	function arrayselect2(){
+		$(".select2").select2({ theme: "bootstrap"});
+
+	
+		}
 
 	function datevalidated() {
 		var dtToday = new Date();
