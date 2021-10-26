@@ -30,7 +30,17 @@
 					<div class="body" id="main_body">
 						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
 						<div class="row clearfix row-deck">
-							<div class="col-12">
+                            <div class="col-12 my-2">
+                                <select 
+                                    class="form-control select2 w-25" 
+                                    id="year_list" 
+                                    name="year_list"
+                                    autocomplete="off"
+                                    >
+                                    <option disabled value="" selected >Select year</option>
+                                </select>
+                            </div>
+							<div class="col-12 holiday_list" >
                                 <div class="table-responsive" id="table_content"></div>
 							</div>
 						</div>

@@ -253,55 +253,98 @@ class ServiceOrder_model extends CI_Model {
 
 
     // ----- SAVE TO SERVICE COMPLETION -----
-    
-    public function updateServices($srID = null, $soID = null, $scID = null)
+    public function getRequestServiceScope($serviceOrderID = 0, $requestServiceID = 0)
     {
-        if ($srID && $soID && $scID) {
-            $where = [
-                "serviceRequisitionID" => $srID,
-                "serviceOrderID"       => $soID
-            ];
-            $query1 = $this->db->update(
-                "ims_request_services_tbl",
-                ["serviceCompletionID" => $scID],
-                $where);
-            $query2 = $this->db->update(
-                "ims_service_scope_tbl", 
-                ["serviceCompletionID" => $scID],
-                $where);
-            return $query1 && $query2 ? true : false;
-        }
-        return false;
+        $sql = "SELECT * FROM ims_service_scope_tbl WHERE serviceOrderID = $serviceOrderID AND requestServiceID = $requestServiceID AND serviceCompletionID IS NULL";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
     }
 
-    public function saveServiceCompletion($id = null)
+    public function getRequestService($serviceRequisitionID = 0, $serviceOrderID = 0)
     {
-        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
+        $sql = "SELECT * FROM ims_request_services_tbl WHERE serviceRequisitionID = $serviceRequisitionID AND serviceOrderID = $serviceOrderID AND serviceCompletionID IS NULL";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
 
-        $soData = $this->getServiceOrder($id);
-        if ($soData) {
-            $serviceRequisitionID = $soData->serviceRequisitionID;
-            $employeeID           = $soData->employeeID;
-            $scData = [
-                "serviceRequisitionID"    => $serviceRequisitionID,
-                "serviceOrderID"          => $id,
-                "employeeID"              => $employeeID,
-                "approversID"             => null,
-                "approversStatus"         => null,
-                "approversDate"           => null,
-                "serviceCompletionStatus" => 0,
-                "createdBy"               => $sessionID,
-                "updatedBy"               => $sessionID,
-            ];
+    public function insertServiceCompletionItems($serviceRequisitionID = 0, $serviceOrderID = 0, $serviceCompletionID = 0)
+    {
+        $sessionID = $this->session->has_userdata('adminSessionID') ? $this->session->userdata('adminSessionID') : 0;
 
-            $query = $this->db->insert("ims_service_completion_tbl", $scData);
-            if ($query) {
-                $insertID = $this->db->insert_id();
-                $this->updateServices($serviceRequisitionID, $id, $insertID);
+        $serviceScopeData = [];
+        $requestService = $this->getRequestService($serviceRequisitionID, $serviceOrderID);
+        if (!empty($requestService)) {
+            foreach($requestService as $service) {
+                $requestServiceID = $service["requestServiceID"];
+
+                $requestServiceData = [
+                    'serviceRequisitionID' => $serviceRequisitionID,
+                    'serviceOrderID'       => $serviceOrderID,
+                    'serviceCompletionID'  => $serviceCompletionID,
+                    'serviceID'            => $service['serviceID'],
+                    'serviceName'          => $service['serviceName'],
+                    'serviceDateFrom'      => $service['serviceDateFrom'],
+                    'serviceDateTo'        => $service['serviceDateTo'],
+                    'remarks'              => $service['remarks'],
+                    'createdBy'            => $sessionID,
+                    'updatedBy'            => $sessionID,
+                ];
+                $insertRequestServiceData = $this->db->insert("ims_request_services_tbl", $requestServiceData);
+                if ($insertRequestServiceData) {
+                    $newRequestServiceID = $this->db->insert_id();
+
+                    $requestServiceScope = $this->getRequestServiceScope($serviceOrderID, $requestServiceID);
+                    if (!empty($requestServiceScope)) {
+                        $scopes = [];
+                        foreach($requestServiceScope as $scope) {
+                            $scopes[] = [
+                                'serviceRequisitionID' => $serviceRequisitionID,
+                                'serviceOrderID'       => $serviceOrderID,
+                                'serviceCompletionID'  => $serviceCompletionID,
+                                'requestServiceID'     => $newRequestServiceID,
+                                'description'          => $scope['description'],
+                                'quantity'             => $scope['quantity'],
+                                'uom'                  => $scope['uom'],
+                                'unitCost'             => $scope['unitCost'],
+                                'totalCost'            => $scope['totalCost'],
+                                'file'                 => $scope['file'],
+                                'createdBy'            => $sessionID,
+                                'updatedBy'            => $sessionID,
+                            ];
+                        }
+                        if (!empty($scopes)) {
+                            $insertRequestServiceScope = $this->db->insert_batch("ims_service_scope_tbl", $scopes);
+                        }
+                    }
+                }
             }
         }
     }
 
+    public function insertServiceCompletion($serviceOrderID = 0)
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
+
+        $serviceOrder = $this->getServiceOrder($serviceOrderID);
+        if ($serviceOrder) {
+            $serviceRequisitionID = $serviceOrder->serviceRequisitionID;
+            $data = [
+                'serviceRequisitionID'     => $serviceRequisitionID,
+                'serviceOrderID'           => $serviceOrderID,
+                'employeeID'               => 0,
+                'serviceCompletionStatus'  => 0,
+                'createdBy'                => $sessionID,
+                'updatedBy'                => $sessionID,
+            ];
+            $query = $this->db->insert("ims_service_completion_tbl", $data);
+            if ($query) {
+                $serviceCompletionID = $this->db->insert_id();
+                $this->insertServiceCompletionItems($serviceRequisitionID, $serviceOrderID, $serviceCompletionID);
+                return true;
+            }
+        }
+        return false;
+    }
     // ----- END SAVE TO SERVICE COMPLETION -----
 
 }

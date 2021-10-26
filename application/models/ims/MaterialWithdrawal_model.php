@@ -433,7 +433,7 @@ class MaterialWithdrawal_model extends CI_Model {
              WHERE materialWithdrawalID = $materialWithdrawalID");
              // END UPDATE THE EQUIPMENT BORROWING DOCUMENT STATUS//
 
-            $temp =  $this->db-query("SELECT materialWithdrawalID FROM ims_material_usage_tbl WHERE materialWithdrawalID =$materialWithdrawalID");
+            $temp =  $this->db->query("SELECT materialWithdrawalID FROM ims_material_usage_tbl WHERE materialWithdrawalID =$materialWithdrawalID");
 
             if($temp->num_rows() == 0){
                 $this->db->query("CALL proc_get_material_withdrawal_approve($materialWithdrawalID)");

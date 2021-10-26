@@ -47,19 +47,11 @@ class Service_order extends CI_Controller {
         $reviseServiceOrderID  = $this->input->post("reviseServiceOrderID") ?? null;
         $serviceRequisitionID  = $this->input->post("serviceRequisitionID") ?? null;
         $employeeID            = $this->input->post("employeeID") ?? null;
-        $projectID             = $this->input->post("projectID") ?? null;
-        $clientID              = $this->input->post("clientID") ?? null;
-        $clientName            = $this->input->post("clientName") ?? null;
-        $clientContactDetails  = $this->input->post("clientContactDetails") ?? null;
-        $clientContactPerson   = $this->input->post("clientContactPerson") ?? null;
-        $clientAddress         = $this->input->post("clientAddress") ?? null;
         $inventoryVendorID     = $this->input->post("inventoryVendorID") ?? null;
         $companyName           = $this->input->post("companyName") ?? null;
         $companyContactDetails = $this->input->post("companyContactDetails") ?? null;
         $companyContactPerson  = $this->input->post("companyContactPerson") ?? null;
         $companyAddress        = $this->input->post("companyAddress") ?? null;
-        $chartOfAccountID      = $this->input->post("chartOfAccountID") ?? null;
-        $accountName           = $this->input->post("accountName") ?? null;
         $paymentTerms          = $this->input->post("paymentTerms") ?? null;
         $discountType          = $this->input->post("discountType") ?? null;
         $scheduleDate          = $this->input->post("scheduleDate") ?? null;
@@ -83,21 +75,12 @@ class Service_order extends CI_Controller {
 
         $serviceOrderData = [
             "reviseServiceOrderID"  => $reviseServiceOrderID,
-            "serviceRequisitionID"  => $serviceRequisitionID,
             "employeeID"            => $employeeID,
-            "projectID"             => $projectID,
-            "clientID"              => $clientID,
-            "clientName"            => $clientName,
-            "clientContactDetails"  => $clientContactDetails,
-            "clientContactPerson"   => $clientContactPerson,
-            "clientAddress"         => $clientAddress,
             "inventoryVendorID"     => $inventoryVendorID,
             "companyName"           => $companyName,
             "companyContactDetails" => $companyContactDetails,
             "companyContactPerson"  => $companyContactPerson,
             "companyAddress"        => $companyAddress,
-            "chartOfAccountID"      => $chartOfAccountID,
-            "accountName"           => $accountName,
             "paymentTerms"          => $paymentTerms,
             "discountType"          => $discountType,
             "scheduleDate"          => $scheduleDate,
@@ -122,11 +105,14 @@ class Service_order extends CI_Controller {
         if ($reviseServiceOrderID) {
             $soData = $this->serviceorder->getServiceOrder($reviseServiceOrderID);
             if ($soData) {
-                $serviceRequisitionID                     = $soData->serviceRequisitionID;
+                $serviceOrderData["serviceRequisitionID"] = $soData->serviceRequisitionID;
                 $serviceOrderData["employeeID"]           = $soData->employeeID;
-                $serviceOrderData["serviceRequisitionID"] = $serviceRequisitionID;
-                $serviceOrderData["clientID"]             = $soData->clientID;
                 $serviceOrderData["projectID"]            = $soData->projectID;
+                $serviceOrderData["projectCode"]          = $soData->projectCode;
+                $serviceOrderData["projectName"]          = $soData->projectName;
+                $serviceOrderData["projectCategory"]      = $soData->projectCategory;
+                $serviceOrderData["clientID"]             = $soData->clientID;
+                $serviceOrderData["clientCode"]           = $soData->clientCode;
                 $serviceOrderData["clientName"]           = $soData->clientName;
                 $serviceOrderData["clientAddress"]        = $soData->clientAddress;
                 $serviceOrderData["clientContactDetails"] = $soData->clientContactDetails;
@@ -175,7 +161,7 @@ class Service_order extends CI_Controller {
             if ($result[0] == "true") {
                 $serviceOrderID = $result[2];
 
-                if ($items && count($items) > 0) {
+                if ($items && count($items) > 0 && $action == "insert") {
                     $deleteServices = $this->serviceorder->deleteServices($serviceRequisitionID, $serviceOrderID);
                     $deleteScopes   = $this->serviceorder->deleteScopes($serviceRequisitionID, $serviceOrderID);
 
@@ -737,6 +723,7 @@ class Service_order extends CI_Controller {
             if (move_uploaded_file($_FILES["files"]["tmp_name"], $targetDir)) {
 
                 $saveServiceOrderContract = $this->serviceorder->saveServiceOrderContract($serviceOrderID, $filename);
+                $insertServiceCompletion = $this->serviceorder->insertServiceCompletion($serviceOrderID);
                 echo json_encode($saveServiceOrderContract);
             }
         }

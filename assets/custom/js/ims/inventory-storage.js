@@ -239,6 +239,7 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
+				lengthMenu: [ 50, 75, 100, 150],
 				columnDefs: [
 					{
 						targets: 0,
@@ -439,69 +440,7 @@ $(document).ready(function () {
                                  <div class="invalid-feedback d-block" id="invalid-input_officename"></div>
                             </div>
                         </div>
-
-                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Region <span class="text-danger">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryStorageRegion" id="input_region" required>
-                            <option value="" disabled selected>Select Region</option>
-                            ${getRegionOptions(inventoryStorageRegion)}
-                            </select>
-                            <div class="invalid-feedback d-block" id="invalid-input_region"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>State/Province <span class="text-danger">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryStorageProvince"
-							id="input_province" required>
-							<option value="" disabled selected>Select Province</option>
-                                ${
-																	data &&
-																	getProvinceOptions(
-																		inventoryStorageProvince,
-																		inventoryStorageRegion
-																	)
-																}
-                            </select>
-                            <div class="invalid-feedback d-block" id="invalid-input_province"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>City/Municipality <span class="text-danger">*</span></label>
-							<select class=" form-control show-tick select2" id="input_municipality" name="inventoryStorageMunicipality" required>
-							<option value="" disabled selected>Select City/Municipality</option>
-                                ${
-																	data &&
-																	getMunicipalityOptions(
-																		inventoryStorageMunicipality,
-																		inventoryStorageRegion,
-																		inventoryStorageProvince
-																	)
-																}
-                            </select> 
-                            <div class="invalid-feedback d-block" id="invalid-input_municipality"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Barangay <span class="text-danger">*</span></label>
-							<select class=" form-control show-tick select2 validate" name="inventoryStorageBarangay" id="input_barangay" required>
-							<option value="" disabled selected>Select Barangay</option>
-                                ${
-																	data &&
-																	getBarangayOptions(
-																		inventoryStorageBarangay,
-																		inventoryStorageRegion,
-																		inventoryStorageProvince,
-																		inventoryStorageMunicipality
-																	)
-																}
-                            </select>
-                            <div class="invalid-feedback d-block" id="invalid-input_barangay"></div>
-                        </div>
-                    </div>
+                        
                     <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
                         <div class="form-group">
                             <label>Unit Number </label>
@@ -528,7 +467,7 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-input_street_Name"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                         <div class="form-group">
                             <label>Subdivision Name <span class="text-danger">*</span></label>
                             <input class="form-control validate"
@@ -537,7 +476,75 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-input_subdivision_Name"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
+
+					<div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
+							<div class="form-group">
+								<label>Region <span class="text-danger">*</span></label>
+								<select class=" form-control show-tick select2 validate" name="inventoryStorageRegion" id="input_region" required>
+								<option value="" disabled selected>Select Region</option>
+								${getRegionOptions(inventoryStorageRegion)}
+								</select>
+								<div class="invalid-feedback d-block" id="invalid-input_region"></div>
+							</div>
+                    	</div>
+                    	<div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
+							<div class="form-group">
+								<label>State/Province <span class="text-danger">*</span></label>
+								<select class=" form-control show-tick select2 validate" name="inventoryStorageProvince"
+								id="input_province" required>
+								<option value="" disabled selected>Select Province</option>
+									${
+																		data &&
+																		getProvinceOptions(
+																			inventoryStorageProvince,
+																			inventoryStorageRegion
+																		)
+																	}
+								</select>
+								<div class="invalid-feedback d-block" id="invalid-input_province"></div>
+							</div>
+                    	</div>
+                   	 	<div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+							<div class="form-group">
+								<label>City/Municipality <span class="text-danger">*</span></label>
+								<select class=" form-control show-tick select2" id="input_municipality" name="inventoryStorageMunicipality" required>
+								<option value="" disabled selected>Select City/Municipality</option>
+									${
+																		data &&
+																		getMunicipalityOptions(
+																			inventoryStorageMunicipality,
+																			inventoryStorageRegion,
+																			inventoryStorageProvince
+																		)
+																	}
+								</select> 
+								<div class="invalid-feedback d-block" id="invalid-input_municipality"></div>
+							</div>
+                    	</div>
+						<div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+							<div class="form-group">
+								<label>Barangay <span class="text-danger">*</span></label>
+								<select class=" form-control show-tick select2 validate" name="inventoryStorageBarangay" id="input_barangay" required>
+								<option value="" disabled selected>Select Barangay</option>
+									${
+																		data &&
+																		getBarangayOptions(
+																			inventoryStorageBarangay,
+																			inventoryStorageRegion,
+																			inventoryStorageProvince,
+																			inventoryStorageMunicipality
+																		)
+																	}
+								</select>
+								<div class="invalid-feedback d-block" id="invalid-input_barangay"></div>
+							</div>
+						</div>
+
+
+
+
+
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                         <div class="form-group">
                             <label>Country <span class="text-danger">*</span></label>
                             <input class="form-control validate"
@@ -547,7 +554,7 @@ $(document).ready(function () {
                         </div>
                         <div class="invalid-feedback d-block" id="invalid-input_country"></div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
+                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
                         <div class="form-group">
                             <label>Zip Code <span class="text-danger">*</span></label>
                             <input class="form-control validate"
@@ -557,7 +564,7 @@ $(document).ready(function () {
                         </div>
                         <div class="invalid-feedback d-block" id="invalid-input_zipcode"></div>
                     </div>
-					<div class="col-md-4 col-lg-4">
+					<div class="col-md-3 col-lg-3">
 						<div class="form-group">
 							<label for="">Storage Number</label>
 							<input 
@@ -572,7 +579,7 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-input_number"></div>
 						</div>
 					</div>
-					<div class="col-md-4 col-lg-4">
+					<div class="col-md-3 col-lg-3">
 						<div class="form-group">
 							<label for="">Room Number</label>
 							<input 
@@ -587,7 +594,7 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-input_room"></div>
 						</div>
                     </div>
-					<div class="col-md-4 col-lg-4">
+					<div class="col-md-3 col-lg-3">
 						<div class="form-group">
 							<label for="">Floor Number</label>
 							<input 
@@ -602,7 +609,7 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-input_floor"></div>
 						</div>
 					</div>
-					<div class="col-md-6 col-lg-6">
+					<div class="col-md-3 col-lg-3">
 						<div class="form-group">
 							<label for="">Bay Number</label>
 							<input 
@@ -617,7 +624,7 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-input_bay"></div>
 						</div>
 					</div>
-					<div class="col-md-6 col-lg-6">
+					<div class="col-md-3 col-lg-3">
 						<div class="form-group">
 							<label for="">Level Number</label>
 							<input 
@@ -632,7 +639,7 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-input_level"></div>
 						</div>
 					</div>
-					<div class="col-md-6 col-lg-6">
+					<div class="col-md-3 col-lg-3">
 						<div class="form-group">
 							<label for="">Shelf Number</label>
 							<input 
@@ -647,9 +654,9 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-input_shelves"></div>
 						</div>
 					</div>
-                        <div class="col-md-6 col-lg-6">
+                        <div class="col-md-3 col-lg-3">
                         <div class="form-group">
-                         <label for="">Status <span class="text-danger">*</span></label>
+                         <label for="">Status</label>
                         <select
                             class="form-control select2 validate" 
                                     name="inventoryStorageStatus" 

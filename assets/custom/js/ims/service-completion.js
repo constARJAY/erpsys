@@ -11,7 +11,8 @@ $(document).ready(function() {
 	const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
 		if (id) {
-			let data = allEmployeeData.filter(employee => employee.employeeID == id);
+			let empID = id == "0" ? sessionID : id;
+			let data = allEmployeeData.filter(employee => employee.employeeID == empID);
 			let { employeeID, fullname, designation, department } = data && data[0];
 			return { employeeID, fullname, designation, department };
 		}
@@ -59,41 +60,38 @@ $(document).ready(function() {
             const tableData = getTableData(
 				`ims_service_completion_tbl AS isct
 					LEFT JOIN ims_service_order_tbl AS isot USING(serviceOrderID)
-					LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
-					LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
-					LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID
 					LEFT JOIN ims_inventory_vendor_tbl AS iivt ON isot.inventoryVendorID = iivt.inventoryVendorID`,
                 `isct.*, 
-                isct.employeeID,
-				isot.serviceRequisitionID, 
-                isot.clientID, 
-				pct.createdAt AS pctCreatedAt,
-                isot.clientName, 
-                isot.clientAddress, 
-                isot.clientContactDetails, 
-                isot.clientContactPerson, 
-				isot.inventoryVendorID, 
-				iivt.createdAt AS iivtCreatedAt,
-                isot.companyName, 
-                isot.companyAddress, 
-                isot.companyContactDetails, 
-                isot.companyContactPerson, 
-                isot.paymentTerms, 
-                isot.discountType, 
-                isot.scheduleDate, 
-                isot.total, 
-                isot.discount, 
-                isot.totalAmount, 
-                isot.vatSales, 
-                isot.vat, 
-                isot.totalVat,
-                isot.lessEwt, 
-                isot.grandTotalAmount,
-                isot.contractFile,
-                isot.projectID, 
-                isot.createdAt AS soCreatedAt, 
-                isrt.serviceRequisitionReason, 
-                isrt.createdAt AS srCreatedAt`,
+				isot.projectID,
+				isot.projectCode,
+				isot.projectName,
+				isot.projectCategory,
+				isot.clientID,
+				isot.clientCode,
+				isot.clientName,
+				isot.clientAddress,
+				isot.clientContactDetails,
+				isot.clientContactPerson,
+				iivt.inventoryVendorID,
+				isot.companyName,
+				isot.companyContactDetails,
+				isot.companyContactPerson,
+				isot.companyAddress,
+				isot.paymentTerms,
+				isot.discountType,
+				isot.scheduleDate,
+				isot.total,
+				isot.discount,
+				isot.totalAmount,
+				isot.vatSales,
+				isot.vat,
+				isot.totalVat,
+				isot.lessEwt,
+				isot.grandTotalAmount,
+				isot.serviceOrderReason,
+				isot.contractFile,
+				isot.createdAt AS isotCreatedAt,
+				iivt.createdAt AS iivtCreatedAt`,
                 `serviceCompletionID=${id}`
             )
 			if (tableData.length > 0) {
@@ -106,8 +104,16 @@ $(document).ready(function() {
 
 				if (employeeID != sessionID) {
 					isReadOnly = true;
-					if (serviceCompletionStatus == 0 || serviceCompletionStatus == 4) {
-						isAllowed = false;
+					if (employeeID == null || employeeID == 0) {
+						if (serviceCompletionStatus == 0) {
+							isReadOnly = false;
+						} else {
+							isReadOnly = true;
+						}
+					} else {
+						if (serviceCompletionStatus == 0 || serviceCompletionStatus == 4) {
+							isAllowed = false;
+						}
 					}
 				} else if (employeeID == sessionID) {
 					if (serviceCompletionStatus == 0) {
@@ -352,13 +358,12 @@ $(document).ready(function() {
 		let html;
 		if (isAdd) {
 			if (isCreateAllowed(128)) {
-				html = `
-				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+				html = ``;
 			}
 		} else {
 			html = `
             <button type="button" 
-				class="btn btn-default btn-light" 
+				class="btn btn-default btn-light btnBack" 
 				id="btnBack" 
 				revise="${isRevise}"
 				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -374,14 +379,37 @@ $(document).ready(function() {
 		let serviceCompletionData = getTableData(
 			`ims_service_completion_tbl AS isct
 				LEFT JOIN ims_service_order_tbl AS isot USING(serviceOrderID)
-				LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
-				LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
-				LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID
 				LEFT JOIN hris_employee_list_tbl AS helt ON isct.employeeID = helt.employeeID`,
 			`isct.*,  
-            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isot.createdAt AS isotCreatedAt,
-			isot.serviceOrderReason`,
+            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, isot.createdAt AS isotCreatedAt,
+			isot.projectID,
+			isot.projectCode,
+			isot.projectName,
+			isot.projectCategory,
+			isot.clientID,
+			isot.clientCode,
+			isot.clientName,
+			isot.clientAddress,
+			isot.clientContactDetails,
+			isot.clientContactPerson,
+			isot.inventoryVendorID,
+			isot.companyName,
+			isot.companyContactDetails,
+			isot.companyContactPerson,
+			isot.companyAddress,
+			isot.paymentTerms,
+			isot.discountType,
+			isot.scheduleDate,
+			isot.total,
+			isot.discount,
+			isot.totalAmount,
+			isot.vatSales,
+			isot.vat,
+			isot.totalVat,
+			isot.lessEwt,
+			isot.grandTotalAmount,
+			isot.serviceOrderReason,
+			isot.contractFile`,
 			`isct.employeeID != ${sessionID} AND isct.serviceCompletionStatus != 0 AND isct.serviceCompletionStatus != 4`,
 			`FIELD(serviceCompletionStatus, 0, 1, 3, 2, 4, 5), COALESCE(isct.submittedAt, isct.createdAt)`
 		);
@@ -412,8 +440,8 @@ $(document).ready(function() {
 				isotCreatedAt,
 				clientName,
 				projectID,
-				projectListCode,
-				projectListName,
+				projectCode,
+				projectName,
 				approversID,
 				approversDate,
 				serviceCompletionStatus,
@@ -434,24 +462,24 @@ $(document).ready(function() {
 			let btnClass = serviceCompletionStatus != 0 ? "btnView" : "btnEdit";
 			if (isImCurrentApprover(approversID, approversDate, serviceCompletionStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${btnClass}" id="${encryptString(serviceCompletionID )}">
-					<td>${getFormCode("SC", createdAt, serviceCompletionID )}</td>
-					<td>${fullname}</td>
+				<tr class="${btnClass}" id="${encryptString(serviceCompletionID)}">
+					<td>${getFormCode("SC", createdAt, serviceCompletionID)}</td>
+					<td>${fullname || "-"}</td>
 					<td>${serviceOrderID != "0" ? getFormCode("SO", isotCreatedAt, serviceOrderID) : "-"}</td>
 					<td>${clientName   || '-'}</td>
 					<td>
 						<div>
-							${projectListCode || '-'}
+							${projectCode || '-'}
 						</div>
-						<small style="color:#848482;">${serviceOrderReason || "-"}</small>
+						<small style="color:#848482;">${serviceOrderReason || ""}</small>
 					</td>
-					<td>${projectListName || '-'}</td>
+					<td>${projectName || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, serviceCompletionStatus, true))}
 					</td>
 					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
-						${getStatusStyle(serviceCompletionStatus)}
+						${getStatusStyle(serviceCompletionStatus, true)}
 					</td>
 					<td>${remarks}</td>
 				</tr>`;
@@ -477,15 +505,38 @@ $(document).ready(function() {
 		let serviceCompletionData = getTableData(
 			`ims_service_completion_tbl AS isct
 				LEFT JOIN ims_service_order_tbl AS isot USING(serviceOrderID)
-				LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
-				LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
-				LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID
 				LEFT JOIN hris_employee_list_tbl AS helt ON isct.employeeID = helt.employeeID`,
 			`isct.*,  
-            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isot.createdAt AS isotCreatedAt,
-			isot.serviceOrderReason`,
-			`isct.employeeID = ${sessionID}`,
+            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, isot.createdAt AS isotCreatedAt,
+			isot.projectID,
+			isot.projectCode,
+			isot.projectName,
+			isot.projectCategory,
+			isot.clientID,
+			isot.clientCode,
+			isot.clientName,
+			isot.clientAddress,
+			isot.clientContactDetails,
+			isot.clientContactPerson,
+			isot.inventoryVendorID,
+			isot.companyName,
+			isot.companyContactDetails,
+			isot.companyContactPerson,
+			isot.companyAddress,
+			isot.paymentTerms,
+			isot.discountType,
+			isot.scheduleDate,
+			isot.total,
+			isot.discount,
+			isot.totalAmount,
+			isot.vatSales,
+			isot.vat,
+			isot.totalVat,
+			isot.lessEwt,
+			isot.grandTotalAmount,
+			isot.serviceOrderReason,
+			isot.contractFile`,
+			`isct.employeeID = 0 OR isct.employeeID IS NULL OR isct.employeeID = ${sessionID}`,
 			`FIELD(serviceCompletionStatus, 0, 1, 3, 2, 4, 5), COALESCE(isct.submittedAt, isct.createdAt)`
 		);
 
@@ -515,8 +566,8 @@ $(document).ready(function() {
 				isotCreatedAt,
 				clientName,
                 projectID,
-                projectListCode,
-                projectListName,
+                projectCode,
+                projectName,
 				approversID,
 				approversDate,
 				serviceCompletionStatus,
@@ -537,24 +588,24 @@ $(document).ready(function() {
 			let btnClass = serviceCompletionStatus != 0 ? "btnView" : "btnEdit";
 
 			html += `
-            <tr class="${btnClass}" id="${encryptString(serviceCompletionID )}">
-                <td>${getFormCode("SC", createdAt, serviceCompletionID )}</td>
-                <td>${fullname}</td>
+            <tr class="${btnClass}" id="${encryptString(serviceCompletionID)}">
+                <td>${getFormCode("SC", createdAt, serviceCompletionID)}</td>
+                <td>${fullname || "-"}</td>
                 <td>${serviceOrderID != "0" ? getFormCode("SO", isotCreatedAt, serviceOrderID) : "-"}</td>
                 <td>${clientName   || '-'}</td>
 				<td>
 					<div>
-						${projectListCode || '-'}
+						${projectCode || '-'}
 					</div>
-					<small style="color:#848482;">${serviceOrderReason || "-"}</small>
+					<small style="color:#848482;">${serviceOrderReason || ""}</small>
 				</td>
-				<td>${projectListName || '-'}</td>
+				<td>${projectName || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, serviceCompletionStatus, true))}
                 </td>
 				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">
-                    ${getStatusStyle(serviceCompletionStatus)}
+                    ${getStatusStyle(serviceCompletionStatus, true)}
                 </td>
 				<td>${remarks}</td>
             </tr>`;
@@ -567,7 +618,6 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
-			return html;
 		}, 300);
 	}
 	// ----- END MY FORMS CONTENT -----
@@ -587,7 +637,7 @@ $(document).ready(function() {
 			} = data && data[0];
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
-			if (employeeID === sessionID) {
+			if (employeeID == 0 || employeeID == null ||  employeeID === sessionID) {
 				if (serviceCompletionStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
@@ -597,6 +647,7 @@ $(document).ready(function() {
 						serviceCompletionID="${encryptString(serviceCompletionID)}"
 						code="${getFormCode("SC", createdAt, serviceCompletionID)}"
 						revise="${isRevise}"
+						status="${serviceCompletionStatus}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
@@ -609,17 +660,19 @@ $(document).ready(function() {
 							revise="${isRevise}"
 							serviceCompletionID="${encryptString(serviceCompletionID)}"
 							code="${getFormCode("SC", createdAt, serviceCompletionID)}"
+							status="${serviceCompletionStatus}"
 							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel px-5 p-2"
-							id="btnCancelForm" 
+							class="btn btn-cancel px-5 p-2 btnBack"
+							id="btnBack" 
 							serviceCompletionID="${encryptString(serviceCompletionID)}"
 							code="${getFormCode("SC", createdAt, serviceCompletionID)}"
-							revise=${isRevise}><i class="fas fa-ban"></i> 
+							status="${serviceCompletionStatus}"
+							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -640,15 +693,15 @@ $(document).ready(function() {
 					}
 				} else if (serviceCompletionStatus == 2) {
 					// DROP
-					button = `
-					<button type="button" 
-						class="btn btn-cancel px-5 p-2"
-						id="btnDrop" 
-						serviceCompletionID="${encryptString(serviceCompletionID)}"
-						code="${getFormCode("SC", createdAt, serviceCompletionID)}"
-						status="${serviceCompletionStatus}"><i class="fas fa-ban"></i> 
-						Drop
-					</button>`;
+					// button = `
+					// <button type="button" 
+					// 	class="btn btn-cancel px-5 p-2"
+					// 	id="btnDrop" 
+					// 	serviceCompletionID="${encryptString(serviceCompletionID)}"
+					// 	code="${getFormCode("SC", createdAt, serviceCompletionID)}"
+					// 	status="${serviceCompletionStatus}"><i class="fas fa-ban"></i> 
+					// 	Drop
+					// </button>`;
 				} else if (serviceCompletionStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(serviceCompletionID)) {
@@ -685,6 +738,7 @@ $(document).ready(function() {
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							serviceCompletionID="${encryptString(serviceCompletionID)}"
+							status="${serviceCompletionStatus}"
 							code="${getFormCode("SC", createdAt, serviceCompletionID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
@@ -692,6 +746,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							serviceCompletionID="${encryptString(serviceCompletionID)}"
+							status="${serviceCompletionStatus}"
 							code="${getFormCode("SC", createdAt, serviceCompletionID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
@@ -832,7 +887,7 @@ $(document).ready(function() {
                 value       = "${project.projectListID}" 
                 projectCode = "${getFormCode("PRJ", project.createdAt, project.projectListID)}"
                 ${project.projectListID == id && "selected"}>
-                ${project.projectListName}
+                ${project.projectName}
             </option>`;
         }).join("")
         return display ? html : projectList;
@@ -905,19 +960,13 @@ $(document).ready(function() {
     function getServiceScopeFile(scopeID, file, link = true, readOnly = false) {
 		let href = link ? `${base_url}assets/upload-files/request-services/${file}` : "javascript:void(0)";
 		let btnDelete = !readOnly ? `
-		<span class="pr-1 btnDeleteServiceFile"
-			scopeID="${scopeID}"
-			style="cursor: pointer;">x</span>` : "";
+		<span class="pr-1 btnDeleteServiceFile display-image-remove"
+			scopeID="${scopeID}">x</span>` : "";
 		const target = link ? `target="_blank"` : "";
         let html = `
         <div class="d-flex justify-content-start align-items-center">
             ${btnDelete}
-            <a class="ml-1"
-				style="display: block;
-					width: 180px;
-					overflow: hidden;
-					white-space: nowrap;
-					text-overflow: ellipsis;"
+            <a class="ml-1 display-image-filename"
                 href="${href}"
                 ${target}
 				title="${file}">
@@ -954,9 +1003,6 @@ $(document).ready(function() {
 			<tr>
 				<td>
 					<div class="servicefile">
-                        <div class="displayservicefile">
-                            ${serviceFile}
-                        </div>
 						<div class="input-group mb-0">
 							<input type="file"
 								class="form-control validate"
@@ -970,6 +1016,10 @@ $(document).ready(function() {
 								required>
 							<div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serviceFile"></div>
 						</div>
+						<div class="display-image displayservicefile" 
+							style="display: ${serviceFile ? "block" : "none"}">
+                            ${serviceFile}
+                        </div>
 					</div>
 				</td>
 				<td>
@@ -1270,14 +1320,16 @@ $(document).ready(function() {
 		if (filesize > 10) {
 			$(this).val("");
 			$(this).parent().parent().find(".displayfile").empty();
+			$(this).parent().parent().find(".displayfile").css("display", "none");
 			showNotification("danger", "File size must be less than or equal to 10mb");
 		} else {
 			let html = `
-			<div class="d-flex justify-content-between align-items-center py-2">
-				<span class="filename">${filename}</span>
-				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
+			<div class="d-flex justify-content-between align-items-center py-2 display-image">
+				<span class="filename display-image-filename">${filename}</span>
+				<span class="btnRemoveFile display-image-remove" style="cursor: pointer"><i class="fas fa-close"></i></span>
 			</div>`;
 			$(this).parent().find(".displayfile").first().html(html);
+			$(this).parent().find(".displayfile").css("display", "block");
 		}
 	})
 	// ----- END SELECT FILE -----
@@ -1287,6 +1339,7 @@ $(document).ready(function() {
 	$(document).on("click", ".btnRemoveFile", function() {
 		$(this).parent().parent().parent().find("[name=files]").first().val("");
 		$(this).closest(".displayfile").empty();
+		$(this).closest(".displayfile").css("display", "none");
 	})
 	// ----- END REMOVE FILE -----
 
@@ -1450,6 +1503,7 @@ $(document).ready(function() {
 				$(this).parent().find(".invalid-feedback").first().text("");
                 let html = getServiceScopeFile(scopeID, filenameArr.join("."), false);
                 $(this).closest(".servicefile").find(".displayservicefile").first().html(html);
+                $(this).closest(".servicefile").find(".displayservicefile").first().css("display", "block");
 			}
 		}
     })
@@ -1460,6 +1514,7 @@ $(document).ready(function() {
     $(document).on("click", ".btnDeleteServiceFile", function() {
         const scopeID = $(this).attr("scopeID");
         let div = $(this).closest('div');
+		let fileElement = $(this).closest("tr").find(".displayservicefile");
         div.fadeOut(500, function (){
             serviceFiles = serviceFiles.map(files => {
 				if (files.scopeID == scopeID) {
@@ -1472,6 +1527,7 @@ $(document).ready(function() {
 			$(this).closest("td").find("[name=serviceFile]").attr("filename", "");
 
             $(this).closest("div").remove();
+			fileElement.css("display", "none");
         });
     })
     // ----- END DELETE SERVICE FILE -----
@@ -1697,112 +1753,34 @@ $(document).ready(function() {
 			requestServiceItems += getServiceRow({}, serviceCompletionStatus == 4);
 		}
 
-		let discountDisplay = discountType == "percent" ? `
-			<div class="py-0 text-dark border-bottom">${formatAmount(discount)} %</div>` :
-			`<div class="py-0 text-dark border-bottom">${formatAmount(discount, true)}</div>`;
-
 		let html = `
-		<table class="table table-striped" id="tableServiceCompletionItems0">
-			<thead>
-				<tr style="white-space: nowrap">
-					<th>Service Code</th>
-					<th>Service Name</th>
-					<th>Service Date ${!readOnly ? "<code>*</code>" : ""}</th>
-					<th>Scope of Work</th>
-					<th>Remarks</th>
-				</tr>
-			</thead>
-			<tbody class="itemServiceTableBody">
-				${requestServiceItems}
-			</tbody>
-		</table>
-
-		<!-- <div class="col-12">
-			<div class="row py-2">
-				<div class="offset-lg-7 offset-xl-8 col-12 col-sm-12 col-lg-5 col-xl-4 col-xl-4 pt-3 pb-2">
-					<div class="row" style="font-size: 1.1rem">
-						<div class="col-6 col-lg-7 text-left">Total :</div>
-						<div class="col-6 col-lg-5 text-right text-dark"
-							style="font-size: 1.05em"
-							id="total">
-							${formatAmount(total, true)}
-						</div>
+		<div class="card">
+			<div class="card-header bg-primary text-white">
+				<div class="row align-items-center">
+					<div class="col-md-6 col-sm-12 text-left align-self-center">
+						<h5 style="font-weight: bold;
+							letter-spacing: 0.05rem;">SERVICES</h5>
 					</div>
-					<div class="row" style="font-size: 1.1rem">
-						<div class="col-6 col-lg-7 text-left">Discount :</div>
-						<div class="col-6 col-lg-5 text-right text-dark">
-							${discountDisplay}
-						</div>
-					</div>
-					<div class="row" style="font-size: 1.1rem">
-						<div class="col-6 col-lg-7 text-left">Total Amount:</div>
-						<div class="col-6 col-lg-5 text-right text-dark"
-							id="totalAmount"
-							style="font-size: 1.05em">
-							${formatAmount(totalAmount, true)}
-						</div>
-					</div>
-					<div class="row" style="font-size: 1.1rem">
-						<div class="col-6 col-lg-7 text-left">Vatable Sales:</div>
-						<div class="col-6 col-lg-5 text-right text-dark"
-							id="vatSales"
-							style="font-size: 1.05em">
-							${formatAmount(vatSales, true)}
-						</div>
-					</div>
-					<div class="row" style="font-size: 1.1rem">
-						<div class="col-6 col-lg-7 text-left">Vat 12%:</div>
-						<div class="col-6 col-lg-5 text-right text-dark">
-							<input 
-								type="text" 
-								class="form-control-plaintext amount py-0 text-dark border-bottom"
-								min="0" 
-								max="9999999999"
-								minlength="1"
-								maxlength="20" 
-								name="vat" 
-								id="vat" 
-								style="font-size: 1.02em;"
-								value="${vat}"
-								readonly>
-						</div>
-					</div>
-					<div class="row" style="font-size: 1.1rem">
-						<div class="col-6 col-lg-7 text-left">Total:</div>
-						<div class="col-6 col-lg-5 text-right text-dark"
-							id="totalVat"
-							style="font-size: 1.05em">
-							${formatAmount(totalVat, true)}
-						</div>
-					</div>
-					<div class="row" style="font-size: 1.1rem">
-						<div class="col-6 col-lg-7 text-left">Less EWT:</div>
-						<div class="col-6 col-lg-5 text-right text-dark">
-							<input 
-								type="text" 
-								class="form-control-plaintext amount py-0 text-dark border-bottom"
-								min="0" 
-								max="9999999999"
-								minlength="1"
-								maxlength="20" 
-								name="lessEwt" 
-								id="lessEwt" 
-								style="font-size: 1.02em;"
-								value="${lessEwt}"
-								${disabled}>
-						</div>
-					</div>
-					<div class="row pt-1" style="font-size: 1.3rem;; border-bottom: 3px double black; border-top: 1px solid black">
-						<div class="col-6 col-lg-7 text-left font-weight-bolder">Grand Total:</div>
-						<div class="col-6 col-lg-5 text-right text-danger font-weight-bolder"
-							id="grandTotalAmount"
-							style="font-size: 1.3em">
-							${formatAmount(grandTotalAmount, true)}
-						</div>
-					</div>
+					<div class="col-md-6 col-sm-12 text-right"></div>
 				</div>
 			</div>
-		</div> -->`;
+			<div class="card-body">
+				<table class="table table-striped" id="tableServiceCompletionItems0">
+					<thead>
+						<tr style="white-space: nowrap">
+							<th>Service Code</th>
+							<th>Service Name</th>
+							<th>Service Date ${!readOnly ? "<code>*</code>" : ""}</th>
+							<th>Scope of Work</th>
+							<th>Remarks</th>
+						</tr>
+					</thead>
+					<tbody class="itemServiceTableBody">
+						${requestServiceItems}
+					</tbody>
+				</table>
+			</div>
+		</div>`;
 
 		return html;
 	}
@@ -1871,15 +1849,13 @@ $(document).ready(function() {
 
 		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3" || (currentStatus == "4" && isRevise)) && method != "approve") {
 
-			let serviceOrderID = $(`[name="serviceOrderID"]`).val();
-				serviceOrderID = serviceOrderID && serviceOrderID != "undefined" ? serviceOrderID : $(`[name="serviceOrderID"]`).attr("serviceOrderID");
+			data["serviceRequisitionID"]  = $("[name=referenceNo]").attr("serviceRequisitionID") || null;
+			data["serviceOrderID"]  = $("[name=referenceNo]").attr("serviceOrderID") || null;
 			data["employeeID"] = sessionID;
-			data["serviceOrderID"]       = serviceOrderID;
-			data["serviceRequisitionID"] = $(`[name="serviceOrderID"] option:selected`).attr("serviceRequisitionID") || null;
 
 			formData.append("employeeID", sessionID);
-			formData.append("serviceOrderID", serviceOrderID);
-			formData.append("serviceRequisitionID", $(`[name="serviceOrderID"] option:selected`).attr("serviceRequisitionID") || null);
+			formData.append("serviceOrderID", $("[name=referenceNo]").attr("serviceOrderID") || null);
+			formData.append("serviceRequisitionID", $("[name=referenceNo]").attr("serviceRequisitionID") || null);
 
 			if (action == "insert") {
 				data["createdBy"] = sessionID;
@@ -1953,50 +1929,52 @@ $(document).ready(function() {
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
-		readOnly     = isRevise ? false : readOnly;
+		readOnly = isRevise ? false : readOnly;
 
 		let {
-			serviceCompletionID       = "",
-			reviseServiceCompletionID = "",
-			employeeID                = "",
-			clientID                  = "",
-			pctCreatedAt              = new Date,
-			projectID                 = "",
-			serviceOrderID            = "",
-			serviceRequisitionID      = "",
-			srCreatedAt               = new Date,
-			clientName                = "-",
-			clientAddress             = "-",
-			clientContactDetails      = "",
-			clientContactPerson       = "",
-			inventoryVendorID         = "",
-			iivtCreatedAt             = new Date,
-			companyCode               = "-",
-			companyName               = "-",
-			companyAddress            = "-",
-			companyContactDetails     = "",
-			companyContactPerson      = "",
-			paymentTerms              = "",
-			scheduleDate              = "",
-			serviceRequisitionReason  = "",
-			total                     = 0,
-			discount                  = 0,
-			totalAmount               = 0,
-			vatSales                  = 0,
-			vat                       = 0,
-			totalVat                  = 0,
-			lessEwt                   = 0,
-			grandTotalAmount          = 0,
-			serviceCompletionRemarks  = "",
-			approversID               = "",
-			approversStatus           = "",
-			approversDate             = "",
-			contractFile		      = "",
-			serviceCompletionStatus   = false,
-			submittedAt               = false,
-			createdAt                 = false,
+			serviceCompletionID,
+			reviseServiceCompletionID,
+			serviceRequisitionID,
+			serviceOrderID,
+			employeeID,
+			approversID,
+			approversStatus,
+			approversDate,
+			serviceCompletionStatus,
+			serviceCompletionRemarks,
+			submittedAt,
+			createdAt,
+			projectID,
+			projectCode,
+			projectName,
+			projectCategory,
+			clientID,
+			clientCode,
+			clientName,
+			clientAddress,
+			clientContactDetails,
+			clientContactPerson,
+			inventoryVendorID,
+			companyName,
+			companyContactDetails,
+			companyContactPerson,
+			companyAddress,
+			paymentTerms,
+			discountType,
+			scheduleDate,
+			total,
+			discount,
+			totalAmount,
+			vatSales,
+			vat,
+			totalVat,
+			lessEwt,
+			grandTotalAmount,
+			serviceOrderReason,
+			contractFile,
+			isotCreatedAt,
+			iivtCreatedAt,
 		} = data && data[0];
-		clientCode = clientID ? getFormCode("CLT", pctCreatedAt, clientID) : "-";
 
 		// ----- GET EMPLOYEE DATA -----
 		let {
@@ -2008,13 +1986,12 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("serviceCompletionID", encryptString(serviceCompletionID));
-		$("#btnBack").attr("status", serviceCompletionStatus);
-		$("#btnBack").attr("employeeID", employeeID);
-		$("#btnBack").attr("cancel", isFromCancelledDocument);
+		$(".btnBack").attr("serviceCompletionID", encryptString(serviceCompletionID));
+		$(".btnBack").attr("status", serviceCompletionStatus);
+		$(".btnBack").attr("employeeID", employeeID);
+		$(".btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
-		let disabledReference = serviceOrderID && serviceOrderID != "0" ? "disabled" : disabled;
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? serviceCompletionID : reviseServiceCompletionID;
@@ -2050,7 +2027,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${serviceCompletionStatus && !isRevise ? getStatusStyle(serviceCompletionStatus) : "---"}
+							${serviceCompletionStatus && !isRevise ? getStatusStyle(serviceCompletionStatus, true) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -2102,39 +2079,36 @@ $(document).ready(function() {
         </div>
 
 		<div class="row" id="form_service_completion">
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group" id="formReferenceNo">
-                    <label>Reference No. ${!disabledReference ? "<code>*</code>" : ""}</label>
-                    <select class="form-control validate select2"
-                        name="serviceOrderID"
-						serviceOrderID="${serviceOrderID}"
-                        id="serviceOrderID"
-                        style="width: 100%"
-                        required
-						${disabledReference}>
-                        <option selected disabled>Select Reference No.</option>
-                        ${getServiceOrderList(serviceOrderID, serviceCompletionStatus)}
-                    </select>
+                    <label>Reference No.</label>
+					<input type="text" class="form-control" name="referenceNo" disabled 
+						value="${getFormCode("SO", isotCreatedAt, serviceOrderID)}"
+						serviceRequisitionID="${serviceRequisitionID}"
+						serviceOrderID="${serviceOrderID}">
 					<div class="d-block invalid-feedback" id="invalid-serviceOrderID"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
-                    <input type="text" class="form-control" name="projectCode" disabled value="-">
+                    <input type="text" class="form-control" name="projectCode" disabled 
+						value="${projectCode}">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Project Name</label>
-                    <select class="form-control validate select2"
-                        name="projectID"
-                        id="projectID"
-                        style="width: 100%"
-						disabled>
-                        <option selected disabled>-</option>
-                        ${getProjectList(projectID)}
-                    </select>
+					<input type="text" class="form-control" name="projectName" disabled 
+						value="${projectName}">
+                    <div class="d-block invalid-feedback" id="invalid-projectID"></div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Project Category</label>
+					<input type="text" class="form-control" name="projectCategory" disabled 
+						value="${projectCategory}">
                     <div class="d-block invalid-feedback" id="invalid-projectID"></div>
                 </div>
             </div>
@@ -2173,7 +2147,7 @@ $(document).ready(function() {
 			<div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Company Code</label>
-                    <input type="text" class="form-control" name="companyCode" disabled value="${inventoryVendorID && inventoryVendorID != "0" ? (iivtCreatedAt ? getFormCode("VEN", iivtCreatedAt, inventoryVendorID) : companyCode) : "-"}">
+                    <input type="text" class="form-control" name="companyCode" disabled value="${getFormCode("VEN", iivtCreatedAt, inventoryVendorID)}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -2259,19 +2233,13 @@ $(document).ready(function() {
                         required
                         rows="4"
                         style="resize:none;"
-						disabled>${serviceRequisitionReason || "-"}</textarea>
+						disabled>${serviceOrderReason || "-"}</textarea>
                     <div class="d-block invalid-feedback" id="invalid-serviceOrderReason"></div>
                 </div>
             </div>
 			
 			<div class="col-sm-12">
-                <div class="w-100">
-					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services </div>
-					<div id="tableServiceDisplay">
-						${getServicesDisplay(data, readOnly, isFromCancelledDocument)}
-					</div>
-                </div>
+				${getServicesDisplay(data, readOnly, isFromCancelledDocument)}
             </div>
 
             <div class="col-md-12 text-right mt-3">
@@ -2286,13 +2254,9 @@ $(document).ready(function() {
 			$("#page_content").html(html);
 			initDataTables();
 			initAll();
-			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			updateTableItems();
 			updateServiceScope();
 			updateServiceOptions();
-			initAmount("#discount", false);
-			initAmount("#lessEwt", true);
-			initAmount("#vat", true);
 			removeIsValid("#tableServiceCompletionItems0");
 
 			const disablePreviousDateOptions = {
@@ -2319,7 +2283,7 @@ $(document).ready(function() {
 						$(this).attr("disabled", true);
 					}
 				})
-				$('#btnBack').attr("status", "2");
+				$('.btnBack').attr("status", "2");
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
@@ -2349,7 +2313,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Service Completion");
+			headerButton(true, "");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -2398,7 +2362,7 @@ $(document).ready(function() {
 
 
 	// ----- SAVE CLOSE FORM -----
-	$(document).on("click", "#btnBack", function () {
+	$(document).on("click", ".btnBack", function () {
 		const id         = decryptString($(this).attr("serviceCompletionID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
@@ -2524,8 +2488,8 @@ $(document).ready(function() {
 
 			if (revise) {
 				if (!isFromCancelledDocument) {
-					delete data["serviceCompletionID"];
-					data["reviseServiceCompletionID"] = id;
+					data.delete("serviceCompletionID");
+					data.append("reviseServiceCompletionID", id);
 				} 
 			}
 

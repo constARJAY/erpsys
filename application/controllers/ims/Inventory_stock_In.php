@@ -53,7 +53,7 @@ class Inventory_stock_in extends CI_Controller {
         $inventoryCode = $this->input->post("inventoryCode");
         $itemCode = $this->input->post("itemCode");
         $uom = $this->input->post("uom");
-        $data = array();
+        $itemdata = array();
         for ($i=0; $i < count($itemID); $i++) {
 			$itemdata[] = array(
                  
@@ -86,9 +86,9 @@ class Inventory_stock_in extends CI_Controller {
                      'InventoryReceivingID'		=>$InventoryReceivingID[$i],
                      'MaterialUsageID'		    =>$MaterialUsageID[$i],
                      'ReturnItemID'		        =>$ReturnItemID[$i],
-                     'itemCode'		            =>$itemCode[$i],
-                     'itemID'		            =>$itemID[$i],
-                     'itemName'		            =>$itemName[$i],
+                     'assetCode'		        =>$itemCode[$i],
+                     'assetID'		            =>$itemID[$i],
+                     'assetName'		        =>$itemName[$i],
                      'barcode'		            =>$barcode[$i],
                      'brand'                     =>$brand[$i],
                      'categoryName'              =>$categoryName[$i],
@@ -108,7 +108,7 @@ class Inventory_stock_in extends CI_Controller {
         }
 
                      
-        $savereceivingreport = $this->inventorystockin->savestockin($itemdata, 	$assetdata, $itemID, $itemName, $brand, $classificationName, $categoryName, $barcode, $recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $recordID);
+        $savereceivingreport = $this->inventorystockin->savestockin($itemdata, 	$assetdata, $barcode, $recordID);
         $result = explode("|", $savereceivingreport);
         if ($result[0] == "true") {
             $this->session->set_flashdata('success', $result[1]);

@@ -1,5 +1,6 @@
 $(document).ready(function () {
 
+	
 	//------ MODULE FUNCTION IS ALLOWED UPDATE-----
 
 	const allowedUpdate = isUpdateAllowed(59);
@@ -793,7 +794,20 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 			</div>
 		</div>
 		<div class="col-md-6 col-sm-12">
-		<label>Loan Deduction Amount ${!disabled ? "<code>*</code>" : ""}</label>
+
+		<label><i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="
+		LOAN FORM FORMULA:
+		
+		Loan Amount X Interest = Additional Fee
+		Loan Amount + Additional Fee(Interest) = Total Loan
+		
+		TERM OF PAYMENT: Payday
+		Total Loan / No. of months(start & end date)/ 2(payday) = Loan Deduction Amount  
+		
+		TERM OF PAYMENT: Monthly (First Cutoff & Second Cutoff)
+		Total Loan / No. of months = Loan Deduction Amount
+
+		"></i> Loan Deduction Amount ${!disabled ? "<code>*</code>" : ""}</label>
 			<div class="input-group">
 				<div class="input-group-prepend">
 					<span class="input-group-text">₱</span>
@@ -1584,7 +1598,7 @@ var loanAmount = parseFloat($("#input_loanFormAmount").val().replaceAll(",",""))
 // var deductionAmount = parseFloat($("#input_loanFormDeductionAmount").val().replaceAll(",",""));
 
 var loanType = $("#loanFormLoanID").val();
-var loanTermPayment = $("#loanFormTermPayment").val();
+var loanTermPayment = +$("#loanFormTermPayment").val();
 // var loanNoOfDays = $("#loanFormNoOfDays").val();
 var loanInterest = $("#loanFormInterest").val() || 0;
 console.log(loanInterest)
@@ -1593,18 +1607,25 @@ console.log(loanInterest)
 	let thisValueSplit  =   thisValue.split(" - ");
 	let fromDate        =  new Date(thisValueSplit[0]); 	
 	let toDate          =  new Date(thisValueSplit[1]);
-	loanNoOfDays    =  Math.round(moment(toDate).diff(moment(fromDate), 'months', true)) || 0;
+	let loanNoOfMonths    =  Math.round(moment(toDate).diff(moment(fromDate), 'months', true)) || 0;
+	let terms ="";
 
 
 
 
-if(loanType == null || loanTermPayment == null || loanNoOfDays == 0 || loanInterest == "" || isNaN(loanAmount) == true  ){
+if(loanType == null || loanTermPayment == null || loanNoOfMonths == 0 || loanInterest == "" || isNaN(loanAmount) == true  ){
 	
 	$("#input_loanFormDeductionAmount").val(0);
 }else{
 
+	if(loanTermPayment == 1 || loanTermPayment == 2){
+		terms =1; 
+	}else{
+		terms =2; 
+	}
 
-	var computeDeductionAmount = ((loanAmount + (loanAmount*(loanInterest/100))) /loanNoOfDays)/loanTermPayment;
+
+	var computeDeductionAmount = ((loanAmount + (loanAmount*(loanInterest/100))) /loanNoOfMonths)/terms;
 
 	$("#input_loanFormDeductionAmount").val(computeDeductionAmount);
 
@@ -1774,5 +1795,9 @@ function ammortizationContent() {
 	}, 300);
 }
 // ----- END MY FORMS CONTENT -----
+
+//  TOOLTIP //
+$('[data-toggle="tooltip"]').tooltip()
+// TOOLTIP //
 
 }

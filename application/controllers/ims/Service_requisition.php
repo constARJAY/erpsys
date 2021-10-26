@@ -27,7 +27,15 @@ class Service_requisition extends CI_Controller {
         $reviseServiceRequisitionID = $this->input->post("reviseServiceRequisitionID") ?? null;
         $employeeID                 = $this->input->post("employeeID");
         $clientID                   = $this->input->post("clientID") ?? null;
+        $clientCode                 = $this->input->post("clientCode") ?? null;
+        $clientName                 = $this->input->post("clientName") ?? null;
+        $clientAddress              = $this->input->post("clientAddress") ?? null;
+        $clientContactDetails       = $this->input->post("clientContactDetails") ?? null;
+        $clientContactPerson        = $this->input->post("clientContactPerson") ?? null;
         $projectID                  = $this->input->post("projectID") ?? null;
+        $projectCode                = $this->input->post("projectCode") ?? null;
+        $projectName                = $this->input->post("projectName") ?? null;
+        $projectCategory            = $this->input->post("projectCategory") ?? null;
         $approversID                = $this->input->post("approversID") ?? null;
         $approversStatus            = $this->input->post("approversStatus") ?? null;
         $approversDate              = $this->input->post("approversDate") ?? null;
@@ -45,13 +53,21 @@ class Service_requisition extends CI_Controller {
             "reviseServiceRequisitionID" => $reviseServiceRequisitionID,
             "employeeID"                 => $employeeID,
             "clientID"                   => $clientID,
+            "clientCode"                 => $clientCode,
+            "clientName"                 => $clientName,
+            "clientAddress"              => $clientAddress,
+            "clientContactDetails"       => $clientContactDetails,
+            "clientContactPerson"        => $clientContactPerson,
             "projectID"                  => $projectID,
+            "projectCode"                => $projectCode,
+            "projectName"                => $projectName,
+            "projectCategory"            => $projectCategory,
             "approversID"                => $approversID,
             "approversStatus"            => $approversStatus,
             "approversDate"              => $approversDate,
             "serviceRequisitionStatus"   => $serviceRequisitionStatus,
             "serviceRequisitionReason"   => $serviceRequisitionReason,
-            "serviceRequisitionTotalAmount"   => $serviceRequisitionTotalAmount,
+            "serviceRequisitionTotalAmount" => $serviceRequisitionTotalAmount,
             "submittedAt"                => $submittedAt,
             "createdBy"                  => $createdBy,
             "updatedBy"                  => $updatedBy,
@@ -96,30 +112,37 @@ class Service_requisition extends CI_Controller {
 
         $saveServiceRequisitionData = $this->servicerequisition->saveServiceRequisitionData($action, $serviceRequisitionData, $serviceRequisitionID);
 
-        if ($saveServiceRequisitionData && ($method == "submit" || $method == "save")) {
+        if ($saveServiceRequisitionData) {
             $result = explode("|", $saveServiceRequisitionData);
+            $serviceRequisitionID = $result[2];
 
-            if ($result[0] == "true") {
-                $serviceRequisitionID = $result[2];
-
-                if ($items && count($items) > 0) {
-                    foreach($items as $index => $item) {
-                        $service = [
-                            "serviceRequisitionID" => $serviceRequisitionID,
-                            "serviceID"            => $item["serviceID"] != "null" ? $item["serviceID"] : null,
-                            "serviceName"          => $item["serviceName"],
-                            "remarks"              => $item["remarks"],
-                            "createdBy"            => $updatedBy,
-                            "updatedBy"            => $updatedBy,
-                        ];
-                        $scopes = $item["scopes"];
-
-                        $saveServices = $this->servicerequisition->saveServices($service, $scopes, $serviceRequisitionID);
+            if ($method == "submit" || $method == "save") {
+                if ($result[0] == "true") {
+    
+                    if ($items && count($items) > 0) {
+                        foreach($items as $index => $item) {
+                            $service = [
+                                "serviceRequisitionID" => $serviceRequisitionID,
+                                "serviceID"            => $item["serviceID"] != "null" ? $item["serviceID"] : null,
+                                "serviceName"          => $item["serviceName"],
+                                "remarks"              => $item["remarks"],
+                                "createdBy"            => $updatedBy,
+                                "updatedBy"            => $updatedBy,
+                            ];
+                            $scopes = $item["scopes"];
+    
+                            $saveServices = $this->servicerequisition->saveServices($service, $scopes, $serviceRequisitionID);
+                        }
                     }
                 }
-
             }
             
+
+            // ----- INSERT SERVICE ORDER -----
+            if ($serviceRequisitionStatus == "2") {
+                $insertServiceOrderData = $this->servicerequisition->insertServiceOrderData($serviceRequisitionID);
+            }
+            // ----- END INSERT SERVICE ORDER -----
         }
         echo json_encode($saveServiceRequisitionData);
     }

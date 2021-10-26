@@ -15,6 +15,7 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
+				lengthMenu: [ 50, 75, 100, 150],
 				columnDefs: [
 					{ targets: 0, width: "120px" },
 					{ targets: 1, width: "30%" },
@@ -164,7 +165,7 @@ $(document).ready(function () {
                 </div>
                 <div class="col-sm-12">
                     <div class="form-group">
-                        <label>Status <code>*</code></label>
+                        <label>Status</label>
                         <select 
                             class="form-control select2 validate" 
                             id="projectMilestoneStatus" 

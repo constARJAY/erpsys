@@ -23,6 +23,7 @@ function initDataTables() {
         serverSide:     false,
         scrollX:        true,
         scrollCollapse: true,
+        lengthMenu: [ 50, 75, 100, 150],
         columnDefs: [
             { targets: 0, width: "10%" },
             // { targets: 1, width: "80%" },
@@ -181,7 +182,7 @@ tableContent();
         <div class="row">
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                    <label>Status</label>
                     <select 
                         class="form-control select2 validate" 
                         id="input_serviceStatus" 

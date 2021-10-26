@@ -162,6 +162,10 @@ $(document).on("change", "[name=clientCity]", function() {
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
+            lengthMenu: [
+                [50, 100, 150, 200, -1],
+                [50, 100, 150, 200, "All"],
+            ],
             columnDefs: [
                 { targets: 0, width: "10%" },
                 { targets: 1, width: "10%" },
@@ -216,23 +220,26 @@ $(document).on("change", "[name=clientCity]", function() {
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
-                        id:       item.clientID, // Required
-                        clientName: item.clientName,
-                        email:    item.email,
+                        id:              item.clientID, // Required
+                        clientName:      item.clientName,
+                        clientBrandName: item.clientBrandName,
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
-                    if(item.clientStatus == 1){
-                        var status=`<span class="badge badge-outline-success w-100">Active</span>`;
-                     }   
-                     if(item.clientStatus == 0){
-                        var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
-                     }
+                    let status = `<span class="badge badge-outline-danger w-100">Inactive</span>`;
+                    if (item.clientStatus == 1) {
+                        status=`<span class="badge badge-outline-success w-100">Active</span>`;
+                    } 
+
+                    let clientLink = item.clientBrandName ? `
+                        <a href="${item.clientBrandName}"
+                            class="client-link"
+                            target="_blank">${item.clientBrandName}</a>` : "-";
+
                     html += `
-                    <tr
-                    class="btnEdit" 
-                    id="${item.clientID}"
-                    feedback="${item.clientName}">
+                    <tr class="btnEdit" 
+                        id="${item.clientID}"
+                        feedback="${item.clientName}">
                         <td>${item.clientCode}</td>
                         <td>${item.clientName}</td>
                         <td style="white-space: normal">
@@ -251,7 +258,7 @@ $(document).on("change", "[name=clientCity]", function() {
                         <td>${item.clientTin}</td>
                         <td>${item.client_MobileNo}</td>
                         <td>${item.clientTelephoneNo}</td>
-                        <td>${item.clientBrandName}</td>
+                        <td>${clientLink}</td>
                         <td class="text-center">${status}</td>
                     </tr>`;
                 })
@@ -316,12 +323,10 @@ $(document).on("change", "[name=clientCity]", function() {
         let html = `
 
             <div class="modal-body">
-                <div class="row" id="pre-loader"></div>
                 <div class="row" id="modal_form">
-                   
                     <div class="col-xl-8 col-lg-8 col-md-8 col-sm-8">
                         <div class="form-group">
-                            <label>Client Name <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Client Name <code>*</code></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
@@ -339,7 +344,7 @@ $(document).on("change", "[name=clientCity]", function() {
                     </div>
                     <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4">
                         <div class="form-group">
-                            <label>Client Shortcut <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Client Shortcut <code>*</code></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
@@ -355,10 +360,59 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalidInputClientShortcut"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <div class="col-sm-12 col-md-2">
                         <div class="form-group">
-                            <label>Region <span
-                                    class="text-danger font-weight-bold">*</span></label>
+                            <label>Unit No. </label>
+                            <input class="form-control validate"
+                            data-allowcharacters="[0-9]" minlength="1" maxlength="35"  id="input_clientUnitNumber" name="clientUnitNumber" value="${clientUnitNumber}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientUnitNumber"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-5">
+                        <div class="form-group">
+                            <label>Building/House No. <code>*</code></label>
+                            <input class="form-control validate" required=""
+                            data-allowcharacters="[a-z][A-Z][.][,][-]['][#][0-9][ ]" minlength="1" maxlength="35" id="input_clientHouseNumber" name="clientHouseNumber" value="${clientHouseNumber}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientHouseNumber"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-5">
+                        <div class="form-group">
+                            <label>Street Name <code>*</code></label>
+                            <input class="form-control validate" required
+                            data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][ ]" minlength="2" maxlength="75"  id="input_clientStreetName" name="clientStreetName" value="${clientStreetName}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientStreetName"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-5">
+                        <div class="form-group">
+                            <label>Subdivision Name <code>*</code></label>
+                            <input class="form-control validate" required
+                            data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][ ]" minlength="2" maxlength="75" id="input_clientSubdivisionName" name="clientSubdivisionName" value="${clientSubdivisionName}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientSubdivisionName"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-5">
+                        <div class="form-group">
+                            <label>Country <code>*</code></label>
+                            <input class="form-control validate" required=""
+                                data-allowcharacters="[a-z][A-Z][ ]" id="input_clientCountry" name="clientCountry" minlength="6"
+                                maxlength="50" value="${clientCountry}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientCountry"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-2">
+                        <div class="form-group">
+                            <label>Zip Code <code>*</code></label>
+                            <input class="form-control validate" required=""
+                                data-allowcharacters="[0-9]" id="input_clientPostalCode" name="clientPostalCode" minlength="4"
+                                maxlength="4" value="${clientPostalCode}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientPostalCode"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <div class="form-group">
+                            <label>Region <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="clientRegion" required=""
                                 id="input_clientRegion" readonly=""> 
                                 <option value="" disabled selected>Select Region</option>
@@ -367,10 +421,9 @@ $(document).on("change", "[name=clientCity]", function() {
                                 <div class="invalid-feedback d-block" id="invalid-input_clientRegion"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <div class="col-sm-12 col-md-6">
                         <div class="form-group">
-                            <label>Province <span
-                                    class="text-danger font-weight-bold">*</span></label>
+                            <label>Province <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="clientProvince" required=""
                                 id="input_clientProvince" readonly="">
                                 <option value="" disabled selected>Select Province</option>
@@ -379,10 +432,9 @@ $(document).on("change", "[name=clientCity]", function() {
                                 <div class="invalid-feedback d-block" id="invalid-input_clientProvince"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <div class="col-sm-12 col-md-6">
                         <div class="form-group">
-                            <label>City/Municipality <span
-                                    class="text-danger font-weight-bold validate">*</span></label>
+                            <label>City/Municipality <code>*</code></label>
                             <select class=" form-control show-tick select2" required="" id="input_clientCity" name="clientCity" readonly="">
                             <option value="" disabled selected>Select City/Municipality</option>
                             ${data && getMunicipalityOptions(clientCity, clientRegion, clientProvince)}
@@ -390,7 +442,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientCity"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <div class="col-sm-12 col-md-6">
                         <div class="form-group">
                             <label>Barangay <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="clientBarangay" required
@@ -401,61 +453,9 @@ $(document).on("change", "[name=clientCity]", function() {
                                 <div class="invalid-feedback d-block" id="invalid-input_clientBarangay"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
+                    <div class="col-sm-12 col-md-4">
                         <div class="form-group">
-                            <label>Unit Number </label>
-                            <input class="form-control validate"
-                            data-allowcharacters="[0-9]" minlength="1" maxlength="35"  id="input_clientUnitNumber" name="clientUnitNumber" value="${clientUnitNumber}" type="text">
-                            <div class="invalid-feedback d-block" id="invalid-input_clientUnitNumber"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
-                        <div class="form-group">
-                            <label>Building/House Number <span class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                            data-allowcharacters="[a-z][A-Z][.][,][-]['][#][0-9][ ]" minlength="1" maxlength="35" id="input_clientHouseNumber" name="clientHouseNumber" value="${clientHouseNumber}" type="text">
-                            <div class="invalid-feedback d-block" id="invalid-input_clientHouseNumber"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                        <div class="form-group">
-                            <label>Street Name <span class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required
-                            data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][ ]" minlength="2" maxlength="75"  id="input_clientStreetName" name="clientStreetName" value="${clientStreetName}" type="text">
-                            <div class="invalid-feedback d-block" id="invalid-input_clientStreetName"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                        <div class="form-group">
-                            <label>Subdivision Name <span class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required
-                            data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][ ]" minlength="2" maxlength="75" id="input_clientSubdivisionName" name="clientSubdivisionName" value="${clientSubdivisionName}" type="text">
-                            <div class="invalid-feedback d-block" id="invalid-input_clientSubdivisionName"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                        <div class="form-group">
-                            <label>Country <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                                data-allowcharacters="[a-z][A-Z][ ]" id="input_clientCountry" name="clientCountry" minlength="6"
-                                maxlength="50" value="${clientCountry}" type="text">
-                            <div class="invalid-feedback d-block" id="invalid-input_clientCountry"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                        <div class="form-group">
-                            <label>Zip Code <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                                data-allowcharacters="[0-9]" id="input_clientPostalCode" name="clientPostalCode" minlength="4"
-                                maxlength="4" value="${clientPostalCode}" type="text">
-                            <div class="invalid-feedback d-block" id="invalid-input_clientPostalCode"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Contact Person <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Contact Person <code>*</code></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
@@ -470,7 +470,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientContactPerson"></div>
                         </div>
                     </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-sm-12 col-md-4">
                         <div class="form-group">
                             <label>Email Address </label>
                             <input 
@@ -488,9 +488,9 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientEmailAddress"></div>
                         </div>
                     </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-sm-12 col-md-4">
                         <div class="form-group">
-                            <label>Tax Identification Number <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Tax Identification No. <code>*</code></label>
                             <input 
                                 type="text" 
                                 class="form-control inputmask" 
@@ -508,7 +508,7 @@ $(document).on("change", "[name=clientCity]", function() {
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Mobile No. <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Mobile No. <code>*</code></label>
                                 <input 
                                 type="text" 
                                 class="form-control inputmask" 
@@ -525,7 +525,7 @@ $(document).on("change", "[name=clientCity]", function() {
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Telephone No. <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Telephone No. <code>*</code></label>
                                 <input type="text" 
                                 class="form-control inputmask" 
                                 name="clientTelephoneNo" 
@@ -555,13 +555,9 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientBrandName"></div>
                         </div>
                     </div>
-
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Contract</label>
-                            <div class="displayfile" id="displayContract">
-                                ${clientContract ? getFileDisplay(clientContract) : ""}
-                            </div>
                             <input 
                                 type="file" 
                                 class="form-control file" 
@@ -569,14 +565,14 @@ $(document).on("change", "[name=clientCity]", function() {
                                 id="clientContract"
                                 file="${clientContract}"
                                 autocomplete="off">
+                            <div class="display-image displayfile" id="displayContract" style="display: ${clientContract ? "block" : "none"}">
+                                ${clientContract ? getFileDisplay(clientContract) : ""}
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Job Order</label>
-                            <div class="displayfile" id="displayJobOrder">
-                                ${clientJobOrder ? getFileDisplay(clientJobOrder) : ""}
-                            </div>
                             <input 
                                 type="file" 
                                 class="form-control file" 
@@ -584,14 +580,14 @@ $(document).on("change", "[name=clientCity]", function() {
                                 id="clientJobOrder"
                                 file="${clientJobOrder}"
                                 autocomplete="off">
+                            <div class="display-image displayfile" id="displayJobOrder" style="display: ${clientJobOrder ? "block" : "none"}">
+                                ${clientJobOrder ? getFileDisplay(clientJobOrder) : ""}
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Engagement Letter</label>
-                            <div class="displayfile" id="displayEngagementLetter">
-                                ${clientEngagementLetter ? getFileDisplay(clientEngagementLetter) : ""}
-                            </div>
                             <input 
                                 type="file" 
                                 class="form-control file" 
@@ -599,12 +595,15 @@ $(document).on("change", "[name=clientCity]", function() {
                                 id="clientEngagementLetter"
                                 file="${clientEngagementLetter}"
                                 autocomplete="off">
+                            <div class="display-image displayfile" id="displayJobOrder" style="display: ${clientEngagementLetter ? "block" : "none"}">
+                                ${clientEngagementLetter ? getFileDisplay(clientEngagementLetter) : ""}
+                            </div>
                         </div>
                     </div>
 
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Status <code>*</code></label>
                             <select 
                                 class="form-control select2 validate" 
                                 id="input_clientStatus" 
@@ -637,14 +636,15 @@ $(document).on("change", "[name=clientCity]", function() {
     // ----- CHOOSE FILE -----
     function getFileDisplay(filename = null, link = true) {
         let text = link ? `
-        <a class="filename" title="${filename}" style="display: block;
+        <a class="display-image-filename" title="${filename}" style="display: block;
             width: 90%;
             overflow: hidden;
             white-space: nowrap;
-            text-overflow: ellipsis;" href="${base_url}assets/upload-files/clients/${filename}" target="_blank">
+            text-overflow: ellipsis;" 
+            href="${base_url}assets/upload-files/clients/${filename}" target="_blank">
             ${filename}
         </a>` : `
-        <span class="filename" title="${filename}" style="display: block;
+        <span class="display-image-filename" title="${filename}" style="display: block;
             width: 90%;
             overflow: hidden;
             white-space: nowrap;
@@ -654,7 +654,7 @@ $(document).on("change", "[name=clientCity]", function() {
 
         let html = `
         <div class="d-flex justify-content-start align-items-center p-0">
-            <span class="btnRemoveFile pr-2" style="cursor: pointer"><i class="fas fa-close"></i></span>
+            <span class="display-image-remove btnRemoveFile pr-2"><i class="fas fa-close"></i></span>
             ${text}
         </div>`;
 
@@ -673,6 +673,7 @@ $(document).on("change", "[name=clientCity]", function() {
                 showNotification("danger", "File size must be less than or equal to 10mb");
             } else {
                 $parent.find(`[type="file"]`).attr("file", filename);
+                $parent.find(`.displayfile`).css("display", "block");
                 $parent.find(".displayfile").html(getFileDisplay(filename, false));
             }
         }
@@ -687,13 +688,14 @@ $(document).on("change", "[name=clientCity]", function() {
         $parent.find(`[type="file"]`).val("");
         $parent.find(`[type="file"]`).removeAttr("file");
         $parent.find(".displayfile").children().remove();
+        $parent.find(`.displayfile`).css("display", "none");
     })
     // ----- END REMOVE FILE -----
 
 
         // ----- OPEN ADD MODAL -----
     $(document).on("click", "#btnAdd", function() {
-        $("#modalTitleAddClientHeader").text("ADD PROJECT CLIENT");
+        $("#modalTitleAddClientHeader").text("ADD CLIENT");
         $("#modalProjectClient").modal("show");
         $("#modalProjectClientContent").html(preloader);
 
@@ -729,14 +731,11 @@ $(document).on("change", "[name=clientCity]", function() {
     });
     // ----- END SAVE MODAL -----
 
-    // ----- OPEN EDIT MODAL -----
-    $(document).on("click", ".btnEdit", function() {
-        const id       = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-        $("#modalTitleAddClientHeader").text("EDIT CLIENT");
-        $("#modalProjectClient").modal("show")
 
-        // Display preloader while waiting for the completion of getting the data
+    // ----- OPEN EDIT MODAL -----
+    function openEditModal(id = null) {
+        $("#modalTitleAddClientHeader").text("EDIT CLIENT");
+        $("#modalProjectClient").modal("show");
         $("#modalProjectClientContent").html(preloader); 
 
         const tableData = getTableData("pms_client_tbl", "*", "clientID="+id, "");
@@ -745,8 +744,31 @@ $(document).on("change", "[name=clientCity]", function() {
             $("#modalProjectClientContent").html(content);       
             initAll(); 
         }
+    }
+    // ----- END OPEN EDIT MODAL -----
+
+
+    // ----- OPEN EDIT MODAL -----
+    $(document).on("click", ".btnEdit", function(e) {
+        const id   = $(this).attr("id");
+        const noShow = $(this).attr("show") == "false";
+        if (!noShow) {
+            openEditModal(id);
+        } else {
+            e.preventDefault();
+            $(`.btnEdit`).removeAttr("show");
+        }
     });
     // ----- END OPEN EDIT MODAL -----
+
+
+    $(document).on('click', `.client-link`, function() {
+        let url = $(this).attr("href");
+        window.open(url, "_blank");
+        $(`.btnEdit`).attr("show", "false");
+    })
+
+
 
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {

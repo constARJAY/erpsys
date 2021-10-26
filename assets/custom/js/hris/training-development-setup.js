@@ -35,6 +35,7 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
+				lengthMenu: [ 50, 75, 100, 150],
 				columnDefs: [
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 200 },
@@ -218,9 +219,7 @@ $(document).ready(function () {
 					  <div class="col-md-6">
 					  <div class="form-group">
 						  <label>Training Module </label>
-						  <div class="displayfile" id="displaytrainingDevelopmentSetupModuleFile">
-							  ${trainingDevelopmentSetupModuleFile ? getFileDisplay(trainingDevelopmentSetupModuleFile) : ""}
-						  </div>
+						  
 						  <input 
 							  type="file" 
 							  class="form-control file" 
@@ -229,7 +228,10 @@ $(document).ready(function () {
 							  accept=".xlsx,.xls,.doc, .docx,.ppt, .pptx,.txt,.pdf"
 							  file="${trainingDevelopmentSetupModuleFile}"
 							  autocomplete="off">
-							  <div class="invalid-feedback d-block" id="invalid-files"></div>
+								<div class="displayfile" id="displaytrainingDevelopmentSetupModuleFile">
+									${trainingDevelopmentSetupModuleFile ? getFileDisplay(trainingDevelopmentSetupModuleFile) : ""}
+								</div>
+								<div class="invalid-feedback d-block" id="invalid-files"></div>
 					  </div>
 				  </div>
                     <div class="col-sm-6">
@@ -260,7 +262,7 @@ $(document).ready(function () {
 				  	</div>
 					<div class="col-sm-6">
                         <div class="form-group">
-                            <label>Status <code>*</code></label>
+                            <label>Status</label>
                             <select class=" form-control show-tick select2 validate" 
 								name="trainingDevelopmentSetupStatus" 
 								id="trainingDevelopmentSetupStatus" 
@@ -286,23 +288,29 @@ $(document).ready(function () {
 	 function getFileDisplay(filename = null, link = true) {
         let text = link ? `
         <a class="filename" title="${filename}" style="display: block;
-            width: 90%;
+			font-size: 12px; border: 1px solid black; border-radius: 5px; background: #d1ffe0; padding: 2px 10px;
+            width: 100%;
             overflow: hidden;
             white-space: nowrap;
+			color:black;
             text-overflow: ellipsis;" href="${base_url}assets/upload-files/training-development-setup/${filename}" target="_blank">
             ${filename}
         </a>` : `
         <span class="filename" title="${filename}" style="display: block;
-            width: 90%;
+            width: 100%;
             overflow: hidden;
             white-space: nowrap;
-            text-overflow: ellipsis;">
+            text-overflow: ellipsis;
+			font-size: 12px; border: 1px solid black; border-radius: 5px; background: #d1ffe0; padding: 2px 10px;
+			"
+			>
+			<span class="btnRemoveFile pr-2" style="cursor: pointer"><i class="fas fa-close"></i></span>
             ${filename}
         </span>`;
 
         let html = `
         <div class="d-flex justify-content-start align-items-center p-0">
-            <span class="btnRemoveFile pr-2" style="cursor: pointer"><i class="fas fa-close"></i></span>
+            
             ${text}
         </div>`;
 
@@ -310,24 +318,28 @@ $(document).ready(function () {
     }
 
 	function fileValidation(){
-		var fileName = document.getElementById('trainingDevelopmentSetupModuleFile').value.toLowerCase();
-		if(!fileName=="" && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xls') && !fileName.endsWith('.pptx') && !fileName.endsWith('.pdf') && !fileName.endsWith('.docs')){
-			//showNotification("danger", "Pleased upload excel, powerpoint, docs and pdf");
-			$("#trainingDevelopmentSetupModuleFile").addClass("is-invalid");
-			$("#invalid-files").text("Invalid file extension.");
-			return false;
-		}else{
+		var path     	= document.getElementById('trainingDevelopmentSetupModuleFile').value.toLowerCase();
+		var splitPath 	= path.split(".");
+		var fileName 	= splitPath.pop();
+		
+		if(fileName == 'xlsx' || fileName == 'xls' || fileName == 'pptx' || fileName == 'pdf' || fileName == 'docs' || fileName == 'jpg' || fileName == 'png'){
 			$("#trainingDevelopmentSetupModuleFile").removeClass("is-invalid");
 			$("#invalid-files").text("");
 			return true;
+		}else{
+			//showNotification("danger", "Pleased upload excel, powerpoint, docs and pdf");
+			setTimeout(() => {
+				$("#trainingDevelopmentSetupModuleFile").addClass("is-invalid");
+				$("#invalid-files").text("Invalid file extension.");
+			}, 500);
+			return false;
+			
 		}		
 	}
-	$(document).on("change", `[type="file"]`, function() {
-        $parent = $(this).closest(".form-group");
-		
-		//alert(fileName);
 
-			//alert('Please upload excel file only.');
+	$(document).on("change", `[type="file"]`, function() {
+		fileValidation();
+        $parent = $(this).closest(".form-group");
 		
 			if (this.files && this.files[0]) {
 				const filesize = this.files[0].size/1024/1024; // Size in MB

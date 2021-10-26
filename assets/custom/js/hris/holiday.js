@@ -1,8 +1,30 @@
 $(document).ready(function(){
+    getYearList();
     initDataTables();
-    tableContent();
-});
+    tableContent("",true);
 
+});
+function getYearList(yearOption = null){
+    let tableData   = getTableData("hris_holiday_tbl","YEAR(holidayDate) AS holidayYear","","","holidayYear");
+    // let option      = `<option disabled value="" ${!yearOption ? "selected" : "" } >Select year</option>`;
+    let option          = `<option value="" ${!yearOption ? "selected" : "" } >All</option>`;
+    tableData.map(years=>{
+        option += `<option value="${years.holidayYear}" ${years.holidayYear == yearOption ? "selected" : ""}>${years.holidayYear}</option>`;
+    });
+        $("#year_list").html(option); 
+  
+    
+}
+// ID: year_list;
+// SELECT YEAR(holidayDate) AS holidayYear FROM hris_holiday_tbl GROUP BY holidayYear
+/* <option disabled value="" selected >Please select</option>
+                                    <option></option> */
+
+$(document).on("change", "#year_list", function(){
+    let thisYear  = $(this).val();
+    tableContent(thisYear,true);
+});
+                                    
 // OPENING ADD & EDIT MODAL
 $(document).on("click",".addHoliday", function(){
     $(".modal_holiday_header").text("ADD HOLIDAY")
@@ -59,7 +81,7 @@ $(document).on("click",".addHoliday", function(){
                                                         </div>
                                                         <div class="col-md-6 col-sm-6">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status</label>
                                                                 <select class="form-control select2 validate" name="holidayStatus" id="inputholidayStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
@@ -77,9 +99,16 @@ $(document).on("click",".addHoliday", function(){
                                             `;
     setTimeout(function(){
         $("#modal_holiday_content").html(modal_holiday_content);
-        initAll();
+        
+        if (!$("#year_list").hasClass("select2-hidden-accessible")) {
+            $("#year_list").select2("destroy");
+        }
+        initDateRangePicker("#inputholidayDate");
+        initSelect2("#inputholidayType");
         $("#inputholidayDate").data("daterangepicker").startDate = moment();
         $("#inputholidayDate").data("daterangepicker").endDate 	= moment();
+        // getYearList();
+        // initAll();
     },500); 
 });
 
@@ -142,7 +171,7 @@ $(document).on("click",".editHoliday", function(){
                                                         </div>
                                                         <div class="col-md-6 col-sm-6">
                                                             <div class="form-group">
-                                                                <label for="">Status ${asterisk}</label>
+                                                                <label for="">Status</label>
                                                                 <select class="form-control select2 validate" name="holidayStatus" id="inputholidayStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -160,19 +189,29 @@ $(document).on("click",".editHoliday", function(){
                                             `;
     setTimeout(function(){
         $("#modal_holiday_content").html(modal_holiday_content);
-        initAll();
+        if (!$("#year_list").hasClass("select2-hidden-accessible")) {
+            $("#year_list").select2("destroy");
+        }
+        getYearList(moment(tableData[0]["holidayDate"]).format("YYYY"));
+        initDateRangePicker("#inputholidayDate");
         $("#inputholidayDate").data("daterangepicker").startDate = moment(tableData[0]["holidayDate"],"YYYY-MM-DD");
         $("#inputholidayDate").data("daterangepicker").endDate 	= moment(tableData[0]["holidayDate"],"YYYY-MM-DD");
+        
         if (!allowedUpdate) {
             $("#modal_holiday_content").find("input, select, textarea").each(function() {
                 $(this).attr("disabled", true);
             })
             $("#btnUpdate").hide();
         }
+
+        // initAll();
+        
     },500);
             
       
 });
+
+
 
 // ACTION EVENTS BUTTONS
 $(document).on("click", "#btnSave", function(){
@@ -183,6 +222,7 @@ $(document).on("click", "#btnSave", function(){
         let codeCondition   = tableData.length < 1 ? "0" : "";
         let data = getFormData("modal_holiday_form", true);
         // console.log(data);
+        let holidayDate                  = moment(data["tableData"]["holidayDate"]).format("YYYY-MM-DD");
         data["tableData"]["holidayDate"] = moment(data["tableData"]["holidayDate"]).format("YYYY-MM-DD");
         data["tableData[holidayCode]"]   = generateCode("HLD",codeCondition,"hris_holiday_tbl","holidayCode");
         data["tableData[createdBy]"]     = sessionID;
@@ -190,6 +230,7 @@ $(document).on("click", "#btnSave", function(){
         data["tableName"]                = "hris_holiday_tbl";
         data["feedback"]                 = $("#inputholidayName").val();
         sweetAlertConfirmation("add", "Holiday","modal_holiday", null, data, true, tableContent);
+        
     }
 });
 
@@ -198,20 +239,21 @@ $(document).on("click", "#btnUpdate", function(){
     let holidayID           = $(this).data("holidayid");
     if(condition == true){
         let data = getFormData("modal_holiday_form", true);
+        let holidayDate                  =  moment(data["tableData"]["holidayDate"]).format("YYYY-MM-DD");
         data["tableData"]["holidayDate"] =  moment(data["tableData"]["holidayDate"]).format("YYYY-MM-DD");
         data["tableData"]["updatedBy"]   =  "2";
         data["whereFilter"]              =  "holidayID="+holidayID;
         data["tableName"]                =  "hris_holiday_tbl";
         data["feedback"]                 =  $("#inputholidayName").val();
-        console.log(data);
         sweetAlertConfirmation("update", "Holiday","modal_holiday", null , data, true, tableContent);
+        
     }
 });
 
 $(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_holiday_form");
     if(!condition){
-        sweetAlertConfirmation("cancel", "Holiday","modal_holiday");
+        sweetAlertConfirmation("cancel", "Holiday","modal_holiday",null , false, false, tableContent);
     }else{
         $("#modal_holiday").modal("hide");
     }
@@ -233,6 +275,7 @@ function initDataTables() {
                 serverSide:     false,
                 scrollX:        true,
                 scrollCollapse: true,
+                lengthMenu: [ 50, 75, 100, 150],
                 columnDefs: [
                     { targets: 0, width: "10%" },
                     { targets: 4, width: 80 }
@@ -240,15 +283,28 @@ function initDataTables() {
             });
 }
 
-function tableContent(){
+function tableContent(holidayYear = null, fromEvent = false){
         unique = [];
+        let searchFilter    =   holidayYear ? `YEAR(holidayDate) = '${holidayYear}' ` : `` ;
 
-        $.ajax({
+        if(!fromEvent){
+            let hasDate         =   $("[name=holidayDate]").val();
+            holidayYear         =   hasDate ? moment(hasDate).format("YYYY") : null;
+            getYearList(holidayYear);
+            setTimeout(() => {
+                $("[name=year_list]").trigger("change");
+            }, 500);
+        }
+
+        // if(holidayYear){
+            $(".holiday_list").html(`<div class="table-responsive" id="table_content"></div>`);
+            $("#table_content").html(preloader);
+            $.ajax({
                 url:      `${base_url}operations/getTableData`,
                 method:   'POST',
                 async:    false,
                 dataType: 'json',
-                data:     {tableName: "hris_holiday_tbl"},
+                data:     {tableName: "hris_holiday_tbl",searchFilter},
                 beforeSend: function() {
                     $("#table_content").html(preloader);
                 },
@@ -300,5 +356,22 @@ function tableContent(){
                         </div>`;
                     $("#table_content").html(html);
                 }
-            })
+            });
+        // }else{
+            
+        //     let html = `<div class="card my-0 p-2" style='box-shadow:none;'>
+        //                     <div class="row w-100">
+        //                         <div class="col-4"></div>
+        //                         <div class="col-4 text-center">
+        //                             <img class="img-fluid" src="${base_url}assets/modal/please-select.gif" alt=""> 
+        //                             <h6 class="text-primary text-center font-weight-bold">HOLIDAY</h6>
+        //                             <p>Select year to view holidays.</p>
+        //                         </div>
+        //                         <div class="col-4"></div>
+        //                     </div>
+        //                 </div>
+        //                 `;
+        //     $(".holiday_list").html(html);
+        // }
+        
 }

@@ -11,6 +11,7 @@ $(document).ready(function(){
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
+            lengthMenu: [ 50, 75, 100, 150],
             columnDefs: [
                 { targets: 0, width: "10%" },
                 { targets: 2, width: "10%" },
@@ -134,7 +135,7 @@ $(document).ready(function(){
                             id="input_bankName" 
                             data-allowcharacters="[A-Z][a-z][0-9][-][ ]" 
                             minlength="2" 
-                            maxlength="20" 
+                            maxlength="60" 
                             required
                             unique="${bankID}"  
                             value="${bankName}"
@@ -165,7 +166,7 @@ $(document).ready(function(){
             <div class="row">
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                    <label>Status</label>
                     <select 
                         class="form-control select2 validate" 
                         id="input_bankStatus" 

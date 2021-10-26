@@ -23,6 +23,7 @@ $(document).ready(function(){
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
+            lengthMenu: [ 50, 75, 100, 150],
             columnDefs: [
                 { targets: 0, width: "30%" },
                 { targets: 1, width: "65%" },
@@ -202,7 +203,7 @@ $(document).ready(function(){
                 </div>
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Status</label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_categoryStatus" 

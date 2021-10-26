@@ -236,9 +236,9 @@ class CostEstimate_model extends CI_Model {
                         }
                     }
                 // END PUSHING VALUE IN $designationIDArr
-                $designationResult = $this->getDesignation($designationArr[$x]);
-                $projectManhourData    = explode("|", $this->getManhoursData($manhourArr[$x], $designationResult->designationHourlyRate, $assignDate[$x]));
-                $projectOvertimeData   = explode("|", $this->getManhoursData($overtimeArr[$x], $designationResult->designationHourlyRate, $assignDate[$x], "overtime") );
+                $designationResult      = $this->getDesignation($designationArr[$x]);
+                $projectManhourData     = explode("|", $this->getManhoursData($manhourArr[$x], $designationResult->designationHourlyRate, $assignDate[$x]));
+                $projectOvertimeData    = explode("|", $this->getManhoursData($overtimeArr[$x], $designationResult->designationHourlyRate, $assignDate[$x], "overtime") );
                 
                 
 

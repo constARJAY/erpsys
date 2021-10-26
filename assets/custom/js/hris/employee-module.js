@@ -90,6 +90,10 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
                 bStateSave: true,
+                lengthMenu: [
+					[50, 100, 150, 200, -1],
+					[50, 100, 150, 200, "All"],
+				],
 				columnDefs: [
 					{ targets: 0, width: 50  },
 					{ targets: 1, width: 200 },
@@ -112,6 +116,11 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
                 bStateSave: true,
+                ordering: false,
+                lengthMenu: [
+					[50, 100, 150, 200, -1],
+					[50, 100, 150, 200, "All"],
+				],
 				columnDefs: [
 					{ targets: 0, width: 50  },
 					{ targets: 1, width: 200 },
@@ -335,7 +344,12 @@ $(document).ready(function() {
             html += `
             <tr class="btnEdit" id="${encryptString(employeeID)}">
                 <td>${employeeCode}</td>
-                <td>${profileImg} <span class="ml-2">${fullname}<span></td>
+                <td>
+                    <div class="d-flex justify-content-start align-items-center">
+                        ${profileImg} 
+                        <span class="ml-2">${fullname}<span>
+                    </div>    
+                </td>
                 <td>
                     <div>
                         ${designationName || '-'}
@@ -436,7 +450,12 @@ $(document).ready(function() {
             html += `
             <tr class="btnEdit" id="${encryptString(employeeID)}">
                 <td>${employeeCode}</td>
-                <td>${profileImg} <span class="ml-2">${fullname}<span></td>
+                <td>
+                    <div class="d-flex justify-content-start align-items-center">
+                        ${profileImg} 
+                        <span class="ml-2">${fullname}<span>        
+                    </div>
+                </td>
                 <td>
                     <div>
                         ${designationName || '-'}
@@ -800,6 +819,7 @@ $(document).ready(function() {
     // ----- REMOVE E-SIGNATURE -----
     $(document).on("click", `.btnRemoveSignature`, function() {
         $(`#displaySignature`).empty();
+        $(`#displaySignature`).css("display", "none");
         $(`[name="employeeSignature"]`).val("");
         $(`[name="employeeSignature"]`).removeAttr("signature");
     })
@@ -819,6 +839,7 @@ $(document).ready(function() {
                 $(this).val("");
                 showNotification("danger", "Invalid file type");
             } else {
+                $(`#displaySignature`).css("display", "block");
                 $(`#displaySignature`).html(displayPersonnelSignature(filename, false));
             }
         }
@@ -850,14 +871,9 @@ $(document).ready(function() {
             target="_blank"` : `href="javascript:void(0)"`;
             html = `
             <div class="d-flex justify-content-start align-items-center p-0">
-                <span class="btnRemoveSignature pr-2" style="cursor: pointer"><i class="fas fa-close"></i></span>
-                <a class="filename"
+                <span class="btnRemoveSignature pr-2 display-image-remove"><i class="fas fa-close"></i></span>
+                <a class="filename display-image-filename"
                     title="${employeeSignature}"
-                    style="display: block;
-                    width: 90%;
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;"
                     ${otherAttr}>
                     ${employeeSignature}
                 </a>
@@ -1246,9 +1262,6 @@ $(document).ready(function() {
                 <div class="col-lg-3 col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Signature</label>
-                        <div class="signature" id="displaySignature">
-                            ${displayPersonnelSignature(employeeSignature)}
-                        </div>
                         <input type="file"
                             class="form-control validate"
                             name="employeeSignature"
@@ -1256,6 +1269,9 @@ $(document).ready(function() {
                             signature="${employeeSignature}"
                             accept="image/*">
                         <div class="invalid-feedback d-block" id="invalid-employeeSignature"></div>
+                        <div class="signature display-image" id="displaySignature" style="display: ${employeeSignature ? "block" : "none"}">
+                            ${displayPersonnelSignature(employeeSignature)}
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12">
@@ -2843,6 +2859,7 @@ $(document).ready(function() {
                         formButtonHTML(this, false);
                         if (data) {
                             data.append("action", "insert");
+                            data.append("employeeCode", generateCode("EMP", false, "hris_employee_list_tbl", "employeeID", "", true));
                             savePersonnelData(data, "add", organicTableContent);
                         } else {
                             showNotification("danger", "There was an error getting employee data");
@@ -2857,9 +2874,10 @@ $(document).ready(function() {
             if (validate) {
                 let data = getFormData("modal_employee_module", true);
                 data[`tableData[employeeProfile]`] = "default.jpg";
-                data[`tableData[createdAt]`] = moment().format("YYYY-MM-DD HH:mm:ss");
-                data[`tableData[createdBy]`] = sessionID;
-                data[`tableData[updatedBy]`] = sessionID;
+                data[`tableData[createdAt]`]       = moment().format("YYYY-MM-DD HH:mm:ss");
+                data[`tableData[createdBy]`]       = sessionID;
+                data[`tableData[updatedBy]`]       = sessionID;
+                data["tableData[employeeCode]"]    = generateCode("EMP", false, "hris_employee_list_tbl", "employeeID", "", true);
                 data[`tableName`] = "hris_employee_list_tbl";
                 let fullname = $(`[name="employeeFirstname"]`).val()?.trim() +" "+ $(`[name="employeeLastname"]`).val()?.trim();
                 data[`feedback`]  = fullname;

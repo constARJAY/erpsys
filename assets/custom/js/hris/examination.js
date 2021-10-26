@@ -331,7 +331,6 @@ $(document).ready(function() {
                 <div class="col-12">
                     <div class="form-group">
                         <label>Isometrics <code>*</code></label>
-                        <div id="displayIsometrics">${isometrics}</div>
                         <input type="file"
                             class="form-control validate"
                             accept="image/*"
@@ -339,6 +338,11 @@ $(document).ready(function() {
                             id="examinationPicture"
                             data="${examinationPicture}"
                             ${!examinationPicture ? "required" : ""}>
+                        <div class="display-image displayfile" 
+                            id="displayIsometrics"
+                            style="display: ${isometrics ? "block" : "none"}">
+                            ${getFileDisplay(examinationPicture)}    
+                        </div>
                         <div class="d-block invalid-feedback"></div>
                     </div>
                 </div>
@@ -368,6 +372,28 @@ $(document).ready(function() {
         return html;
     }
     // ----- END GET EXAMINATION FORM CONTENT -----
+
+
+    // ----- GET FILE DISPLAY -----
+    function getFileDisplay(filename = "", link = true) {
+        let text = link ? `
+        <a class="display-image-filename" title="${filename}"
+            href="${base_url}assets/upload-files/examination/${filename}" target="_blank">
+            ${filename}
+        </a>` : `
+        <span class="display-image-filename" title="${filename}">
+            ${filename}
+        </span>`;
+
+        let html = `
+        <div class="d-flex justify-content-start align-items-center p-0">
+            <span class="display-image-remove btnRemoveFile pr-2"><i class="fas fa-close"></i></span>
+            ${text}
+        </div>`;
+
+        return html;
+    }
+    // ----- END GET FILE DISPLAY -----
 
 
     // ----- GET CHOICES -----
@@ -1029,12 +1055,8 @@ $(document).ready(function() {
         } else {
             $(this).attr("data", filename);
             $(this).removeAttr("required");
-			let html = `
-			<div class="d-flex justify-content-between align-items-center py-2">
-				<span class="filename">${filename}</span>
-				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>`;
-			$("#displayIsometrics").html(html);
+            $("#displayIsometrics").css("display", "block");
+			$("#displayIsometrics").html(getFileDisplay(filename, false));
 		}
     })
     // ----- END SELECT ISOMETRICS -----
@@ -1046,6 +1068,7 @@ $(document).ready(function() {
         $("#examinationPicture").val("");
         $("#examinationPicture").attr("required", true);
         $("#examinationPicture").removeAttr("data");
+        $("#displayIsometrics").css("display", "none");
     })
     // ----- END REMOVE ISOMETRICS -----
 

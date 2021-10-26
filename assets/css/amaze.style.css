@@ -21,6 +21,27 @@
 	}
 }
 
+.display-image {
+	font-size: 12px; 
+	border: 1px solid black; 
+	border-radius: 5px; 
+	background: #d1ffe0; 
+	padding: 2px 10px;
+}
+
+.display-image-filename {
+	display: block;
+	width: 90%;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	color: black;
+}
+
+.display-image-remove {
+	cursor: pointer;
+}
+
 .body_area .container .card.col-12, .body_area .container .col-lg-12 .card{
 	box-shadow: 0px 0px 15px 5px rgba(0, 0, 0, 0.1);
 }

@@ -1,4 +1,6 @@
 $(document).ready(function () {
+	const allowedUpdate = isUpdateAllowed(58);
+
 
 	// ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("official business");
@@ -23,13 +25,24 @@ $(document).ready(function () {
 	}
 	// ---- END GET EMPLOYEE DATA -----
 
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"hris_official_business_tbl", 
+				"reviseOfficialBusinessID", 
+				"reviseOfficialBusinessID IS NOT NULL AND officialBusinessID != 4");
+			return revisedDocumentsID.map(item => item.reviseOfficialBusinessID).includes(id);
+		}
+		return false;
+	}
 	
 	// ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false) {
-		const loadData = (id) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("hris_official_business_tbl", "", "officialBusinessID=" + id);
 
-			if (tableData.length > 0) {
+					if (tableData.length > 0) {
 				let {
 					employeeID,
 					officialBusinessStatus
@@ -53,8 +66,13 @@ $(document).ready(function () {
 				}
 
 				if (isAllowed) {
-					pageContent(true, tableData, isReadOnly);
-					updateURL(encryptString(id));
+					if (isRevise && employeeID == sessionID) {
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
+						updateURL(encryptString(id), true, true);
+					} else {
+						pageContent(true, tableData, isReadOnly);
+						updateURL(encryptString(id));
+					}
 				} else {
 					pageContent();
 					updateURL();
@@ -67,8 +85,8 @@ $(document).ready(function () {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -77,17 +95,28 @@ $(document).ready(function () {
 				let id = decryptString(arr[1]);
 					id && isFinite(id) && loadData(id);
 			} else if (isAdd != -1) {
-				pageContent(true);
+				arr = url.split("?add=");
+				if (arr.length > 1) {
+					let id = decryptString(arr[1]);
+						id && isFinite(id) && loadData(id, true);
+				} else {
+					const isAllowed = isCreateAllowed(46);
+					pageContent(isAllowed);
+				}
 			}
 		}
 		
 	}
 
-	function updateURL(view_id = 0, isAdd = false) {
+	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
 			window.history.pushState("", "", `${base_url}hris/official_business?view_id=${view_id}`);
-		} else if (!view_id && isAdd) {
-			window.history.pushState("", "", `${base_url}hris/official_business?add`);
+		} else if (isAdd) {
+			if (view_id && isRevise) {
+				window.history.pushState("", "", `${base_url}hris/official_business?add=${view_id}`);
+			} else {
+				window.history.pushState("", "", `${base_url}hris/official_business?add`);
+			}
 		} else {
 			window.history.pushState("", "", `${base_url}hris/official_business`);
 		}
@@ -178,14 +207,20 @@ $(document).ready(function () {
 	// ----- END HEADER CONTENT -----
 
 	// ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add") {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
-		if (isAdd) {
-			html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+				if (isAdd) {
+			if (isCreateAllowed(58)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack"
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -402,7 +437,7 @@ $(document).ready(function () {
 	}
 
 	// ----- FORM BUTTONS -----
-	function formButtons(data = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 
@@ -417,32 +452,91 @@ $(document).ready(function () {
 
 			let isOngoing = approversDate ? (approversDate.split("|").length > 0 ? true : false) : false;
 			if (employeeID === sessionID) {
-				if (officialBusinessStatus == 0) {
+				if (officialBusinessStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
 					<button 
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
-						officialBusinessID="${officialBusinessID}"
-						code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-paper-plane"></i>
+						officialBusinessID="${encryptString(officialBusinessID)}"
+						code="${getFormCode("OBF", createdAt, officialBusinessID)}"
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"
+						><i class="fas fa-paper-plane"></i>
 						Submit
-					</button>
-					<button 
-						class="btn btn-cancel px-5 p-2"
-						id="btnCancelForm" 
-						officialBusinessID="${officialBusinessID}"
-						code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-ban"></i> 
-						Cancel
 					</button>`;
-				} else if (officialBusinessStatus == 1) {
+					if (isRevise) {
+					button += `
+						<button 
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancel" 
+							officialBusinessID="${encryptString(officialBusinessID)}"
+							code="${getFormCode("OBF", createdAt, officialBusinessID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					} else {
+						button += `
+						<button type="button" 
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancelForm" 
+							officialBusinessID="${encryptString(officialBusinessID)}"
+							code="${getFormCode("OBF", createdAt, officialBusinessID)}"
+							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					}
+
+					} else if (officialBusinessStatus == 1) {
+					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							officialBusinessID="${officialBusinessID}"
-							code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-ban"></i> 
+							officialBusinessID="${encryptString(officialBusinessID)}"
+							code="${getFormCode("OBF", createdAt, officialBusinessID)}"
+							status="${officialBusinessStatus}"><i class="fas fa-ban"></i> 
 							Cancel
+						</button>`;
+					}
+				} else if (officialBusinessStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						officialBusinessID="${encryptString(officialBusinessID)}"
+						code="${getFormCode("OBF", createdAt, officialBusinessID)}"
+						status="${officialBusinessStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
+				} else if (officialBusinessStatus == 3) {
+					// DENIED - FOR REVISE
+					if (!isDocumentRevised(officialBusinessID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							officialBusinessID="${encryptString(officialBusinessID)}"
+							code="${getFormCode("OBF", createdAt, officialBusinessID)}"
+							status="${officialBusinessStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				} else if (officialBusinessStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(officialBusinessID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							officialBusinessID="${encryptString(officialBusinessID)}"
+							code="${getFormCode("OBF", createdAt, officialBusinessID)}"
+							status="${officialBusinessStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
 						</button>`;
 					}
 				}
@@ -467,7 +561,6 @@ $(document).ready(function () {
 					}
 				}
 			}
-
 		} else {
 			button = `
 			<button 
@@ -484,11 +577,12 @@ $(document).ready(function () {
 	}
 	// ----- END FORM BUTTONS -----
 	// ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
-
+		readOnly = isRevise ? false : readOnly;
 		let {
 				officialBusinessID 			= "",
+				reviseOfficialBusinessID    = "",
 				employeeID 					= "",
 				officialBusinessCompanyID 	= "",
 				officialBusinessAddress 	= "",
@@ -508,8 +602,8 @@ $(document).ready(function () {
 		// ----- GET EMPLOYEE DATA -----
 		let {
 			fullname:    employeeFullname    = "",
-			// department:  employeeDepartment  = "",
-			// designation: employeeDesignation = "",
+			department:  employeeDepartment  = "",
+			designation: employeeDesignation = "",
 		} = employeeData(data ? employeeID : sessionID);
 		// ----- END GET EMPLOYEE DATA -----
 
@@ -517,39 +611,61 @@ $(document).ready(function () {
 
 
 		$("#btnBack").attr("officialBusinessID", officialBusinessID);
+		$("#btnBack").attr("code", getFormCode("OBF", moment(createdAt), officialBusinessID));
 		$("#btnBack").attr("status", officialBusinessStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
-		let button = formButtons(data);
+		let button   = formButtons(data, isRevise, isFromCancelledDocument);
+
+		let reviseDocumentNo    = isRevise ? officialBusinessID : reviseOfficialBusinessID;
+		let documentHeaderClass = isRevise || reviseOfficialBusinessID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseOfficialBusinessID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseOfficialBusinessID ? `
+		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+			<div class="card">
+				<div class="body">
+					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
+					<h6 class="mt-0 text-danger font-weight-bold">
+						${getFormCode("OBF", createdAt, reviseDocumentNo)}
+					</h6>      
+				</div>
+			</div>
+		</div>` : "";
 
 		let html = `
         <div class="row px-2">
-            <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+        ${documentReviseNo}
+            <div class="${documentHeaderClass}">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-						${officialBusinessID ? getFormCode("OBF", createdAt, officialBusinessID) : "---"}
+                        ${officialBusinessID && !isRevise ? getFormCode("OBF", createdAt, officialBusinessID) : "---"}
 						</h6>      
                     </div>
                 </div>
             </div>
-            <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+            <div class="${documentHeaderClass}">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
-                        <h6 class="mt-0 font-weight-bold">${officialBusinessStatus ? getStatusStyle(officialBusinessStatus) : "---"}</h6>      
+                        <h6 class="mt-0 font-weight-bold">
+                        ${officialBusinessStatus && !isRevise ? getStatusStyle(officialBusinessStatus) : "---"}
+                       </h6>      
                     </div>
                 </div>
             </div>
-            <div class="col-lg-8 col-md-12 col-sm-12 px-1">
+            <div class="${documentDateClass}">
                 <div class="row m-0">
                 <div class="col-lg-4 col-md-4 col-sm-12 px-1">
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Created</small>
-                            <h6 class="mt-0 font-weight-bold">${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+                            ${createdAt && !isRevise ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
+                            </h6>      
                         </div>
                     </div>
                 </div>
@@ -557,7 +673,8 @@ $(document).ready(function () {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Submitted</small>
-                            <h6 class="mt-0 font-weight-bold">${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+                            ${submittedAt && !isRevise && !isRevise ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
                         </div>
                     </div>
                 </div>
@@ -575,7 +692,9 @@ $(document).ready(function () {
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
-                        <h6 class="mt-0 font-weight-bold">${officialBusinessRemarks ? officialBusinessRemarks : "---"}</h6>      
+                        <h6 class="mt-0 font-weight-bold">
+                        ${officialBusinessRemarks && !isRevise ? officialBusinessRemarks : "---"}
+                        </h6>      
                     </div>
                 </div>
             </div>
@@ -588,6 +707,18 @@ $(document).ready(function () {
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
+            <div class="col-md-4 col-sm-12">
+				<div class="form-group">
+					<label class="text-dark">Department</label>
+					<input type="text" class="form-control" disabled value="${employeeDepartment}">
+				</div>
+				</div>
+			 <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label class="text-dark">Position</label>
+                        <input type="text" class="form-control" disabled value="${employeeDesignation}">
+                    </div>
+                </div>	
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Company ${!disabled ? "<code>*</code>" : ""}</label>
@@ -602,7 +733,7 @@ $(document).ready(function () {
             <div class="invalid-feedback d-block" id="invalid-officialBusinessCompanyID"></div>
                 </div>
              </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-8 col-sm-12">
              <div class="form-group">
                  <label>Address ${!disabled ? "<code>*</code>" : ""}</label>
                  <input type="text"
@@ -682,7 +813,7 @@ $(document).ready(function () {
             </div>
         </div>
 		<div class="approvers">
-			${getApproversStatus(approversID, approversStatus, approversDate)}
+			${!isRevise ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
 
 		setTimeout(() => {
@@ -696,16 +827,27 @@ $(document).ready(function () {
 				initInputmaskTime();
 			$("#officialBusinessDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			}
-			
-			$("#officialBusinessDate").data("daterangepicker").minDate = moment();
+			var totalminDate = moment().subtract(7,'d').format('YYYY-MM-DD');
+			$("#officialBusinessDate").data("daterangepicker").minDate = moment(totalminDate);
 			//data ? initInputmaskTime(false) : initInputmaskTime();
+
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
 			return html;
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
 
 	// ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -728,9 +870,9 @@ $(document).ready(function () {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -898,7 +1040,7 @@ $(document).ready(function () {
 						data["tableData[approversID]"]          = sessionID;
 						data["tableData[approversStatus]"]      = 2;
 						data["tableData[approversDate]"]        = dateToday();
-						data["tableData[changeScheduleStatus]"] = 2;
+						data["tableData[officialBusinessStatus]"] = 2;
 					}
 				}
 				data["whereFilter"] = "officialBusinessID =" + id;
@@ -922,24 +1064,62 @@ $(document).ready(function () {
 	});
 	// ----- END OPEN ADD FORM -----
 
+		// ----- REVISE DOCUMENT -----
+	$(document).on("click", "#btnRevise", function () {
+		const id                    = decryptString($(this).attr("officialBusinessID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
+	});
+	// ----- END REVISE DOCUMENT -----
 	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id 			= $(this).attr("officialBusinessID");
-		const employeeID 	= $(this).attr("employeeID");
-		const feedback   	= $(this).attr("code") || getFormCode("OBF", dateToday(), id);
-		const status 		= $(this).attr("status");
+		const id         = decryptString($(this).attr("officialBusinessID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise     = $(this).attr("revise") == "true";
+		const employeeID = $(this).attr("employeeID");
+		const feedback   = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
+		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
-			$("#page_content").html(preloader);
-			pageContent();
 
-			if (employeeID != sessionID) {
-				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-			}	
+			if (revise) {
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getData(action, 0, "save", feedback, id);
+				data[`tableData[officialBusinessStatus]`] = 0;
+				if (!isFromCancelledDocument) {
+					delete data[`officialBusinessID`];
+					data[`feedback`] = getFormCode("OBF", new Date);
+					data[`tableData[reviseOfficialBusinessID]`] = id;
+				} else {
+					delete data[`action`];
+					data[`tableData[officialBusinessID]`] = id;
+					data[`action`] = "update";
+				}
+
+				setTimeout(() => {
+					cancelForm(
+						"save",
+						action,
+						"OFFICIAL BUSINESS",
+						"",
+						"form_official_business",
+						data,
+						true,
+						pageContent
+					);
+				}, 300);
+			} else {
+				$("#page_content").html(preloader);
+				pageContent();
+	
+				if (employeeID != sessionID) {
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+				}
+			}
 		} else {
-			const action = id && feedback ? "update" : "insert";
-
-			const data = getData(action, 0, "save", feedback, id);
+			const action   = id && feedback ? "update" : "insert";
+			const data     = getData(action, 0, "save", feedback, id);
+			data[`tableData[officialBusinessStatus]`] = 0;
 
 			setTimeout(() => {
 				cancelForm(
@@ -962,81 +1142,78 @@ $(document).ready(function () {
 
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
-		// const code = $(this).attr("code");
-
-		// const tableData = getTableData(
-		// 	"hris_official_business_tbl",
-		// 	"*",
-		// 	"officialBusinessID=" + id,
-		// 	""
-		// );
-
-		// pageContent(true, tableData);
-		// getCompanyContent(tableData);
 	});
 	// ----- END OPEN EDIT MODAL -----
 
 
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
-		// const tableData = getTableData(
-		// 	"hris_official_business_tbl",
-		// 	"*",
-		// 	"officialBusinessID=" + id,
-		// 	""
-		// );
-		// pageContent(true, tableData, true);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 	// ----- SAVE DOCUMENT -----
-	$(document).on("click", "#btnSave", function () {
-		const action   = "insert"; 
-		const feedback = getFormCode("OBF", dateToday()); 
+	$(document).on("click", "#btnSave, #btnCancel", function () {
+		const id       = decryptString($(this).attr("officialBusinessID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise   = $(this).attr("revise") == "true";
+		const feedback = $(this).attr("code") || getFormCode("OBF", dateToday(), id);
+		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getData(action, 0, "save", feedback);
-		// const validate = validateForm("form_official_business");
-		// // const validateTime = checkTimeRange(false, true);
-		// if (validate) {
-		// 	const action = "insert"; // CHANGE
-		// 	const feedback = generateCode(
-		// 		"OBF",
-		// 		false,
-		// 		"hris_official_business_tbl",
-		// 		"officialBusinessCode",
-		// 	);
+		data[`tableData[officialBusinessStatus]`] = 0;
 
-			//const data = getData(action, 0, "save", feedback);
+		if (revise) {
+			if (!isFromCancelledDocument) {
+				data[`feedback`] = getFormCode("OBF", new Date);
+				data[`tableData[reviseOfficialBusinessID]`] = id;
+				data[`whereFilter`] = `officialBusinessID = ${id}`;
+				delete data[`tableData[officialBusinessID]`];
+			} else {
+				data[`tableData[officialBusinessID]`] = id;
+				data[`whereFilter`] = `officialBusinessID = ${id}`;
+				delete data[`action`];
+				data[`action`] = "update";
+			}
+		}
 
-			formConfirmation(
-				"save",
-				"insert",
-				"OFFICIAL BUSINESS",
-				"",
-				"form_official_business",
-				data,
-				true,
-				myFormsContent
-			);
-		// }
+		formConfirmation(
+			"save",
+			action,
+			"OFFICIAL BUSINESS",
+			"",
+			"form_official_business",
+			data,
+			true,
+			pageContent
+		);
 	});
 	// ----- END SAVE DOCUMENT -----
 
 
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id = $(this).attr("officialBusinessID");
+	const id           = decryptString($(this).attr("officialBusinessID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise       = $(this).attr("revise") == "true";
+		const validate     = validateForm("form_official_business");
 
-		const validate = validateForm("form_official_business");
-		// const validateTime = checkTimeRange(false, true);
-
-		if (validate) {
+		if (validate && flag) {
 			const feedback = $(this).attr("code") || getFormCode("OBF", dateToday(), id);
-			const action   = id && feedback ? "update" : "insert";
+			const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data     = getData(action, 1, "submit", feedback, id);
+
+			if (revise) {
+				if (!isFromCancelledDocument) {
+					data[`tableData[reviseOfficialBusinessID]`] = id;
+					delete data[`tableData[officialBusinessID]`];
+					data["feedback"] = getFormCode("OBF", new Date);
+				} else {
+					data[`whereFilter`] = `officialBusinessID = ${id}`;
+				}
+			}
 
 			const employeeID = getNotificationEmployeeID(
 				data["tableData[approversID]"],
@@ -1044,38 +1221,17 @@ $(document).ready(function () {
 				true
 			);
 
-			// const feedback = $(this).attr("officialBusinessCode") ?
-			// 	$(this).attr("officialBusinessCode") :
-			// 	generateCode(
-			// 		"OBF",
-			// 		false,
-			// 		"hris_official_business_tbl",
-			// 		"officialBusinessCode",
-			// 	);
-
-			// const action = id && feedback ? "update" : "insert";
-
-			// const data = getData(action, 1, "submit", feedback, id);
-			
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                60,
-					// tableID:                 1, // AUTO FILL
-					notificationTitle:       "Official Business Form",
+					moduleID:                58,
+					notificationTitle:       "OFFICIAL BUSINESS",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
 				};
 			}
 
-			// let notificationData = {
-			// 	moduleID: 58,
-			// 	notificationTitle: "Official Business Form",
-			// 	notificationDescription: `${sessionID} asked for your approval.`,
-			// 	notificationType: 2,
-			// 	employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"]),
-			// };
 			setTimeout(() => {
 				formConfirmation(
 					"submit",
@@ -1095,72 +1251,13 @@ $(document).ready(function () {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id = $(this).attr("officialBusinessID");
+		const id       = decryptString($(this).attr("officialBusinessID"));
 		const feedback = $(this).attr("code") || getFormCode("OBF", dateToday(), id);
 		const action   = "update";
 		const data     = getData(action, 4, "cancelform", feedback, id);
 
-
-		//const feedback = $(this).attr("officialBusinessCode");
-
-		// const validate = validateForm("form_change_schedule");
-		// const validateTime = checkTimeRange(false, true);
-
-		// if (validate && validateTime) {
-
-		// const action = "update";
-		// const data = getData(action, 4, "cancelform", feedback, id);
-
 		formConfirmation(
 			"cancelform",
-			action,
-			"OFFICIAL BUSINESS",
-			"",
-			"form_official_business",
-			data,
-			true,
-			pageContent
-		);
-		// const action = "update";
-
-		// const data = getData(action, 4, "cancelform", feedback, id);
-
-		// formConfirmation(
-		// 	"cancelform",
-		// 	action,
-		// 	"OFFICIAL BUSINESS",
-		// 	"",
-		// 	"form_official_business",
-		// 	data,
-		// 	true,
-		// 	pageContent
-		// );
-		// }
-	});
-	// ----- END CANCEL DOCUMENT -----
-
-	// ----- CANCEL DOCUMENT -----
-	$(document).on("click", "#btnCancel", function () {
-		const id = $(this).attr("officialBusinessID");
-		const feedback = $(this).attr("code") || getFormCode("OBF", dateToday(), id);
-		const action   = id && feedback ? "update" : "insert";
-		const data     = getData(action, 0, "save", feedback, id);
-
-		// const feedback = $(this).attr("officialBusinessCode") ?
-		// 	$(this).attr("officialBusinessCode") :
-		// 	generateCode(
-		// 		"OBF",
-		// 		false,
-		// 		" hris_official_business_tbl",
-		// 		"officialBusinessCode",
-		// 	);
-
-		// const action = id && feedback ? "update" : "insert";
-
-		// const data = getData(action, 0, "save", feedback, id);
-
-		cancelForm(
-			"save",
 			action,
 			"OFFICIAL BUSINESS",
 			"",
@@ -1177,47 +1274,41 @@ $(document).ready(function () {
 		const feedback 			= $(this).attr("code") || getFormCode("OBF", dateCreated, id);
 		let tableData 			= getTableData(" hris_official_business_tbl", "", "officialBusinessID = " + id);
 		if (tableData) {
-			let approversID 	= tableData[0].approversID;
+			let approversID     = tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
-			let approversDate 	= tableData[0].approversDate;
-			let employeeID 		= tableData[0].employeeID;
+			let approversDate   = tableData[0].approversDate;
+			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data 							= getData("update", 2, "approve", feedback, id);
-			data["tableData[approversStatus]"] 	= updateApproveStatus(approversStatus, 2);
-			let dateApproved 					= updateApproveDate(approversDate)
-			data["tableData[approversDate]"] 	= dateApproved;
+			let data = getData("update", 2, "approve", feedback, id);
+			data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 2);
+			let dateApproved = updateApproveDate(approversDate)
+			data["tableData[approversDate]"]   = dateApproved;
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID: 					58,
-					tableID:                 	id,
-					notificationTitle: 			"Official Business",
-					notificationDescription: 	`${getFormCode("OBF", createdAt, id)}: Your request has been approved.`,
-					notificationType: 			7,
+					moduleID:                58,
+					tableID:                 id,
+					notificationTitle:       "Official Business",
+					notificationDescription: `${getFormCode("OBF", createdAt, id)}: Your request has been approved.`,
+					notificationType:        7,
 					employeeID,
 				};
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID: 58,
-					tableID:                 	id,
-					notificationTitle: 			"Official Business",
-					notificationDescription: 	`${employeeFullname(employeeID)} asked for your approval.`,
-					notificationType: 			2,
-					employeeID: 				getNotificationEmployeeID(approversID, approversDate),
+					moduleID:                58,
+					tableID:                 id,
+					notificationTitle:       "Official Business",
+					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
+					notificationType:         2,
+					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
 				};
 			}
+
 			data["tableData[officialBusinessStatus]"] = status;
-
-			// let data = getData("update", 2, "approve", feedback, id);
-			// data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 2);
-			// data["tableData[approversDate]"] = updateApproveDate(approversDate);
-
-			// let status = isImLastApprover(approversID, approversDate) ? 2 : 1;
-			// data["tableData[officialBusinessStatus]"] = status;
 
 			setTimeout(() => {
 				formConfirmation(
@@ -1231,14 +1322,15 @@ $(document).ready(function () {
 					pageContent,
 					notificationData
 				);
-			}, 300);	
+				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			}, 300);
 		}
 	})
 	// ----- END APPROVE DOCUMENT -----
 
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id = $(this).attr("officialBusinessID");
+		const id = decryptString($(this).attr("officialBusinessID"));
 		const feedback =  $(this).attr("code") || getFormCode("OBF", dateToday(), id);
 
 		$("#modal_change_schedule_content").html(preloader);
@@ -1262,7 +1354,7 @@ $(document).ready(function () {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger" id="btnRejectConfirmation"
-			officialBusinessID="${id}"
+			officialBusinessID="${encryptString(id)}"
 			officialBusinessCode="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -1302,7 +1394,7 @@ $(document).ready(function () {
 					"reject",
 					"update",
 					"OFFICIAL BUSINESS",
-					"modal_change_schedule",
+					"form_official_business",
 					"",
 					data,
 					true,
@@ -1315,6 +1407,36 @@ $(document).ready(function () {
 			}
 		}
 	});
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const officialBusinessID = decryptString($(this).attr("officialBusinessID"));
+		const feedback         = $(this).attr("code") || getFormCode("OBF", dateToday(), id);
+
+		const id = decryptString($(this).attr("officialBusinessID"));
+		let data = {};
+		data["tableName"]                       = "hris_official_business_tbl";
+		data["whereFilter"]                     = `officialBusinessID = ${officialBusinessID}`;
+		data["tableData[officialBusinessStatus]"] = 5;
+		data["action"]                          = "update";
+		data["method"]                          = "drop";
+		data["feedback"]                        = feedback;
+		data["tableData[updatedBy]"]            = sessionID;
+
+		setTimeout(() => {
+			formConfirmation(
+				"drop",
+				"update",
+				"Oficial Business Form",
+				"",
+				"form_official_business",
+				data,
+				true,
+				pageContent
+			);
+		}, 300);
+	})
+	// ----- END DROP DOCUMENT -----
+
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
 		if (tab == "#forApprovalTab") {
@@ -1325,21 +1447,6 @@ $(document).ready(function () {
 		}
 	});
 	// ----- END REJECT DOCUMENT -----
-
-
-	// $(document).on("change", ".officialBusinessDate" ,function(){
-	// 	let thisValue       =   $(this).val();
-	// 	let thisValueSplit  =   thisValue.split(" - ");
-	
-	// 	// from = start.format('YYYY-MM-DD 00:00:00');
-	// 	//               to = end.format('YYYY-MM-DD 23:59:59');
-	
-	// 	let fromDate        =  new Date(thisValueSplit[0]); 	
-	// 	let toDate          =  new Date(thisValueSplit[1]);
-	// 	let numberOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
-	// 	$("#loanFormNoOfDays").val(numberOfDays);
-	// 	// alert(thisValue);
-	// })
 
 	// ----- APPROVER STATUS -----
 function getApproversStatus(approversID, approversStatus, approversDate) {

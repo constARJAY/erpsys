@@ -309,7 +309,7 @@ $(document).ready(function() {
 						columnDefs: []
 					}
 			let column =  	[
-								{ targets: 0,  width: 100 },
+								{ targets: 0,  width: 180 },
 								{ targets: 1,  width: 150 },
 								{ targets: 2,  width: 150 },
 								{ targets: 3,  width: 100 },

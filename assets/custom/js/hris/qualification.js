@@ -30,7 +30,7 @@ $(document).on("click",".addQualification", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status</label>
                                                                 <select class="form-control select2 validate" name="qualificationStatus" id="inputqualificationStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
@@ -76,7 +76,7 @@ $(document).on("click",".editQualification", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status ${asterisk}</label>
+                                                                <label for="">Status</label>
                                                                 <select class="form-control select2 validate" name="qualificationStatus" id="inputqualificationStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -157,6 +157,7 @@ function initDataTables() {
                 serverSide:     false,
                 scrollX:        true,
                 scrollCollapse: true,
+                lengthMenu: [ 50, 75, 100, 150],
                 columnDefs: [
                     { targets: 0, width: "11%" },
                     { targets: 2, width: 80 }

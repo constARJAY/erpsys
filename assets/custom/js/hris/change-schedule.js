@@ -27,6 +27,28 @@ $(document).ready(function () {
 	// ---- END GET EMPLOYEE DATA -----
 
 
+	// ----- REUSABLE FUNCTIONS -----
+	let holidayData = getTableData(
+        "hris_holiday_tbl",
+        `*`,
+        `holidayStatus = 1`
+    )?.map(holiday => holiday.holidayDate);
+
+	let employeeSchedule = getTableData(
+		`hris_employee_list_tbl as helt
+			LEFT JOIN hris_schedule_setup_tbl AS hsst USING(scheduleID)`,
+		`IF(mondayStatus = 1, 1, 0) AS monday,
+		IF(tuesdayStatus = 1, 1, 0) AS tuesday,
+		IF(wednesdayStatus = 1, 1, 0) AS wednesday,
+		IF(thursdayStatus = 1, 1, 0) AS thursday,
+		IF(fridayStatus = 1, 1, 0) AS friday,
+		IF(saturdayStatus = 1, 1, 0) AS saturday,
+		IF(sundayStatus = 1, 1, 0) AS sunday`,
+		`employeeID = ${sessionID}`
+	);
+	// ----- END REUSABLE FUNCTIONS -----
+
+
 	// ----- IS DOCUMENT REVISED -----
 	function isDocumentRevised(id = null) {
 		if (id) {
@@ -265,6 +287,9 @@ $(document).ready(function () {
 			let {
 				fullname,
 				changeScheduleID,
+				changeScheduleDate,
+				changeScheduleTimeIn,
+				changeScheduleTimeOut,
 				approversID,
 				approversDate,
 				changeScheduleStatus,
@@ -282,8 +307,10 @@ $(document).ready(function () {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(changeScheduleID)}"><i class="fas fa-eye"></i> View</button>`;
+			let description = `
+				<div>${moment(changeScheduleDate).format("MMMM DD, YYYY")} | ${changeScheduleTimeIn} - ${changeScheduleTimeOut}</div>
+				<small>${changeScheduleReason || "-"}</small>`;
+
 			let btnClass = changeScheduleStatus != 0 ? "btnView" : "btnEdit";
 
 			if (isImCurrentApprover(approversID, approversDate, changeScheduleStatus) || isAlreadyApproved(approversID, approversDate)) {
@@ -291,7 +318,7 @@ $(document).ready(function () {
 				<tr class="${btnClass}" id="${encryptString(changeScheduleID)}">
 					<td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
 					<td>${fullname}</td>
-					<td>${changeScheduleReason || "-"}</td>
+					<td>${description}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, changeScheduleStatus, true))}
 					</td>
@@ -349,6 +376,8 @@ $(document).ready(function () {
 				fullname,
 				changeScheduleID,
 				changeScheduleDate,
+				changeScheduleTimeIn,
+				changeScheduleTimeOut,
 				approversID,
 				approversDate,
 				changeScheduleReason,
@@ -372,22 +401,17 @@ $(document).ready(function () {
 			};
 			(changeScheduleStatus == 1 || changeScheduleStatus == 2) && uniqueData.push(unique);
 
+			let description = `
+				<div>${moment(changeScheduleDate).format("MMMM DD, YYYY")} | ${changeScheduleTimeIn} - ${changeScheduleTimeOut}</div>
+				<small>${changeScheduleReason || "-"}</small>`;
+
 			let btnClass = changeScheduleStatus != 0 ? "btnView" : "btnEdit";
 
-			let button =
-				changeScheduleStatus != 0
-					? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(changeScheduleID)}"><i class="fas fa-eye"></i> View</button>`
-					: `
-            <button 
-                class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(changeScheduleID)}" 
-                code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
             <tr class="${btnClass}" id="${encryptString(changeScheduleID)}">
                 <td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
                 <td>${fullname}</td>
-				<td>${changeScheduleReason || "-"}</td>
+				<td>${description}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, changeScheduleStatus, true))}
                 </td>
@@ -766,15 +790,49 @@ $(document).ready(function () {
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
-			if (data) {
-				initInputmaskTime(false);
-				$("#changeScheduleDate").data("daterangepicker").startDate = moment(changeScheduleDate, "YYYY-MM-DD");
-				$("#changeScheduleDate").data("daterangepicker").endDate   = moment(changeScheduleDate, "YYYY-MM-DD");
-			} else {
-				initInputmaskTime();
-				$("#changeScheduleDate").val(moment(new Date).format("MMMM DD, YYYY"));
-			}
-			$("#changeScheduleDate").data("daterangepicker").minDate = moment();
+			initInputmaskTime(data ? true : false);
+			// if (data) {
+			// 	$("#changeScheduleDate").data("daterangepicker").startDate = moment(changeScheduleDate, "YYYY-MM-DD");
+			// 	$("#changeScheduleDate").data("daterangepicker").endDate   = moment(changeScheduleDate, "YYYY-MM-DD");
+			// } else {
+			// 	initInputmaskTime();
+			// 	$("#changeScheduleDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			// }
+			// $("#changeScheduleDate").data("daterangepicker").minDate = moment();
+
+
+			$("#changeScheduleDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			$("#changeScheduleDate").daterangepicker({
+				autoUpdateInput: false,
+				singleDatePicker: true,
+				showDropdowns: true,
+				autoApply: true,
+				startDate: moment(changeScheduleDate || new Date).format("YYYY-MM-DD"),
+				minDate: moment(),
+				// maxDate: moment().add(80, 'days'),
+				locale: {
+					format: "MMMM DD, YYYY",
+				},
+				isInvalidDate: function(date) {
+					let optionDay  = moment(date).day();
+
+					let isActive = '1';
+					employeeSchedule.map(schedule => {
+							 if (optionDay == 0) isActive = schedule.sunday ?? '1';
+						else if (optionDay == 1) isActive = schedule.monday ?? '1';
+						else if (optionDay == 2) isActive = schedule.tuesday ?? '1';
+						else if (optionDay == 3) isActive = schedule.wednesday ?? '1';
+						else if (optionDay == 4) isActive = schedule.thursday ?? '1';
+						else if (optionDay == 5) isActive = schedule.friday ?? '1';
+						else if (optionDay == 6) isActive = schedule.saturday ?? '1';
+					});
+
+					let optionDate = moment(date).format("YYYY-MM-DD");
+					return holidayData.includes(optionDate) || isActive == '0';
+				},
+			}, function(data) {
+				$("#changeScheduleDate").val(moment(data).format("MMMM DD, YYYY"));
+			})
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -1098,7 +1156,16 @@ $(document).ready(function () {
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_change_schedule");
 
-		if (validate) {
+		const changeScheduleDate = moment($("#changeScheduleDate").val());
+		let duration = moment.duration(moment(changeScheduleDate).diff(moment())).asDays() + 1;
+		let flag = true;
+		if (duration < 0) {
+			flag = false;
+			$("#changeScheduleDate").removeClass("is-valid").addClass("is-invalid");
+			$("#invalid-changeScheduleDate").text("Invalid date")
+		}
+
+		if (validate && flag) {
 			const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 			const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data     = getData(action, 1, "submit", feedback, id);

@@ -60,7 +60,7 @@ $(document).ready(function() {
 					if (inventoryValidationStatus == 0 || inventoryValidationStatus == 4) {
 						isAllowed = true; // default nito is false;
 					}
-					if (inventoryValidationStatus == 1 || inventoryValidationStatus == 1) {
+					if (inventoryValidationStatus == 1 || inventoryValidationStatus == 2) {
 						isReadOnly = true;
 					}
 				} else if (employeeID == sessionID) {
@@ -1053,7 +1053,7 @@ $(document).ready(function() {
 								reqItems.itemCategory,
 								reqItems.itemUom,
 								reqItems.requestQuantity,
-									( SELECT 
+									(SELECT 
 										CASE 
 										WHEN ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL)) < 0 
 											THEN  0
@@ -2047,7 +2047,9 @@ $(document).ready(function() {
 			let inventoryValidationID 	= $(this).attr("inventoryValidationID");
 			let requestAssetData			= getTableData("ims_request_assets_tbl", "", `requestAssetID = '${requestAseetID}'`);
 			let tableData 				= requestAssetData[0];
-			let getForPurchase = +$(this).find(".forpurchase").text()?.trim() ==""  ? +$(this).find(".forpurchase  [name='forPurchase']").val().replaceAll(",","") : +$(this).find(".forpurchase").text()?.trim();
+			let isExist                 = $(this).find(".forpurchase  [name='forPurchase']").val() || false;
+			let tmvar =  isExist ? ($(this).find(".forpurchase  [name='forPurchase']").val().replaceAll(",","") || $(this).find(".forpurchase  [name='forPurchase']").val()) : "0.00";
+			let getForPurchase = +$(this).find(".forpurchase").text()?.trim() ==""  ? tmvar : +$(this).find(".forpurchase").text()?.trim();
 			let getAvailableStocks = +$(this).find(".availablestocks").text()?.trim().replaceAll(",","") || $(this).find(".availablestocks").text()?.trim();
 			let getAssetRemarks = $(this).find('.assetRemarks > textarea').val()?.trim() || $(this).find('.assetRemarks').text()?.trim();
 			if(requestAssetData.length !=0){

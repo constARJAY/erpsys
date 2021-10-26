@@ -912,6 +912,7 @@ $(document).ready(function() {
                     assignedEmployee    = "${assignedEmployee}"
                     assignedDesignation = "${assignedDesignation}"
                     executeonce         = "true"
+                    required
                     ${disabled}>
                     <option disabled>${!disabled ? "Select Employee" : "-"}</option>
                     ${teamMemberOptions}
@@ -1733,11 +1734,12 @@ $(document).ready(function() {
                             name="employeeManHours"
                             minlength="1"
                             maxlength="5"
-                            min="0"
+                            min="0.01"
                             max="24"
                             remaining="${remaining || 0}"
                             ${isReadOnly ? "disabled" : ""}
-                            value="${manHours || "0.00"}">
+                            value="${manHours || "0.00"}"
+                            required>
                         <div class="invalid-feedback d-block"></div>
                     </div>
                 </td>

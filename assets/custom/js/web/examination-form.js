@@ -304,25 +304,14 @@ function getMultipleChoiceQuestion(data = false,pageQuestionsNumber=1,examData=f
 				<div class="form-group">
 					<h5 style="font-weight: bolder;">${pageQuestionsNumber}. ${data[0].question}</h5>
 				</div>
-			<div class="choices py-2">
+			<div class="choices">
 				${getChoices("Multiple Choice",data[0].examinationQaID,pageQuestionsNumber)}
 			</div>
-			<div class="answer py-2">
-				<div class="row">
-					<div class="offset-md-7 col-md-5 col-sm-12">
-						<div class="row">
-							<div class="col-md-12 col-sm-12">
-								<div class="row">
-									<div class="col-md-5 col-sm-5 px-0 align-self-center font-weight-bold text-right">
-									
-									</div>
-									<div class="col-md-7 col-sm-7 text-right">
-									${questionsButton(nextQuestionID,data[0].examinationType,examData,pageQuestionsNumber,level,ExaminationID)}
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+			<div class="answer pb-2">
+				<div class="row float-right mr-2">
+					
+					${questionsButton(nextQuestionID,data[0].examinationType,examData,pageQuestionsNumber,level,ExaminationID)}
+						
 				</div>
 			</div>
 		</div>
@@ -392,21 +381,10 @@ function getEssayQuestion(data = false,pageQuestionsNumber=1,examData=false,leve
 						</div>
 					</div>
 				</div>
-				<div class="row">
-					<div class="offset-md-7 col-md-5 col-sm-12">
-						<div class="row">
-							<div class="col-md-12 col-sm-12">
-								<div class="row">
-									<div class="col-md-5 col-sm-5 px-0 align-self-center font-weight-bold text-right">
-									
-									</div>
-									<div class="col-md-7 col-sm-7 text-right">
-									${questionsButton(nextQuestionID,data[0].examinationType,examData,pageQuestionsNumber,level,ExaminationID)}
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+				<div class="row float-right mr-2">
+					
+					${questionsButton(nextQuestionID,data[0].examinationType,examData,pageQuestionsNumber,level,ExaminationID)}
+						
 				</div>
 			</div>
 		</div>
@@ -476,21 +454,10 @@ function getIdentificationQuestion(data = false,pageQuestionsNumber=1,examData=f
 						</div>
 					</div>
 				</div>
-				<div class="row">
-					<div class="offset-md-7 col-md-5 col-sm-12">
-						<div class="row">
-							<div class="col-md-12 col-sm-12">
-								<div class="row">
-									<div class="col-md-5 col-sm-5 px-0 align-self-center font-weight-bold text-right">
-									
-									</div>
-									<div class="col-md-7 col-sm-7 text-right">
-									${questionsButton(nextQuestionID,data[0].examinationType,examData,pageQuestionsNumber,level,ExaminationID)}
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+				<div class="row float-right mr-2">
+					
+					${questionsButton(nextQuestionID,data[0].examinationType,examData,pageQuestionsNumber,level,ExaminationID)}
+					
 				</div>
 			</div>
 		</div>
@@ -538,25 +505,14 @@ function getTrueFalseQuestion(data = false,pageQuestionsNumber=1,examData=false,
 					<h5 style="font-weight: bolder;">${pageQuestionsNumber}. ${data[0].question}</h5>
 				</div>
 			</div>
-			<div class="choices py-2">
+			<div class="choices">
 				${getChoices("True or False",data[0].examinationQaID,pageQuestionsNumber)}
 			</div>
-			<div class="answer py-2">
-				<div class="row">
-					<div class="offset-md-7 col-md-5 col-sm-12">
-						<div class="row">
-							<div class="col-md-12 col-sm-12">
-								<div class="row">
-									<div class="col-md-5 col-sm-5 px-0 align-self-center font-weight-bold text-right">
-									
-									</div>
-									<div class="col-md-7 col-sm-7 text-right">
-									${questionsButton(nextQuestionID,data[0].examinationType,examData,pageQuestionsNumber,level,ExaminationID)}
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+			<div class="answer pb-2">
+				<div class="row float-right mr-2">
+					
+					${questionsButton(nextQuestionID,data[0].examinationType,examData,pageQuestionsNumber,level,ExaminationID)}
+					
 				</div>
 			</div>
 		</div>
@@ -576,14 +532,49 @@ function listQuestionsContent(data = false,level="") {
 	let count =1;
 	let dataLength = data.length;
 	let html = `
-	<h6 class="bg-primary text-light p-3" style="line-height: 10px;"><strong ">Questions (${dataLength})</strong></h6>
-	<ul class="container_choices float">
+	<h6 class="bg-primary text-light pt-3" style="line-height: 10px;">
+		<strong class="pl-3">Questions (${dataLength})
+			<div class="container mt-4 ">
+				<div class="row">
+					<div class="col-3 p-1">
+						<label class="mb-0 " style="width: 45px; 
+						border-radius: 3px;
+						height: 12px; 
+						background-color: #2e93ffa8;"></label>
+						<label class="p-2" style="font: small-caption;">Current Item</label>
+					</div>
+					<div class="col-3 p-1">
+						<label class="mb-0 " style="width: 45px; 
+						border-radius: 3px;
+						height: 12px; 
+						background-color: #28a74594;"></label>
+						<label class="p-2" style="font: small-caption;">Answered</label>
+					</div>
+					<div class="col-3 p-1">
+						<label class="mb-0 " style="width: 45px; 
+						border-radius: 3px;
+						height: 12px; 
+						background-color:#ffc107a3;"></label>
+						<label class="p-2" style="font: small-caption;">Skipped</label>
+					</div>
+					<div class="col-3 p-1">
+						<label class="mb-0 " style="width: 45px; 
+						border-radius: 3px;
+						height: 12px; 
+						background-color:#f2f2f2;"></label>
+						<label class="p-2" style="font: small-caption;">Yet to Attend</label>
+					</div>
+				</div>
+			</div>	
+		</strong>
+	</h6>
+	<ul class="container_choices float" style="overflow-x: auto !important;height: 300px;!important">
 	`;
 
 	data.map((item, index) => {
 		if(index ==0){
 			html += `<li  class="item float-item selectedQuestion"
-			style="background-color:#28a74594;"
+			style="background-color:#2e93ffa8;cursor:pointer;"
 			id="listQuestion${index}" 
 			examData="${encryptString(JSON.stringify(data))}"  
 			examinationQaID ="${encryptString(item.examinationQaID)}" 
@@ -592,6 +583,7 @@ function listQuestionsContent(data = false,level="") {
 			pageQuestionsNumber="${count}">${count}</li>`;
 		}else{
 			html += `<li  class="item float-item selectedQuestion" 
+			style="cursor:pointer;"
 			id="listQuestion${index}" 
 			examData="${encryptString(JSON.stringify(data))}"  
 			examinationQaID ="${encryptString(item.examinationQaID)}" 
@@ -671,40 +663,37 @@ function pageContent(level = "0",onGoing = false) {
 				let dataLength = getExamData.length-1;
 					
 				if(dataLength >= level){
-					html =`<div class="container">
+					html =`<div class="container p-4">
 					<div class="section">
 						<div class="row">
-							<div class="col-4">
+							<div class="col-sm-12 col-md-12 col-lg-8 col-xl-4">
 								<img src="../assets/upload-files/examination/${getExamData[level].examinationPicture}" alt="">
 							</div>
-							<div class="col-8">
-							
-								<h1 class="font-weight-bolder mt-4  mb-1 pt-4">${getExamData[level].examinationName}</h1>
-								<h4><strong>Instructions:</strong><p>${getExamData[level].examinationDescription}</p></h4>
+							<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style="align-self: center;">
+								<h5><strong>Instructions:</strong><p>${getExamData[level].examinationDescription}</p></h5>
 							</div>
 						</div>
 					</div>
-					<div class="footer">
-					<button type="button" class="btn btn-success btn-lg float-right startExam" style="width: 15%;line-height: 49px;font-size: 32px;font-weight: 1000;border-radius: 50px;" examTitle="${getExamData[level].examinationName}" examinationID="${encryptString(getExamData[level].examinationID)}" examinationType="${encryptString(getExamData[level].examinationType)}" level="${encryptString(level)}" applicantDesignationID="${encryptString(applicantDesignationID)}">Start <i class="fas fa-arrow-right"></i></button>
+					<div class="footer float-right  col-sm-12 col-md-5 col-lg-3 col-xl-2">
+					<button type="button" class="btn btn-success btn-lg btn-block startExam"  examTitle="${getExamData[level].examinationName}" examinationID="${encryptString(getExamData[level].examinationID)}" examinationType="${encryptString(getExamData[level].examinationType)}" level="${encryptString(level)}" applicantDesignationID="${encryptString(applicantDesignationID)}">Start <i class="fas fa-arrow-right"></i></button>
 					</div> 
 				</div>`;
 				preventRefresh(false);
 				}else{
-					html =`<div class="container">
+					html =`<div class="container p-4">
 					<div class="section">
 						<div class="row">
-							<div class="col-4">
+							<div class="col-sm-12 col-md-12 col-lg-8 col-xl-4">
 								<img src="../assets/modal/done.svg" alt="">
 							</div>
-							<div class="col-8">
-							
-								<h1 class="font-weight-bolder mt-4  mb-1 pt-4">Thank you for taking the examination</h1>
-								<h4><p>Kindly wait for the HR to give further instructions on the next action that must be done.</p></h4>
+							<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style="align-self: center;">
+								<h2 class="font-weight-bolder mt-2">Thank you for taking the examination</h2>
+								<h5><p>Kindly wait for the HR to give further instructions on the next action that must be done.</p></h5>
 							</div>
 						</div>
 					</div>
-					<div class="footer">
-					<button type="button" class="btn btn-success btn-lg float-right" style="width: 15%;line-height: 49px;font-size: 32px;font-weight: 1000;border-radius: 50px;" >Go Back on Website <i class="fas fa-house"></i></button>
+					<div class="footer float-right mt-2 col-sm-12 col-md-5 col-lg-3 col-xl-2">
+					<button type="button" class="btn btn-success btn-lg btn-block" style="padding: 6px;">Go Back on Website <i class="fas fa-house"></i></button>
 					</div> 
 				</div>`;
 				preventRefresh(false);
@@ -714,40 +703,38 @@ function pageContent(level = "0",onGoing = false) {
 					let dataLength = getExamData.length-1;
 					
 					if(dataLength >= level){
-						html =`<div class="container">
+						html =`<div class="container p-4">
 						<div class="section">
 							<div class="row">
-								<div class="col-4">
+								<div class="col-sm-12 col-md-12 col-lg-8 col-xl-4">
+									<h2 class="font-weight-bolder mb-1">${getExamData[level].examinationName}</h2>
 									<img src="../assets/upload-files/examination/${getExamData[level].examinationPicture}" alt="">
 								</div>
-								<div class="col-8">
-								
-									<h1 class="font-weight-bolder mt-4  mb-1 pt-4">${getExamData[level].examinationName}</h1>
-									<h4><strong>Instructions:</strong><p>${getExamData[level].examinationDescription}</p></h4>
+								<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style="align-self: center;">
+									<h5><strong>Instructions:</strong><p>${getExamData[level].examinationDescription}</p></h5>
 								</div>
 							</div>
 						</div>
-						<div class="footer">
-						<button type="button" class="btn btn-success btn-lg float-right startExam" style="width: 15%;line-height: 49px;font-size: 32px;font-weight: 1000;border-radius: 50px;" examTitle="${getExamData[level].examinationName}" examinationID="${encryptString(getExamData[level].examinationID)}" examinationType="${encryptString(getExamData[level].examinationType)}" level="${encryptString(level)}" applicantDesignationID="${encryptString(applicantDesignationID)}">Start <i class="fas fa-arrow-right"></i></button>
+						<div class="footer float-right col-sm-12 col-md-5 col-lg-3 col-xl-2">
+						<button type="button" class="btn btn-success btn-lg btn-block startExam"  examTitle="${getExamData[level].examinationName}" examinationID="${encryptString(getExamData[level].examinationID)}" examinationType="${encryptString(getExamData[level].examinationType)}" level="${encryptString(level)}" applicantDesignationID="${encryptString(applicantDesignationID)}">Start <i class="fas fa-arrow-right"></i></button>
 						</div> 
 					</div>`;
 					preventRefresh(false);
 					}else{
-						html =`<div class="container">
+						html =`<div class="container p-4">
 						<div class="section">
 							<div class="row">
-								<div class="col-4">
+								<div class="col-sm-12 col-md-12 col-lg-8 col-xl-4">
 									<img src="../assets/modal/done.svg" alt="">
 								</div>
-								<div class="col-8">
-								
-									<h1 class="font-weight-bolder mt-4  mb-1 pt-4">Thank you for taking the examination</h1>
-									<h4><p>Kindly wait for the HR to give further instructions on the next action that must be done.</p></h4>
+								<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style="align-self: center;">
+									<h2 class="font-weight-bolder mb-1">Thank you for taking the examination</h2>
+									<h5><p>Kindly wait for the HR to give further instructions on the next action that must be done.</p></h5>
 								</div>
 							</div>
 						</div>
-						<div class="footer">
-						<button type="button" class="btn btn-success btn-lg float-right" style="width: 15%;line-height: 49px;font-size: 32px;font-weight: 1000;border-radius: 50px;" >Go Back on Website <i class="fas fa-house"></i></button>
+						<div class="footer float-right mt-2 col-sm-12 col-md-5 col-lg-3 col-xl-2">
+						<button type="button" class="btn btn-success btn-lg  btn-block" style="padding: 6px;">Go Back on Website <i class="fas fa-house"></i></button>
 						</div> 
 					</div>`;
 					preventRefresh(false);
@@ -755,21 +742,21 @@ function pageContent(level = "0",onGoing = false) {
 					
 		
 				}else{
-					html =`<div class="container">
+					html =`<div class="container p-4">
 							<div class="section">
 									<div class="row">
-										<div class="col-4">
+										<div class="col-sm-12 col-md-12 col-lg-8 col-xl-4">
+											
 											<img src="../assets/modal/warning.svg" alt="">
 										</div>
-										<div class="col-8">
-										
-											<h1 class="font-weight-bolder mt-4  mb-1 pt-4">WARNING!</h1>
-											<h4><strong>You already closed or reload the examination portal and you cannot take the exam anymore.</strong></h4>
+										<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style="align-self: center;">
+											<h2 class="font-weight-bolder mb-1">WARNING!</h2>
+											<h5><strong>You already closed or reload the examination portal and you cannot take the exam anymore.</strong></h5>
 										</div>
 									</div>
 								</div>
-								<div class="footer">
-								<button type="button" class="btn btn-success btn-lg float-right " style="width: 17%;line-height: 49px;font-size: 26px;font-weight: 1000;border-radius: 50px;">Back to Homepage  <i class="fas fa-arrow-right"></i></button>
+								<div class="footer float-right mt-2 col-sm-12 col-md-5 col-lg-3 col-xl-2">
+								<button type="button" class="btn btn-success btn-lg btn-block">Back to Homepage <i class="fas fa-arrow-right"></i></button>
 								</div> 
 							</div>
 						</div>`;
@@ -777,21 +764,21 @@ function pageContent(level = "0",onGoing = false) {
 			}
 			
 		}else{
-			html =`<div class="container">
+			html =`<div class="container p-4">
 						<div class="section">
 								<div class="row">
-									<div class="col-4">
+									<div class="col-sm-12 col-md-12 col-lg-8 col-xl-4">
+										
 										<img src="../assets/modal/warning.svg" alt="">
 									</div>
-									<div class="col-8">
-									
-										<h1 class="font-weight-bolder mt-4  mb-1 pt-4">WARNING!</h1>
-										<h4><strong>Your time to take the examination has already passed. Kindly contact the HR for further instructions.</strong></h4>
+									<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style="align-self: center;">
+										<h2 class="font-weight-bolder mb-1">WARNING!</h2>
+										<h5><strong>Your time to take the examination has already passed. Kindly contact the HR for further instructions.</strong></h5>
 									</div>
 								</div>
 							</div>
-							<div class="footer">
-							<button type="button" class="btn btn-success btn-lg float-right " style="width: 17%;line-height: 49px;font-size: 26px;font-weight: 1000;border-radius: 50px;">Back to Homepage  <i class="fas fa-arrow-right"></i></button>
+							<div class="footer float-right mt-2 col-sm-12 col-md-5 col-lg-3 col-xl-2">
+							<button type="button" class="btn btn-success btn-lg btn-block">Back to Homepage <i class="fas fa-arrow-right"></i></button>
 							</div> 
 						</div>
 					</div>`;
@@ -815,9 +802,9 @@ function examContent(data = false,examinationType="",level="",examTitle=""){
 		console.log(data)
 		if (data) {
 			html = `
-            <div class="col-md-9 col-sm-12 mb-4">
+            <div class="col-sm-7 col-lg-8 col-xl-9 mb-4">
                 <div class="">
-					<div class="col-12 col-lg-8 col-xl-12 text-left">
+					<div class="text-left">
 					<h5 class="bg-primary text-light p-3 text-left" style="position: absolute;"><strong>${examTitle}</strong></h5>
 						<h5 class="bg-primary text-light p-3 text-right"><i class="fas fa-alarm-clock"></i> <strong id="setTime">00:00:00</strong></h5>
 						<div class="card my-0 p-2 approval-list" style='box-shadow:none;'>
@@ -827,38 +814,14 @@ function examContent(data = false,examinationType="",level="",examTitle=""){
 					</div>
                 </div>
             </div>
-			<div class="col-md-3 col-sm-12" style="padding-left: 29px;
-			padding-right: 29px;">
+			<div class="col-sm-5 col-lg-4 col-xl-3 " style="padding-left: 29px;
+				padding-right: 29px;">
+
+				
                 <div class="" id="user_role_content">
                     ${listQuestionsContent(data,level)}
                 </div>
-				<div class="row">
-					<div class="col-12">
-					<hr class="mb-0">
-						<div class="container p-5 pl-1">
-						<label class="mb-0 " style="width: 45px; 
-						border-radius: 3px;
-						height: 12px; 
-						background-color: #28a74594;"></label>
-						<label class="p-2">Attended</label>
-
-						
-						<label class="mb-0 " style="width: 45px; 
-						border-radius: 3px;
-						height: 12px; 
-						background-color:#ffc107a3;"></label>
-						<label class="p-2">Skipped</label>
-
-					
-						<label class="mb-0 " style="width: 45px; 
-						border-radius: 3px;
-						height: 12px; 
-						background-color:#f2f2f2;"></label>
-						<label class="p-2">Yet to Attend</label>
-
-						</div>
-					</div>	
-				</div>
+				
             </div>`;
 		} else {
 			html = `
@@ -919,10 +882,21 @@ $(document).on("click", ".selectedQuestion", function () {
 	const level  = decryptString($(this).attr("level"));
 	const pageQuestionsNumber  = $(this).attr("pageQuestionsNumber");
 	const examData  = JSON.parse(decryptString($(this).attr("examData")));
+	$parentID = $(this).attr("id");
+	
+	// if($(this).css('background-color') != "#ffc107a3"){
+	// 	$(this).css('background-color','#2e93ffa8'); 
+	// }
 
-	if($(this).css('background-color') != "#ffc107a3"){
-		$(this).css('background-color','#28a74594'); 
-	}
+	$(".item").each(function(){
+		console.log($(this).css("background-color"))
+		if($(this).css("background-color") === "rgba(46, 147, 255, 0.66)"){
+			let id  = $(this).attr("id");
+			$("#"+id).css("background-color","#ffc107a3");
+
+		}
+	})
+	$("#"+$parentID).css("background-color","#2e93ffa8");
 	
 	const moduleData = getDisplayQuestionContent(examData,examinationQaID,examinationType,pageQuestionsNumber,level);
 	$("#module_access_content").html(preloader);
@@ -943,8 +917,8 @@ $(document).on("click", ".skipQuestion", function (){
 	const examData  = JSON.parse(decryptString($(this).attr("examData")));
 	const level  = decryptString($(this).attr("level"));
 
-	$("#listQuestion"+indexMinus).css('background-color','#ffc107a3');
-	$("#listQuestion"+indexPlus).css('background-color','#28a74594');
+	$("#listQuestion"+indexMinus).css('background-color','#ffc107a3'); // yellow
+	$("#listQuestion"+indexPlus).css('background-color','#2e93ffa8'); // blue
 
 	const moduleData = getDisplayQuestionContent(examData,examinationQaID,examinationType,pageQuestionsNumber,level);
 	$("#module_access_content").html(preloader);
@@ -965,8 +939,22 @@ $(document).on("click", ".nextQuestion", function (){
 	const examData  = JSON.parse(decryptString($(this).attr("examData")));
 	const level  = decryptString($(this).attr("level"));
 
-		$("#listQuestion"+indexMinus).css('background-color','#28a74594'); 
-		$("#listQuestion"+indexPlus).css('background-color','#28a74594'); 
+	const getCategory = $(".answer").find("input").attr("id");
+	let getAnswer = '';
+	
+	if(getCategory == "identification"){
+		getAnswer = $(".answer").find("input").val();
+		
+		if(getAnswer != 0 || getAnswer != ''){
+			$("#listQuestion"+indexMinus).css('background-color','#28a74594'); // green
+			$("#listQuestion"+indexPlus).css('background-color','#2e93ffa8'); // blue
+		}else{
+			$("#listQuestion"+indexMinus).css('background-color','#ffc107a3'); // yellow
+			$("#listQuestion"+indexPlus).css('background-color','#2e93ffa8'); // blue
+		}
+	}
+
+		
 	
 
 	const moduleData = getDisplayQuestionContent(examData,examinationQaID,examinationType,pageQuestionsNumber,level);

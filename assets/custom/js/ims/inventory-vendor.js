@@ -209,6 +209,10 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
+				lengthMenu: [
+					[50, 100, 150, 200, -1],
+					[50, 100, 150, 200, "All"],
+				],
 				columnDefs: [
 					{ targets: 0, width: 50  },
 					{ targets: 1, width: 150 },

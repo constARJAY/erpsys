@@ -78,6 +78,7 @@ class Purchase_order extends CI_Controller {
         $purchaseOrderID = $this->input->get("id");
         $data = $this->purchaseorder->getPurchaseOrderExcelData($purchaseOrderID);
         downloadExcel("Purchase Order", $data);
+        // downloadExcel("cost estimate", ["name" => "lol"]);
     }
     // ----- ***** END EXCEL ***** -----
 

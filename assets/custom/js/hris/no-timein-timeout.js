@@ -1,7 +1,8 @@
 $(document).ready(function () {
+	const allowedUpdate = isUpdateAllowed(57);
 
 	// ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover(57);
+	const moduleApprover = getModuleApprover("no time in/out");
 	// ----- END MODULE APPROVER -----
 
 
@@ -24,12 +25,44 @@ $(document).ready(function () {
 	}
 	// ---- END GET EMPLOYEE DATA -----
 
+	// ----- REUSABLE FUNCTIONS -----
+	let holidayData = getTableData(
+        "hris_holiday_tbl",
+        `*`,
+        `holidayStatus = 1`
+    )?.map(holiday => holiday.holidayDate);
+
+	let employeeSchedule = getTableData(
+		`hris_employee_list_tbl as helt
+			LEFT JOIN hris_schedule_setup_tbl AS hsst USING(scheduleID)`,
+		`IF(mondayStatus = 1, 1, 0) AS monday,
+		IF(tuesdayStatus = 1, 1, 0) AS tuesday,
+		IF(wednesdayStatus = 1, 1, 0) AS wednesday,
+		IF(thursdayStatus = 1, 1, 0) AS thursday,
+		IF(fridayStatus = 1, 1, 0) AS friday,
+		IF(saturdayStatus = 1, 1, 0) AS saturday,
+		IF(sundayStatus = 1, 1, 0) AS sunday`,
+		`employeeID = ${sessionID}`
+	);
+	// ----- END REUSABLE FUNCTIONS -----
+console.log(`${sessionID}`);
+
+// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"hris_no_timein_timeout_tbl", 
+				"reviseNoTimeinTimeoutID", 
+				"reviseNoTimeinTimeoutID IS NOT NULL AND noTimeinTimeoutID  != 4");
+			return revisedDocumentsID.map(item => item.reviseNoTimeinTimeoutID).includes(id);
+		}
+		return false;
+	}
 
 	// ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false) {
-		const loadData = (id) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("hris_no_timein_timeout_tbl", "", "noTimeinTimeoutID=" + id);
-
 			if (tableData.length > 0) {
 				let {
 					employeeID,
@@ -54,8 +87,13 @@ $(document).ready(function () {
 				}
 
 				if (isAllowed) {
-					pageContent(true, tableData, isReadOnly);
-					updateURL(encryptString(id));
+					if (isRevise && employeeID == sessionID) {
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
+						updateURL(encryptString(id), true, true);
+					} else {
+						pageContent(true, tableData, isReadOnly);
+						updateURL(encryptString(id));
+					}
 				} else {
 					pageContent();
 					updateURL();
@@ -68,8 +106,8 @@ $(document).ready(function () {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -78,17 +116,28 @@ $(document).ready(function () {
 				let id = decryptString(arr[1]);
 					id && isFinite(id) && loadData(id);
 			} else if (isAdd != -1) {
-				pageContent(true);
+				arr = url.split("?add=");
+				if (arr.length > 1) {
+					let id = decryptString(arr[1]);
+						id && isFinite(id) && loadData(id, true);
+				} else {
+					const isAllowed = isCreateAllowed(46);
+					pageContent(isAllowed);
+				}
 			}
 		}
 		
 	}
 
-	function updateURL(view_id = 0, isAdd = false) {
+	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
 			window.history.pushState("", "", `${base_url}hris/no_timein_timeout?view_id=${view_id}`);
-		} else if (!view_id && isAdd) {
-			window.history.pushState("", "", `${base_url}hris/no_timein_timeout?add`);
+		} else if (isAdd) {
+			if (view_id && isRevise) {
+				window.history.pushState("", "", `${base_url}hris/no_timein_timeout?add=${view_id}`);
+			} else {
+				window.history.pushState("", "", `${base_url}hris/no_timein_timeout?add`);
+			}
 		} else {
 			window.history.pushState("", "", `${base_url}hris/no_timein_timeout`);
 		}
@@ -180,7 +229,7 @@ $(document).ready(function () {
 
 
 	// ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add") {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
 			if (isCreateAllowed(57)) {
@@ -189,7 +238,11 @@ $(document).ready(function () {
 			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack"
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -400,7 +453,7 @@ $(document).ready(function () {
 
 
 	// ----- FORM BUTTONS -----
-	function formButtons(data = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 
@@ -415,48 +468,107 @@ $(document).ready(function () {
 
 			let isOngoing = approversDate ? (approversDate.split("|").length > 0 ? true : false) : false;
 			if (employeeID === sessionID) {
-				if (noTimeinTimeoutStatus == 0) {
-					// DRAFT
+				if (noTimeinTimeoutStatus == 0 || isRevise) {
+				// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit px-5 py-2" 
+						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
-						code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-paper-plane"></i>
+						code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
-					</button>
-					<button 
-						class="btn btn-cancel px-5 py-2"
-						id="btnCancelForm" 
-						noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
-						code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-ban"></i> 
-						Cancel
 					</button>`;
-				} else if (noTimeinTimeoutStatus == 1) {
-					if (!isOngoing) {
-						button = `
+
+					if (isRevise) {
+						button += `
 						<button 
-							class="btn btn-cancel px-5 py-2"
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancel" 
+							noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
+							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					} else {
+						button += `
+						<button type="button" 
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
-							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"
+							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
-				} 
+
+				} else if (noTimeinTimeoutStatus == 1) {
+					// FOR APPROVAL
+					if (!isOngoing) {
+						button = `
+						<button 
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancelForm" 
+							noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
+							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"
+							status="${noTimeinTimeoutStatus}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					}
+				} else if (noTimeinTimeoutStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
+						code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"
+						status="${noTimeinTimeoutStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
+				} else if (noTimeinTimeoutStatus == 3) {
+					// DENIED - FOR REVISE
+					if (!isDocumentRevised(noTimeinTimeoutID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
+							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"
+							status="${noTimeinTimeoutStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				} else if (noTimeinTimeoutStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(noTimeinTimeoutID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
+							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"
+							status="${noTimeinTimeoutStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				}
 			} else {
 				if (noTimeinTimeoutStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit px-5 py-2" 
+							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
 							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel px-5 py-2"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
 							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-ban"></i> 
@@ -465,30 +577,31 @@ $(document).ready(function () {
 					}
 				}
 			}
-
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit px-5 py-2" 
+				class="btn btn-submit px-5 p-2"  
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel px-5 py-2" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
 		}
-		return button;
+		return button;	
 	}
 	// ----- END FORM BUTTONS -----
 
 
 	// ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
+			readOnly = isRevise ? false : readOnly;
 
 		let {
 			noTimeinTimeoutID         = "",
+			reviseNoTimeinTimeoutID	  = "", 
 			employeeID            	  = "",
 			noTimeinTimeoutNegligence ="",
 			noTimeinTimeoutDate       = "",
@@ -515,11 +628,13 @@ $(document).ready(function () {
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("noTimeinTimeoutID", noTimeinTimeoutID);
+		$("#btnBack").attr("code", getFormCode("NTI", moment(createdAt), noTimeinTimeoutID));
 		$("#btnBack").attr("status", noTimeinTimeoutStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
-		let button   = formButtons(data);
+		let button   = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let timeInNegligence  = "disabled", 
 			timeOutNegligence = "disabled";
@@ -542,32 +657,53 @@ $(document).ready(function () {
 				timeOutNegligence = "disabled";
 			}
 		}
+		let reviseDocumentNo    = isRevise ? noTimeinTimeoutID : reviseNoTimeinTimeoutID;
+		let documentHeaderClass = isRevise || reviseNoTimeinTimeoutID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseNoTimeinTimeoutID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseNoTimeinTimeoutID ? `
+		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+			<div class="card">
+				<div class="body">
+					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
+					<h6 class="mt-0 text-danger font-weight-bold">
+						${getFormCode("NTI", createdAt, reviseDocumentNo)}
+					</h6>      
+				</div>
+			</div>
+		</div>` : "";
 
 		let html = `
         <div class="row px-2">
-            <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+        ${documentReviseNo}
+            <div class="${documentHeaderClass}">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
-                        <h6 class="mt-0 text-danger font-weight-bold">${noTimeinTimeoutID ? getFormCode("NTI", createdAt, noTimeinTimeoutID) : "---"}</h6>      
+                        <h6 class="mt-0 text-danger font-weight-bold">
+                        ${noTimeinTimeoutID && !isRevise ? getFormCode("NTI", createdAt, noTimeinTimeoutID) : "---"}
+                        </h6>      
                     </div>
                 </div>
             </div>
-            <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+            <div class="${documentHeaderClass}">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
-                        <h6 class="mt-0 font-weight-bold">${noTimeinTimeoutStatus ? getStatusStyle(noTimeinTimeoutStatus) : "---"}</h6>      
+                        <h6 class="mt-0 font-weight-bold">
+                        ${noTimeinTimeoutStatus && !isRevise ? getStatusStyle(noTimeinTimeoutStatus) : "---"}
+                        </h6>      
                     </div>
                 </div>
             </div>
-            <div class="col-lg-8 col-md-12 col-sm-12 px-1">
+            <div class="${documentDateClass}">
                 <div class="row m-0">
                 <div class="col-lg-4 col-md-4 col-sm-12 px-1">
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Created</small>
-                            <h6 class="mt-0 font-weight-bold">${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+                          ${createdAt && !isRevise ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
+                            </h6>      
                         </div>
                     </div>
                 </div>
@@ -575,7 +711,9 @@ $(document).ready(function () {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Submitted</small>
-                            <h6 class="mt-0 font-weight-bold">${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+                           ${submittedAt && !isRevise && !isRevise ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
+                            </h6>      
                         </div>
                     </div>
                 </div>
@@ -583,7 +721,9 @@ $(document).ready(function () {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Approved</small>
-                            <h6 class="mt-0 font-weight-bold">${getDateApproved(noTimeinTimeoutStatus, approversID, approversDate)}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+                            ${getDateApproved(noTimeinTimeoutStatus, approversID, approversDate)}
+                            </h6>      
                         </div>
                     </div>
                 </div>
@@ -593,7 +733,9 @@ $(document).ready(function () {
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
-                        <h6 class="mt-0 font-weight-bold">${noTimeinTimeoutRemarks ? noTimeinTimeoutRemarks : "---"}</h6>      
+                        <h6 class="mt-0 font-weight-bold">
+                        ${noTimeinTimeoutRemarks && !isRevise ? noTimeinTimeoutRemarks : "---"}
+                        </h6>      
                     </div>
                 </div>
             </div>
@@ -631,7 +773,7 @@ $(document).ready(function () {
 						unique="${noTimeinTimeoutID}"
 						title="Date"
 						>
-                    <div class="d-block invalid-feedback" id="invalid-changeScheduleDate"></div>
+                    <div class="d-block invalid-feedback" id="invalid-noTimeinTimeoutDate"></div>
                 </div>
             </div>
 			<div class="col-md-3 col-sm-12">
@@ -705,16 +847,66 @@ $(document).ready(function () {
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
+			$("#noTimeinTimeoutDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			$("#noTimeinTimeoutDate").daterangepicker({
+				autoUpdateInput: false,
+				singleDatePicker: true,
+				showDropdowns: true,
+				autoApply: true,
+				startDate: moment(noTimeinTimeoutDate || new Date).format("YYYY-MM-DD"),
+				maxDate: moment(),
+				// maxDate: moment().add(80, 'days'),
+				locale: {
+					format: "MMMM DD, YYYY",
+				},
+				isInvalidDate: function(date) {
+					let optionDay  = moment(date).day();
+
+					let isActive = '1';
+					employeeSchedule.map(schedule => {
+							 if (optionDay == 0) isActive = schedule.sunday ?? '1';
+						else if (optionDay == 1) isActive = schedule.monday ?? '1';
+						else if (optionDay == 2) isActive = schedule.tuesday ?? '1';
+						else if (optionDay == 3) isActive = schedule.wednesday ?? '1';
+						else if (optionDay == 4) isActive = schedule.thursday ?? '1';
+						else if (optionDay == 5) isActive = schedule.friday ?? '1';
+						else if (optionDay == 6) isActive = schedule.saturday ?? '1';
+					});
+
+					let optionDate = moment(date).format("YYYY-MM-DD");
+					return holidayData.includes(optionDate) || isActive == '0';
+				},
+			}, function(data) {
+				$("#noTimeinTimeoutDate").val(moment(data).format("MMMM DD, YYYY"));
+			})
+
 			if(data){
 				initInputmaskTime(false);
-				$("#noTimeinTimeoutDate").data("daterangepicker").startDate = moment(noTimeinTimeoutDate, "YYYY-MM-DD");
-				$("#noTimeinTimeoutDate").data("daterangepicker").endDate   = moment(noTimeinTimeoutDate, "YYYY-MM-DD");
 			}else{
 				initInputmaskTime();
-				$("#noTimeinTimeoutDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			}
+
+			// if(data){
+			// 	initInputmaskTime(false);
+			// 	$("#noTimeinTimeoutDate").data("daterangepicker").startDate = moment(noTimeinTimeoutDate, "YYYY-MM-DD");
+			// 	$("#noTimeinTimeoutDate").data("daterangepicker").endDate   = moment(noTimeinTimeoutDate, "YYYY-MM-DD");
+			// }else{
+			// 	initInputmaskTime();
+			// 	$("#noTimeinTimeoutDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			// }
+
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			
-			$("#noTimeinTimeoutDate").data("daterangepicker").maxDate = moment();
+			//$("#noTimeinTimeoutDate").data("daterangepicker").maxDate = moment();
 			return html;
 		}, 300);
 	}
@@ -722,7 +914,7 @@ $(document).ready(function () {
 
 
 	// ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -745,9 +937,9 @@ $(document).ready(function () {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -864,7 +1056,7 @@ $(document).ready(function () {
 						data["tableData[approversID]"]          = sessionID;
 						data["tableData[approversStatus]"]      = 2;
 						data["tableData[approversDate]"]        = dateToday();
-						data["tableData[changeScheduleStatus]"] = 2;
+						data["tableData[noTimeinTimeoutStatus]"] = 2;
 					}
 				}
 				data["whereFilter"] = "noTimeinTimeoutID=" + id;
@@ -890,30 +1082,68 @@ $(document).ready(function () {
 	});
 	// ----- END OPEN ADD FORM -----
 
-
+	// ----- REVISE DOCUMENT -----
+	$(document).on("click", "#btnRevise", function () {
+		const id                    = decryptString($(this).attr("noTimeinTimeoutID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
+	});
+	// ----- END REVISE DOCUMENT -----
 	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("noTimeinTimeoutID");
+		const id         = decryptString($(this).attr("noTimeinTimeoutID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
-			$("#page_content").html(preloader);
-			pageContent();
 
-			if (employeeID != sessionID) {
-				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			if (revise) {
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getData(action, 0, "save", feedback, id);
+				data[`tableData[noTimeinTimeoutStatus]`] = 0;
+				if (!isFromCancelledDocument) {
+					delete data[`noTimeinTimeoutID`];
+					data[`feedback`] = getFormCode("NTI", new Date);
+					data[`tableData[reviseNoTimeinTimeoutID]`] = id;
+				} else {
+					delete data[`action`];
+					data[`tableData[noTimeinTimeoutID]`] = id;
+					data[`action`] = "update";
+				}
+
+				setTimeout(() => {
+					cancelForm(
+						"save",
+						action,
+						"NO TIME-IN / TIME-OUT",
+						"",
+						"form_no_timein_timeout",
+						data,
+						true,
+						pageContent
+					);
+				}, 300);
+			} else {
+				$("#page_content").html(preloader);
+				pageContent();
+	
+				if (employeeID != sessionID) {
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+				}
 			}
 		} else {
-			const action = id && feedback ? "update" : "insert";
-			const data   = getData(action, 0, "save", feedback, id);
+			const action   = id && feedback ? "update" : "insert";
+			const data     = getData(action, 0, "save", feedback, id);
+			data[`tableData[noTimeinTimeoutStatus]`] = 0;
 
 			setTimeout(() => {
 				cancelForm(
 					"save",
 					action,
-					"NO TIME-IN / TIME-OUT",
+					"CHANGE SCHEDULE",
 					"",
 					"form_no_timein_timeout",
 					data,
@@ -922,14 +1152,13 @@ $(document).ready(function () {
 				);
 			}, 300);
 		}
-		
 	});
 	// ----- END CLOSE FORM -----
 
 
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT MODAL -----
@@ -937,16 +1166,24 @@ $(document).ready(function () {
 
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE DOCUMENT -----
-	$(document).on("click", "#btnSave", function () {
+	$(document).on("click", "#btnSave, #btnCancel", function () {
 		var getNegligenceValue = $("#negligence option:selected").val();
 		var boolean = false;
+		const id       = decryptString($(this).attr("noTimeinTimeoutID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise   = $(this).attr("revise") == "true";
+		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
+		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
+		const data     = getData(action, 0, "save", feedback);
+		data[`tableData[noTimeinTimeoutStatus]`] = 0;
+
 		if(getNegligenceValue == "2"){
 			if($("#noTimeinTimeoutTimeOut").val() != "00:00" ){
 			
@@ -992,20 +1229,30 @@ $(document).ready(function () {
 		}
 
 		if(boolean == true){
-			const action   = "insert"; // CHANGE
-			const feedback = getFormCode("SCH", dateToday()); 
-			const data     = getData(action, 0, "save", feedback);
+			if (revise) {
+			if (!isFromCancelledDocument) {
+				data[`feedback`] = getFormCode("SCH", new Date);
+				data[`tableData[reviseNoTimeinTimeoutID]`] = id;
+				data[`whereFilter`] = `noTimeinTimeoutID  = ${id}`;
+				delete data[`tableData[noTimeinTimeoutID ]`];
+			} else {
+				data[`tableData[noTimeinTimeoutID ]`] = id;
+				data[`whereFilter`] = `noTimeinTimeoutID  = ${id}`;
+				delete data[`action`];
+				data[`action`] = "update";
+			}
+		}
 
-			formConfirmation(
-				"save",
-				"insert",
-				"NO TIME-IN / TIME-OUT",
-				"",
-				"form_no_timein_timeout",
-				data,
-				true,
-				myFormsContent
-			);
+		formConfirmation(
+			"save",
+			action,
+			"NO TIME-IN / TIME-OUT",
+			"",
+			"form_no_timein_timeout",
+			data,
+			true,
+			pageContent
+		);
 		}
 		
 	});
@@ -1014,26 +1261,36 @@ $(document).ready(function () {
 
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id       = $(this).attr("noTimeinTimeoutID");
-		const validate = validateForm("form_no_timein_timeout");
-
+		const id           = decryptString($(this).attr("noTimeinTimeoutID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise       = $(this).attr("revise") == "true";
+		const validate     = validateForm("form_no_timein_timeout");
 		if (validate) {
 			const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
-			const action   = id && feedback ? "update" : "insert";
+			const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data     = getData(action, 1, "submit", feedback, id);
+
+			if (revise) {
+				if (!isFromCancelledDocument) {
+					data[`tableData[reviseNoTimeinTimeoutID]`] = id;
+					delete data[`tableData[noTimeinTimeoutID ]`];
+					data["feedback"] = getFormCode("SCH", new Date);
+				} else {
+					data[`whereFilter`] = `noTimeinTimeoutID  = ${id}`;
+				}
+			}
 
 			const employeeID = getNotificationEmployeeID(
 				data["tableData[approversID]"],
 				data["tableData[approversDate]"],
 				true
 			);
-			
+
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
 					moduleID:                57,
-					// tableID:                 1, // AUTO FILL
-					notificationTitle:       "No Time-in/Time-out",
+					notificationTitle:       "NO TIME-IN / TIME-OUT",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
@@ -1060,7 +1317,7 @@ $(document).ready(function () {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id       = $(this).attr("noTimeinTimeoutID");
+		const id       = decryptString($(this).attr("noTimeinTimeoutID"));
 		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
 		const action   = "update";
 		const data     = getData(action, 4, "cancelform", feedback, id);
@@ -1079,24 +1336,24 @@ $(document).ready(function () {
 	// ----- END CANCEL DOCUMENT -----
 
 
-	// ----- CANCEL DOCUMENT -----
-	$(document).on("click", "#btnCancel", function () {
-		const id	   = $(this).attr("noTimeinTimeoutID");
-		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
-		const action   = id && feedback ? "update" : "insert";
-		const data     = getData(action, 0, "save", feedback, id);
+// '	// ----- CANCEL DOCUMENT -----
+// 	$(document).on("click", "#btnCancel", function () {
+// 		const id	   = $(this).attr("noTimeinTimeoutID");
+// 		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
+// 		const action   = id && feedback ? "update" : "insert";
+// 		const data     = getData(action, 0, "save", feedback, id);
 
-		cancelForm(
-			"save",
-			action,
-			"NO TIME-IN / TIME-OUT",
-			"",
-			"form_no_timein_timeout",
-			data,
-			true,
-			pageContent
-		);
-	});
+// 		cancelForm(
+// 			"save",
+// 			action,
+// 			"NO TIME-IN / TIME-OUT",
+// 			"",
+// 			"form_no_timein_timeout",
+// 			data,
+// 			true,
+// 			pageContent
+// 		);
+// 	});'
 	// ----- END CANCEL DOCUMENT -----
 
 
@@ -1211,7 +1468,7 @@ $(document).ready(function () {
 
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function() {
-		const id       = $(this).attr("noTimeinTimeoutID");
+		const id       = decryptString($(this).attr("noTimeinTimeoutID"));
 		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
 
 		$("#modal_change_schedule_content").html(preloader);
@@ -1235,7 +1492,7 @@ $(document).ready(function () {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger px-5 py-2" id="btnRejectConfirmation"
-			noTimeinTimeoutID="${(id)}"
+			noTimeinTimeoutID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel px-5 py-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -1247,7 +1504,7 @@ $(document).ready(function () {
 		const id       = decryptString($(this).attr("noTimeinTimeoutID"));
 		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
 
-		const validate = validateForm("modal_change_schedule");
+		const validate = validateForm("form_no_timein_timeout");
 		if (validate) {
 			let tableData = getTableData("hris_no_timein_timeout_tbl", "", "noTimeinTimeoutID = "+ id);
 			if (tableData) {
@@ -1276,7 +1533,7 @@ $(document).ready(function () {
 						"reject",
 						"update",
 						"NO TIME-IN / TIME-OUT",
-						"modal_change_schedule",
+						"form_no_timein_timeout",
 						"",
 						data,
 						true,
@@ -1290,6 +1547,35 @@ $(document).ready(function () {
 	})
 	// ----- END REJECT DOCUMENT -----
 
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const noTimeinTimeoutID = decryptString($(this).attr("noTimeinTimeoutID"));
+		const feedback         = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
+
+		const id = decryptString($(this).attr("noTimeinTimeoutID"));
+		let data = {};
+		data["tableName"]                       = "hris_no_timein_timeout_tbl";
+		data["whereFilter"]                     = `noTimeinTimeoutID = ${noTimeinTimeoutID}`;
+		data["tableData[noTimeinTimeoutStatus]"] = 5;
+		data["action"]                          = "update";
+		data["method"]                          = "drop";
+		data["feedback"]                        = feedback;
+		data["tableData[updatedBy]"]            = sessionID;
+
+		setTimeout(() => {
+			formConfirmation(
+				"drop",
+				"update",
+				"NO TIME-IN / TIME-OUT",
+				"",
+				"form_no_timein_timeout",
+				data,
+				true,
+				pageContent
+			);
+		}, 300);
+	})
+	// ----- END DROP DOCUMENT -----
 
 	// ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {

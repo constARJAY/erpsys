@@ -35,7 +35,7 @@ $(document).on("click",".addCodeConductSection", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status</label>
                                                                 <select class="form-control select2 validate" name="codeConductSectionStatus" id="inputcodeConductSectionStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
@@ -70,7 +70,6 @@ $(document).on("click",".editCodeConductSection", function(){
 
     // Category Option
     let selectedCategory            =   getTableData("hris_code_conduct_category_tbl", "", "codeConductCategoryID ="+codeConductCategoryID);
-    console.log(selectedCategory);
     let unmentionedCategory         =   getTableData("hris_code_conduct_category_tbl","","codeConductCategoryID !='"+codeConductCategoryID +"' AND codeConductCategoryStatus != 0" );
     let codeOfConductCategory       =   `<option value="">No Selected</option>
                                          <option value="${tableData[0]["codeConductCategoryID"]}" selected>${selectedCategory[0]["codeConductCategoryName"]}</option>`;
@@ -79,7 +78,7 @@ $(document).on("click",".editCodeConductSection", function(){
     });
 
 
-    let statusOption            = tableData[0]["codeConductSectionStatus"] == "1" ?`<option value="1" selected>Active</option> <option value="0" >Inactive</option>` : `<option value="1" >Active</option> <option value="0" selected>Inactive</option>`;
+    let statusOption                        = tableData[0]["codeConductSectionStatus"] == "1" ?`<option value="1" selected>Active</option> <option value="0" >Inactive</option>` : `<option value="1" >Active</option> <option value="0" selected>Inactive</option>`;
     let modal_codeConductSection_content    =   ` 
                                             <div class="modal-body">  
                                                 <form id="modal_codeConductSection_form">
@@ -102,7 +101,7 @@ $(document).on("click",".editCodeConductSection", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status ${asterisk}</label>
+                                                                <label for="">Status</label>
                                                                 <select class="form-control select2 validate" name="codeConductSectionStatus" id="inputcodeConductSectionStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -199,6 +198,7 @@ function initDataTables() {
                 serverSide:     false,
                 scrollX:        true,
                 scrollCollapse: true,
+                lengthMenu: [ 50, 75, 100, 150],
                 columnDefs: [
                     { targets: 0, width: "10%" },
                     { targets: 4, width: 80 }

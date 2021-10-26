@@ -191,7 +191,6 @@ tableContent();
             const filetype = this.files[0].type;
             const filename = this.files[0].name;
 
-            console.log(filetype);
 
             if (filesize > 10) {
                 $(`#displayImage`).empty();
@@ -234,11 +233,11 @@ tableContent();
 
     // -- START COMPUTE MONTHLY DEPRECIATION AND HOURLY RATE --//
     $(document).on('keyup','#input_vehicleCost,#input_vehicleSalvageValue,#input_vehicleUsefulLife',function(){
-        var getAssetCost = +parseFloat($("#input_vehicleCost").val().replaceAll(",",""));
-        var getSalvageValue = +parseFloat($("#input_vehicleSalvageValue").val().replaceAll(",",""));
-        var getEstimatedLife = +parseFloat($("#input_vehicleUsefulLife").val().replaceAll(",",""));
-        var getMonthlyDepreciation = 0;
-        var getHourlyRate = 0;
+        var getAssetCost            = +parseFloat($("#input_vehicleCost").val().replaceAll(",",""));
+        var getSalvageValue         = +parseFloat($("#input_vehicleSalvageValue").val().replaceAll(",",""));
+        var getEstimatedLife        = +parseFloat($("#input_vehicleUsefulLife").val().replaceAll(",",""));
+        var getMonthlyDepreciation  = 0;
+        var getHourlyRate           = 0;
 
         getMonthlyDepreciation = ((getAssetCost - getSalvageValue)/getEstimatedLife)/12;
 
@@ -484,7 +483,12 @@ tableContent();
             </div>
 
             <div class="col-md-6 col-sm-12">
-                <label>Monthly Depreciation <span class="text-danger font-weight-bold">*</span></label>
+                <label>
+                    <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="MONTHLY DEPRECIATION FORMULA:
+            ( (Cost - Salvage Value) ÷ Estimated Useful Life ) ÷ 12 months "></i>
+                
+                
+                Monthly Depreciation <span class="text-danger font-weight-bold">*</span></label>
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text">₱</span>
@@ -503,7 +507,10 @@ tableContent();
             </div>
 
             <div class="col-md-6 col-sm-12">
-                <label>Hourly Rate <span class="text-danger font-weight-bold">*</span></label>
+                <label>
+                <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="HOURLY RATE FORMULA:
+                Monthly Depreciation ÷ (30 days x 24 hours)"></i>
+        Hourly Rate <span class="text-danger font-weight-bold">*</span></label>
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text">₱</span>
@@ -599,6 +606,9 @@ $(document).on("click", "#btnAdd", function() {
     const content = modalContent();
     $("#modal_vehicle_content").html(content);
     initAll();
+    //  TOOLTIP //
+    $('[data-toggle="tooltip"]').tooltip()
+    // TOOLTIP //
     datepicker("inputacquisitionDate");
 });
 // ----- END OPEN ADD MODAL -----
@@ -655,6 +665,9 @@ $(document).on("click", ".btnEdit", function() {
             $("#btnSaveConfirmationEdit").attr("feedback", feedback);
             datepicker("inputacquisitionDate",new Date(tableData[0].acquisitionDate));
             initAll();
+            //  TOOLTIP //
+            $('[data-toggle="tooltip"]').tooltip()
+            // TOOLTIP //
         }, 500);
     }
 });
@@ -721,6 +734,7 @@ $(document).on("change","#input_classificationID",function(){
     categoryContent("add", thisValue);
     initAll();
 });
+
 
 
 

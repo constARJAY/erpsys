@@ -507,9 +507,9 @@ $(document).ready(function() {
                                                 <input class="form-control text-center validate"
                                             id="barcodeItem${itemID}0"
                                             name="barcodeItem"
-                                            min="36"
+                                            min="18"
                                             max="64"
-                                            minlength="36"
+                                            minlength="18"
                                             maxlength="64"
                                             index="0"
                                             itemID="${itemID}"
@@ -1018,9 +1018,9 @@ $(document).ready(function() {
         const index         = parent.attr("index");
         const id            = parent.attr("id");
         const withdrawalItemID    = parent.attr("withdrawalItemID");
-        const valueLength = parent.val().length +1;
+        const valueLength = parent.val().length;
         const value = parent.val();
-        const characterLength = 37;
+        const characterLength = 18;
         let warningCondition = false;
         let isInvalid        = false;
         // $("#"+id).addClass("is-invalid").addClass("validate");

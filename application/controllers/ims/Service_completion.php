@@ -56,13 +56,6 @@ class Service_completion extends CI_Controller {
             "createdAt"                  => $createdAt
         ];
 
-        // if ($reviseServiceCompletionID) {
-        //     $scData = $this->servicecompletion->getServiceCompletion($reviseServiceCompletionID);
-        //     $serviceCompletionData["serviceRequisitionID"] = $scData->serviceRequisitionID;
-        //     $serviceCompletionData["serviceOrderID"]       = $scData->serviceOrderID;
-        //     $serviceCompletionData["employeeID"]           = $scData->employeeID;
-        // }
-
         if ($action == "update") {
             unset($serviceCompletionData["reviseServiceCompletionID"]);
             unset($serviceCompletionData["createdBy"]);
@@ -107,7 +100,7 @@ class Service_completion extends CI_Controller {
 
                 if ($services && count($services) > 0) {
                     $deleteServices = $this->serviceorder->deleteServices($serviceRequisitionID, $serviceOrderID, $serviceCompletionID);
-                    $deleteScopes = $this->serviceorder->deleteScopes($serviceRequisitionID, $serviceOrderID, $serviceCompletionID);
+                    $deleteScopes   = $this->serviceorder->deleteScopes($serviceRequisitionID, $serviceOrderID, $serviceCompletionID);
 
                     foreach($services as $index => $item) {
                         $scopesData = [];

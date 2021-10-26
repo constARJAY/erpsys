@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 21, 2021 at 02:31 AM
+-- Generation Time: Oct 26, 2021 at 05:16 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -6866,7 +6866,21 @@ INSERT INTO `hris_employee_attendance_tbl` (`attendanceID`, `employeeID`, `sched
 (151, 20, '2021-10-19', '2021-10-19 06:00:00', '2021-10-19 17:00:00', '1.00', '10.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
 (152, 21, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
 (153, 22, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
-(154, 23, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46');
+(154, 23, '2021-10-19', '2021-10-19 07:00:00', '2021-10-19 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-19 04:41:46', '2021-10-19 04:41:46'),
+(155, 1, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(156, 2, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(157, 3, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(158, 4, '2021-10-21', '2021-10-21 00:00:00', '2021-10-21 00:00:00', '0.00', '0.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(159, 5, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(160, 6, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(161, 7, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(162, 8, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(163, 9, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(164, 19, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(165, 20, '2021-10-21', '2021-10-21 00:00:00', '2021-10-21 00:00:00', '0.00', '0.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(166, 21, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(167, 22, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37'),
+(168, 23, '2021-10-21', '2021-10-21 07:00:00', '2021-10-21 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-21 03:13:37', '2021-10-21 03:13:37');
 
 -- --------------------------------------------------------
 
@@ -9242,6 +9256,7 @@ INSERT INTO `hris_loan_tbl` (`loanID`, `loanCode`, `loanName`, `loanStatus`, `cr
 
 CREATE TABLE `hris_no_timein_timeout_tbl` (
   `noTimeinTimeoutID` bigint(20) NOT NULL,
+  `reviseNoTimeinTimeoutID` bigint(20) DEFAULT NULL,
   `noTimeinTimeoutCode` varchar(100) NOT NULL,
   `employeeID` bigint(20) NOT NULL,
   `noTimeinTimeoutNegligence` int(11) DEFAULT NULL,
@@ -9265,11 +9280,11 @@ CREATE TABLE `hris_no_timein_timeout_tbl` (
 -- Dumping data for table `hris_no_timein_timeout_tbl`
 --
 
-INSERT INTO `hris_no_timein_timeout_tbl` (`noTimeinTimeoutID`, `noTimeinTimeoutCode`, `employeeID`, `noTimeinTimeoutNegligence`, `noTimeinTimeoutDate`, `noTimeinTimeoutTimeIn`, `noTimeinTimeoutTimeOut`, `noTimeinTimeoutReason`, `approversID`, `approversStatus`, `approversDate`, `noTimeinTimeoutStatus`, `noTimeinTimeoutRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(8, '', 1, 1, '2021-04-21', '07:00:00', '00:00:00', 'Sample no time-in', '2|4|5', '3', '2021-07-06 14:29:38', 3, 'Reject', '2021-04-21 08:53:49', 1, 2, '2021-04-21 08:53:49', '2021-07-06 06:29:39'),
-(9, '', 1, 2, '2021-04-19', '00:00:00', '17:00:00', 'Sample reason for no time out', '2|4|5', '2', '2021-07-06 14:26:49', 1, NULL, '2021-04-21 08:56:32', 1, 2, '2021-04-21 08:56:32', '2021-07-06 06:26:51'),
-(10, '', 1, 3, '2021-04-10', '07:00:00', '17:00:00', 'No Time-in/out', '2|4|5', NULL, NULL, 4, NULL, '2021-04-21 08:57:28', 1, 1, '2021-04-21 08:57:28', '2021-04-21 00:59:51'),
-(11, '', 1, 2, '2021-04-08', '00:00:00', '00:00:00', '', NULL, NULL, NULL, 0, NULL, NULL, 1, 1, '2021-04-21 09:00:28', '2021-04-21 01:00:31');
+INSERT INTO `hris_no_timein_timeout_tbl` (`noTimeinTimeoutID`, `reviseNoTimeinTimeoutID`, `noTimeinTimeoutCode`, `employeeID`, `noTimeinTimeoutNegligence`, `noTimeinTimeoutDate`, `noTimeinTimeoutTimeIn`, `noTimeinTimeoutTimeOut`, `noTimeinTimeoutReason`, `approversID`, `approversStatus`, `approversDate`, `noTimeinTimeoutStatus`, `noTimeinTimeoutRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(8, NULL, '', 1, 1, '2021-04-21', '07:00:00', '00:00:00', 'Sample no time-in', '2|4|5', '3', '2021-07-06 14:29:38', 3, 'Reject', '2021-04-21 08:53:49', 1, 2, '2021-04-21 08:53:49', '2021-07-06 06:29:39'),
+(9, NULL, '', 1, 2, '2021-04-19', '00:00:00', '17:00:00', 'Sample reason for no time out', '2|4|5', '2', '2021-07-06 14:26:49', 1, NULL, '2021-04-21 08:56:32', 1, 2, '2021-04-21 08:56:32', '2021-07-06 06:26:51'),
+(10, NULL, '', 1, 3, '2021-04-10', '07:00:00', '17:00:00', 'No Time-in/out', '2|4|5', NULL, NULL, 4, NULL, '2021-04-21 08:57:28', 1, 1, '2021-04-21 08:57:28', '2021-04-21 00:59:51'),
+(11, NULL, '', 1, 2, '2021-04-08', '00:00:00', '00:00:00', '', NULL, NULL, NULL, 0, NULL, NULL, 1, 1, '2021-04-21 09:00:28', '2021-04-21 01:00:31');
 
 -- --------------------------------------------------------
 
@@ -9279,6 +9294,7 @@ INSERT INTO `hris_no_timein_timeout_tbl` (`noTimeinTimeoutID`, `noTimeinTimeoutC
 
 CREATE TABLE `hris_official_business_tbl` (
   `officialBusinessID` bigint(20) NOT NULL,
+  `reviseOfficialBusinessID` bigint(20) DEFAULT NULL,
   `officialBusinessCode` varchar(50) NOT NULL,
   `employeeID` bigint(20) NOT NULL,
   `officialBusinessCompanyID` bigint(40) NOT NULL,
@@ -9303,16 +9319,16 @@ CREATE TABLE `hris_official_business_tbl` (
 -- Dumping data for table `hris_official_business_tbl`
 --
 
-INSERT INTO `hris_official_business_tbl` (`officialBusinessID`, `officialBusinessCode`, `employeeID`, `officialBusinessCompanyID`, `officialBusinessAddress`, `officialBusinessDate`, `officialBusinessTimeIn`, `officialBusinessTimeOut`, `officialBusinessReason`, `approversID`, `approversStatus`, `approversDate`, `officialBusinessStatus`, `officialBusinessRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'OBF-21-00001', 1, 0, '', '2021-04-13', '08:00:00', '17:00:00', 'TEST', '', '', '', 4, '', '2021-04-13 09:25:50', 1, 1, '2021-04-13 08:32:04', '2021-05-17 00:29:54'),
-(2, 'OBF-21-00002', 1, 0, '', '2021-04-13', '08:00:00', '17:00:00', '', '', '', '', 0, '', NULL, 1, 1, '2021-04-13 08:33:24', '2021-04-13 00:33:28'),
-(3, 'OBF-21-00003', 1, 1, '2, Sample Building, Dilaguidi, Dilasag, Aurora, Philippines, 1212', '2021-04-22', '08:00:00', '17:00:00', 'rererer', '2|3|5', '', '', 1, '', '2021-04-13 10:07:46', 1, 1, '2021-04-13 10:07:46', '2021-04-13 02:07:46'),
-(4, 'OBF-21-00004', 1, 3, '1201, Katipunan Street, Batasan Hills, Quezon City, National Capital Region - Second District, Philippines, 1119', '2021-04-20', '08:00:00', '17:00:00', 'dwa', '', '', '', 1, '', '2021-04-13 10:09:07', 1, 1, '2021-04-13 10:08:05', '2021-04-13 02:09:05'),
-(5, '', 1, 1, '2, Sample Building, Dilaguidi, Dilasag, Aurora, Philippines, 1212', '2021-04-14', '08:00:00', '17:00:00', 'test', '2|3|5', '2|2|2', '2021-04-14 08:29:33|2021-04-14 08:30:38|2021-04-14 08:31:42', 2, '', '2021-04-14 08:26:46', 1, 5, '2021-04-14 08:26:46', '2021-04-14 00:31:45'),
-(6, '', 1, 0, '', '2021-04-14', '08:00:00', '17:00:00', 'test', '', '', '', 0, '', NULL, 1, 1, '2021-04-14 09:26:56', '2021-04-14 01:26:59'),
-(7, '', 1, 0, '', '2021-04-14', '08:00:00', '17:00:00', 'test', '', '', '', 0, '', NULL, 1, 1, '2021-04-14 09:27:20', '2021-04-14 01:27:22'),
-(8, '', 1, 3, '28D Eastwood Excelsior Eastwood Avenue, Eastwood City, Bagumbayan, Quezon City, National Capital Region - Second District, Philippines, 1110', '2021-05-28', '05:00:00', '17:00:00', 'Test', '2|3|5', '2', '2021-07-06 14:38:36', 1, '', '2021-05-17 08:31:15', 1, 2, '2021-04-14 09:27:29', '2021-07-06 06:38:38'),
-(9, '', 1, 4, '1709, Antel Global Corporate Center, San Antonio, City Of Pasig, National Capital Region - Second District, Philippines, 1605', '2021-04-21', '09:00:00', '17:00:00', 'UAT', '2|3|5', '', '', 4, '', '2021-04-21 08:42:34', 1, 1, '2021-04-21 08:42:34', '2021-04-21 00:59:20');
+INSERT INTO `hris_official_business_tbl` (`officialBusinessID`, `reviseOfficialBusinessID`, `officialBusinessCode`, `employeeID`, `officialBusinessCompanyID`, `officialBusinessAddress`, `officialBusinessDate`, `officialBusinessTimeIn`, `officialBusinessTimeOut`, `officialBusinessReason`, `approversID`, `approversStatus`, `approversDate`, `officialBusinessStatus`, `officialBusinessRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, NULL, 'OBF-21-00001', 1, 0, '', '2021-04-13', '08:00:00', '17:00:00', 'TEST', '', '', '', 4, '', '2021-04-13 09:25:50', 1, 1, '2021-04-13 08:32:04', '2021-05-17 00:29:54'),
+(2, NULL, 'OBF-21-00002', 1, 0, '', '2021-04-13', '08:00:00', '17:00:00', '', '', '', '', 0, '', NULL, 1, 1, '2021-04-13 08:33:24', '2021-04-13 00:33:28'),
+(3, NULL, 'OBF-21-00003', 1, 1, '2, Sample Building, Dilaguidi, Dilasag, Aurora, Philippines, 1212', '2021-04-22', '08:00:00', '17:00:00', 'rererer', '2|3|5', '', '', 1, '', '2021-04-13 10:07:46', 1, 1, '2021-04-13 10:07:46', '2021-04-13 02:07:46'),
+(4, NULL, 'OBF-21-00004', 1, 3, '1201, Katipunan Street, Batasan Hills, Quezon City, National Capital Region - Second District, Philippines, 1119', '2021-04-20', '08:00:00', '17:00:00', 'dwa', '', '', '', 1, '', '2021-04-13 10:09:07', 1, 1, '2021-04-13 10:08:05', '2021-04-13 02:09:05'),
+(5, NULL, '', 1, 1, '2, Sample Building, Dilaguidi, Dilasag, Aurora, Philippines, 1212', '2021-04-14', '08:00:00', '17:00:00', 'test', '2|3|5', '2|2|2', '2021-04-14 08:29:33|2021-04-14 08:30:38|2021-04-14 08:31:42', 2, '', '2021-04-14 08:26:46', 1, 5, '2021-04-14 08:26:46', '2021-04-14 00:31:45'),
+(6, NULL, '', 1, 0, '', '2021-04-14', '08:00:00', '17:00:00', 'test', '', '', '', 0, '', NULL, 1, 1, '2021-04-14 09:26:56', '2021-04-14 01:26:59'),
+(7, NULL, '', 1, 0, '', '2021-04-14', '08:00:00', '17:00:00', 'test', '', '', '', 0, '', NULL, 1, 1, '2021-04-14 09:27:20', '2021-04-14 01:27:22'),
+(8, NULL, '', 1, 3, '28D Eastwood Excelsior Eastwood Avenue, Eastwood City, Bagumbayan, Quezon City, National Capital Region - Second District, Philippines, 1110', '2021-05-28', '05:00:00', '17:00:00', 'Test', '2|3|5', '2', '2021-07-06 14:38:36', 1, '', '2021-05-17 08:31:15', 1, 2, '2021-04-14 09:27:29', '2021-07-06 06:38:38'),
+(9, NULL, '', 1, 4, '1709, Antel Global Corporate Center, San Antonio, City Of Pasig, National Capital Region - Second District, Philippines, 1605', '2021-04-21', '09:00:00', '17:00:00', 'UAT', '2|3|5', '', '', 4, '', '2021-04-21 08:42:34', 1, 1, '2021-04-21 08:42:34', '2021-04-21 00:59:20');
 
 -- --------------------------------------------------------
 
@@ -9370,6 +9386,7 @@ CREATE TABLE `hris_orientation_setup_tbl` (
 
 CREATE TABLE `hris_overtime_request_tbl` (
   `overtimeRequestID` bigint(20) NOT NULL,
+  `reviseOvertimeRequestID` bigint(20) DEFAULT NULL,
   `overtimeRequestCode` text NOT NULL,
   `employeeID` bigint(20) NOT NULL,
   `overtimeRequestDate` date NOT NULL,
@@ -9392,17 +9409,17 @@ CREATE TABLE `hris_overtime_request_tbl` (
 -- Dumping data for table `hris_overtime_request_tbl`
 --
 
-INSERT INTO `hris_overtime_request_tbl` (`overtimeRequestID`, `overtimeRequestCode`, `employeeID`, `overtimeRequestDate`, `overtimeRequestTimeIn`, `overtimeRequestTimeOut`, `overtimeRequestReason`, `approversID`, `approversStatus`, `approversDate`, `overtimeRequestStatus`, `overtimeRequestRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, '', 1, '2021-04-14', '08:00:00', '17:00:00', '', '', '', '', 0, '', NULL, 1, 1, '2021-04-14 07:57:11', '2021-04-13 23:57:10'),
-(2, '', 1, '2021-04-14', '08:00:00', '17:00:00', 'qweqweqwe', '4|8|7', '2', '2021-07-06 14:17:13', 1, '', '2021-04-14 07:57:31', 1, 4, '2021-04-14 07:57:31', '2021-07-06 06:17:14'),
-(3, '', 1, '2021-04-14', '08:00:00', '17:00:00', 'test', '', '', '', 0, '', NULL, 1, 1, '2021-04-14 09:24:58', '2021-04-14 01:25:00'),
-(4, '', 1, '2021-04-14', '08:00:00', '17:00:00', 'test', '', '', '', 0, '', NULL, 1, 1, '2021-04-14 09:25:11', '2021-04-14 01:25:13'),
-(5, '', 1, '2021-04-15', '08:00:00', '17:00:00', 'test', '4|8|7', '', '', 1, '', '2021-04-14 09:35:44', 1, 1, '2021-04-14 09:35:44', '2021-04-14 01:35:49'),
-(6, '', 1, '2021-04-19', '08:00:00', '19:00:00', 'OT ako', '4|8|7', '', '', 1, '', '2021-04-19 16:49:45', 1, 1, '2021-04-19 16:49:45', '2021-04-19 08:49:48'),
-(7, '', 1, '2021-04-19', '08:00:00', '17:00:00', '', '', '', '', 0, '', NULL, 1, 1, '2021-04-19 16:50:11', '2021-04-19 08:50:15'),
-(8, '', 1, '2021-06-24', '08:00:00', '17:00:00', '', '', '', '', 0, '', NULL, 1, 1, '2021-06-24 13:48:17', '2021-06-24 05:48:20'),
-(9, '', 1, '2021-06-24', '08:00:00', '17:00:00', '', '', '', '', 0, '', NULL, 1, 1, '2021-06-24 13:49:13', '2021-06-24 05:49:15'),
-(10, '', 1, '2021-06-30', '05:00:00', '18:00:00', 'Reason', '4|8|7', '', '', 1, '', '2021-06-30 05:30:40', 1, 1, '2021-06-30 05:30:40', '2021-06-30 05:30:42');
+INSERT INTO `hris_overtime_request_tbl` (`overtimeRequestID`, `reviseOvertimeRequestID`, `overtimeRequestCode`, `employeeID`, `overtimeRequestDate`, `overtimeRequestTimeIn`, `overtimeRequestTimeOut`, `overtimeRequestReason`, `approversID`, `approversStatus`, `approversDate`, `overtimeRequestStatus`, `overtimeRequestRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, NULL, '', 1, '2021-04-14', '08:00:00', '17:00:00', '', '', '', '', 0, '', NULL, 1, 1, '2021-04-14 07:57:11', '2021-04-13 23:57:10'),
+(2, NULL, '', 1, '2021-04-14', '08:00:00', '17:00:00', 'qweqweqwe', '4|8|7', '2', '2021-07-06 14:17:13', 1, '', '2021-04-14 07:57:31', 1, 4, '2021-04-14 07:57:31', '2021-07-06 06:17:14'),
+(3, NULL, '', 1, '2021-04-14', '08:00:00', '17:00:00', 'test', '', '', '', 0, '', NULL, 1, 1, '2021-04-14 09:24:58', '2021-04-14 01:25:00'),
+(4, NULL, '', 1, '2021-04-14', '08:00:00', '17:00:00', 'test', '', '', '', 0, '', NULL, 1, 1, '2021-04-14 09:25:11', '2021-04-14 01:25:13'),
+(5, NULL, '', 1, '2021-04-15', '08:00:00', '17:00:00', 'test', '4|8|7', '', '', 1, '', '2021-04-14 09:35:44', 1, 1, '2021-04-14 09:35:44', '2021-04-14 01:35:49'),
+(6, NULL, '', 1, '2021-04-19', '08:00:00', '19:00:00', 'OT ako', '4|8|7', '', '', 1, '', '2021-04-19 16:49:45', 1, 1, '2021-04-19 16:49:45', '2021-04-19 08:49:48'),
+(7, NULL, '', 1, '2021-04-19', '08:00:00', '17:00:00', '', '', '', '', 0, '', NULL, 1, 1, '2021-04-19 16:50:11', '2021-04-19 08:50:15'),
+(8, NULL, '', 1, '2021-06-24', '08:00:00', '17:00:00', '', '', '', '', 0, '', NULL, 1, 1, '2021-06-24 13:48:17', '2021-06-24 05:48:20'),
+(9, NULL, '', 1, '2021-06-24', '08:00:00', '17:00:00', '', '', '', '', 0, '', NULL, 1, 1, '2021-06-24 13:49:13', '2021-06-24 05:49:15'),
+(10, NULL, '', 1, '2021-06-30', '05:00:00', '18:00:00', 'Reason', '4|8|7', '', '', 1, '', '2021-06-30 05:30:40', 1, 1, '2021-06-30 05:30:40', '2021-06-30 05:30:42');
 
 -- --------------------------------------------------------
 
@@ -11349,7 +11366,11 @@ CREATE TABLE `ims_service_order_tbl` (
   `serviceRequisitionID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
   `projectID` bigint(20) NOT NULL,
+  `projectCode` varchar(50) DEFAULT NULL,
+  `projectName` varchar(255) DEFAULT NULL,
+  `projectCategory` varchar(255) DEFAULT NULL,
   `clientID` bigint(20) NOT NULL,
+  `clientCode` varchar(100) DEFAULT NULL,
   `clientName` text DEFAULT NULL,
   `clientAddress` text DEFAULT NULL,
   `clientContactDetails` text DEFAULT NULL,
@@ -11397,7 +11418,15 @@ CREATE TABLE `ims_service_requisition_tbl` (
   `reviseServiceRequisitionID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
   `clientID` bigint(20) DEFAULT NULL,
+  `clientCode` varchar(100) DEFAULT NULL,
+  `clientName` varchar(255) DEFAULT NULL,
+  `clientAddress` text DEFAULT NULL,
+  `clientContactDetails` varchar(255) DEFAULT NULL,
+  `clientContactPerson` varchar(255) DEFAULT NULL,
   `projectID` bigint(20) DEFAULT NULL,
+  `projectCode` varchar(100) DEFAULT NULL,
+  `projectName` varchar(100) DEFAULT NULL,
+  `projectCategory` varchar(255) DEFAULT NULL,
   `approversID` text DEFAULT NULL,
   `approversStatus` text DEFAULT NULL,
   `approversDate` text DEFAULT NULL,
@@ -13528,7 +13557,7 @@ ALTER TABLE `hris_designation_tbl`
 -- AUTO_INCREMENT for table `hris_employee_attendance_tbl`
 --
 ALTER TABLE `hris_employee_attendance_tbl`
-  MODIFY `attendanceID` bigint(21) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=155;
+  MODIFY `attendanceID` bigint(21) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=169;
 
 --
 -- AUTO_INCREMENT for table `hris_employee_documents_tbl`

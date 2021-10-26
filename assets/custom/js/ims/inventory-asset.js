@@ -23,6 +23,7 @@ $(document).ready(function(){
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
+            lengthMenu: [ 50, 75, 100, 150],
             columnDefs: [
                 { targets: 0, width: 100 },
                 { targets: 1, width: 150 },
@@ -585,7 +586,10 @@ $(document).ready(function(){
                     </div>
 
                     <div class="col-md-6 col-sm-12">
-                        <label>Monthly Depreciation <span class="text-danger font-weight-bold">*</span></label>
+                        <label>
+                            <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="MONTHLY DEPRECIATION FORMULA:
+                ( (Cost - Salvage Value) ÷ Estimated Useful Life ) ÷ 12 months "></i>
+                        Monthly Depreciation <span class="text-danger font-weight-bold">*</span></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">₱</span>
@@ -604,7 +608,10 @@ $(document).ready(function(){
                     </div>
 
                     <div class="col-md-6 col-sm-12">
-                        <label>Hourly Rate <span class="text-danger font-weight-bold">*</span></label>
+                        <label>
+                        <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="HOURLY RATE FORMULA:
+                Monthly Depreciation ÷ (30 days x 24 hours)"></i>
+                        Hourly Rate <span class="text-danger font-weight-bold">*</span></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">₱</span>
@@ -624,7 +631,7 @@ $(document).ready(function(){
 
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Status</label>
                             <select 
                                 class="form-control select2 validate" 
                                 id="input_assetStatus" 
@@ -649,6 +656,13 @@ $(document).ready(function(){
                 ${button}
                 <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> Cancel</button>
             </div>`;
+
+            setTimeout(() => {
+                $("#input_assetName").val(assetName);
+                //  TOOLTIP //
+                $('[data-toggle="tooltip"]').tooltip()
+                // TOOLTIP //
+            }, 700);
         return html;
         
     } 

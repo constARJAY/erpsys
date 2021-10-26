@@ -506,9 +506,9 @@ $(document).ready(function() {
                                                     <input class="form-control text-center validate"
                                                 id="barcodeAsse${assetID}0"
                                                 name="barcodeAsset"
-                                                min="36"
+                                                min="18"
                                                 max="64"
-                                                minlength="36"
+                                                minlength="18"
                                                 maxlength="64"
                                                 index="0"
                                                 assetID="${assetID}"
@@ -1012,9 +1012,9 @@ $(document).ready(function() {
         const index         = parent.attr("index");
         const id            = parent.attr("id");
         const withdrawalAssetID    = parent.attr("withdrawalAssetID");
-        const valueLength = parent.val().length +1;
+        const valueLength = parent.val().length;
         const value = parent.val();
-        const characterLength = 37;
+        const characterLength = 18;
         let warningCondition = false;
         let isInvalid        = false;
         // $("#"+id).addClass("is-invalid").addClass("validate");
@@ -1460,7 +1460,7 @@ $(document).ready(function() {
             // multipleSelect2Placeholder();
             // inputmaskHours();
             initQuantity();
-
+            updateTableRows();
             $(`[name="assignEmployee"]`).each(function() {
                 $assignedEmployee = $(this).attr("assignedEmployee");
                 const assignedEmployeeArr = $assignedEmployee?.split("|");
@@ -1508,46 +1508,7 @@ $(document).ready(function() {
     }
     // END CHECK IF THERE IS EXIST DATA //
 
-        // KEYUP CHECK COMPLETE DATA EACH ROW //
-
-        $(document).on("change",`[name="barcodeAsset"],[name="borrowed"]`,function(){
-            var getBarcode = $(this).closest("tr").find(`[name="barcodeAsset"]`).val();
-            var getQuantity = +$(this).closest("tr").find(`[name="borrowed"]`).val();
-    
-            if(getBarcode == "" && getQuantity != 0){
-                $(this).closest("tr").find(`[name="barcodeAsset"]`).addClass("is-invalid");
-                $(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("Please input barcode.");
-    
-                $(this).closest("tr").find(`[name="borrowed"]`).removeClass("is-invalid").removeClass("is-valid");
-                $(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("");
-            }
-    
-            if(getBarcode != "" && getQuantity == 0){
-                $(this).closest("tr").find(`[name="borrowed"]`).addClass("is-invalid");
-                $(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("Please input quantity.");
-    
-                $(this).closest("tr").find(`[name="barcodeAsset"]`).removeClass("is-invalid").removeClass("is-valid");
-                $(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
-            }
-    
-            if(getBarcode != "" && getQuantity != 0 ){
-                $(this).closest("tr").find(`[name="barcodeAsset"]`).removeClass("is-invalid").removeClass("is-valid");
-                $(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
-    
-                $(this).closest("tr").find(`[name="borrowed"]`).removeClass("is-invalid").removeClass("is-valid");
-                $(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("");
-            }else{
-                 if(getBarcode == "" && getQuantity == 0 ){
-                    $(this).closest("tr").find(`[name="barcodeAsset"]`).removeClass("is-invalid").removeClass("is-valid");
-                    $(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
-    
-                    $(this).closest("tr").find(`[name="borrowed"]`).removeClass("is-invalid").removeClass("is-valid");
-                    $(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("");
-                }
-            }    
-        })
-        
-        // END KEYUP CHECK COMPLETE DATA EACH ROW //
+       
     
 
     // ----- PAGE CONTENT -----

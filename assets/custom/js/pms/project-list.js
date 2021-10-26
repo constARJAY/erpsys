@@ -35,6 +35,7 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
+				lengthMenu: [ 50, 75, 100, 150],
 				columnDefs: [
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 200 },
@@ -216,7 +217,7 @@ $(document).ready(function () {
                     </div>
 					<div class="col-sm-12">
                         <div class="form-group">
-                            <label>Status <code>*</code></label>
+                            <label>Status</label>
                             <select class=" form-control show-tick select2 validate" 
 								name="projectListStatus" 
 								id="projectListStatus" 

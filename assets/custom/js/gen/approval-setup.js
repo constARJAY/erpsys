@@ -81,7 +81,7 @@ $(document).on("click", "#update_attach-designation", function(){
         approvalUsers.push($(this).attr("approvers"));
     });
 
-    let data    = {"moduleID":moduleID,"designationID":designationIDList.join("|"), "approvalUsers":approvalUsers.join(",")}
+    let data    = {"moduleID":moduleID,"designationID":designationIDList.join("|"), "approvalUsers":approvalUsers.join(",") || 0}
     let url     = base_url+"approval_setup/update_attach_designation";
     $.ajax({
         url,

@@ -23,6 +23,7 @@ $(document).ready(function(){
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
+            lengthMenu: [ 50, 75, 100, 150],
             columnDefs: [
                 { targets: 0, width: 100 },
                 { targets: 1, width: 150 },
@@ -345,7 +346,7 @@ $(document).ready(function(){
                                 maxlength="100" 
                                 required 
                                 unique="${itemID}" 
-                                value="${itemName}"
+                                value=""
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-input_itemName"></div>
                         </div>
@@ -475,7 +476,7 @@ $(document).ready(function(){
                     
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Status</label>
                             <select 
                                 class="form-control select2 validate" 
                                 id="input_itemStatus" 
@@ -501,6 +502,9 @@ $(document).ready(function(){
                 ${button}
                 <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> Cancel</button>
             </div>`;
+            setTimeout(() => {
+                $("#input_itemName").val(itemName);
+            }, 700);
         return html;
         
     } 

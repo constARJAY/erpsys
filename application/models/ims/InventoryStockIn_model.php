@@ -14,7 +14,7 @@ class InventoryStockIn_model extends CI_Model {
 
     }
 
-    public function savestockin($itemdata, 	$assetdata, $itemID, $itemName, $brand, $classificationName, $categoryName, $barcode, $recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $recordID)
+    public function savestockin($itemdata, 	$assetdata, $barcode, $recordID)
     {
       $folderDir = "assets/upload-files/images/";
       if (!is_dir($folderDir)) {
@@ -23,9 +23,9 @@ class InventoryStockIn_model extends CI_Model {
       }
        $folder = $folderDir;
        
-        if($recordID =='0'){
+        if($recordID ==0){
            
-                   
+
                 //$this->db->insert("ims_stock_in_item_tbl", $data);
                     
            
@@ -50,7 +50,7 @@ class InventoryStockIn_model extends CI_Model {
 
         }else{
 
-            $this->db->insert_batch("ims_stock_in_item_tbl", $assetdata);
+            $this->db->insert_batch("ims_stock_in_assets_tbl", $assetdata);
                
 
                 if(is_array($barcode)){ 

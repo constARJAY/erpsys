@@ -1,3 +1,12 @@
+<style>
+
+.tooltip-inner {
+    max-width: 591px !important;
+    white-space: pre-wrap !important;
+    text-align: left !important;
+}
+</style>
+
 <div class="body_area after_bg ">
 	<div class="block-header pb-0">
 		<div class="container">

@@ -29,7 +29,7 @@ $(document).on("click",".addClassification", function(){
                                                     </div>  
                                                     <div class="col-md-12 col-sm-12 px-0">
                                                         <div class="form-group">
-                                                            <label for="">Status <strong class="text-danger">*</strong></label>
+                                                            <label for="">Status</label>
                                                             <select class="form-control select2 validate" name="classificationStatus" id="input_classificationStatus">
                                                                 <option value="1">Active</option>
                                                                 <option value="0">Inactive</option>
@@ -97,7 +97,7 @@ $(document).on("click",".editClassification", function(){
 
                                                     <div class="col-md-12 col-sm-12 px-0">
                                                         <div class="form-group">
-                                                            <label for="">Status <strong class="text-danger">*</strong></label>
+                                                            <label for="">Status</label>
                                                             <select class="form-control select2 validate" name="classificationStatus" id="input_classificationStatus" data-classificationid="${classificationID}">
                                                                 ${statusOption}
                                                             </select>
@@ -203,6 +203,7 @@ function initDataTables() {
                 serverSide:     false,
                 scrollX:        true,
                 scrollCollapse: true,
+                lengthMenu: [ 50, 75, 100, 150],
                 columnDefs: [
                     { targets: 0, width: "11%" },
                     { targets: 2, width: 80 }

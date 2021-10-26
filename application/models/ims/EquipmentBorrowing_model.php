@@ -179,6 +179,7 @@ class equipmentBorrowing_model extends CI_Model {
             $output["employeeDepartment"] = $details->employeeDepartment;
             $output["employeeDesignation"] = $details->employeeDesignation;
             $output["dateNeeded"] = $details->dateNeeded;
+            $output["createdBy"] = $details->createdBy;
 
 
             

@@ -23,6 +23,7 @@ $(document).ready(function(){
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
+            lengthMenu: [ 50, 75, 100, 150],
             columnDefs: [
                 { targets: 0, width: "10%" },
                 { targets: 1, width: "20%" },
@@ -376,7 +377,7 @@ $(document).ready(function(){
 
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Status</label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_accountStatus" 

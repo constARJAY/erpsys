@@ -115,7 +115,7 @@ class ListStock_model extends CI_Model {
                                         LEFT JOIN ims_inventory_item_tbl AS iii ON i.itemID = iii.itemID
                                         $where $AND
                                         GROUP BY itemID
-                                    )l GROUP BY itemID AND itemCode IS NOT NULL");       
+                                    )l GROUP BY itemID");       
        
         $sqlAsset = $this->db->query("SELECT assetID, assetCode, brand, assetName, classificationName, categoryName, uom, totalequipmentBorrowing,
                                     stockIN,equipmentBorrowing, Transferred, returnQuantity, disposed, reservedAsset,reserved,available,

@@ -1167,8 +1167,7 @@
                 $sheet->setCellValue('A5', 'OWNER: ');
                 $sheet->setCellValue('A6', 'SUBJECT: ');
                 $sheet->setCellValue('A7', 'CE#: ');
-                $sheet->setCellValue('A8', 'TIMELINE: ');
-                $sheet->getStyle('A2:A8')->applyFromArray($boldStyle);
+                $sheet->getStyle('A2:A7')->applyFromArray($boldStyle);
 
                 $sheet->mergeCells('B2:J2');
                 $sheet->mergeCells('B3:J3');
@@ -1184,15 +1183,14 @@
                 $sheet->setCellValue('B5', $projectOwner);
                 $sheet->setCellValue('B6', $projectSubject);
                 $sheet->setCellValue('B7', $projectCostEstimate);
-                $sheet->setCellValue('B8', $projectTimeline);
 
-                $sheet->mergeCells('A9:J9');
+                $sheet->mergeCells('A8:J8');
             // ----- END PROJECT -----
 
 
             // ----- ITEMS -----
-                $startRow = 10;
-                $row = 10;
+                $startRow = 9;
+                $row = 9;
 
                 // ----- COLUMN HEADER -----
                     $sheet->getRowDimension($row)->setRowHeight(15);
@@ -2081,8 +2079,7 @@
                 $sheet->setCellValue('A5', 'OWNER: ');
                 $sheet->setCellValue('A6', 'SUBJECT: ');
                 $sheet->setCellValue('A7', 'BOM#: ');
-                $sheet->setCellValue('A8', 'TIMELINE: ');
-                $sheet->getStyle('A2:A8')->applyFromArray($boldStyle);
+                $sheet->getStyle('A2:A7')->applyFromArray($boldStyle);
 
                 $sheet->mergeCells('B2:M2');
                 $sheet->mergeCells('B3:M3');
@@ -2098,15 +2095,14 @@
                 $sheet->setCellValue('B5', $projectOwner);
                 $sheet->setCellValue('B6', $projectSubject);
                 $sheet->setCellValue('B7', $projectCostEstimate);
-                $sheet->setCellValue('B8', $projectTimeline);
 
-                $sheet->mergeCells('A9:M9');
+                $sheet->mergeCells('A8:M8');
             // ----- END PROJECT -----
 
 
             // ----- ITEMS -----
-                $startRow = 10;
-                $row = 10;
+                $startRow = 9;
+                $row = 9;
 
                 // ----- COLUMN HEADER -----
                     $sheet->getRowDimension($row)->setRowHeight(15);

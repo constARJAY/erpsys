@@ -765,11 +765,9 @@ $(document).ready(function() {
                 <i class="fas fa-ban"></i> Change Request
             </button>` : "";
         const displaySignedPO = purchaseOrderStatus == "2" && purchaseOrderSignedPO ? `
-            <div class="pr-3">
-                <a href="${base_url}assets/upload-files/purchase-order/${purchaseOrderSignedPO}"
-                    class="pr-3"
-                    target="_blank">${purchaseOrderSignedPO}</a>
-            </div>` : "";
+			<a href="${base_url}assets/upload-files/purchase-order/${purchaseOrderSignedPO}"
+				class="text-dark"
+				target="_blank">${purchaseOrderSignedPO}</a>` : "";
 		const displayButtonSigned = purchaseOrderStatus == "0" ? `
 			<input type="file"
 				id="fileSignedPO"
@@ -791,7 +789,8 @@ $(document).ready(function() {
 		let html = `
         <div class="row px-2">
             <div class="col-12 mb-3 text-right d-flex align-items-center justify-content-end">
-                <div id="displaySignedPO">${displaySignedPO}</div>
+                <div id="displaySignedPO"
+					class="display-image w-50 d-${displaySignedPO ? "block" : "none"}">${displaySignedPO}</div>
                 ${displayButtonSigned}
             </div>
             <div class="col-lg-3 col-md-4 col-sm-12 px-1">

@@ -1307,6 +1307,7 @@ $(document).ready(function () {
 										class="form-control expirationdate  validate expirationdateoncheck" 
 										number="${index}"
 										max="2040-04-30"
+										recordID="${recordID}"
 										name="expirationdate"
 										value="${today}"
 										id="expirationdate${index}">
@@ -1384,6 +1385,8 @@ $(document).ready(function () {
 		$(document).on("change", ".expirationdate", function() {
 			const val = $(this).val();
 			const number = $(this).attr("number");
+			const recordID = $(this).attr("recordID");
+			if(recordID =="1"){
 			const todaydate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
 			var dateString = moment(todaydate).format('YYYY-MM-DD');
 			const inventoryStorageID = $(`#inventoryStorageID${number}`).val();
@@ -1436,6 +1439,9 @@ $(document).ready(function () {
 		//const barcode = `${warehouse}-${myExpDate}-${getlastthreedigititemcode}`;
 		const barcode = `${warehouse}-${myExpDate}-${getlastthreedigititemcode}-${mytodayDate}`;
 		$("#barcode" + number).val(barcode);
+		}else{
+			
+		}
 	  });
 	
 	$(document).on("change", ".recievedQuantity1", function () {

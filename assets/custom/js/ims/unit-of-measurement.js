@@ -22,6 +22,7 @@ function initDataTables() {
         serverSide:     false,
         scrollX:        true,
         scrollCollapse: true,
+        lengthMenu: [ 50, 75, 100, 150],
         columnDefs: [
             { targets: 0, width: "10%" },
             // { targets: 1, width: "80%" },
@@ -36,11 +37,6 @@ initDataTables();
 function tableContent() {
     // Reset the unique datas
     uniqueData = [];
-     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
-    //  const data = getTableData("hris_department_tbl", 
-    //  "*, CONCAT('DEP-',SUBSTR(datecreated,3,2),'-',LPAD(departmentID, 5, '0')) AS departmentCode", "", "");
-
-
     $.ajax({
         url:      `${base_url}operations/getTableData`,
         method:   'POST',
@@ -159,7 +155,7 @@ tableContent();
         <div class="row">
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Status ${disabled ? `` : asterisk}</label>
+                    <label>Status</label>
                     <select 
                         class="form-control select2 validate" 
                         id="input_uomStatus" 
@@ -317,10 +313,13 @@ function isCurrentlyInUse(string = null){
     if(string){
         var itemDataCondition   = getTableData("ims_inventory_item_tbl","COUNT(itemID) as itemLength",  
                                                 `LOWER(unitOfMeasurementID) =  BINARY LOWER ("${string.toLowerCase()}") AND itemStatus = '1' `);
-        var travelDataCondition = getTableData("ims_travel_request_tbl", "COUNT(travelRequestID) as travelLength", `LOWER(unitOfMeasure) = BINARY LOWER ("${string.toLowerCase()}") `); 
-        console.log(travelDataCondition);
-        console.log(itemDataCondition);
-        if(itemDataCondition[0].itemLength > 0 || travelDataCondition[0].travelLength > 0 ) {
+        // var travelDataCondition = getTableData("ims_travel_request_tbl", "COUNT(travelRequestID) as travelLength", `LOWER(unitOfMeasurementID) = BINARY LOWER ("${string.toLowerCase()}") `); 
+        // // console.log(travelDataCondition);
+        // // console.log(itemDataCondition);
+        // if(itemDataCondition[0].itemLength > 0 || travelDataCondition[0].travelLength > 0 ) {
+        //     returnData = true;
+        // }
+        if(itemDataCondition[0].itemLength > 0) {
             returnData = true;
         }
     }

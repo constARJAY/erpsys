@@ -30,7 +30,7 @@ $(document).on("click",".addLeave", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status</label>
                                                                 <select class="form-control select2 validate" name="leaveStatus" id="inputleaveStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
@@ -77,7 +77,7 @@ $(document).on("click",".editleave", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status ${asterisk}</label>
+                                                                <label for="">Status</label>
                                                                 <select class="form-control select2 validate" name="leaveStatus" id="inputleaveStatus" leaveid="${leaveID}">
                                                                     ${statusOption}
                                                                 </select>
@@ -190,6 +190,7 @@ function initDataTables() {
                 serverSide:     false,
                 scrollX:        true,
                 scrollCollapse: true,
+                lengthMenu: [ 50, 75, 100, 150],
                 columnDefs: [
                     { targets: 0, width: "10%" },
                     { targets: 2, width: 80 }

@@ -23,6 +23,7 @@ $(document).ready(function(){
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
+            lengthMenu: [ 50, 75, 100, 150],
             columnDefs: [
                 { targets: 0, width: "10%" },
                 { targets: 3, width: 180},
@@ -193,7 +194,9 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Hourly Rate ${asterisk}</label>
+                        <label>
+                        <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="Note: This field is for Bill of Material purpose only"></i>
+                        Hourly Rate ${asterisk}</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">₱</span>
@@ -215,7 +218,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Status ${asterisk}</label>
+                        <label>Status </label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_designationStatus" 
@@ -252,6 +255,9 @@ $(document).ready(function(){
         const content = modalContent();
         $("#modal_hris_designation_content").html(content);
         departmentContent();
+        //  TOOLTIP //
+        $('[data-toggle="tooltip"]').tooltip()
+        // TOOLTIP //
         initAll();
     });
     // ----- END OPEN ADD MODAL -----
@@ -291,6 +297,9 @@ $(document).ready(function(){
                 departmentContent(tableData);
                 $("#btnSaveConfirmationEdit").attr("rowID", id);
                 $("#btnSaveConfirmationEdit").attr("feedback", feedback);
+                //  TOOLTIP //
+                $('[data-toggle="tooltip"]').tooltip()
+                // TOOLTIP //
                 initAll();
             }, 500);
         }
