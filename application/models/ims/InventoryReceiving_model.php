@@ -34,7 +34,16 @@ class InventoryReceiving_model extends CI_Model {
               $this->db->where('inventoryReceivingID', $id);
               $this->db->update('ims_inventory_receiving_tbl', $data);
             } 
-            // ----- UPDATE ORDERED PENDING -----
+           $newdata = $this->db->query("SELECT ird.inventoryReceivingID FROM 
+                                        ims_inventory_request_details_tbl AS ird 
+                                        LEFT JOIN ims_inventory_receiving_tbl AS ir ON ird.inventoryReceivingID = ir.inventoryReceivingID
+                                        WHERE ird.inventoryReceivingID = $insertID AND remainingQuantity <>0  GROUP BY inventoryReceivingID");
+           if ($newdata->num_rows() !== 0) {
+              
+            $this->db->query("CALL proc_get_receiving_report_remaining($insertID)");
+            
+           } 
+           // ----- UPDATE ORDERED PENDING -----
             // if ($data["inventoryReceivingStatus"] == 2) {
             //     $updateOrderedPending = $this->updateOrderedPending($insertID);
             // }

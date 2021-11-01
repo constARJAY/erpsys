@@ -156,7 +156,24 @@ $(document).ready(function() {
              stockout.materialRequestID,
              stockout.clientCode,
              stockout.clientName`,
-            `IF(stockout.employeeID = 0 ,stockout.createdBy = ${sessionID},stockout.employeeID = ${sessionID})`);
+            ``);
+
+            // const data  = getTableData(
+            //     `ims_stock_out_tbl AS stockout
+            //      LEFT JOIN hris_employee_list_tbl AS helt ON helt.employeeID = stockout.createdBy
+            //      `,
+            //     `CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
+            //      stockout.projectCode,
+            //      stockout.projectName,
+            //      stockout.inventoryItemStatus,
+            //      stockout.stockOutID,
+            //      stockout.stockOutCode,
+            //      stockout.materialWithdrawalCode,
+            //      stockout.materialWithdrawalID,
+            //      stockout.materialRequestID,
+            //      stockout.clientCode,
+            //      stockout.clientName`,
+            //     `IF(stockout.employeeID = 0 ,stockout.createdBy = ${sessionID},stockout.employeeID = ${sessionID})`);
         return data;
     }
     // ----- END TIMELINE DATA -----
@@ -840,7 +857,7 @@ $(document).ready(function() {
             <div class="card-body">
                 <div class="mb-2">
                     <div class="text-primary font-weight-bold" style="font-size: 1.2rem;">
-                       Item/s Request
+                       STOCK OUT (ITEM/S)
                     </div>
                 </div>
 
@@ -1119,18 +1136,28 @@ $(document).ready(function() {
 
     // ----- KEYUP QUANTITY -----
     $(document).on("keyup", `[name="StockOut"]`, function() {
-        const itemID    = $(this).attr("itemID");
+        const itemID    = $(this).attr("itemID") || 0;
         const index    = $(this).attr("index");
         const withdrawalItemID    = $(this).attr("withdrawalItemID");
         const value = +$(this).val();
         var availableStocksValue = +$(this).attr("availableStocksValue");
+        var requestQuantity = +$(`div[itemID=${itemID}]`).find("span").eq(4).text().replace(",","") || 0;
         // const getRemainingItem = +$(`[name="remainingItem"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
         // var computeRemainingItem =0;
         // computeRemainingItem = getRemainingItem - value;
 
+        if(value > requestQuantity){
+            $(this).val(0);
+            showNotification("danger", "Incorrect Quantity Inserted!");
+            $(this).closest("tr").find("span").eq(3).text("-");
+            return false;
+        }
+
         if(value > availableStocksValue){
             $(this).val(0);
             showNotification("danger", "Incorrect Quantity Inserted!");
+            $(this).closest("tr").find("span").eq(3).text("-");
+            return false;
         }
         
         

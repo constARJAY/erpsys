@@ -19,22 +19,17 @@ class DisposalItem_model extends CI_Model {
 
         if ($query) {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
-            $sql = $this->db->query("SELECT iidd.disposalID,iidd.itemID,iidd.inventoryStorageID, (isit.quantity - iidd.quantity) as totalquantity
-            FROM ims_inventory_disposal_details_tbl AS iidd
-            LEFT JOIN ims_inventory_disposal_tbl AS iid ON iidd.disposalID = iid.disposalID
-            LEFT JOIN ims_stock_in_total_tbl AS  isit ON iidd.itemID = isit.itemID AND iidd.inventoryStorageID = isit.inventoryStorageID 
-            WHERE iid.disposalID= $insertID AND iid.disposalStatus =2");
+            $sql = $this->db->query("SELECT idd.stockInAssetID, (isia.quantity - idd.quantity) AS  quantity FROM ims_inventory_disposal_details_tbl AS idd 
+            LEFT JOIN ims_inventory_disposal_tbl AS id ON idd.disposalID = id.disposalID
+            LEFT JOIN ims_stock_in_assets_tbl AS isia ON idd.stockInAssetID = isia.stockInAssetID
+             WHERE id.disposalID= $insertID AND id.disposalStatus =2");
             foreach ($sql->result() as $row)
-            {
-                $quantity                           =$row->totalquantity;
-                $itemID                             = $row->itemID;
-                $inventoryStorageID                 =$row->inventoryStorageID;
-                $array = array('itemID' => $row->itemID, 'inventoryStorageID' => $row->inventoryStorageID);
-               
-                $data = array(
-                    'quantity'            => $quantity);
-                $this->db->where($array);  
-                $this->db->update("ims_stock_in_total_tbl", $data);  
+             {  
+                $data =  array(
+                           'quantity'            =>$row->quantity);
+                      // $this->db->where($array);  
+                       $this->db->where('stockInAssetID', $row->stockInAssetID);
+                       $this->db->update("ims_stock_in_assets_tbl", $data);  
             }    
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }

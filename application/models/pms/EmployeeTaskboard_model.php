@@ -392,19 +392,20 @@ class EmployeeTaskboard_model extends CI_Model {
     }
 
     public function autoSavedSubtask($data,$subtaskboardID,$label=null) {
-
+        
         if ($data && count($data) > 0) {
           
             if($subtaskboardID){
-                $this->logHistory($label,$data,"",$subtaskboardID);
                 // $query = $this->db->update('pms_employeetaskoard_tbl', $data, array('taskBoardID' => $taskBoardID));
                 $this->db->where('subtaskboardID', $subtaskboardID);
                 $query = $this->db->update('pms_employeetaskoard_details_tbl', $data);
                 $insertID = $subtaskboardID;
+                $this->logHistory($label,$data,"",$insertID);
             }else{
                 $query = $this->db->insert("pms_employeetaskoard_details_tbl", $data);
                 $insertID = $this->db->insert_id();
                 $this->logHistory($label,$data,"",$insertID);
+                
             } 
 
             return $query ? $insertID : "false|System error: Please contact the system administrator for assistance!";
@@ -452,7 +453,7 @@ class EmployeeTaskboard_model extends CI_Model {
                     $listID[$count]=$insertID;
                 }
               
-                $this->logHistory($label,"",$taskBoardID,$subtaskboardID);
+                $this->logHistory($label,$img,$taskBoardID,$subtaskboardID);
 
             return $query ? $listID : "false|System error: Please contact the system administrator for assistance!";
 
@@ -467,7 +468,7 @@ class EmployeeTaskboard_model extends CI_Model {
             $subtaskboardID = $queryGetID->row()->subtaskboardID;
 
           $query = $this->db->delete('pms_image_taskboard_tbl', array('imageName' => $imageSrc));
-          $this->logHistory($label,"",$taskboardID,$subtaskboardID);
+          $this->logHistory($label,$imageSrc,$taskboardID,$subtaskboardID);
             return $query ? true : "false|System error: Please contact the system administrator for assistance!";
 
         
@@ -507,25 +508,44 @@ class EmployeeTaskboard_model extends CI_Model {
         }
     }
 
-    public function updateEmployeeTaskStatus($data,$taskBoardID = 0,$subtaskboardID = 0,$employeeID=0) {
+    public function updateEmployeeTaskStatus($data,$taskBoardID = 0,$subtaskboardID = 0,$employeeID=0,$label="") {
 
-        $condition = $subtaskboardID ? "taskboardID = $taskBoardID AND subtaskboardID = $subtaskboardID AND" : "taskboardID = $taskBoardID AND subtaskboardID =0 AND";
-        $this->db->query("DELETE FROM pms_employee_taskboard_status_tbl WHERE $condition   employeeID = $employeeID ");
+        $condition = $subtaskboardID ? "taskboardID = $taskBoardID AND subtaskboardID = $subtaskboardID AND  employeeID = $employeeID" : "taskboardID = $taskBoardID AND subtaskboardID =0 AND  employeeID = $employeeID";
+        $multiClause = $subtaskboardID ? array('taskboardID' => $taskBoardID, 'subtaskboardID' => $subtaskboardID, 'employeeID' => $employeeID ) : array('taskboardID' => $taskBoardID, 'subtaskboardID' => 0 , 'employeeID' => $employeeID)  ;
+        
+        // $this->db->query("DELETE FROM pms_employee_taskboard_status_tbl WHERE $condition   employeeID = $employeeID ");
   
+        $query = $this->db->query("SELECT * FROM pms_employee_taskboard_status_tbl WHERE $condition");
 
         if($taskBoardID || $subtaskboardID){
-            if (count($data) > 0) {
-                $query = $this->db->insert('pms_employee_taskboard_status_tbl', $data);
-                // $insertID = $subtaskboardID;
-                // $this->logHistory($label,$passListAssignee,"",$subtaskboardID);
-                return $query ? true : "false|System error: Please contact the system administrator for assistance!";
+            if($query->num_rows() > 0){
+                if (count($data) > 0) {
+                   
+                    $this->db->where($multiClause);		
+                    $query = $this->db->update('pms_employee_taskboard_status_tbl', $data);
+
+                    $this->logHistory($label,$data,$taskBoardID,$subtaskboardID);
+
+                    return $query ? true : "false|System error: Please contact the system administrator for assistance!";
+                }
+            }else{
+                if (count($data) > 0) {
+                    $query = $this->db->insert('pms_employee_taskboard_status_tbl', $data);
+
+                    $this->logHistory($label,$data,$taskBoardID,$subtaskboardID);
+
+                    return $query ? true : "false|System error: Please contact the system administrator for assistance!";
+                }
             }
         }
     }
 
     public function logHistory($label =null,$data=false, $taskboardID=null,$subtaskboardID = null){
 
-       
+        // echo $data;
+        // echo "<pre>";
+        // print_r($data);
+        // exit;
        
         $value="";
         $databaseColumn="";
@@ -535,7 +555,7 @@ class EmployeeTaskboard_model extends CI_Model {
 
         $employeeID = $this->session->userdata('adminSessionID');
 
-        if($taskboardID){
+        if($taskboardID && ($subtaskboardID == null || $subtaskboardID =="" || $subtaskboardID == 0 )){
             $databaseTable ="pms_employeetaskoard_tbl";
 
             if($label == "description"){
@@ -544,9 +564,15 @@ class EmployeeTaskboard_model extends CI_Model {
             }
 
             if($label == "used hours"){
-                 $value = $data["taskUsedHours"];
+        
+                $value ='';
+                if(isset($data["taskUsedHours"])){
+                    $value = $data["taskUsedHours"];
+                }else{
+                    $value =$data["employeeUsedHours"];
+                }
                  $databaseColumn = "taskUsedHours";
-            }
+           }
 
             if($label == "actual end date"){
                 $value = $data["taskEndDates"];
@@ -563,41 +589,57 @@ class EmployeeTaskboard_model extends CI_Model {
                 $databaseColumn = "taskSeverity";
            }
 
-            if($label == "status"){
-                 $value = $data["taskStatus"];
-                 $databaseColumn = "taskStatus";
+           if($label == "status"){
+
+                $value ='';
+                if(isset($data["taskStatus"])){
+                    $value = $data["taskStatus"];
+                    $databaseColumn = "taskStatus";
+                }else{
+                    $value =$data["employeeTaskStatus"];
+                    $databaseColumn = "employeeStatus";
+                }
+
             }
+
 
             if($label == "notes"){
                 $value = $data["taskNotes"];
                 $databaseColumn = "taskNotes";
            }
 
-           if($label == "attachment"){
            
-            $databaseColumn = "subTaskNotes";
-            $action="added";
-            }
 
             if($label == "delete attachment"){
-            $label ="attachment row";
-            // $databaseColumn = "subTaskNotes";
-            $action="deleted";
-            }
+                $value = $data;
+    
+                $action="deleted";
+                }
 
             if($label == "comment"){
                 $value = $data;
                 // $databaseColumn = "taskNotes";
            }
 
-            // $checkData = $this->db->query("SELECT $databaseColumn FROM $databaseTable  WHERE taskboardID = $taskboardID AND $databaseColumn  IS NOT NULL ");
+            if($label == "attachment"){
+           
+                // $databaseColumn = "subTaskNotes";
+                $attachmentArray =[];
+                $action="added";
 
-            //     if($checkData -> num_rows()){
-            //         $action="changed";
-            //     }else{
-            //         $action = "set";
-            //     }
+                for($loop =0; $loop<count($data);$loop++){
+                    $temp =[
+                        'taskboardID' => $taskboardID,
+                        'object_label' => $label,
+                        'action' => $action,
+                        'object_value' => $data[$loop],
+                        'createdBy' => $employeeID
+                    ];
+                    array_push($attachmentArray, $temp);
+                }
+                $this->db->insert_batch("pms_employeetaskboard_log_tbl", $attachmentArray);
 
+            }else{
                 $logData = array(
                     'taskboardID' => $taskboardID,
                     'object_label' => $label,
@@ -607,12 +649,14 @@ class EmployeeTaskboard_model extends CI_Model {
 
                 );
             
-                $this->db->insert('pms_employeetaskboard_log_tbl', $logData); 
+                $this->db->insert('pms_employeetaskboard_log_tbl', $logData);   
+            }
+               
             
 
         }
 
-        if($subtaskboardID){
+        if($subtaskboardID != 0 || $subtaskboardID != null ){
             $databaseTable ="pms_employeetaskoard_details_tbl";
 
             if($label == "description"){
@@ -626,13 +670,25 @@ class EmployeeTaskboard_model extends CI_Model {
            }
 
             if($label == "man hours"){
-                $value = $data["subTaskManHours"];
-                $databaseColumn = "subTaskManHours";
+
+                $value ='';
+                if(isset($data["subTaskManHours"])){
+                    $value = $data["subTaskManHours"];
+                }else{
+                    $value =$data["employeeManHours"];
+                }
+                 $databaseColumn = "subTaskManHours";
            }
 
             if($label == "used hours"){
-                 $value = $data["subTaskUsedHours"];
-                 $databaseColumn = "subTaskUsedHours";
+        
+                 $value ='';
+                 if(isset($data["subTaskUsedHours"])){
+                     $value = $data["subTaskUsedHours"];
+                 }else{
+                     $value =$data["employeeUsedHours"];
+                 }
+                  $databaseColumn = "subTaskUsedHours";
             }
 
             if($label == "actual end date"){
@@ -651,8 +707,15 @@ class EmployeeTaskboard_model extends CI_Model {
            }
 
             if($label == "status"){
-                 $value = $data["subTaskStatus"];
-                 $databaseColumn = "subTaskStatus";
+
+                $value ='';
+                if(isset($data["subTaskStatus"])){
+                    $value = $data["subTaskStatus"];
+                }else{
+                    $value =$data["employeeTaskStatus"];
+                }
+                $databaseColumn = "subTaskStatus";
+
             }
 
             if($label == "notes"){
@@ -660,15 +723,11 @@ class EmployeeTaskboard_model extends CI_Model {
                 $databaseColumn = "subTaskNotes";
            }
 
-           if($label == "attachment"){
-           
-            $databaseColumn = "subTaskNotes";
-            $action="added";
-            }
+          
 
             if($label == "delete attachment"){
-            $label ="attachment row";
-            // $databaseColumn = "subTaskNotes";
+            $value = $data;
+
             $action="deleted";
             }
 
@@ -677,14 +736,37 @@ class EmployeeTaskboard_model extends CI_Model {
                 // $databaseColumn = "taskNotes";
            }
 
-            // $checkData = $this->db->query("SELECT $databaseColumn FROM $databaseTable  WHERE subtaskboardID = $subtaskboardID AND $databaseColumn  IS NOT NULL ");
+           if($label == "start date"){
+            $value = $data["employeeStartDate"];
+            // $databaseColumn = $data["employeeStartDate"];
 
-            //     if($checkData -> num_rows()){
-            //         $action="changed";
-            //     }else{
-            //         $action = "set";
-            //     }
+            }
 
+            if($label == "end date"){
+            $value = $data["employeeEndDate"];
+            // $databaseColumn = ;
+
+            }
+
+            if($label == "attachment"){
+           
+                // $databaseColumn = "subTaskNotes";
+                $attachmentArray =[];
+                $action="added";
+
+                for($loop =0; $loop<count($data);$loop++){
+                    $temp =[
+                        'subtaskboardID' => $subtaskboardID,
+                        'object_label' => $label,
+                        'action' => $action,
+                        'object_value' => $data[$loop],
+                        'createdBy' => $employeeID
+                    ];
+                    array_push($attachmentArray, $temp);
+                }
+                $this->db->insert_batch("pms_employeetaskboard_log_tbl", $attachmentArray);
+
+            }else{
                 $logData = array(
                     'subtaskboardID' => $subtaskboardID,
                     'object_label' => $label,
@@ -694,7 +776,10 @@ class EmployeeTaskboard_model extends CI_Model {
 
                 );
             
-                $this->db->insert('pms_employeetaskboard_log_tbl', $logData); 
+                $this->db->insert('pms_employeetaskboard_log_tbl', $logData);   
+            }
+
+              
             
 
         }

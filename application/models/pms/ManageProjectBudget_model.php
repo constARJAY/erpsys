@@ -187,8 +187,8 @@ class ManageProjectBudget_model extends CI_Model {
 
             $output["timelineBuilderID"]   = $timelineHeader->timelineBuilderID;
             $output["budgetStatus"]        = $timelineHeader->budgetStatus;
-            $output["createdAt"]           = date("M d, Y h:i:s A", strtotime($timelineHeader->ptbtCreatedAt));
-            $output["submittedAt"]         = date("M d, Y h:i:s A", strtotime($timelineHeader->submittedAt));
+            $output["createdAt"]           = date("F d, Y h:i:s A", strtotime($timelineHeader->ptbtCreatedAt));
+            $output["submittedAt"]         = date("F d, Y h:i:s A", strtotime($timelineHeader->submittedAt));
             $output["approversID"]         = $timelineHeader->approversID;
             $output["approversDate"]       = $timelineHeader->approversDate;
             $output["approversStatus"]     = $timelineHeader->approversStatus;
@@ -203,7 +203,7 @@ class ManageProjectBudget_model extends CI_Model {
             $output["projectCategory"]     = $timelineHeader->projectCategory;
             $output["clientName"]          = $timelineHeader->clientName;
             $output["clientAddress"]       = $address;
-            $output["timelineDate"]        = date("M d, Y", strtotime($timelineHeader->timelineStartDate))." - ".date("M d, Y", strtotime($timelineHeader->timelineEndDate));
+            $output["timelineDate"]        = date("F d, Y", strtotime($timelineHeader->timelineStartDate))." - ".date("F d, Y", strtotime($timelineHeader->timelineEndDate));
             $output["timelinePriority"]    = $timelineHeader->timelinePriority;
             $output["timelineIssued"]      = $timelineHeader->timelineIssued;
             $output["proposedBudget"]      = $timelineHeader->proposedBudget;

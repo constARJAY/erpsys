@@ -379,6 +379,33 @@ select{
 
 <!-- ----- END MODAL ----- -->
 
+<!-- ----- MODAL VIDEO ----- -->
+
+<div class="modal fade" id="videomodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">              
+      <div class="modal-body">
+        <div class="row">
+          <!-- <div class="col-8"><label class="title"></label> <button class="ml-2 btn btn-success"><a href="" class="text-white" target="_blank"  style="cursor:pointer;">Download</a></button></div> -->
+          <div class="col-8"><label class="title"></label></div>
+          <div class="col-4">
+            <button type="button" class="close mr-2" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          </div>
+        </div>
+        
+        <hr class="w-100">
+        <!-- 16:9 aspect ratio -->
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe class=" videopreview embed-responsive-item" src=""></iframe>
+        </div>
+        <!-- <img src="" class="videopreview" style="width: 100%;height:100%; " > -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ----- END VIDEO ----- -->
+
 <!-- ----- MODAL ASSIGNEE ----- -->
 <div id="modal_employee_assignee" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">

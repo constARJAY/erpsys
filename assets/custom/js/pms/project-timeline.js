@@ -1,8 +1,11 @@
+let FILE_ARRAY 			= [];
+let EXIST_FILE_ARRAY 	= [];
 $(document).ready(function() {
 	const allowedUpdate = isUpdateAllowed(90);
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover(90);
 	// ----- END MODULE APPROVER -----
+
 
 
 	// ---- GET EMPLOYEE DATA -----
@@ -1073,6 +1076,16 @@ $(document).ready(function() {
 		} = employeeData(data ? employeeID : sessionID);
 		// ----- END GET EMPLOYEE DATA -----
 
+
+		if(timelineDesign){
+			let timelineDesignArr = timelineDesign.split("|");
+			timelineDesignArr.map(file=>{
+					EXIST_FILE_ARRAY.push(file);
+			});
+		}
+
+
+
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("timelineBuilderID", encryptString(timelineBuilderID));
@@ -1267,7 +1280,7 @@ $(document).ready(function() {
 					
 				</div>
 			</div>
-			<div class="col-md-3 col-sm-12">
+			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
 					<label>Project Manager ${!disabled ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2"
@@ -1280,7 +1293,7 @@ $(document).ready(function() {
 					<div class="invalid-feedback d-block" id="invalid-timelineProjectManager"></div>
 				</div>
 			</div>
-			<div class="col-md-3 col-sm-12">
+			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
 					<label>Team Leader ${!disabled ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2"
@@ -1294,29 +1307,13 @@ $(document).ready(function() {
 				</div>
 			</div>
 
-			<div class="col-md-3 col-sm-12">
+			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
 					<label>Start Date & End Date ${!disabled ? "<code>*</code>" : ""}</label>
 					<input type="text" class="form-control" disabled name="timelineDate" value="${timelineDate}">
 				</div>
 			</div>
-			<div class="col-md-3 col-sm-12">
-				<div class="form-group">
-					<div class="d-flex justify-content-between align-items-center">
-							<label>Design </label>
-							<label>${!disabled ? (timelineDesign ? `<a href="${base_url+"assets/upload-files/project-designs/"+timelineDesign}" target="_blank">${timelineDesign}</a>` : ``) : ``}</label>
-					</div>
-					
-					
-					${ disabled ? (timelineDesign ? `<a href="${base_url+"assets/upload-files/project-designs/"+timelineDesign}" target="_blank">${timelineDesign}</a>` : `-` )
-					: `<input  type="file" 
-								class="form-control" 
-								name="timelineDesign" 
-								id="timelineDesign"
-								accept="image/*, .pdf, .doc, .docx" ${disabled}>`}
-					
-				</div>
-			</div>
+			
 			<div class="col-12">
 				<div class="row">
 					<div class="col-md-6 col-sm-12">
@@ -1345,10 +1342,29 @@ $(document).ready(function() {
 							<div class="invalid-feedback d-block" id="invalid-timelineTeamMemberNonOrganic"></div>
 						</div>
 					</div>
+
+
+
+					<div class="col-md-12 col-sm-12">
+						<div class="form-group">
+							<label>Design </label>
+						 	<input  type="file" 
+								class="form-control" 
+								name="timelineDesign" 
+								id="timelineDesign"
+								accept="image/*, .pdf, .doc, .docx"  multiple ${disabled}>
+						</div>
+					</div>
 				</div>
 			</div>
 
-
+			<div class="col-12">
+				<div class="row row-display-image">
+					${displayImage(false , readOnly, "assets/upload-files/project-designs")}
+				</div>
+				
+			</div>
+			
 			<div class="card mt-2">
 				<div class="card-header bg-primary text-white">
 					<div class="row">
@@ -1838,6 +1854,8 @@ $(document).ready(function() {
     // ----- PAGE CONTENT -----
 	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
+		FILE_ARRAY 		 = [];
+		EXIST_FILE_ARRAY = [];
 		if (!isForm) {
 			preventRefresh(false);
 			let html = `
@@ -1893,7 +1911,7 @@ $(document).ready(function() {
 		 * ----- END METHOD -----
 		 */
 
-		let data = { tasks: [] }, formData = new FormData;
+		let data = { tasks: [], files: [], }, formData = new FormData;
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
@@ -1916,13 +1934,12 @@ $(document).ready(function() {
 
 		if (currentStatus == "0" && method != "approve") {
 			var timelineDate 					= $("[name=timelineDate]").val().split(" - ");
-			var files 							= document.getElementById("timelineDesign").files[0];
 			var timelineBudgetStatus 			= $("[name=timelineProposedBudget]").attr("timelineBudgetStatus");
 			var timelineAllocatedBudget 		= $("[name=timelineAllocatedBudget]").val().replaceAll(",","") || $("[name=timelineAllocatedBudget]").val() ;
 			var timelineTeamMember 				= [];
 			var timelineTeamMemberOrganic 		= $("#timelineTeamMemberOrganic").val() ?? null;
 			var timelineTeamMemberNonOrganic 	= $("#timelineTeamMemberNonOrganic").val() ?? null;
-
+			var existTimelineDesign 			= EXIST_FILE_ARRAY.join("|");
 			for (let index = 0; index < timelineTeamMemberOrganic.length; index++) {
 				timelineTeamMember.push(timelineTeamMemberOrganic[index]);
 			}
@@ -1944,9 +1961,9 @@ $(document).ready(function() {
 			data["timelineTeamMember"] 			= timelineTeamMember.join("|") ?? null;
 			data["timelineBuilderReason"] 	  	= $("[name=timelineBuilderReason]").val()?.trim() ?? null;
 			data["timelineProposedBudget"] 		= $("[name=timelineProposedBudget]").val().replaceAll(",","") ?? null;
-			data["file"] 						= files;
+			data["existTimelineDesign"] 		= existTimelineDesign;
 			data["timelineBudgetStatus"] 		= timelineBudgetStatus;
-			data["timelineAllocatedBudget"] 		= timelineAllocatedBudget;
+			data["timelineAllocatedBudget"] 	= timelineAllocatedBudget;
 
 
 
@@ -1963,7 +1980,7 @@ $(document).ready(function() {
 			formData.append("timelineTeamMember",timelineTeamMember.join("|") ?? null);
 			formData.append("timelineBuilderReason", $("[name=timelineBuilderReason]").val()?.trim() ?? null );
 			formData.append("timelineProposedBudget", $("[name=timelineProposedBudget]").val().replaceAll(",","") ?? null);
-			formData.append("file", files);
+			formData.append("existTimelineDesign", existTimelineDesign);
 			formData.append("timelineBudgetStatus", timelineBudgetStatus);
 			formData.append("timelineAllocatedBudget", timelineAllocatedBudget);
 
@@ -2032,8 +2049,18 @@ $(document).ready(function() {
 				formData.append(`tasks[${i}][taskStartDate]`, taskStartDate);
 				formData.append(`tasks[${i}][taskEndDate]`, taskEndDate);
 				formData.append(`tasks[${i}][taskRemarks]`, taskRemarks);
+
 				data["tasks"].push(temp);
 			});
+
+
+
+			for (let index = 0; index < FILE_ARRAY.length; index++){
+				formData.append(`files[${index}]`, FILE_ARRAY[index]);
+				data["files"].push(FILE_ARRAY[index]);
+				
+				formData.append(`files${index}`, FILE_ARRAY[index]);
+			}
 		} 
 
 		
@@ -2652,3 +2679,105 @@ function validateNoneForm(){
 	});
 	return returnData < 4 ? true : false;
 }
+
+
+function displayImage(fileList = false, readOnly = false, path = "assets/upload-files/project-designs"){
+	let html 		= ``;
+	
+	let link 		= true;
+	if(EXIST_FILE_ARRAY || fileList){
+		let existFile 		= EXIST_FILE_ARRAY || [] ;
+		let parameterArray 	= fileList ? fileList.split("|") : [];
+		
+		let array		= [...existFile, ...parameterArray];
+		array.map(list =>{
+			let otherAttr = link ? `
+				href="${base_url+path+"/"+list}" 
+				target="_blank"` : `href="javascript:void(0)"`;
+			html += `	<div class="col-md-2 col-sm-2 image-column">
+							<div class="form-group">
+								<div class="d-flex justify-content align-items-center" style="font-size: 12px; border: 1px solid black; border-radius: 5px; color:black;background: #d1ffe0; padding: 2px 10px;">
+										${!readOnly ? `<span class="btnRemoveImage pr-2" style="cursor: pointer" filename="${list}"><i class="fas fa-close"></i></span>` : ""}
+										<a class="filename"
+											title="${list}"
+											style="display: block;
+											color:black !important;
+											width: 90%;
+											overflow: hidden;
+											white-space: nowrap;
+											text-overflow: ellipsis;"
+											${readOnly ? otherAttr : ""}>
+											${list}
+										</a>
+								</div>
+							</div>
+						</div>`;
+		});
+		$("#timelineDesign").val("");
+	}
+	setTimeout(() => {
+		$(".row-display-image").html(html);
+	}, 800);
+}
+
+
+    // // ----- REMOVE IMAGE -----
+    $(document).on("click", `.btnRemoveImage`, function() {
+		let thisDivision 	= $(this).closest(".image-column");
+		let filename 		= $(this).attr("filename");
+		// FOR INPUT VALUE
+		let fileDataArray 	= FILE_ARRAY.filter(data => data.name != filename);
+		let tempFileData 	= [];
+		fileDataArray.map(x =>{
+			tempFileData.push(x);
+		});
+		FILE_ARRAY = tempFileData;
+
+		// FOR EXIST VALUE
+		let existFileDataArray 	= EXIST_FILE_ARRAY.filter(data => data == filename);
+		let tempExistFileData 	= [];
+			if(existFileDataArray){
+				EXIST_FILE_ARRAY.filter(data => data != filename).map(file=>{
+					tempExistFileData.push(file);
+				});
+			}
+			EXIST_FILE_ARRAY = tempExistFileData;
+		// REMOVING DIVISION
+        thisDivision.fadeOut(500, function(){
+			thisDivision.remove();
+		});
+
+    })
+    // ----- END REMOVE IMAGE -----
+
+
+	    // ----- SELECT IMAGE -----
+		$(document).on("change", "[id=timelineDesign]", function(e) {
+			e.preventDefault();
+			let filesArray = [];
+			let data 	   = [];
+			let thisArray  = this.files;
+
+			for (let index = 0; index < thisArray.length; index++) {
+				let filesize 		= this.files[index].size/1024/1024; // Size in MB
+				let filename 		= this.files[index].name;
+				let filenameSplit 	= filename.split(".");
+				let filetype		= filenameSplit.pop();
+				if (filesize > 10) {
+					showNotification("danger", `${filename} <br> File size must be less than or equal to 10mb`);
+				} else if (filetype	== "image" || filetype	== "jpeg" || filetype	== "jpg" || filetype	== "png" || filetype	== "docx") {
+					FILE_ARRAY.push(this.files[index]);
+				} else {
+					showNotification("danger", `${filename} <br>  Invalid file type`);
+				}	
+			}
+
+			FILE_ARRAY.map(files=>{
+				let filename = files.name;
+				filesArray.push(filename);
+			});
+			console.log(FILE_ARRAY);
+			displayImage(filesArray.join("|"), false);
+		})
+		// ----- END SELECT IMAGE -----
+

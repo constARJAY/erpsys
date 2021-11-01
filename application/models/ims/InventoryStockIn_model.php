@@ -80,11 +80,13 @@ class InventoryStockIn_model extends CI_Model {
     public function getBarcodes($referenceCode,$itemID)
     {
         $sql = "
-                SELECT quantityForStockin, barcode FROM ims_stock_in_item_tbl
-                WHERE inventoryCode ='".$referenceCode."' AND itemID = ".$itemID."
+                SELECT SUM(quantityForStockin) AS quantityForStockin, barcode FROM ims_stock_in_item_tbl
+                WHERE inventoryCode ='".$referenceCode."' AND itemID = '$itemID'
+                GROUP BY barcode
                 UNION ALL 
-                SELECT quantityForStockin, barcode FROM ims_stock_in_assets_tbl
-                WHERE inventoryCode = '".$referenceCode."' AND assetID = ".$itemID."";
+                SELECT SUM(quantityForStockin) AS quantityForStockin, barcode FROM ims_stock_in_assets_tbl
+                WHERE inventoryCode = '".$referenceCode."' AND assetID = '$itemID'
+                GROUP BY barcode";
         $query = $this->db->query($sql);
         //return $query->result($query);
         return $query->result_array();

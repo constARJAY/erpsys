@@ -2838,7 +2838,7 @@ $(document).ready(function() {
 					formData.append("billMaterialStatus", 2);
 				}
 			}
-
+			let milestoneIndex = 0;
 			$(".table-body-inventory-request-item").each(function(i,ob){
 				let thisExtension 			= $(this).attr("invcategory");
 				let requestItemTR 			= $(this).find(`.table-row-request-${thisExtension}`);
@@ -2848,9 +2848,10 @@ $(document).ready(function() {
 					let unitCost 				= 	$(this).attr("unitcost");
 					let totalCost 				= 	getNonFormattedAmount($(this).find(".item-total-cost").text());
 						if(requestItemID){
-							formData.append(`items[${i}][${j}][requestItemID]`, requestItemID);
-							formData.append(`items[${i}][${j}][unitCost]`, 		unitCost);
-							formData.append(`items[${i}][${j}][totalCost]`, 	totalCost);
+							formData.append(`items[${milestoneIndex}][${j}][requestItemID]`, requestItemID);
+							formData.append(`items[${milestoneIndex}][${j}][unitCost]`, 		unitCost);
+							formData.append(`items[${milestoneIndex}][${j}][totalCost]`, 	totalCost);
+							milestoneIndex ++;
 						}
 					
 				});

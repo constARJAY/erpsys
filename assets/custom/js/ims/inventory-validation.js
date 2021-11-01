@@ -1030,7 +1030,7 @@ $(document).ready(function() {
 		
 				if (inventoryValidationID) {
 
-					if(inventoryValidationStatus == 0 || inventoryValidationStatus == 1 ){
+					if(inventoryValidationStatus == 0 || inventoryValidationStatus == 1 || inventoryValidationStatus == 4  ){
 						
 						let checkExistItems = getTableData("ims_request_items_tbl","",`inventoryValidationID = ${inventoryValidationID}`);
 						let queryCondition ="";
@@ -1254,7 +1254,7 @@ $(document).ready(function() {
 		
 				if (inventoryValidationID) {
 
-					if(inventoryValidationStatus == 0 || inventoryValidationStatus == 1 ){
+					if(inventoryValidationStatus == 0 || inventoryValidationStatus == 1  || inventoryValidationStatus == 4){
 
 						let checkExistAssets = getTableData("ims_request_assets_tbl","",`inventoryValidationID = ${inventoryValidationID}`);
 						let queryCondition ="";
@@ -1295,8 +1295,7 @@ $(document).ready(function() {
 								reqAsset.assetUom,
 								reqAsset.requestQuantity,
 									
-	
-									( SELECT 
+									(SELECT 
 										CASE 
 										WHEN ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL)) < 0 
 											THEN  0
@@ -1309,8 +1308,7 @@ $(document).ready(function() {
 									AND astStock.stockInDate IS NOT NULL 
 									AND astStock.assetID = reqAsset.assetID) as availableStocks,
 									${forPuchaseCondition},
-									reqAsset.assetRemarks
-							`, 
+									reqAsset.assetRemarks`, 
 							`materialRequestID = ${materialRequestID}  ${queryCondition} AND bidRecapID IS NULL`);
 					}else{
 						
@@ -1991,7 +1989,8 @@ $(document).ready(function() {
 				 reservedItem =  0;
 
 			}else{
-				 reservedItem =  computeReservedItem || tableData.reservedItem;
+				//  reservedItem =  computeReservedItem || tableData.reservedItem;
+				 reservedItem = requestQuantity;
 
 			}
 			let forPurchase 	= getForPurchase;				
@@ -2104,7 +2103,7 @@ $(document).ready(function() {
 
 	
 				}else{
-					 reservedAsset = computeReservedAsset || tableData.reservedAsset;
+					 reservedAsset = requestQuantity;
 	
 				}
 				

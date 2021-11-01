@@ -26,6 +26,27 @@ $(document).ready(function () {
 	}
 	// ---- END GET EMPLOYEE DATA -----
 
+	// ----- REUSABLE FUNCTIONS -----
+	let holidayData = getTableData(
+        "hris_holiday_tbl",
+        `*`,
+        `holidayStatus = 1`
+    )?.map(holiday => holiday.holidayDate);
+
+	let employeeSchedule = getTableData(
+		`hris_employee_list_tbl as helt
+			LEFT JOIN hris_schedule_setup_tbl AS hsst USING(scheduleID)`,
+		`IF(mondayStatus = 1, 1, 0) AS monday,
+		IF(tuesdayStatus = 1, 1, 0) AS tuesday,
+		IF(wednesdayStatus = 1, 1, 0) AS wednesday,
+		IF(thursdayStatus = 1, 1, 0) AS thursday,
+		IF(fridayStatus = 1, 1, 0) AS friday,
+		IF(saturdayStatus = 1, 1, 0) AS saturday,
+		IF(sundayStatus = 1, 1, 0) AS sunday`,
+		`employeeID = ${sessionID}`
+	);
+	// ----- END REUSABLE FUNCTIONS -----
+
 
 	// ----- IS DOCUMENT REVISED -----
 	function isDocumentRevised(id = null) {
@@ -330,12 +351,14 @@ $(document).ready(function () {
 		leaveRequestData.map(leave => {
 			let {
 				leaveRequestID,
-				leaveRequestDate,
+				leaveRequestDateFrom,
+				leaveRequestDateTo,
 				leaveRequestStatus
 			} = leave;
 			let unique = {
 				id: leaveRequestID,
-				leaveRequestDate,
+				leaveRequestDateFrom,
+				leaveRequestDateTo,
 			};
 			(leaveRequestStatus == 1 || leaveRequestStatus == 2) && uniqueData.push(unique);
 		})
@@ -620,6 +643,8 @@ $(document).ready(function () {
 			approversID 				= "",
 			approversStatus 			= "",
 			approversDate 				= "",
+			leaveWorkingDay				= "",
+			leaveStatus   				= "",
 			leaveRequestStatus 			= false,
 			submittedAt 				= false,
 			createdAt 					= false,
@@ -747,7 +772,34 @@ $(document).ready(function () {
                     <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12">
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label for="">Leave Type ${!disabled ? "<code>*</code>" : ""}</label>
+                    <select class="form-control validate select2" id="leaveID" name="leaveID" ${disabled} required>
+                    ${getLeaveOptions(leaveID)}
+                    </select>
+                    <div class="invalid-feedback d-block" id="invalid-leaveID"></div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label for="">Leave Credit/s</label>
+                    <input type="text" class="form-control" disabled name="leaveRequestRemainingLeave" id="leaveRequestRemainingLeave" required value="${leaveRequestRemainingLeave}">
+                    <div class="invalid-feedback d-block" id="invalid-leaveRequestRemainingLeave"></div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Status</label>
+                      <select class="form-control select2" id="leaveStatus" name="leaveStatus" ${disabled} required>
+                        <option value="0" ${data && leaveStatus == "0" && "selected"}>Unpaid</option>
+ 						<option value="1" ${data && leaveStatus == "1" && "selected"}>Paid</option>
+ 						</select>
+                    <div class="d-block invalid-feedback" id="invalid-leaveStatus"></div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
@@ -762,7 +814,18 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-leaveRequestDate"></div>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12">
+             <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Working Day ${!disabled ? "<code>*</code>" : ""}</label>
+                      <select class="form-control select2" id="leaveWorkingDay" name="leaveWorkingDay" ${disabled} required>
+                        <option selected value="" disabled>Select Working Day</option>
+                        <option value="0" ${data && leaveWorkingDay == "0" && "selected"}>Half-day</option>
+ 						<option value="1" ${data && leaveWorkingDay == "1" && "selected"}>Whole-day</option>
+ 						</select>
+                    <div class="d-block invalid-feedback" id="invalid-leaveWorkingDay"></div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label for="">Number of Day/s</label>
                     <input 
@@ -775,25 +838,6 @@ $(document).ready(function () {
                     <div class="invalid-feedback d-block" id="invalid-leaveRequestNumberOfDate"></div>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12">
-                <div class="form-group">
-                    <label for="">Leave Type ${!disabled ? "<code>*</code>" : ""}</label>
-                    <select class="form-control validate select2" id="leaveID" name="leaveID" ${disabled} required>
-                    ${getLeaveOptions(leaveID)}
-                    </select>
-                    <div class="invalid-feedback d-block" id="invalid-leaveID"></div>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-12">
-                <div class="form-group">
-                    <label for="">Leave Credit/s</label>
-                    <input type="text" class="form-control" disabled name="leaveRequestRemainingLeave" id="leaveRequestRemainingLeave" required value="${leaveRequestRemainingLeave}">
-                    <div class="invalid-feedback d-block" id="invalid-leaveRequestRemainingLeave"></div>
-                </div>
-            </div>
-
-
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
                     <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
@@ -840,7 +884,7 @@ $(document).ready(function () {
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
-            leaveRequestDateRange(leaveRequestDateFrom, leaveRequestDateTo);
+            leaveRequestDateRange(leaveRequestDateFrom, leaveRequestDateTo, employeeSchedule, holidayData);
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -892,6 +936,16 @@ $(document).ready(function () {
 	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 	// ----- END PAGE CONTENT -----
 
+	$(document).on("change", "#leaveWorkingDay", function() {
+		var workDay = $("#leaveWorkingDay option:selected").val();
+		var numberOfDays = $("#leaveRequestNumberOfDate").attr("numberofdays");
+		if(workDay =="0"){
+			var countnumber = (parseInt(numberOfDays) - 0.5);
+			$("#leaveRequestNumberOfDate").val(countnumber);
+		}else{
+			$("#leaveRequestNumberOfDate").val(numberOfDays);
+		}
+	});	
 
 	// ----- GET DATA -----
 	function getData(action = "insert", status, method, feedback, id = null) {
@@ -1401,7 +1455,7 @@ function getLeaveOptions(leaveID  = 0) {
     return leaveOptions;
 }
 
-function leaveRequestDateRange(iStartDate = new Date, iEndDate = new Date){
+function leaveRequestDateRange(iStartDate = new Date, iEndDate = new Date, employeeSchedule, holidayData){
 	$("#leaveRequestDate").attr("start", moment(iStartDate).format("YYYY-MM-DD"));
 	$("#leaveRequestDate").attr("end", moment(iEndDate).format("YYYY-MM-DD"));
 	console.log(iStartDate);
@@ -1414,6 +1468,23 @@ function leaveRequestDateRange(iStartDate = new Date, iEndDate = new Date){
         locale: {
           format: 'MMMM DD, YYYY'
         },
+        isInvalidDate: function(date) {
+					let optionDay  = moment(date).day();
+
+					let isActive = '1';
+					employeeSchedule.map(schedule => {
+							 if (optionDay == 0) isActive = schedule.sunday ?? '1';
+						else if (optionDay == 1) isActive = schedule.monday ?? '1';
+						else if (optionDay == 2) isActive = schedule.tuesday ?? '1';
+						else if (optionDay == 3) isActive = schedule.wednesday ?? '1';
+						else if (optionDay == 4) isActive = schedule.thursday ?? '1';
+						else if (optionDay == 5) isActive = schedule.friday ?? '1';
+						else if (optionDay == 6) isActive = schedule.saturday ?? '1';
+					});
+
+					let optionDate = moment(date).format("YYYY-MM-DD");
+					return holidayData.includes(optionDate) || isActive == '0';
+				},
     }, function(start, end) {
 		$("#leaveRequestDate").attr("start", moment(start).format("YYYY-MM-DD"));
 		$("#leaveRequestDate").attr("end", moment(end).format("YYYY-MM-DD"));
@@ -1429,6 +1500,7 @@ $(document).on("change","#leaveRequestDate", function(){
     var remaining_of_days   = $("#leaveRequestRemainingLeave").val();
 
     $("#leaveRequestNumberOfDate").val(numberOfDays);
+    $("#leaveRequestNumberOfDate").attr("numberOfDays",numberOfDays);
     if(numberOfDays > remaining_of_days){
         $("#leaveRequestNumberOfDate").addClass("is-invalid");
         $("#invalid-leaveRequestNumberOfDate").addClass("is-invalid");

@@ -338,9 +338,9 @@ class PurchaseOrder_model extends CI_Model {
                     "wordAmount" => convertNumberToWords($purchaseOrderData->grandTotalAmount),
                     "grandTotal" => $purchaseOrderData->grandTotalAmount ?? 0
                 ];
-                $discount = formatAmount(($purchaseOrderData->discount ?? 0), true);
+                $discount = formatAmount(($purchaseOrderData->discount ?? 0));
                 if ($purchaseOrderData->discountType == "percent") {
-                    $discount = formatAmount(($purchaseOrderData->discount ?? 0))." %";
+                    $discount = $discount." %";
                 }
                 $footer["costSummary"] = [
                     "total"       => formatAmount(($purchaseOrderData->total ?? 0), true),

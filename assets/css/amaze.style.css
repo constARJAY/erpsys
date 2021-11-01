@@ -21,6 +21,12 @@
 	}
 }
 
+.display-image-parent {
+	height: auto;
+	max-height: 20vh;
+	overflow-y: auto;
+}
+
 .display-image {
 	font-size: 12px; 
 	border: 1px solid black; 

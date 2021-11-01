@@ -186,4 +186,27 @@ class ServiceRequisition_model extends CI_Model {
     // ----- END SAVE SERVICE ORDER -----
 
 
+    // ----- DROP SERVICES -----
+    function dropServices($serviceRequisitionID = 0)
+    {
+        $dropServiceOrder = $this->db->update(
+            "ims_service_order_tbl", 
+            ["serviceOrderStatus" => 5],
+            [
+                "serviceOrderID <> "   => null,
+                "serviceRequisitionID" => $serviceRequisitionID,
+            ]);
+        $dropServiceCompletion = $this->db->update(
+            "ims_service_completion_tbl", 
+            ["serviceCompletionStatus" => 5],
+            [
+                "serviceCompletionID <> " => null,
+                "serviceRequisitionID"    => $serviceRequisitionID,
+            ]);
+        $result = $dropServiceOrder || $dropServiceCompletion ? true : false;
+        return $result;
+    }
+    // ----- END DROP SERVICES -----
+
+
 }

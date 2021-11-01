@@ -20,6 +20,19 @@
     use PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooterDrawing;
     use PhpOffice\PhpSpreadsheet\Worksheet;
 
+    function stringToDecimal($strAmount = "0.00") {
+        if ($strAmount && !strpos($strAmount, ",")) {
+            $arrAmount = explode(".", $strAmount);
+            if ($arrAmount && !empty($arrAmount) && count($arrAmount) > 1) {
+                $centavos = $arrAmount[1];
+                if ($centavos == "00") {
+                    return $strAmount." ";
+                }
+            }
+        }
+        return $strAmount;
+    }
+
     function purchaseOrderExcel($data = [])
     {
         if ($data && count($data) > 0)
@@ -45,6 +58,15 @@
             $fTotalVat       = $data["footer"]["costSummary"]["totalVat"] ?? formatAmount(0);
             $fLessEwt        = $data["footer"]["costSummary"]["lessEwt"] ?? formatAmount(0);
             $fGrandTotal     = $data["footer"]["costSummary"]["grandTotalAmount"] ?? formatAmount(0, true);
+
+            $fTotal        = stringToDecimal($fTotal);
+            $fDiscount     = stringToDecimal($fDiscount);
+            $fTotalAmount  = stringToDecimal($fTotalAmount);
+            $fVatableSales = stringToDecimal($fVatableSales);
+            $fVat          = stringToDecimal($fVat);
+            $fTotalVat     = stringToDecimal($fTotalVat);
+            $fLessEwt      = stringToDecimal($fLessEwt);
+            $fGrandTotal   = stringToDecimal($fGrandTotal);
             
 
             $spreadsheet = new Spreadsheet();
@@ -632,295 +654,7 @@
 
     function costEstimateExcel($data = [])
     {
-        // $data = [
-        //     "filename" => "costEstimate.xlsx",
-        //     "code"     => "CMT-21-00001",
-        //     "title"    => "",
-        //     "project" => [
-        //         "code"         => "PRJ-21-00001",
-        //         "name"         => "BIDAY SATELLITE WAREHOUSE AND TEMFACIL",
-        //         "location"     => "Biday, City of San Fernando, La Union",
-        //         "owner"        => "CMTLand Development Corporation",
-        //         "subject"      => "BILL OF MATERIALS –  Biday Satellite Warehouse and TemFacil",
-        //         "costEstimate" => "2020-0042",
-        //         "timeline"     => ""
-        //     ],
-        //     "body" => [
-        //         "phases" => [
-        //             [
-        //                 "name"       => "SATELLITE WAREHOUSE",
-        //                 "totalCost"  => "12,100.34",
-        //                 "totalLabor" => "50,000.00",
-        //                 "milestones" => [
-        //                     [
-        //                         "name"       => "CONCRETING WORKS",
-        //                         "totalCost"  => "12,234.43",
-        //                         "totalLabor" => "30,200.50",
-        //                         "items" => [
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                         ],
-        //                         "labors" => [
-        //                             [
-        //                                 "manHours"         => "10",
-        //                                 "overtimeManHours" => "8",
-        //                                 "personnel"        => "M/CARP",
-        //                                 "totalLabor"       => "5000"
-        //                             ],
-        //                             [
-        //                                 "manHours"         => "10",
-        //                                 "overtimeManHours" => "8",
-        //                                 "personnel"        => "M/CARP",
-        //                                 "totalLabor"       => "5000"
-        //                             ],
-        //                         ],
-        //                     ],
-        //                     [
-        //                         "name"       => "CONCRETING WORKS",
-        //                         "totalCost"  => "12,234.43",
-        //                         "totalLabor" => "30,200.50",
-        //                         "items" => [
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                         ],
-        //                         "labors" => [
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                         ],
-        //                     ],
-        //                 ]
-        //             ],
-        //             [
-        //                 "name" => "SATELLITE WAREHOUSE",
-        //                 "totalCost"  => "12,100.34",
-        //                 "totalLabor" => "50,000.00",
-        //                 "milestones" => [
-        //                     [
-        //                         "name"       => "CONCRETING WORKS",
-        //                         "totalCost"  => "12,234.43",
-        //                         "totalLabor" => "30,200.50",
-        //                         "items" => [
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                         ],
-        //                         "labors" => [
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                         ],
-        //                     ],
-        //                     [
-        //                         "name"       => "CONCRETING WORKS",
-        //                         "totalCost"  => "12,234.43",
-        //                         "totalLabor" => "30,200.50",
-        //                         "items" => [
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                         ],
-        //                         "labors" => [
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                         ],
-        //                     ],
-        //                 ]
-        //             ],
-        //         ],
-        //         "assets" => [
-        //             [
-        //                 "code"           => "AST-21-00001",
-        //                 "name"           => "Sample Asset Name",
-        //                 "classification" => "Classfic",
-        //                 "unit"           => "Kg",
-        //                 "quantity"       => "10",
-        //                 "manHours"       => "10",
-        //             ],
-        //             [
-        //                 "code"           => "AST-21-00001",
-        //                 "name"           => "Sample Asset Name",
-        //                 "classification" => "Classfic",
-        //                 "unit"           => "Kg",
-        //                 "quantity"       => "10",
-        //                 "manHours"       => "10",
-        //             ],
-        //         ],
-        //         "vehicles" => [
-        //             [
-        //                 "code"            => "VHC-21-00001",
-        //                 "name"            => "BMW",
-        //                 "averageFuelType" => "8.00 km/L",
-        //                 "distance"        => "435",
-        //                 "manHours"        => "100"
-        //             ],
-        //             [
-        //                 "code"            => "VHC-21-00001",
-        //                 "name"            => "BMW",
-        //                 "averageFuelType" => "8.00 km/L",
-        //                 "distance"        => "435",
-        //                 "manHours"        => "100"
-        //             ],
-        //         ],
-        //         "others" => [
-        //             [
-        //                 "category"    => "Commute",
-        //                 "description" => "point a to point b",
-        //             ],
-        //             [
-        //                 "category"    => "Commute",
-        //                 "description" => "point a to point b",
-        //             ],
-        //         ]
-        //     ],
-
-        // ];
-
-        if ($data && count($data) > 0)
+       if ($data && count($data) > 0)
         {
             $filename   = $data["filename"] ?? "costEstimate.xlsx";
             $code       = $data["code"] ?? "BOM-21-00001";
@@ -1469,338 +1203,6 @@
 
     function billMaterialExcel($data = [])
     {
-        
-        // $data = [
-        //     "filename" => "billMaterials.xlsx",
-        //     "code"     => "CMT-21-00001",
-        //     "title"    => "",
-        //     "project" => [
-        //         "code"         => "PRJ-21-00001",
-        //         "name"         => "BIDAY SATELLITE WAREHOUSE AND TEMFACIL",
-        //         "location"     => "Biday, City of San Fernando, La Union",
-        //         "owner"        => "CMTLand Development Corporation",
-        //         "subject"      => "BILL OF MATERIALS –  Biday Satellite Warehouse and TemFacil",
-        //         "costEstimate" => "2020-0042",
-        //         "timeline"     => ""
-        //     ],
-        //     "body" => [
-        //         "phases" => [
-        //             [
-        //                 "name"       => "SATELLITE WAREHOUSE",
-        //                 "totalCost"  => "12,100.34",
-        //                 "totalLabor" => "50,000.00",
-        //                 "milestones" => [
-        //                     [
-        //                         "name"       => "CONCRETING WORKS",
-        //                         "totalCost"  => "12,234.43",
-        //                         "totalLabor" => "30,200.50",
-        //                         "items" => [
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                         ],
-        //                         "labors" => [
-        //                             [
-        //                                 "manHours"         => "10",
-        //                                 "overtimeManHours" => "8",
-        //                                 "personnel"        => "M/CARP",
-        //                                 "totalLabor"       => "5000"
-        //                             ],
-        //                             [
-        //                                 "manHours"         => "10",
-        //                                 "overtimeManHours" => "8",
-        //                                 "personnel"        => "M/CARP",
-        //                                 "totalLabor"       => "5000"
-        //                             ],
-        //                         ],
-        //                     ],
-        //                     [
-        //                         "name"       => "CONCRETING WORKS",
-        //                         "totalCost"  => "12,234.43",
-        //                         "totalLabor" => "30,200.50",
-        //                         "items" => [
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                         ],
-        //                         "labors" => [
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                         ],
-        //                     ],
-        //                 ]
-        //             ],
-        //             [
-        //                 "name" => "SATELLITE WAREHOUSE",
-        //                 "totalCost"  => "12,100.34",
-        //                 "totalLabor" => "50,000.00",
-        //                 "milestones" => [
-        //                     [
-        //                         "name"       => "CONCRETING WORKS",
-        //                         "totalCost"  => "12,234.43",
-        //                         "totalLabor" => "30,200.50",
-        //                         "items" => [
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                         ],
-        //                         "labors" => [
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                         ],
-        //                     ],
-        //                     [
-        //                         "name"       => "CONCRETING WORKS",
-        //                         "totalCost"  => "12,234.43",
-        //                         "totalLabor" => "30,200.50",
-        //                         "items" => [
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                             [
-        //                                 "name"        => "Cememt",
-        //                                 "code"        => "ITM-21-00001",
-        //                                 "description" => "Sample Description",
-        //                                 "brand"       => "Branded",
-        //                                 "size"        => "Medium",
-        //                                 "quantity"    => "100",
-        //                                 "unit"        => "Kg",
-        //                                 "unitPrice"   => "500.00",
-        //                                 "totalCost"   => "5000.00",
-        //                             ],
-        //                         ],
-        //                         "labors" => [
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                             [
-        //                                 "manHours"   => "10",
-        //                                 "personnel"  => "M/CARP",
-        //                                 "totalLabor" => "5000"
-        //                             ],
-        //                         ],
-        //                     ],
-        //                 ]
-        //             ],
-        //         ],
-        //         "assets" => [
-        //             [
-        //                 "code"           => "AST-21-00001",
-        //                 "name"           => "Sample Asset Name",
-        //                 "classification" => "Classfic",
-        //                 "unit"           => "Kg",
-        //                 "quantity"       => "10",
-        //                 "manHours"       => "10",
-        //                 "unitCost"       => "10",
-        //                 "totalCost"      => "10",
-        //             ],
-        //             [
-        //                 "code"           => "AST-21-00001",
-        //                 "name"           => "Sample Asset Name",
-        //                 "classification" => "Classfic",
-        //                 "unit"           => "Kg",
-        //                 "quantity"       => "10",
-        //                 "manHours"       => "10",
-        //                 "unitCost"       => "10",
-        //                 "totalCost"      => "10",
-        //             ],
-        //         ],
-        //         "vehicles" => [
-        //             [
-        //                 "code"            => "VHC-21-00001",
-        //                 "name"            => "BMW",
-        //                 "averageFuelType" => "8.00 km/L",
-        //                 "distance"        => "435",
-        //                 "manHours"        => "100",
-        //                 "fuelRate"        => "10",
-        //                 "vehicleRate"     => "10",
-        //                 "totalCost"       => "10",
-        //             ],
-        //             [
-        //                 "code"            => "VHC-21-00001",
-        //                 "name"            => "BMW",
-        //                 "averageFuelType" => "8.00 km/L",
-        //                 "distance"        => "435",
-        //                 "manHours"        => "100",
-        //                 "fuelRate"        => "10",
-        //                 "vehicleRate"     => "10",
-        //                 "totalCost"       => "10",
-        //             ],
-        //         ],
-        //         "others" => [
-        //             [
-        //                 "category"    => "Commute",
-        //                 "description" => "point a to point b",
-        //                 "totalCost"   => "1000",
-        //             ],
-        //             [
-        //                 "category"    => "Commute",
-        //                 "description" => "point a to point b",
-        //                 "totalCost"   => "1000",
-        //             ],
-        //         ]
-        //     ],
-        //     "footer" => [
-        //         "costSummary" => [
-        //             "items" => [
-        //                 [
-        //                     "name" => "Materials",
-        //                     "totalCost" => "63250.00"
-        //                 ],
-        //                 [
-        //                     "name" => "Labor",
-        //                     "totalCost" => "69000"
-        //                 ],
-        //             ],
-        //             "itemTotalCost" => "65953.96",
-        //             "overhead" => [
-        //                 [
-        //                     "name" => "Equipment",
-        //                     "totalCost" => "776.00"
-        //                 ],
-        //                 [
-        //                     "name" => "Travel",
-        //                     "totalCost" => "776.00"
-        //                 ],
-        //             ],
-        //             "contigency"          => "1000",
-        //             "subtotal"            => "10000",
-        //             "markUp"              => "1234",
-        //             "contractPriceVATEX"  => "3023",
-        //             "vat"                 => "123",
-        //             "contractPriceVATINC" => "4213",
-        //         ]
-        //     ]
-
-        // ];
-
         if ($data && count($data) > 0)
         {
             $filename   = $data["filename"] ?? "billMaterials.xlsx";
@@ -1829,6 +1231,14 @@
             $costContractPriceVATEX  = $data["footer"]["costSummary"]["contractPriceVATEX"] ?? "";
             $costVat                 = $data["footer"]["costSummary"]["vat"] ?? "";
             $costContractPriceVATINC = $data["footer"]["costSummary"]["contractPriceVATINC"] ?? "";
+
+            $costItemTotalCost       = stringToDecimal($costItemTotalCost);
+            $costContingency         = stringToDecimal($costContingency);
+            $costSubtotal            = stringToDecimal($costSubtotal);
+            $costMarkUp              = stringToDecimal($costMarkUp);
+            $costContractPriceVATEX  = stringToDecimal($costContractPriceVATEX);
+            $costVat                 = stringToDecimal($costVat);
+            $costContractPriceVATINC = stringToDecimal($costContractPriceVATINC);
 
             $spreadsheet = new Spreadsheet();
             $sheet       = $spreadsheet->getActiveSheet();
@@ -2487,6 +1897,7 @@
 
                         $costName      = $item["name"] ?? "";
                         $costTotalCost = $item["totalCost"] ?? "";
+                        $costTotalCost = stringToDecimal($costTotalCost);
                         
                         $sheet->setCellValue("I$row", strtoupper($costName));
                         $sheet->setCellValue("L$row", $costTotalCost);
@@ -2521,6 +1932,7 @@
 
                         $overheadName      = $item["name"] ?? "";
                         $overheadTotalCost = $item["totalCost"] ?? "";
+                        $overheadTotalCost = stringToDecimal($overheadTotalCost);
                         
                         $sheet->setCellValue("I$row", "          ".strtoupper($overheadName));
                         $sheet->setCellValue("L$row", $overheadTotalCost);
@@ -2635,141 +2047,6 @@
     
     function costSheetExcel($data = [])
     {
-        // $data = [
-        //     "filename" => "costSheet.xlsx",
-        //     "code"     => "CS-21-00001",
-        //     "header" => [
-        //         "clientName"  => "Esquared Universal Company",
-        //         "address"     => "1 Antel global corporate center Barangay I (pob.), Vigan City, Ilocos Sur, Philippines, 1533",
-        //         "projectCode" => "2021-EUC-00002",
-        //         "description" => "for testing purposes only",
-        //         "date"        => "August 31, 2021",
-        //         "referenceNo" => "CEF-21-00003",
-        //         "projectName" => "CCTV Lingsat",
-        //     ],
-        //     "body" => [
-        //         "projectPhase" => [
-        //             [
-        //                 "phaseName" => "Planning Phase I",
-        //                 "itemCost"  => "100",
-        //                 "laborCost" => "100",
-        //                 "totalCost" => "200",
-        //                 "milestone" => [
-        //                     [
-        //                         "name"      => "Site Development Plan",
-        //                         "item"      => "123.56",
-        //                         "labor"     => "300.23",
-        //                         "totalCost" => "423.97"
-        //                     ],
-        //                     [
-        //                         "name"      => "Schedule of Floor",
-        //                         "item"      => "123.56",
-        //                         "labor"     => "300.23",
-        //                         "totalCost" => "423.97"
-        //                     ],
-        //                 ]
-        //             ],
-        //             [
-        //                 "phaseName" => "Planning Phase II",
-        //                 "milestone" => [
-        //                     [
-        //                         "name"      => "Site Development Plan",
-        //                         "item"      => "123.56",
-        //                         "labor"     => "300.23",
-        //                         "totalCost" => "423.97"
-        //                     ],
-        //                     [
-        //                         "name"      => "Schedule of Floor",
-        //                         "item"      => "123.56",
-        //                         "labor"     => "300.23",
-        //                         "totalCost" => "423.97"
-        //                     ],
-        //                     [
-        //                         "name"      => "Schedule of Floor",
-        //                         "item"      => "123.56",
-        //                         "labor"     => "300.23",
-        //                         "totalCost" => "423.97"
-        //                     ],
-        //                 ]
-        //             ],
-        //             [
-        //                 "phaseName" => "Planning Phase III",
-        //                 "milestone" => [
-        //                     [
-        //                         "name"      => "Site Development Plan",
-        //                         "item"      => "123.56",
-        //                         "labor"     => "300.23",
-        //                         "totalCost" => "423.97"
-        //                     ],
-        //                     [
-        //                         "name"      => "Schedule of Floor",
-        //                         "item"      => "123.56",
-        //                         "labor"     => "300.23",
-        //                         "totalCost" => "423.97"
-        //                     ],
-        //                     [
-        //                         "name"      => "Schedule of Floor",
-        //                         "item"      => "123.56",
-        //                         "labor"     => "300.23",
-        //                         "totalCost" => "423.97"
-        //                     ],
-        //                 ]
-        //             ],
-        //         ],
-        //         "assetEquipment" => [
-        //             [
-        //                 "name"      => "OfficeSupplies",
-        //                 "totalCost" => "₱ 8,770.00",
-        //             ],
-        //             [
-        //                 "name"      => "OfficeSupplies",
-        //                 "totalCost" => "₱ 8,770.00",
-        //             ],
-        //             [
-        //                 "name"      => "OfficeSupplies",
-        //                 "totalCost" => "₱ 8,770.00",
-        //             ],
-        //         ],
-        //         "travelTransportation" => [
-        //             [
-        //                 "name"      => "Vehicle",
-        //                 "totalCost" => "₱ 1,650.00",
-        //             ],
-        //             [
-        //                 "name"      => "Vehicle",
-        //                 "totalCost" => "₱ 1,650.00",
-        //             ],
-        //         ]
-        //     ],
-        //     "footer" => [
-        //         "comment" => "",
-        //         "costSummary" => [
-        //             "totalCost"           => "₱ 34,005.00",
-        //             "overhead"            => "₱ 1,700.25",
-        //             "contingency"         => "₱ 1,700.25",
-        //             "subtotal"            => "₱ 37,405.50",
-        //             "markup"              => "₱ 11,221.65",
-        //             "contractPriceVatEx"  => "₱ 48,627.15",
-        //             "vat"                 => "₱ 5,835.26",
-        //             "contractPriceVatInc" => "₱ 54,462.41"
-        //         ],
-        //         "approvers" => [
-        //             [
-        //                 "title"       => "Prepared By Arjay Diangzon",
-        //                 "designation" => "Operations Manager"
-        //             ],
-        //             [
-        //                 "title"       => "Approved By Arjay Diangzon",
-        //                 "designation" => "Operations Manager"
-        //             ],
-        //             [
-        //                 "title"       => "Approved By Arjay Diangzon",
-        //                 "designation" => "Operations Manager"
-        //             ],
-        //         ]
-        //     ]
-        // ];
-
         if ($data && count($data) > 0)
         {
             $filename        = $data["filename"] ?? "download.xlsx";
@@ -2796,7 +2073,15 @@
             $contractPriceVatEx  = $data["footer"]["costSummary"]["contractPriceVatEx"] ?? formatAmount(0);
             $vat                 = $data["footer"]["costSummary"]["vat"] ?? formatAmount(0);
             $contractPriceVatInc = $data["footer"]["costSummary"]["contractPriceVatInc"] ?? formatAmount(0, true);
-            
+
+            $totalCost           = stringToDecimal($totalCost);
+            $overhead            = stringToDecimal($overhead);
+            $contingency         = stringToDecimal($contingency);
+            $subtotal            = stringToDecimal($subtotal);
+            $markup              = stringToDecimal($markup);
+            $contractPriceVatEx  = stringToDecimal($contractPriceVatEx);
+            $vat                 = stringToDecimal($vat);
+            $contractPriceVatInc = stringToDecimal($contractPriceVatInc);
 
             $spreadsheet = new Spreadsheet();
             $sheet       = $spreadsheet->getActiveSheet();

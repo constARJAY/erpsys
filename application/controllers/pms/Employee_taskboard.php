@@ -260,7 +260,7 @@ class Employee_taskboard extends CI_Controller {
               $new_filename                =  "ST-".date('y')."-".$selectedID."-".strtotime("now").$i;
               $config = array(
                 'file_name'     =>$new_filename,
-                'allowed_types' => 'jpg|jpeg|png',
+                'allowed_types' => 'jpg|jpeg|png|docs|doc|docx|xls|xlsx|pdf|csv|webm|mpg|mp2|mpeg|mpe|mpv|mp4|m4p|m4v|avi|wmv|mov|flv',
                 'overwrite'     => true,
                 
                 /* real path to upload folder ALWAYS */
@@ -344,6 +344,7 @@ public function updateEmployeeTaskStatus(){
   //  echo "<pre>";
   //  print_r($_POST);
   //  exit;
+  $label          =  $this->input->post('label');
   $taskBoardID          =  $this->input->post('taskBoardID');
   $subtaskboardID          =  $this->input->post('subtaskboardID');
   $timelineBuilderID          =  $this->input->post('timelineBuilderID');
@@ -351,21 +352,45 @@ public function updateEmployeeTaskStatus(){
   $taskID          =  $this->input->post('taskID');
   $employeeID          =  $this->input->post('employeeID');
   $employeeTaskStatus          =  $this->input->post('employeeTaskStatus');
+  $employeeStartDate          =  $this->input->post('employeeStartDate');
+  $employeeEndDate          =  $this->input->post('employeeEndDate');
+  $employeeManHours          =  $this->input->post('employeeManHours');
+  $employeeUsedHours          =  $this->input->post('employeeUsedHours');
   $sessionID          =  $this->input->post('sessionID');
 
+  if($subtaskboardID != 0){
+    $data = array(
+      "taskboardID" => $taskBoardID,
+      "subtaskboardID" => $subtaskboardID,
+      "timelineBuilderID" => $timelineBuilderID,
+      "projectMilestoneID" => $projectMilestoneID,
+      "taskID" =>$taskID,
+      "employeeID" =>$employeeID,
+      "employeeStartDate" =>$employeeStartDate,
+      "employeeEndDate" =>$employeeEndDate,
+      "employeeManHours" =>$employeeManHours,
+      "employeeUsedHours" =>$employeeUsedHours,
+      "employeeTaskStatus" =>$employeeTaskStatus,
+      "createdBy" =>$sessionID,
+    );
+  }else{
+    $data = array(
+      "taskboardID" => $taskBoardID,
+      "subtaskboardID" => $subtaskboardID,
+      "timelineBuilderID" => $timelineBuilderID,
+      "projectMilestoneID" => $projectMilestoneID,
+      "taskID" =>$taskID,
+      "employeeID" =>$employeeID,
+      "employeeTaskStatus" =>$employeeTaskStatus,
+      "employeeUsedHours" =>$employeeUsedHours,
+      "createdBy" =>$sessionID,
+    );
+  }
 
-  $data = array(
-    "taskboardID" => $taskBoardID,
-    "subtaskboardID" => $subtaskboardID,
-    "timelineBuilderID" => $timelineBuilderID,
-    "projectMilestoneID" => $projectMilestoneID,
-    "taskID" =>$taskID,
-    "employeeID" =>$employeeID,
-    "employeeTaskStatus" =>$employeeTaskStatus,
-    "createdBy" =>$sessionID,
-  );
 
-  $data = $this->employee_taskboard->updateEmployeeTaskStatus($data,$taskBoardID,$subtaskboardID,$employeeID);
+  
+
+  $data = $this->employee_taskboard->updateEmployeeTaskStatus($data,$taskBoardID,$subtaskboardID,$employeeID,$label);
 
     echo json_encode($data);
 }

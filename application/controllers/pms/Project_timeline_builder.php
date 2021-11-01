@@ -49,6 +49,7 @@ class Project_timeline_builder extends CI_Controller {
         $updatedBy                  = $this->input->post("updatedBy");
         $createdAt                  = $this->input->post("createdAt");
         $tasks                      = $this->input->post("tasks") ?? null;
+        $existTimelineDesign        = $this->input->post("existTimelineDesign") ?? null;
 
         $projectCode                = $projectID ? $this->projecttimeline->getClientCount($clientID) : "-";
         
@@ -118,21 +119,49 @@ class Project_timeline_builder extends CI_Controller {
         
         if ($saveTimelineBuilderData) {
             
-            $result = explode("|", $saveTimelineBuilderData);
+            $result     = explode("|", $saveTimelineBuilderData);
            
+            $fileArray  = [];
+            
             if ($result[0] == "true") {
+                
                 $timelineBuilderID = $result[2];
+                // GETTING FILE (BINARY) DATA 
                 if($_FILES){
-                    $fileType                   = substr($_FILES["file"]["type"], strpos($_FILES["file"]["type"], "/") + 1);
-                    $timelineDesign             = "PTB-".date("y")."-".str_pad($timelineBuilderID, 5, '0', STR_PAD_LEFT).".".$fileType;
-                    $updateTimelineBuilderData  = ["timelineDesign" => $timelineDesign];
-                    if(file_exists("assets/upload-files/project-designs/".$timelineDesign)){
-                        unlink("assets/upload-files/project-designs/".$timelineDesign);
-                    }
-                    if(move_uploaded_file($_FILES["file"]["tmp_name"], "assets/upload-files/project-designs/".$timelineDesign)){
-                        $this->projecttimeline->updateTimelineBuilder("pms_timeline_builder_tbl", $updateTimelineBuilderData, "timelineBuilderID = ".$timelineBuilderID);
+                    $files = $_FILES["files"]["name"];
+                    
+                    for ($i=0; $i < count($files) ; $i++) { 
+                        $filesdata      =  $_FILES["files".$i];
+                        $filesname      =   $filesdata["name"];
+
+                        $timelineDesign =   "PTB-".date("y")."-".str_pad($timelineBuilderID, 5, '0', STR_PAD_LEFT)."_".$filesname;
+                        array_push($fileArray, $timelineDesign);
+                        
+                        if(file_exists("assets/upload-files/project-designs/".$timelineDesign)){
+                            unlink("assets/upload-files/project-designs/".$timelineDesign);
+                        }
+
+                        move_uploaded_file($_FILES["files".$i]["tmp_name"], "assets/upload-files/project-designs/".$timelineDesign);
+                       
                     }
                 }
+                // END GETTING FILE (BINARY) DATA 
+
+                // GETTING EXISTING DATA 
+                if($existTimelineDesign){
+                    $existTimelineDesignArr = explode("|", $existTimelineDesign);
+                    for ($i=0; $i < count($existTimelineDesignArr) ; $i++) { 
+                        array_push($fileArray, $existTimelineDesignArr[$i]);
+                    }
+                }
+                // END GETTING EXISTING DATA 
+
+                // UPDATE TABLE - FILE COLUMN 
+                if($fileArray){
+                    $updateTimelineBuilderData  = ["timelineDesign" => join("|", $fileArray)];
+                    $this->projecttimeline->updateTimelineBuilder("pms_timeline_builder_tbl", $updateTimelineBuilderData, "timelineBuilderID = ".$timelineBuilderID);
+                }
+                // END UPDATE TABLE - FILE COLUMN 
                 
 
                 if ($tasks) {
@@ -161,10 +190,6 @@ class Project_timeline_builder extends CI_Controller {
         }
         echo json_encode($saveTimelineBuilderData);
     }
-
-    
-
-
 
 
 

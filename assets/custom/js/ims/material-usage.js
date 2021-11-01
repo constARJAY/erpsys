@@ -3,12 +3,6 @@ $(document).ready(function() {
 	//------ MODULE FUNCTION IS ALLOWED UPDATE-----
 
 	const allowedUpdate = isUpdateAllowed(45);
-	if(!allowedUpdate){
-		$("#page_content").find("input, select, textarea").each(function(){
-			$(this).attr("disabled",true);
-		});
-		$("#btnSubmit").hide();
-	}
 
 	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
 
@@ -218,7 +212,7 @@ function initDataTables() {
             info: false,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 120 },
+                { targets: 0,  width: 200 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 220 },
                 { targets: 3,  width: 250 },
@@ -242,7 +236,7 @@ function initDataTables() {
             scrollX: true,
             scrollCollapse: true,
             columnDefs: [
-				{ targets: 0,  width: 120 },
+				{ targets: 0,  width: 200 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 220 },
                 { targets: 3,  width: 250 },
@@ -333,6 +327,7 @@ function forApprovalContent() {
 		<tbody>`;
 
 	inventoryReceivingData.map((item) => {
+	
 		let {
 			fullname,
 			materialUsageID,
@@ -542,7 +537,8 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 					id="btnSubmit" 
 					materialUsageID="${encryptString(materialUsageID)}"
 					code="${getFormCode("MUF", createdAt, materialUsageID)}"
-					revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
+					revise="${isRevise}" 
+					cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 					Submit
 				</button>`;
 
@@ -820,6 +816,7 @@ function getItemsRow(readOnly = false,materialUsageID) {
 				recordID							= "",
 			} = item;
 			var scopeData ="";
+		
 
 			const buttonAddRow = !readOnly ? `
 				<div class="w-100 text-center">
@@ -921,6 +918,16 @@ function getItemsRow(readOnly = false,materialUsageID) {
 					</td>
 				</tr>`;
 			} else {
+				var totalquantity = 0;
+				if(used =='0.00'){
+					totalquantity = quantity;
+					
+
+				}else{
+					
+					totalquantity = used;
+				}
+				
 				html += `
 				<tr class="itemTableRow"inventoryRequestID="${inventoryRequestID}">
 					<td>
@@ -963,7 +970,7 @@ function getItemsRow(readOnly = false,materialUsageID) {
 					</div>
 					</td>
 					<td class="text-center">
-						<div class="used" id="used${index}" name="used">${used || "0.00"}</div>
+						<div class="used" id="used${index}" name="used">${totalquantity || "0.00"}</div>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}
@@ -1001,9 +1008,11 @@ $(document).on("keyup change", ".unused", function() {
 	var quantity  = $(`#quantity${count}`).text().replaceAll(",","");
 	var totalQuantity = parseInt(quantity);
 	var val = $(this).val().replaceAll(",","");
+	var totalformatquantity = parseInt(quantity) ? quantity : '0.00';
+	var totalval = parseInt(val) ? val : '0.00';
 
 	var totalReceived = parseInt(val);
-	var used = parseFloat(quantity) - parseFloat(val);
+	var used = parseFloat(totalformatquantity) - parseFloat(totalval);
 	var formatdecimalused = parseFloat(used).toFixed(2);
 	$(`#used${count}`).text(formatdecimalused);
 	var flag = ["true"];
@@ -1146,10 +1155,11 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
 	readOnly ? preventRefresh(false) : preventRefresh(true);
 
-	$("#btnBack").attr("materialUsageID", materialUsageID);
+	$("#btnBack").attr("materialUsageID", encryptString(materialUsageID));
 	$("#btnBack").attr("status", materialUsageStatus);
 	$("#btnBack").attr("employeeID", employeeID);
 	$("#btnBack").attr("cancel", isFromCancelledDocument);
+	$("#btnBack").attr("materialUsageCode", getFormCode("MUF", dateToday(), materialUsageID));
 
 	let disabled = readOnly ? "disabled" : "";
 	//let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
@@ -1487,12 +1497,16 @@ function getMaterialUsageData(action = "insert", method = "submit", status = "1"
 		data["stockOutID"]			 				= $("[name=projectCode]").attr("stockOutID");
 		data["projectName"]			 				= $("[name=projectName]").val();
 		data["projectCategory"]			 			= $("[name=projectCategory]").val();
-		data["clientCode"]			 	= $("[name=clientCode]").val();
-		data["clientName"]			 	= $("[name=clientName]").val();
-		data["clientAddress"]	 	 	= $("[name=clientAddress]").val();
-		data["materialUsageDate"]	 	= $("[name=materialUsageDate]").val();
-		data["materialUsageReason"] 	= $("[name=materialUsageReason]").val()?.trim();
-		data["materialWithdrawalCode"] 	= $("[name=materialWithdrawalCode]").val();
+		data["clientCode"]			 				= $("[name=clientCode]").val();
+		data["clientName"]			 				= $("[name=clientName]").val();
+		data["clientAddress"]	 	 				= $("[name=clientAddress]").val();
+		data["materialUsageDate"]	 				= $("[name=materialUsageDate]").val();
+		data["materialUsageReason"] 				= $("[name=materialUsageReason]").val()?.trim();
+		data["materialWithdrawalCode"] 				= $("[name=materialWithdrawalCode]").val();
+		const dateNeeded 							= $(`[name="materialUsageDate"]`).val();
+
+
+		
 	
 
 		formData.append("employeeID", sessionID);
@@ -1502,7 +1516,8 @@ function getMaterialUsageData(action = "insert", method = "submit", status = "1"
 		formData.append("clientCode", $("[name=clientCode]").val()?.trim());
 		formData.append("clientName", $("[name=clientName]").val()?.trim());
 		formData.append("clientAddress", $("[name=clientAddress]").val()?.trim());
-		formData.append("materialUsageDate", $("[name=materialUsageDate]").val()?.trim());
+		formData.append("materialUsageDate", moment(dateNeeded).format("YYYY-MM-DD"));
+		//formData.append("materialUsageDate", $("[name=materialUsageDate]").val()?.trim());
 		formData.append("materialUsageReason", $("[name=materialUsageReason]").val()?.trim());
 		formData.append("materialWithdrawalCode", $("[name=materialWithdrawalCode]").val()?.trim());
 		formData.append("materialWithdrawalID", $("[name=materialWithdrawalCode]").attr("materialWithdrawalID"));
@@ -1665,72 +1680,57 @@ $(document).on("click", ".btnView", function () {
 $(document).on("click", "#btnRevise", function () {
 	const id = $(this).attr("materialUsageID");
 	const fromCancelledDocument = $(this).attr("cancel") == "true";
-	viewDocument(id, false, true, fromCancelledDocument);
+	$("#page_content").html(preloader);
+	setTimeout(() => {
+		viewDocument(id, false, true, fromCancelledDocument);
+	}, 10);
+	//viewDocument(id, false, true, fromCancelledDocument);
 });
 // ----- END VIEW DOCUMENT -----
 
 
 // ----- SAVE CLOSE FORM -----
 $(document).on("click", "#btnBack", function () {
-	const id         = $(this).attr("materialUsageID");
-	const isFromCancelledDocument = $(this).attr("cancel") == "true";
-	const revise     = $(this).attr("revise") == "true";
-	const employeeID = $(this).attr("employeeID");
-	const feedback   = $(this).attr("code") || getFormCode("MUF", dateToday(), id);
-	const status     = $(this).attr("status");
+	const id         = decryptString($(this).attr("materialUsageID"));
+		const code       = $(this).attr("materialUsageCode");
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise     = $(this).attr("revise") == "true";
+		const employeeID = $(this).attr("employeeID");
+		const status     = $(this).attr("status");
 
-	if (status != "false" && status != 0) {
-		
-		if (revise) {
-			// const action = revise && "insert" || (id && feedback ? "update" : "insert");
-			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-			const data   = getMaterialUsageData(action, "save", "0", id);
-			
-			data["materialUsageStatus"]   = 0;
-			data.append("materialUsageStatus", 0);
-			
-			// data["reviseMaterialUsageID"] = id;
+		if (status && status != 0) {
+			if (revise) {
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getMaterialUsageData(action, "save", "0", id);
+				data.append("materialUsageStatus", 0);
+				if (!isFromCancelledDocument) {
+					data.append("reviseMaterialUsageID ", id);
+					data.delete("materialUsageID");
+				} else {
+					data.append("materialUsageID", id);
+					data.delete("action");
+					data.append("action", "update");
+				}
 
-			// delete data["materialUsageID"];
-
-			if (!isFromCancelledDocument) {
-				data["reviseMaterialUsageID"] = id;
-				data.append("reviseMaterialUsageID", id);
-
-				delete data["materialUsageID"];
-
-				// data.append("reviseMaterialUsageID", id);
-				// data.delete("materialUsageID");
+				saveMaterialUsage(data, "save", null, pageContent, code);
 			} else {
-				// delete data["materialUsageID"];
-
-				data["materialUsageID"] = id;
-				delete data["action"];
-				data["action"] = update;
-
-				// data.append("materialUsageID", id);
-				// data.delete("action");
-				// data.append("action", "update");
+				$("#page_content").html(preloader);
+				pageContent();
+	
+				if (employeeID != sessionID) {
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+				}
 			}
 
-			saveMaterialUsage(data, "save", null, pageContent);
 		} else {
-			$("#page_content").html(preloader);
-			pageContent();
+			const action = id ? "update" : "insert";
+			const data   = getMaterialUsageData(action, "save", "0", id);
+			data.append("materialUsageStatus", 0);
 
-			if (employeeID != sessionID) {
-				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-			}
+			saveMaterialUsage(data, "save", null, pageContent, code);
 		}
 
-	} else {
-		const action = id && feedback ? "update" : "insert";
-		const data   = getMaterialUsageData(action, "save", "0", id);
-		data["materialUsageStatus"] = 0;
-		// data.append("materialUsageStatus", 0);
-
-		saveMaterialUsage(data, "save", null, pageContent);
-	}
+	
 });
 // ----- END SAVE CLOSE FORM -----
 
@@ -1745,30 +1745,17 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("MUF", dateToday(), id);
-		//const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getMaterialUsageData(action, "save", "0", id);
 		//data["materialUsageStatus"] = 0;
 		data.append("materialUsageStatus", 0);
 		
 		if (revise) {
-			// data["reviseMaterialUsageID"] = id;
-			// delete data["materialUsageID"];
-
 			if (!isFromCancelledDocument) {
-				// data["reviseMaterialUsageID"] = id;
-				// delete data["materialUsageID"];
-
 				data.append("reviseMaterialUsageID", id);
-				data.delete("materialUsageID");
+				data.delete("materialUsageID ");
 			} else {
-				// delete data["materialUsageID"];
-
-				// data["materialUsageID"] = id;
-				// delete data["action"];
-				// data["action"] = update;
-
-				data.append("materialUsageID", id);
+				data.append("materialUsageID ", id);
 				data.delete("action");
 				data.append("action", "update");
 			}
@@ -2106,12 +2093,12 @@ $(document).on("click", "#btnRejectConfirmation", function () {
 
 // ----- DROP DOCUMENT -----
 $(document).on("click", "#btnDrop", function() {
-	const materialUsageID = decryptString($(this).attr("materialUsageID"));
-	const feedback          = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+	//const materialUsageID = decryptString($(this).attr("materialUsageID"));
+	const feedback          = $(this).attr("code") || getFormCode("MUF", dateToday(), id);
 
 	const id = decryptString($(this).attr("materialUsageID"));
 	let data = new FormData;
-	data.append("materialUsageID", materialUsageID);
+	data.append("materialUsageID", id);
 	data.append("action", "update");
 	data.append("method", "drop");
 	data.append("updatedBy", sessionID);

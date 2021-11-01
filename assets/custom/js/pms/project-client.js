@@ -1,152 +1,147 @@
 
 $(document).ready(function(){
+    const allowedUpdate = isUpdateAllowed(12);
 
 
-    //------ MODULE FUNCTION IS ALLOWED UPDATE-----
-	
-	const allowedUpdate = isUpdateAllowed(12);
-	if(!allowedUpdate){
-		$("#modalProjectClientContent").find("input, select, textarea").each(function(){
-			$(this).attr("disabled",true);
-		});
-		$("#btnUpdate").hide();
-	}
+    let oldContractFilename = [], newContractFilename = [], newContractFiles = [];
+    let oldJobOrderFilename = [], newJobOrderFilename = [], newJobOrderFiles = [];
+    let oldLetterFilename = [], newLetterFilename = [], newLetterFiles = [];
 
-	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
+
     // ----- GET PHILIPPINE ADDRESSES -----
- const getPhAddresses = () => {
-    let result = [];
-    $.ajax({
-        method: "GET",
-        url: `${base_url}assets/json/ph-address.json`,
-        async: false,
-        dataType: "json",
-        success: function (data) {
-            result = data;
-        },
-    });
-    return result;
-};
-const address = getPhAddresses();
+    const getPhAddresses = () => {
+        let result = [];
+        $.ajax({
+            method: "GET",
+            url: `${base_url}assets/json/ph-address.json`,
+            async: false,
+            dataType: "json",
+            success: function (data) {
+                result = data;
+            },
+        });
+        return result;
+    };
+    const address = getPhAddresses();
 
-const phRegion = [
-    { key: "01",    name: "REGION I" },
-    { key: "02",    name: "REGION II" },
-    { key: "03",    name: "REGION III" },
-    { key: "4A",    name: "REGION IV-A" },
-    { key: "4B",    name: "REGION IV-B" },
-    { key: "05",    name: "REGION V" },
-    { key: "06",    name: "REGION VI" },
-    { key: "07",    name: "REGION VII" },
-    { key: "08",    name: "REGION VIII" },
-    { key: "09",    name: "REGION IX" },
-    { key: "10",    name: "REGION X" },
-    { key: "11",    name: "REGION XI" },
-    { key: "12",    name: "REGION XII" },
-    { key: "13",    name: "REGION XIII" },
-    { key: "BARMM", name: "BARMM" },
-    { key: "CAR",   name: "CAR" },
-    { key: "NCR",   name: "NCR" },
-];
+    const phRegion = [
+        { key: "01",    name: "REGION I" },
+        { key: "02",    name: "REGION II" },
+        { key: "03",    name: "REGION III" },
+        { key: "4A",    name: "REGION IV-A" },
+        { key: "4B",    name: "REGION IV-B" },
+        { key: "05",    name: "REGION V" },
+        { key: "06",    name: "REGION VI" },
+        { key: "07",    name: "REGION VII" },
+        { key: "08",    name: "REGION VIII" },
+        { key: "09",    name: "REGION IX" },
+        { key: "10",    name: "REGION X" },
+        { key: "11",    name: "REGION XI" },
+        { key: "12",    name: "REGION XII" },
+        { key: "13",    name: "REGION XIII" },
+        { key: "BARMM", name: "BARMM" },
+        { key: "CAR",   name: "CAR" },
+        { key: "NCR",   name: "NCR" },
+    ];
 
-const getRegionName = (regionKey = "01") => {
-    let region = phRegion.filter(item => {
-        if (item.key == regionKey) {
-            return item;
+    const getRegionName = (regionKey = "01") => {
+        let region = phRegion.filter(item => {
+            if (item.key == regionKey) {
+                return item;
+            }
+        });
+        return region.length > 0 ? region[0].name : "";
+    }
+
+    function getRegionOptions(regionKey = false) {
+        let html = "";
+        phRegion.map(item => {
+            html += `<option value="${item.key}" ${regionKey == item.key && "selected"}>${item.name}</option>`;
+        })
+        return html;
+    }
+
+    function getProvinceOptions(provinceKey = false, region = "01", doEmpty = false) {
+        let html = `<option value="" selected>Select Province</option>`;
+        if (!doEmpty) {
+            const provinceList = region && Object.keys(address[region].province_list);
+            provinceList && provinceList.map(item => {
+                html += `<option value="${item}" ${provinceKey == item && "selected"}>${item}</option>`;
+            })
         }
-    });
-    return region.length > 0 ? region[0].name : "";
-}
-
-function getRegionOptions(regionKey = false) {
-    let html = "";
-    phRegion.map(item => {
-        html += `<option value="${item.key}" ${regionKey == item.key && "selected"}>${item.name}</option>`;
-    })
-    return html;
-}
-
-function getProvinceOptions(provinceKey = false, region = "01", doEmpty = false) {
-    let html = `<option value="" selected>Select Province</option>`;
-    if (!doEmpty) {
-        const provinceList = region && Object.keys(address[region].province_list);
-        provinceList && provinceList.map(item => {
-            html += `<option value="${item}" ${provinceKey == item && "selected"}>${item}</option>`;
-        })
-    }
-    return html;
-}
-
-function getMunicipalityOptions(municipalityKey = false, region = "01", province = "ILOCOS NORTE", doEmpty = false) {
-    let html = `<option value="" selected>Select City/Municipality</option>`;
-    if (!doEmpty) {
-        const municipalityList = region && province && Object.keys(address[region].province_list[province].municipality_list);
-        municipalityList && municipalityList.map(item => {
-            html += `<option value="${item}" ${municipalityKey == item && "selected"}>${item}</option>`;
-        })
-    }
-    return html;
-}
-
-function getBarangayOptions(barangayKey = false, region = "01", province = "ILOCOS NORTE", city = "ADAMS", doEmpty = false) {
-    let html = `<option value="" selected>Select Barangay</option>`;
-    if (!doEmpty) {
-        const barangayList = region && region && province && address[region].province_list[province].municipality_list[city].barangay_list;
-        barangayList && barangayList.map(item => {
-            html += `<option value="${item}" ${barangayKey == item && "selected"}>${item}</option>`;
-        })
-    }
-    return html;
-}
-
-$(document).on("change", "[name=clientRegion]", function() {
-    const region = $(this).val();
-
-    if (region) {
-        const provinceOptions = getProvinceOptions(false, region);
-        $("[name=clientProvince]").html(provinceOptions);
-    } else {
-        const provinceOptions = getProvinceOptions(false, "", true);
-        $("[name=clientProvince]").html(provinceOptions);
+        return html;
     }
 
-    const municipality = getMunicipalityOptions(false, "", "", true);
-    $("[name=clientCity]").html(municipality); 
-
-    const barangay = getBarangayOptions(false, "", "", "", true);
-    $("[name=clientBarangay]").html(barangay);
-})
-
-$(document).on("change", "[name=clientProvince]", function() {
-    const region   = $("[name=clientRegion]").val();
-    const province = $(this).val();
-    
-    if (province) {
-        const municipalityOptions = getMunicipalityOptions(false, region, province);
-        $("[name=clientCity]").html(municipalityOptions);
-    } else {
-        const municipalityOptions = getMunicipalityOptions(false, "", "", true);
-        $("[name=clientCity]").html(municipalityOptions);
+    function getMunicipalityOptions(municipalityKey = false, region = "01", province = "ILOCOS NORTE", doEmpty = false) {
+        let html = `<option value="" selected>Select City/Municipality</option>`;
+        if (!doEmpty) {
+            const municipalityList = region && province && Object.keys(address[region].province_list[province].municipality_list);
+            municipalityList && municipalityList.map(item => {
+                html += `<option value="${item}" ${municipalityKey == item && "selected"}>${item}</option>`;
+            })
+        }
+        return html;
     }
 
-    const barangay = getBarangayOptions(false, "", "", "", true);
-    $("[name=clientBarangay]").html(barangay);
-})
+    function getBarangayOptions(barangayKey = false, region = "01", province = "ILOCOS NORTE", city = "ADAMS", doEmpty = false) {
+        let html = `<option value="" selected>Select Barangay</option>`;
+        if (!doEmpty) {
+            const barangayList = region && region && province && address[region].province_list[province].municipality_list[city].barangay_list;
+            barangayList && barangayList.map(item => {
+                html += `<option value="${item}" ${barangayKey == item && "selected"}>${item}</option>`;
+            })
+        }
+        return html;
+    }
 
-$(document).on("change", "[name=clientCity]", function() {
-    const region   = $("[name=clientRegion]").val();
-    const province = $("[name=clientProvince]").val();
-    const city     = $(this).val();
+    $(document).on("change", "[name=clientRegion]", function() {
+        const region = $(this).val();
 
-    if (city) {
-        const barangay = getBarangayOptions(false, region, province, city);
-        $("[name=clientBarangay]").html(barangay);
-    } else {
+        if (region) {
+            const provinceOptions = getProvinceOptions(false, region);
+            $("[name=clientProvince]").html(provinceOptions);
+        } else {
+            const provinceOptions = getProvinceOptions(false, "", true);
+            $("[name=clientProvince]").html(provinceOptions);
+        }
+
+        const municipality = getMunicipalityOptions(false, "", "", true);
+        $("[name=clientCity]").html(municipality); 
+
         const barangay = getBarangayOptions(false, "", "", "", true);
         $("[name=clientBarangay]").html(barangay);
-    }
-})
-// ----- END GET PHILIPPINE ADDRESSES -----
+    })
+
+    $(document).on("change", "[name=clientProvince]", function() {
+        const region   = $("[name=clientRegion]").val();
+        const province = $(this).val();
+        
+        if (province) {
+            const municipalityOptions = getMunicipalityOptions(false, region, province);
+            $("[name=clientCity]").html(municipalityOptions);
+        } else {
+            const municipalityOptions = getMunicipalityOptions(false, "", "", true);
+            $("[name=clientCity]").html(municipalityOptions);
+        }
+
+        const barangay = getBarangayOptions(false, "", "", "", true);
+        $("[name=clientBarangay]").html(barangay);
+    })
+
+    $(document).on("change", "[name=clientCity]", function() {
+        const region   = $("[name=clientRegion]").val();
+        const province = $("[name=clientProvince]").val();
+        const city     = $(this).val();
+
+        if (city) {
+            const barangay = getBarangayOptions(false, region, province, city);
+            $("[name=clientBarangay]").html(barangay);
+        } else {
+            const barangay = getBarangayOptions(false, "", "", "", true);
+            $("[name=clientBarangay]").html(barangay);
+        }
+    })
+    // ----- END GET PHILIPPINE ADDRESSES -----
 
 
 
@@ -198,7 +193,6 @@ $(document).on("change", "[name=clientCity]", function() {
                 $("#table_content").html(preloader);
             },
             success: function(data) {
-                console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover nowrap" id="tableProjectClient">
                     <thead>
@@ -282,9 +276,13 @@ $(document).on("change", "[name=clientCity]", function() {
     tableContent();
     // ----- END TABLE CONTENT -----
 
-     // ----- MODAL CONTENT -----
-     function modalContent(data = false) {
-         
+
+    // ----- MODAL CONTENT -----
+    function modalContent(data = false) {
+        oldContractFilename = [], newContractFilename = [], newContractFiles = [];
+        oldJobOrderFilename = [], newJobOrderFilename = [], newJobOrderFiles = [];
+        oldLetterFilename = [], newLetterFilename = [], newLetterFiles = [];
+            
         let {
             clientID                = "",
             clientName              = "",
@@ -315,7 +313,7 @@ $(document).on("change", "[name=clientCity]", function() {
         <button 
             class="btn btn-update px-5 p-2" 
             id="btnUpdate" 
-            rowID="${clientID}"><i class="fas fa-save"></i>
+            clientID="${clientID}"><i class="fas fa-save"></i>
             Update
         </button>` : `
         <button class="btn btn-save px-5 p-2" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
@@ -506,7 +504,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientTin"></div>
                         </div>
                     </div>
-                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Mobile No. <code>*</code></label>
                                 <input 
@@ -523,7 +521,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientMobileNo"></div>
                         </div>
                     </div>
-                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Telephone No. <code>*</code></label>
                                 <input type="text" 
@@ -537,6 +535,57 @@ $(document).on("change", "[name=clientCity]", function() {
                                 required="" 
                                 value="${clientTelephoneNo}">
                             <div class="invalid-feedback d-block" id="invalid-input_clientTelephoneNo"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Contract</label>
+                            <input 
+                                type="file" 
+                                class="form-control file" 
+                                name="clientContract" 
+                                id="clientContract"
+                                file="${clientContract}"
+                                multiple="multiple"
+                                fileClassification="contract"
+                                autocomplete="off">
+                            <div class="row display-image-parent" id="displayFileContract">
+                                ${displayFile("contract", clientContract)}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Job Order</label>
+                            <input 
+                                type="file" 
+                                class="form-control file" 
+                                name="clientJobOrder|clients" 
+                                id="clientJobOrder"
+                                file="${clientJobOrder}"
+                                multiple="multiple"
+                                fileClassification="jobOrder"
+                                autocomplete="off">
+                            <div class="row display-image-parent" id="displayFileJobOrder">
+                                ${displayFile("jobOrder", clientJobOrder)}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Engagement Letter</label>
+                            <input 
+                                type="file" 
+                                class="form-control file" 
+                                name="clientEngagementLetter|clients" 
+                                id="clientEngagementLetter"
+                                file="${clientEngagementLetter}"
+                                multiple="multiple"
+                                fileClassification="letter"
+                                autocomplete="off">
+                            <div class="row display-image-parent" id="displayFileLetter">
+                                ${displayFile("letter", clientEngagementLetter)}
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
@@ -555,52 +604,6 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientBrandName"></div>
                         </div>
                     </div>
-                    <div class="col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Contract</label>
-                            <input 
-                                type="file" 
-                                class="form-control file" 
-                                name="clientContract|clients" 
-                                id="clientContract"
-                                file="${clientContract}"
-                                autocomplete="off">
-                            <div class="display-image displayfile" id="displayContract" style="display: ${clientContract ? "block" : "none"}">
-                                ${clientContract ? getFileDisplay(clientContract) : ""}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Job Order</label>
-                            <input 
-                                type="file" 
-                                class="form-control file" 
-                                name="clientJobOrder|clients" 
-                                id="clientJobOrder"
-                                file="${clientJobOrder}"
-                                autocomplete="off">
-                            <div class="display-image displayfile" id="displayJobOrder" style="display: ${clientJobOrder ? "block" : "none"}">
-                                ${clientJobOrder ? getFileDisplay(clientJobOrder) : ""}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Engagement Letter</label>
-                            <input 
-                                type="file" 
-                                class="form-control file" 
-                                name="clientEngagementLetter|clients" 
-                                id="clientEngagementLetter"
-                                file="${clientEngagementLetter}"
-                                autocomplete="off">
-                            <div class="display-image displayfile" id="displayJobOrder" style="display: ${clientEngagementLetter ? "block" : "none"}">
-                                ${clientEngagementLetter ? getFileDisplay(clientEngagementLetter) : ""}
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Status <code>*</code></label>
@@ -627,68 +630,159 @@ $(document).on("change", "[name=clientCity]", function() {
                 <button class="btn btn-cancel btnCancel px-5 p-2"><i class="fas fa-ban"></i> Cancel</button>
             </div>`;
 
-    
+
         return html;
     } 
     // ----- END MODAL CONTENT ----
 
     
     // ----- CHOOSE FILE -----
-    function getFileDisplay(filename = null, link = true) {
-        let text = link ? `
-        <a class="display-image-filename" title="${filename}" style="display: block;
-            width: 90%;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;" 
-            href="${base_url}assets/upload-files/clients/${filename}" target="_blank">
-            ${filename}
-        </a>` : `
-        <span class="display-image-filename" title="${filename}" style="display: block;
-            width: 90%;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;">
-            ${filename}
-        </span>`;
+    function displayFile(fileClassification = "", file = null, blob = "", link = true, oldFiles = true) {
+        let html = ``;
+        if (file && file != null && file != "null") {
+			let fileArr = file.split("|");
+			fileArr.forEach(cliFile => {
+                if (oldFiles && fileClassification) {
+                    if (fileClassification == "contract") {
+                        oldContractFilename.push(cliFile);
+                    } else if (fileClassification == "jobOrder") {
+                        oldJobOrderFilename.push(cliFile);
+                    } else if (fileClassification == "letter") {
+                        oldLetterFilename.push(cliFile);
+                    }
+                }
+				
+				let fileType = cliFile.split(".");
+					fileType = fileType[fileType.length-1].toLowerCase();
+				let imageExtensions = ["jpg", "png", "jpeg", "gif"];
+                let isFileImage = imageExtensions.includes(fileType);
+				let targetAttr = isFileImage ? `display="true" blob="${blob}"` : 
+                    (oldFiles ? `target="_blank"` : "");
 
-        let html = `
-        <div class="d-flex justify-content-start align-items-center p-0">
-            <span class="display-image-remove btnRemoveFile pr-2"><i class="fas fa-close"></i></span>
-            ${text}
-        </div>`;
-
+				let otherAttr = link && oldFiles ? `
+				href="${base_url+"assets/upload-files/project-client/"+cliFile}"` : `href="javascript:void(0)"`;
+				html += `
+				<div class="col-md-4 col-sm-12 display-image-content">
+					<div class="display-image">
+						<div class="d-flex justify-content-start align-items-center p-0">
+							<span class="btnRemoveFile pr-2 display-image-remove"
+								filename="${cliFile}"
+                                fileClassification="${fileClassification}">
+								<i class="fas fa-close"></i>
+							</span>
+							<a class="filename display-image-filename"
+								title="${cliFile}"
+								${otherAttr}
+                                ${targetAttr}>
+								${cliFile}
+							</a>
+						</div>
+					</div>
+				</div>`;
+			})
+        }
         return html;
     }
 
+
     $(document).on("change", `[type="file"]`, function() {
+        const fileClassification = $(this).attr("fileClassification");
         $parent = $(this).closest(".form-group");
 
-        if (this.files && this.files[0]) {
-            const filesize = this.files[0].size/1024/1024; // Size in MB
-            const filetype = this.files[0].type;
-            const filename = this.files[0].name;
-            if (filesize > 10) {
-                $(this).val("");
-                showNotification("danger", "File size must be less than or equal to 10mb");
-            } else {
-                $parent.find(`[type="file"]`).attr("file", filename);
-                $parent.find(`.displayfile`).css("display", "block");
-                $parent.find(".displayfile").html(getFileDisplay(filename, false));
-            }
+        let countFiles = 0;
+        if (fileClassification == "contract") {
+            countFiles = oldContractFilename.length + newContractFilename.length;
+        } else if (fileClassification == "jobOrder") {
+            countFiles = oldJobOrderFilename.length + newJobOrderFilename.length;
+        } else if (fileClassification == "letter") {
+            countFiles = oldLetterFilename.length + newLetterFilename.length;
+        }
+
+		if (this.files && this.files[0]) {
+			let files = this.files;
+			let filesLength = this.files.length;
+			for (var i=0; i<filesLength; i++) {
+				countFiles++;
+
+				const filesize = files[i].size/1024/1024; // Size in MB
+				const filetype = files[i].type;
+				const filename = files[i].name;
+                const fileArr  = filename.split(".");
+				const name     = fileArr?.[0];
+				const type     = fileArr?.[fileArr.length-1]?.toLowerCase();
+				const displayName = `${name}${countFiles}.${type}`;
+				if (filesize > 10) {
+					showNotification("danger", `${filename} - File size must be less than or equal to <b>10mb</b>`);
+				} else if (!["png", "jpg", "jpeg", "doc", "docx", "pdf"].includes(type)) {
+					showNotification("danger", `${filename} - <b>Invalid file type</b>`);
+				} else {
+                    let blob = URL.createObjectURL(files[i]);
+
+                    if (fileClassification == "contract") {
+                        newContractFilename.push(displayName);
+                        newContractFiles.push(files[i]);
+                        $(`#displayFileContract`).append(displayFile(fileClassification, displayName, blob, true, false));
+                    } else if (fileClassification == "jobOrder") {
+                        newJobOrderFilename.push(displayName);
+                        newJobOrderFiles.push(files[i]);
+                        $(`#displayFileJobOrder`).append(displayFile(fileClassification, displayName, blob, true, false));
+                    } else if (fileClassification == "letter") {
+                        newLetterFilename.push(displayName);
+                        newLetterFiles.push(files[i]);
+                        $(`#displayFileLetter`).append(displayFile(fileClassification, displayName, blob, true, false));
+                    }
+				}
+			}
+			$(this).val("");
         }
     })
     // ----- END CHOOSE FILE -----
 
 
+    // ----- MODAL IMAGE -----
+	$(document).on("click", `.display-image-filename`, function(e) {
+		let display = $(this).attr("display") == "true";
+		let source  = $(this).attr("blob") || $(this).attr("href");
+		if (display) {
+			e.preventDefault();
+			$("#display-image-preview").attr("src", source);
+			$("#display-image-modal").modal("show");
+		}
+	})
+	// ----- END MODAL IMAGE -----
+
+
     // ----- REMOVE FILE -----
     $(document).on("click", `.btnRemoveFile`, function() {
-        $parent = $(this).closest(".form-group");
+        const filename           = $(this).attr("filename");
+        const fileClassification = $(this).attr("fileClassification");
+        if (fileClassification == "contract") {
+            const newFileIndex = newContractFilename.indexOf(filename);
+            const oldFileIndex = oldContractFilename.indexOf(filename);
 
-        $parent.find(`[type="file"]`).val("");
-        $parent.find(`[type="file"]`).removeAttr("file");
-        $parent.find(".displayfile").children().remove();
-        $parent.find(`.displayfile`).css("display", "none");
+            newFileIndex != -1 && newContractFilename.splice(newFileIndex, 1);
+            newFileIndex != -1 && newContractFiles.splice(newFileIndex, 1);
+            oldFileIndex != -1 && oldContractFilename.splice(oldFileIndex, 1);
+        } else if (fileClassification == "jobOrder") {
+            const newFileIndex = newJobOrderFilename.indexOf(filename);
+            const oldFileIndex = oldJobOrderFilename.indexOf(filename);
+
+            newFileIndex != -1 && newJobOrderFilename.splice(newFileIndex, 1);
+            newFileIndex != -1 && newJobOrderFiles.splice(newFileIndex, 1);
+            oldFileIndex != -1 && oldJobOrderFilename.splice(oldFileIndex, 1);
+        } else if (fileClassification == "letter") {
+            const newFileIndex = newLetterFilename.indexOf(filename);
+            const oldFileIndex = oldLetterFilename.indexOf(filename);
+
+            newFileIndex != -1 && newLetterFilename.splice(newFileIndex, 1);
+            newFileIndex != -1 && newLetterFiles.splice(newFileIndex, 1);
+            oldFileIndex != -1 && oldLetterFilename.splice(oldFileIndex, 1);
+        }
+
+        $display = $(this).closest(".display-image-content");
+		$display.fadeOut(500, function() {
+			$display.remove();
+		})
     })
     // ----- END REMOVE FILE -----
 
@@ -707,11 +801,36 @@ $(document).on("change", "[name=clientCity]", function() {
     // ----- END OPEN ADD MODAL -----
 
 
+    // ----- CHECK FILE LENGTH -----
+	function checkFileLength() {
+        let flag = true;
+		let countContract = oldContractFilename.length + newContractFilename.length;
+		let countJobOrder = oldJobOrderFilename.length + newJobOrderFilename.length;
+		let countLetter   = oldLetterFilename.length + newLetterFilename.length;
+
+		if (countContract > 5) {
+			showNotification("danger", "Only 5 files are allowed to upload in Contract");
+			flag = false;
+		}
+		if (countJobOrder > 5) {
+			showNotification("danger", "Only 5 files are allowed to upload in Job Order");
+			flag = false;
+		}
+		if (countLetter > 5) {
+			showNotification("danger", "Only 5 files are allowed to upload in Engagement Letter");
+			flag = false;
+		}
+		return flag;
+	}
+	// ----- END CHECK FILE LENGTH -----
+
+
     // ----- SAVE MODAL -----
     $(document).on("click", "#btnSave", function() {
         const validate = validateForm("modalProjectClient");
-        if (validate) {
+        const validateFileLength = checkFileLength();
 
+        if (validate && validateFileLength) {
             let data = getFormData("modalProjectClient");
             data.append(`tableData[clientCode]`, generateCode("CLT", false, "pms_client_tbl", "clientCode"));
             data.append(`tableData[createdBy]`, sessionID);
@@ -719,14 +838,39 @@ $(document).on("change", "[name=clientCity]", function() {
             data.append(`tableName`, `pms_client_tbl`);
             data.append(`feedback`, $("[name=clientName]").val()?.trim());
 
-            const clientContract = $("#clientContract").attr("file");
-            const clientJobOrder = $("#clientJobOrder").attr("file");
-            const clientEngagementLetter = $("#clientEngagementLetter").attr("file");
-            !clientContract && data.append(`tableData[clientContract]`, "");
-            !clientJobOrder && data.append(`tableData[clientJobOrder]`, "");
-            !clientEngagementLetter && data.append(`tableData[clientEngagementLetter]`, "");
+            // ----- FILES -----
+			data.append("uploadFileFolder", "project-client");
+			data.append("uploadFileColumnName[0]", "clientContract");
+			data.append("uploadFileNewFilename[0]", newContractFilename.join("|"));
+			data.append("uploadFileOldFilename[0]", oldContractFilename.join("|"));
+			newContractFiles.map((file, index) => {
+				data.append(`uploadFiles[0][${index}]`, file);
+			})
+			data.append("uploadFileFolder", "project-client");
+			data.append("uploadFileColumnName[1]", "clientJobOrder");
+			data.append("uploadFileNewFilename[1]", newJobOrderFilename.join("|"));
+			data.append("uploadFileOldFilename[1]", oldJobOrderFilename.join("|"));
+			newJobOrderFiles.map((file, index) => {
+				data.append(`uploadFiles[1][${index}]`, file);
+			})
+			data.append("uploadFileFolder", "project-client");
+			data.append("uploadFileColumnName[2]", "clientEngagementLetter");
+			data.append("uploadFileNewFilename[2]", newLetterFilename.join("|"));
+			data.append("uploadFileOldFilename[2]", oldLetterFilename.join("|"));
+			newLetterFiles.map((file, index) => {
+				data.append(`uploadFiles[2][${index}]`, file);
+			})
+			// ----- FILES -----
 
-            sweetAlertConfirmation("add", "Client", "modalProjectClient", null, data, false, tableContent);
+            sweetAlertConfirmation(
+                "add", 
+                "Client", 
+                "modalProjectClient", 
+                null, 
+                data, 
+                false, 
+                tableContent
+            );
         }
     });
     // ----- END SAVE MODAL -----
@@ -743,6 +887,13 @@ $(document).on("change", "[name=clientCity]", function() {
             const content = modalContent(tableData);
             $("#modalProjectClientContent").html(content);       
             initAll(); 
+
+            if(!allowedUpdate){
+                $("#modalProjectClientContent").find("input, select, textarea").each(function(){
+                    $(this).attr("disabled",true);
+                });
+                $("#btnUpdate").hide();
+            }
         }
     }
     // ----- END OPEN EDIT MODAL -----
@@ -773,22 +924,40 @@ $(document).on("change", "[name=clientCity]", function() {
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
         const validate = validateForm("modalProjectClient");
-        let rowID      = $(this).attr("rowID");
+        const validateFileLength = checkFileLength();
+        let clientID = $(this).attr("clientID");
 
-        if (validate) {
+        if (validate && validateFileLength) {
 
             let data = getFormData("modalProjectClient");
             data.append(`tableData[updatedBy]`, sessionID);
             data.append(`tableName`, `pms_client_tbl`);
-            data.append(`whereFilter`, `clientID=${rowID}`);
+            data.append(`whereFilter`, `clientID=${clientID}`);
             data.append(`feedback`, $("[name=clientName]").val()?.trim());
 
-            const clientContract = $("#clientContract").attr("file");
-            const clientJobOrder = $("#clientJobOrder").attr("file");
-            const clientEngagementLetter = $("#clientEngagementLetter").attr("file");
-            !clientContract && data.append(`tableData[clientContract]`, "");
-            !clientJobOrder && data.append(`tableData[clientJobOrder]`, "");
-            !clientEngagementLetter && data.append(`tableData[clientEngagementLetter]`, "");   
+            // ----- FILES -----
+			data.append("uploadFileFolder", "project-client");
+			data.append("uploadFileColumnName[0]", "clientContract");
+			data.append("uploadFileNewFilename[0]", newContractFilename.join("|"));
+			data.append("uploadFileOldFilename[0]", oldContractFilename.join("|"));
+			newContractFiles.map((file, index) => {
+				data.append(`uploadFiles[0][${index}]`, file);
+			})
+			data.append("uploadFileFolder", "project-client");
+			data.append("uploadFileColumnName[1]", "clientJobOrder");
+			data.append("uploadFileNewFilename[1]", newJobOrderFilename.join("|"));
+			data.append("uploadFileOldFilename[1]", oldJobOrderFilename.join("|"));
+			newJobOrderFiles.map((file, index) => {
+				data.append(`uploadFiles[1][${index}]`, file);
+			})
+			data.append("uploadFileFolder", "project-client");
+			data.append("uploadFileColumnName[2]", "clientEngagementLetter");
+			data.append("uploadFileNewFilename[2]", newLetterFilename.join("|"));
+			data.append("uploadFileOldFilename[2]", oldLetterFilename.join("|"));
+			newLetterFiles.map((file, index) => {
+				data.append(`uploadFiles[2][${index}]`, file);
+			})
+			// ----- FILES -----
 
 			sweetAlertConfirmation(
 				"update",

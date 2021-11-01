@@ -3,12 +3,12 @@ $(document).ready(function() {
 	//------ MODULE FUNCTION IS ALLOWED UPDATE-----
 
 	const allowedUpdate = isUpdateAllowed(35);
-	if(!allowedUpdate){
-		$("#page_content").find("input, select, textarea").each(function(){
-			$(this).attr("disabled",true);
-		});
-		$("#btnSubmit").hide();
-	}
+	// if(!allowedUpdate){
+	// 	$("#page_content").find("input, select, textarea").each(function(){
+	// 		$(this).attr("disabled",true);
+	// 	});
+	// 	$("#btnSubmit").hide();
+	// }
 
 	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
 
@@ -226,7 +226,8 @@ function initDataTables() {
                 { targets: 5,  width: 80  },
                 { targets: 6,  width: 80  },
                 { targets: 7,  width: 50  },
-                { targets: 8,  width: 300 },
+                { targets: 8,  width: 150 },
+				{ targets: 9,  width: 300 },
 				
             ],
         });
@@ -250,7 +251,8 @@ function initDataTables() {
                 { targets: 5,  width: 80  },
                 { targets: 6,  width: 50  },
                 { targets: 7,  width: 50  },
-                { targets: 8,  width: 300 },
+                { targets: 8,  width: 150 },
+				{ targets: 9,  width: 300 },
 			
             ],
         });
@@ -293,7 +295,10 @@ function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancel
 		}
 	} else {
 		html = `
-		<button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+		<button type="button" class="btn btn-default btn-light" id="btnBack" 
+		revise="${isRevise}" 
+		cancel="${isFromCancelledDocument}">
+		<i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 	}
 	$("#headerButton").html(html);
 }
@@ -536,9 +541,10 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 				<button 
 					class="btn btn-submit px-5 p-2" 
 					id="btnSubmit" 
-					returnItemID="${returnItemID}"
+					returnItemID="${encryptString(returnItemID)}"
 					code="${getFormCode("RI", createdAt, returnItemID)}"
-					revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
+					revise="${isRevise}" 
+					cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 					Submit
 				</button>`;
 
@@ -547,7 +553,10 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 					<button 
 						class="btn btn-cancel  px-5 p-2" 
 						id="btnCancel"
-						revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+						returnItemID="${encryptString(returnItemID)}"
+						code="${getFormCode("RI", createdAt, returnItemID)}"
+						revise="${isRevise}" 
+						cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
 				} else {
@@ -555,7 +564,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 					<button 
 						class="btn btn-cancel px-5 p-2"
 						id="btnCancelForm" 
-						returnItemID="${returnItemID}"
+						returnItemID="${encryptString(returnItemID)}"
 						code="${getFormCode("RI", createdAt, returnItemID)}"
 						revise=${isRevise}><i class="fas fa-ban"></i> 
 						Cancel
@@ -570,7 +579,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 					<button 
 						class="btn btn-cancel px-5 p-2"
 						id="btnCancelForm" 
-						returnItemID="${returnItemID}"
+						returnItemID="${encryptString(returnItemID)}"
 						code="${getFormCode("RI", createdAt, returnItemID)}"
 						status="${returnItemStatus}"><i class="fas fa-ban"></i> 
 						Cancel
@@ -969,8 +978,7 @@ function getItemsRow(readOnly = false,returnItemID) {
 								value="${inventoryRequestID ? receivedQuantity : ""}" 
 								name="receivedQuantity" 
 								minlength="1" 
-								maxlength="20" 
-								>
+								maxlength="20">
 							<div class="invalid-feedback d-block" id="invalid-receivedQuantity${index}"></div>
 					</div>
 					</td>
@@ -1190,10 +1198,11 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
 	readOnly ? preventRefresh(false) : preventRefresh(true);
 
-	$("#btnBack").attr("returnItemID", returnItemID);
+	$("#btnBack").attr("returnItemID", encryptString(returnItemID));
 	$("#btnBack").attr("status", returnItemStatus);
 	$("#btnBack").attr("employeeID", employeeID);
 	$("#btnBack").attr("cancel", isFromCancelledDocument);
+	$("#btnBack").attr("returnItemCode", getFormCode("RI", dateToday(), returnItemID));
 
 	let disabled = readOnly ? "disabled" : "";
 	//let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
@@ -1442,6 +1451,16 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		//$("#returnItemDate").val(moment(new Date).format("MMMM DD, YYYY"));
 		initAll();
 		updateSerialNumber();
+
+		if (!allowedUpdate) {
+			$("#page_content").find(`input, select, textarea`).each(function() {
+				if (this.type != "search") {
+					$(this).attr("disabled", true);
+				}
+			})
+			$('#btnBack').attr("status", "2");
+			$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+		}
 		
 		//$("#returnItemDate").data("daterangepicker").maxDate = moment();
 		return html;
@@ -1701,73 +1720,57 @@ $(document).on("click", ".btnView", function () {
 // ----- VIEW DOCUMENT -----
 $(document).on("click", "#btnRevise", function () {
 	const id = $(this).attr("returnItemID");
-
-	viewDocument(id, false, true);
+	const fromCancelledDocument = $(this).attr("cancel") == "true";
+	$("#page_content").html(preloader);
+	setTimeout(() => {
+		viewDocument(id, false, true, fromCancelledDocument);
+	}, 10);
+	//viewDocument(id, false, true);
 });
 // ----- END VIEW DOCUMENT -----
 
 
 // ----- SAVE CLOSE FORM -----
 $(document).on("click", "#btnBack", function () {
-	const id         = $(this).attr("returnItemID");
-	const isFromCancelledDocument = $(this).attr("cancel") == "true";
-	const revise     = $(this).attr("revise") == "true";
-	const employeeID = $(this).attr("employeeID");
-	const feedback   = $(this).attr("code") || getFormCode("RI", dateToday(), id);
-	const status     = $(this).attr("status");
+	const id         = decryptString($(this).attr("returnItemID"));
+		const code       = $(this).attr("returnItemCode");
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise     = $(this).attr("revise") == "true";
+		const employeeID = $(this).attr("employeeID");
+		const status     = $(this).attr("status");
 
-	if (status != "false" && status != 0) {
-		
-		if (revise) {
-			// const action = revise && "insert" || (id && feedback ? "update" : "insert");
-			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-			const data   = getReturnItemData(action, "save", "0", id);
-			
-			data["returnItemStatus"]   = 0;
-			data.append("returnItemStatus", 0);
-			
-			// data["reviseReturnItemID"] = id;
+		if (status && status != 0) {
+			if (revise) {
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getReturnItemData(action, "save", "0", id);
+				data.append("returnItemStatus", 0);
+				if (!isFromCancelledDocument) {
+					data.append("reviseReturnItemID ", id);
+					data.delete("returnItemID");
+				} else {
+					data.append("returnItemID", id);
+					data.delete("action");
+					data.append("action", "update");
+				}
 
-			// delete data["returnItemID"];
-
-			if (!isFromCancelledDocument) {
-				data["reviseReturnItemID"] = id;
-				data.append("reviseReturnItemID", id);
-
-				delete data["returnItemID"];
-
-				// data.append("reviseReturnItemID", id);
-				// data.delete("returnItemID");
+				saveReturnItem(data, "save", null, pageContent, code);
 			} else {
-				// delete data["returnItemID"];
-
-				data["returnItemID"] = id;
-				delete data["action"];
-				data["action"] = update;
-
-				// data.append("returnItemID", id);
-				// data.delete("action");
-				// data.append("action", "update");
+				$("#page_content").html(preloader);
+				pageContent();
+	
+				if (employeeID != sessionID) {
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+				}
 			}
 
-			saveInventoryReceiving(data, "save", null, pageContent);
 		} else {
-			$("#page_content").html(preloader);
-			pageContent();
+			const action = id ? "update" : "insert";
+			const data   = getReturnItemData(action, "save", "0", id);
+			data.append("returnItemStatus", 0);
 
-			if (employeeID != sessionID) {
-				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-			}
+			saveReturnItem(data, "save", null, pageContent, code);
 		}
 
-	} else {
-		const action = id && feedback ? "update" : "insert";
-		const data   = getReturnItemData(action, "save", "0", id);
-		data["returnItemStatus"] = 0;
-		// data.append("returnItemStatus", 0);
-
-		saveInventoryReceiving(data, "save", null, pageContent);
-	}
 });
 // ----- END SAVE CLOSE FORM -----
 
@@ -1778,39 +1781,27 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
 	let serialNumberCondition = $("[name=serialNumber]").hasClass("is-invalid");
 	if(!receivedCondition && !serialNumberCondition){
 
-		const id       = $(this).attr("returnItemID");
+		const id       = decryptString($(this).attr("returnItemID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("RI", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+		//const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getReturnItemData(action, "save", "0", id);
-		data["returnItemStatus"] = 0;
+		//data["returnItemStatus"] = 0;
 		data.append("returnItemStatus", 0);
-		
 		if (revise) {
-			// data["reviseReturnItemID"] = id;
-			// delete data["returnItemID"];
-
 			if (!isFromCancelledDocument) {
-				data["reviseReturnItemID"] = id;
-				delete data["returnItemID"];
-
 				data.append("reviseReturnItemID", id);
 				data.delete("returnItemID");
 			} else {
-				// delete data["returnItemID"];
-
-				data["returnItemID"] = id;
-				delete data["action"];
-				data["action"] = update;
-
 				data.append("returnItemID", id);
 				data.delete("action");
 				data.append("action", "update");
 			}
 		}
 
-		saveInventoryReceiving(data, "save", null, pageContent);
+		saveReturnItem(data, "save", null, pageContent);
 	}else{
 		$("[name=quantity]").focus();
 		$("[name=serialNumber]").focus();
@@ -1920,20 +1911,21 @@ $(document).on("click", "#btnSubmit", function () {
 		
 		if (validateSerial != "false") {
 			const validate       = validateForm("form_return_item");
+			const isFromCancelledDocument = $(this).attr("cancel") == "true";
 			// console.log("validate: "+ validate)
 			removeIsValid("#tableReturnItem");
 			if(validate){
-				const id             = $(this).attr("returnItemID");
+				const id             = decryptString($(this).attr("returnItemID"));
 				const revise         = $(this).attr("revise") == "true";
-				const action = revise && "insert" || (id ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				//const action = revise && "insert" || (id ? "update" : "insert");
 				const data   = getReturnItemData(action, "submit", "1", id);
-				// console.log(data["approversID"])
 				if (revise) {
-					data["reviseReturnItemID"] = id;
-					delete data["returnItemID"];
+					if (!isFromCancelledDocument) {
 
-					data.append("reviseReturnItemID", id);
-					data.delete("returnItemID");
+						data.append("reviseReturnItemID", id);
+						data.delete("returnItemID");
+					}
 				}
 	
 				let approversID = "", approversDate = "";
@@ -1941,11 +1933,8 @@ $(document).on("click", "#btnSubmit", function () {
 					if (i[0] == "approversID")   approversID   = i[1];
 					if (i[0] == "approversDate") approversDate = i[1];
 				}
-
-					// approversID   = data["approversID"]; 
-					// approversDate = data["approversDate"];
-
-	
+				// console.log(data["approversID"])
+				
 				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
 			
 				let notificationData = false;
@@ -1960,7 +1949,7 @@ $(document).on("click", "#btnSubmit", function () {
 					// console.log(notificationData)
 				}
 	
-				saveInventoryReceiving(data, "submit", notificationData, pageContent);
+				saveReturnItem(data, "submit", notificationData, pageContent);
 			}
 			
 		}
@@ -1984,12 +1973,12 @@ $(document).on("click", "#btnSubmit", function () {
 
 // ----- CANCEL DOCUMENT -----
 $(document).on("click", "#btnCancelForm", function () {
-	const id     = $(this).attr("returnItemID");
+	const id     = decryptString($(this).attr("returnItemID"));
 	const status = $(this).attr("status");
 	const action = "update";
 	const data   = getReturnItemData(action, "cancelform", "4", id, status);
 
-	saveInventoryReceiving(data, "cancelform", null, pageContent);
+	saveReturnItem(data, "cancelform", null, pageContent);
 });
 // ----- END CANCEL DOCUMENT -----
 
@@ -2044,7 +2033,7 @@ $(document).on("click", "#btnApprove", function () {
 		data.append("returnItemStatus", status);
 
 
-		saveInventoryReceiving(data, "approve", notificationData, pageContent,lastApproveCondition);
+		saveReturnItem(data, "approve", notificationData, pageContent,lastApproveCondition);
 	}
 });
 // ----- END APPROVE DOCUMENT -----
@@ -2124,7 +2113,7 @@ $(document).on("click", "#btnRejectConfirmation", function () {
 				employeeID,
 			};
 
-			saveInventoryReceiving(data, "deny", notificationData, pageContent);
+			saveReturnItem(data, "deny", notificationData, pageContent);
 			$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 		} 
 	} 
@@ -2143,13 +2132,7 @@ $(document).on("click", "#btnDrop", function() {
 	data.append("method", "drop");
 	data.append("updatedBy", sessionID);
 
-	// let data = {};
-	// data["returnItemID"] = id;
-	// data["action"]               = "update";
-	// data["method"]               = "drop";
-	// data["updatedBy"]            = sessionID;
-
-	saveInventoryReceiving(data, "drop", null, pageContent);
+	saveReturnItem(data, "drop", null, pageContent);
 })
 // ----- END DROP DOCUMENT -----
 
@@ -2266,7 +2249,7 @@ return Swal.fire({
 })
 }
 
-function saveInventoryReceiving(data = null, method = "submit", notificationData = null, callback = null,lastApproveCondition =false) {
+function saveReturnItem(data = null, method = "submit", notificationData = null, callback = null,lastApproveCondition =false) {
 
 data.lastApproveCondition = lastApproveCondition; // inserting object in data object parameter
 

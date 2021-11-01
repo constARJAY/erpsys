@@ -321,7 +321,7 @@ class ServiceOrder_model extends CI_Model {
         }
     }
 
-    public function insertServiceCompletion($serviceOrderID = 0)
+    public function insertServiceCompletionData($serviceOrderID = 0)
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
 

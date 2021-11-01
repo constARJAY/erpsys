@@ -139,11 +139,6 @@ $(document).ready(function() {
         "clientStatus = 1"
     );
 
-	// const projectList = getTableData(
-	// 	"pms_project_list_tbl", 
-	// 	"projectListID, projectListCode, projectListName, projectListClientID, createdAt",
-	// 	"projectListStatus = 1");
-
 	const projectList = getTableData(
 		`pms_timeline_builder_tbl AS ptbt
 			LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID
@@ -695,7 +690,7 @@ $(document).ready(function() {
 			projectCategory = "-"
 			${id == "0" && "selected"}>N/A</option>`;
         projectList
-			.filter(project => project.projectID == clientID)
+			.filter(project => project.clientID == clientID)
 			.map(project => {
 				html += `
 				<option 
@@ -774,13 +769,11 @@ $(document).ready(function() {
 	// ----- GET UOM LIST -----
 	function getUomList(uomName = null) {
 		let html = `<option disabled selected>Select UOM</option>`;
-		// if (uomName) {
-			uomList.map(uom => {
-				html += `
-				<option value="${uom.uomName}"
-					${uomName == uom.uomName ? "selected" : ""}>${titleCase(uom.uomName)}</option>`;
-			})
-		// }
+		uomList.map(uom => {
+			html += `
+			<option value="${uom.uomName}"
+				${uomName == uom.uomName ? "selected" : ""}>${titleCase(uom.uomName)}</option>`;
+		})
 		return html;
 	}
 	// ----- END GET UOM LIST -----
@@ -801,7 +794,7 @@ $(document).ready(function() {
 			html = `
 			<tr>
 				<td>
-					<div class="servicescope">
+					<div class="servicescope form-group mb-0">
 						<div class="input-group mb-0">
 							<div class="input-group-prepend">
 								<button class="btn btn-sm btn-danger btnDeleteScope">
@@ -823,7 +816,7 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="quantity">
+					<div class="quantity form-group mb-0">
 						<input 
 							type="text" 
 							class="form-control input-quantity text-center"
@@ -841,29 +834,17 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="uom">
+					<div class="uom form-group mb-0">
 						<select class="form-control validate select2"
 							name="serviceUom"
-							id="serviceUom"
 							required>
 							${getUomList(uom)}
 						</select>
-						<!-- <input 
-							type="text" 
-							class="form-control validate text-center serviceUom"
-							data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-]['][()]" 
-							id="serviceUom" 
-							name="serviceUom" 
-							autocomplete="off"
-							minlength="1" 
-							maxlength="20" 
-							value="${uom}"
-							required> -->
-						<div class="invalid-feedback d-block" id="invalid-serviceUom"></div>
+						<div class="invalid-feedback d-block"></div>
 					</div>
 				</td>
 				<td>
-					<div class="unitcost">
+					<div class="unitcost form-group mb-0">
 						<div class="input-group">
 							<div class="input-group-prepend">
 								<span class="input-group-text" >₱</span>
@@ -1049,45 +1030,35 @@ $(document).ready(function() {
 			$(this).attr("id", `tableRow${i}`);
 			$(this).attr("index", `${i}`);
 
-			// CHECKBOX
-			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
+			$(`input, textarea, select`, this).each(function(j) {
+				const name = $(this).attr("name") || "";
+				$(this).attr("id", `${name}${i}${j}`);
 
-			// ITEMCODE
-			$("td .servicecode", this).attr("id", `servicecode${i}`);
-
-			// ITEMNAME
-			$(this).find(`[name="serviceID"]`).each(function() {
-				if ($(this).hasClass("select2-hidden-accessible")) {
-					$(this).select2("destroy");
-				}
-			})
-
-			$(`[name="serviceID"]`, this).each(function(j) {
-				$(this).attr("index", `${i}`);
-				$(this).attr("project", `true`);
-				$(this).attr("id", `projectitemid${j}${i}`)
-				$(this).attr("data-select2-id", `projectitemid${i}`);
-				if (!$(this).hasClass("select2-hidden-accessible")) {
+				if ($(this).is("select")) {
+					if ($(this).hasClass("select2-hidden-accessible")) {
+						$(this).select2("destroy");
+					}
 					$(this).select2({ theme: "bootstrap" });
 				}
+
+				$parent = $(this).parent();
+				$parent.find(".invalid-feedback").attr("id", `invalid-${name}${i}${j}`);
 			})
 
-			$(this).find(`[name="serviceUom"]`).each(function() {
-				if ($(this).hasClass("select2-hidden-accessible")) {
-					$(this).select2("destroy");
-				}
-			})
+			// // CHECKBOX
+			// $("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
 
-			$(`[name="serviceUom"]`, this).each(function(x) {
-				$(this).attr("index", `${x}`);
-				$(this).attr("id", `serviceUom${i}${x}`)
-				$(this).attr("data-select2-id", `serviceUom${i}${x}`);
-				if (!$(this).hasClass("select2-hidden-accessible")) {
-					$(this).select2({ theme: "bootstrap" });
-				}
-			})
+			// // ITEMCODE
+			// $("td .servicecode", this).attr("id", `servicecode${i}`);
 
-			// $(this).find("select").each(function(j) {
+			// // ITEMNAME
+			// $(this).find(`[name="serviceID"]`).each(function() {
+			// 	if ($(this).hasClass("select2-hidden-accessible")) {
+			// 		$(this).select2("destroy");
+			// 	}
+			// })
+
+			// $(`[name="serviceID"]`, this).each(function(j) {
 			// 	$(this).attr("index", `${i}`);
 			// 	$(this).attr("project", `true`);
 			// 	$(this).attr("id", `projectitemid${j}${i}`)
@@ -1095,37 +1066,52 @@ $(document).ready(function() {
 			// 	if (!$(this).hasClass("select2-hidden-accessible")) {
 			// 		$(this).select2({ theme: "bootstrap" });
 			// 	}
-			// });
+			// })
 
-			// SCOPE
-			$("td .tableScopeBody tr", this).each(function(x) {
+			// $(this).find(`[name="serviceUom"]`).each(function() {
+			// 	if ($(this).hasClass("select2-hidden-accessible")) {
+			// 		$(this).select2("destroy");
+			// 	}
+			// })
 
-				// DESCRIPTION
-				$("td .servicescope [name=serviceDescription]", this).attr("id", `serviceDescription${i}${x}`);
-				$("td .servicescope .invalid-feedback", this).attr("id", `invalid-serviceDescription${i}${x}`);
+			// $(`[name="serviceUom"]`, this).each(function(x) {
+			// 	$(this).attr("index", `${x}`);
+			// 	$(this).attr("id", `serviceUom${i}${x}`)
+			// 	$(this).attr("data-select2-id", `serviceUom${i}${x}`);
+			// 	if (!$(this).hasClass("select2-hidden-accessible")) {
+			// 		$(this).select2({ theme: "bootstrap" });
+			// 	}
+			// })
 
-				// QUANTITY
-				$("td .quantity [name=quantity]", this).attr("id", `quantity${i}${x}`);
-				$("td .quantity .invalid-feedback", this).attr("id", `invalid-quantity${i}${x}`);
+			// // SCOPE
+			// $("td .tableScopeBody tr", this).each(function(x) {
+
+			// 	// DESCRIPTION
+			// 	$("td .servicescope [name=serviceDescription]", this).attr("id", `serviceDescription${i}${x}`);
+			// 	$("td .servicescope .invalid-feedback", this).attr("id", `invalid-serviceDescription${i}${x}`);
+
+			// 	// QUANTITY
+			// 	$("td .quantity [name=quantity]", this).attr("id", `quantity${i}${x}`);
+			// 	$("td .quantity .invalid-feedback", this).attr("id", `invalid-quantity${i}${x}`);
 	
-				// UOM
-				$("td .uom .serviceUom", this).attr("id", `serviceUom${i}${x}`);
-				$("td .uom .invalid-feedback", this).attr("id", `invalid-serviceUom${i}${x}`);
+			// 	// UOM
+			// 	$("td .uom .serviceUom", this).attr("id", `serviceUom${i}${x}`);
+			// 	$("td .uom .invalid-feedback", this).attr("id", `invalid-serviceUom${i}${x}`);
 	
-				// UNIT COST
-				$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}${x}`);
-				$("td .unitcost .invalid-feedback", this).attr("id", `invalid-unitcost${i}${x}`);
+			// 	// UNIT COST
+			// 	$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}${x}`);
+			// 	$("td .unitcost .invalid-feedback", this).attr("id", `invalid-unitcost${i}${x}`);
 	
-				// TOTAL COST
-				$("td .totalcost", this).attr("id", `totalcost${i}${x}`);
-			})
+			// 	// TOTAL COST
+			// 	$("td .totalcost", this).attr("id", `totalcost${i}${x}`);
+			// })
 
 
-			// FILE
-			$("td .file [name=files]", this).attr("id", `files${i}`);
+			// // FILE
+			// $("td .file [name=files]", this).attr("id", `files${i}`);
 
-			// REMARKS
-			$("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
+			// // REMARKS
+			// $("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
 		})
 	}
 	// ----- END UPDATE TABLE ITEMS -----
@@ -1454,7 +1440,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${serviceRequisitionStatus && !isRevise ? getStatusStyle(serviceRequisitionStatus) : "---"}
+							${serviceRequisitionStatus && !isRevise ? getStatusStyle(serviceRequisitionStatus, true) : "---"}
 						</h6>      
                     </div>
                 </div>

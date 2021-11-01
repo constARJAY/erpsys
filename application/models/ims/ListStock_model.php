@@ -118,8 +118,8 @@ class ListStock_model extends CI_Model {
                                     )l GROUP BY itemID");       
        
         $sqlAsset = $this->db->query("SELECT assetID, assetCode, brand, assetName, classificationName, categoryName, uom, totalequipmentBorrowing,
-                                    stockIN,equipmentBorrowing, Transferred, returnQuantity, disposed, reservedAsset,reserved,available,
-                                    reOrderLevel, ROUND((stockIN - totalequipmentBorrowing),2) AS totalQuantity
+                                    stockIN,equipmentBorrowing, ROUND(Transferred,2) AS Transferred, returnQuantity, ROUND(disposed,2) AS disposed, reservedAsset,reserved,available,
+                                    ROUND(reOrderLevel,2) AS reOrderLevel, ROUND((stockIN - totalequipmentBorrowing),2) AS totalQuantity
                                     FROM
                                     (
                                     SELECT i.assetID, i.assetCode , brand, i.assetName, classificationName, categoryName, uom,stockIN,equipmentBorrowing,Transferred,returnQuantity,
@@ -130,7 +130,7 @@ class ListStock_model extends CI_Model {
                                     (
                                     SELECT assetID, assetCode, brand, assetName, classificationName,categoryName,uom,
                                     IFNULL(SUM(stockIN),0) AS stockIN,SUM(equipmentBorrowing) AS equipmentBorrowing,sum(Transferred) AS Transferred, SUM(returnQuantity) AS returnQuantity,
-                                    disposed,IFNULL(SUM(reservedAsset),0) AS reservedAsset
+                                    IFNULL(SUM(disposed),0) AS disposed,IFNULL(SUM(reservedAsset),0) AS reservedAsset
                                     FROM
                                     (
                                         SELECT 
@@ -172,6 +172,20 @@ class ListStock_model extends CI_Model {
                                         WHERE  sii.returnItemID <>0  
                                         GROUP BY sii.assetID
                                         UNION ALL
+                                        SELECT 
+                                        idd.assetID, 			idd.assetCode, 		idd.brand,		idd.assetName,
+                                        idd.assetClassification as classificationName, idd.assetCategory as categoryName,	idd.unitOfMeasurement AS uom,  
+                                        0 AS stockIN,
+                                        0 AS equipmentBorrowing,
+                                        0 returnQuantity,
+                                        0 AS Transferred,
+                                        SUM(quantity)  AS disposed,
+                                        0 AS reservedAsset
+                                        FROM  ims_inventory_disposal_details_tbl AS idd
+                                        LEFT JOIN ims_inventory_disposal_tbl AS  id ON idd.disposalID = id.disposalID
+                                        WHERE  id.disposalStatus =2  
+                                        GROUP BY idd.assetID
+                                        UNION ALL
                                         SELECT sii.assetID, 		NULL AS assetCode, 	0 AS  brand,	0 AS assetName,
                                         0 AS classificationName, 	0 as categoryName,	0 AS  uom,  
                                         0 AS stockIN,
@@ -191,7 +205,7 @@ class ListStock_model extends CI_Model {
                                     LEFT JOIN ims_inventory_asset_tbl AS iii ON i.assetID = iii.assetID
                                     $where $AND
                                     GROUP BY i.assetID
-                                    )l GROUP BY assetID AND assetCode IS NOT NULL");        
+                                    )l GROUP BY assetID");        
                                     return array('item' =>$sqlItem->result(),'assets' =>$sqlAsset->result());
         //return array('item',$this->db->query($sqlItem)->result_array(),'assets',$this->db->query($sqlAsset)->result_array());
 

@@ -55,9 +55,10 @@ $(document).ready(function(){
             async:    false,
             dataType: 'json',
             data:     {tableName: "ims_inventory_asset_tbl as asset INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID)",
-                        columnName: `CONCAT('AST','-',classification.classificationShortcut,'-',SUBSTR(asset.createdAt,3,2),'-',LPAD(asset.assetID, 5, '0')) as assetCode,
+                        columnName: `
                                     asset.assetID,
                                     asset.assetName,
+                                    asset.assetCode,
                                     asset.unitOfMeasurementID,
                                     asset.brandName,
                                     category.categoryName,

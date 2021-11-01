@@ -1,6 +1,8 @@
 $(document).ready(function () {
 	const allowedUpdate = isUpdateAllowed(8);
 
+	let oldVendorFilename = [], newVendorFilename = [], newVendorFiles = [];
+
 	// ----- GET PHILIPPINE ADDRESSES -----
 	const getPhAddresses = () => {
 		let result = [];
@@ -214,17 +216,17 @@ $(document).ready(function () {
 					[50, 100, 150, 200, "All"],
 				],
 				columnDefs: [
-					{ targets: 0, width: 50  },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 300 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 100 },
-					{ targets: 5, width: 120 },
-					{ targets: 6, width: 120 },
-					{ targets: 7, width: 100 },
-					{ targets: 8, width: 100 },
-					{ targets: 9, width: 150 },
-					{ targets: 10, width: 80 },
+					{ targets: 0,  width: 50  },
+					{ targets: 1,  width: 150 },
+					{ targets: 2,  width: 300 },
+					{ targets: 3,  width: 150 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 130 },
+					{ targets: 6,  width: 120 },
+					{ targets: 7,  width: 100 },
+					{ targets: 8,  width: 100 },
+					{ targets: 9,  width: 150 },
+					{ targets: 10, width: 80  },
 				],
 			});
 	}
@@ -485,66 +487,106 @@ $(document).ready(function () {
 	// ----- END CUSTOM INPUTMASK ------
 
 
-	// ----- DISPLAY EMPLOYEE SIGNATURE -----
-    function displayImage(file = null, link = true) {
+	// ----- DISPLAY FILE -----
+    function displayFile(file = null, blob = "", link = true, oldFiles = true) {
         let html = ``;
         if (file && file != null && file != "null") {
-            let otherAttr = link ? `
-            href="${base_url+"assets/upload-files/vendor/"+file}" 
-            target="_blank"` : `href="javascript:void(0)"`;
-            html = `
-            <div class="d-flex justify-content-start align-items-center p-0">
-                <span class="btnRemoveFile pr-2" style="cursor: pointer"><i class="fas fa-close"></i></span>
-                <a class="filename"
-                    title="${file}"
-                    style="display: block;
-                    width: 90%;
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
-					color: black;"
-                    ${otherAttr}>
-                    ${file}
-                </a>
-			</div>`
+			let fileArr = file.split("|");
+			fileArr.forEach(venFile => {
+				if (oldFiles) oldVendorFilename.push(venFile);
+				
+				let fileType = venFile.split(".");
+					fileType = fileType[fileType.length-1].toLowerCase();
+				let imageExtensions = ["jpg", "png", "jpeg", "gif"];
+				let isFileImage = imageExtensions.includes(fileType);
+				let targetAttr = isFileImage ? `display="true" blob="${blob}"` : 
+					(oldFiles ? `target="_blank"` : "");
+
+				let otherAttr = link ? `
+				href="${base_url+"assets/upload-files/inventory-vendor/"+venFile}"` : `href="javascript:void(0)"`;
+				html += `
+				<div class="col-md-4 col-sm-12 display-image-content">
+					<div class="display-image">
+						<div class="d-flex justify-content-start align-items-center p-0">
+							<span class="btnRemoveFile pr-2 display-image-remove"
+								filename="${venFile}">
+								<i class="fas fa-close"></i>
+							</span>
+							<a class="filename display-image-filename"
+								title="${venFile}"
+								${otherAttr}
+								${targetAttr}>
+								${venFile}
+							</a>
+						</div>
+					</div>
+				</div>`;
+			})
         }
         return html;
     }
-    // ----- END DISPLAY EMPLOYEE SIGNATURE -----
+    // ----- END DISPLAY FILE -----
 
 
-	 // ----- REMOVE E-SIGNATURE -----
+	// ----- MODAL IMAGE -----
+	$(document).on("click", `.display-image-filename`, function(e) {
+		let display = $(this).attr("display") == "true";
+		let source  = $(this).attr("blob") || $(this).attr("href");
+		if (display) {
+			e.preventDefault();
+			$("#display-image-preview").attr("src", source);
+			$("#display-image-modal").modal("show");
+		}
+	})
+	// ----- END MODAL IMAGE -----
+
+
+	 // ----- REMOVE FILE -----
 	 $(document).on("click", `.btnRemoveFile`, function() {
-        $(`#displayImage`).empty();
-        $(`#displayImage`).css('display','none');
-        $(`[name="file|vendor"]`).val("");
-        $(`[name="file|vendor"]`).removeAttr("filename");
+		const filename     = $(this).attr("filename");
+		const newFileIndex = newVendorFilename.indexOf(filename);
+		const oldFileIndex = oldVendorFilename.indexOf(filename);
+
+		newFileIndex != -1 && newVendorFilename.splice(newFileIndex, 1);
+		newFileIndex != -1 && newVendorFiles.splice(newFileIndex, 1);
+		oldFileIndex != -1 && oldVendorFilename.splice(oldFileIndex, 1);
+
+		$display = $(this).closest(".display-image-content");
+		$display.fadeOut(500, function() {
+			$display.remove();
+		})
     })
-    // ----- END REMOVE E-SIGNATURE -----
+    // ----- END REMOVE FILE -----
 
 
 	// ----- SELECT FILE -----
 	$(document).on("change", `[name="file|vendor"]`, function() {
+		let countFiles = oldVendorFilename.length + newVendorFilename.length;
 		if (this.files && this.files[0]) {
-            const filesize = this.files[0].size/1024/1024; // Size in MB
-            const filetype = this.files[0].type;
-            const filename = this.files[0].name;
-			const type     = filetype.split("/")?.[1];
-            if (filesize > 10) {
-				$(`#displayImage`).empty();
-                $(`#displayImage`).css('display','none');
-                $(this).val("");
-                showNotification("danger", "File size must be less than or equal to 10mb");
-            } else if (!["png", "jpg", "jpeg", "doc", "docx", "pdf"].includes(type)) {
-				$(`#displayImage`).empty();
-                $(`#displayImage`).css('display','none');
-                $(this).val("");
-                showNotification("danger", "Invalid file type");
-            } else {
-                $("#invalid-inventoryVendorFile").text("");
-				$(`#displayImage`).css('display','block');
-                $(`#displayImage`).html(displayImage(filename, false));
-            }
+			let files = this.files;
+			let filesLength = this.files.length;
+			for (var i=0; i<filesLength; i++) {
+				countFiles++;
+
+				const filesize = files[i].size/1024/1024; // Size in MB
+				const filetype = files[i].type;
+				const filename = files[i].name;
+				const fileArr  = filename.split(".");
+				const name     = fileArr?.[0];
+				const type     = fileArr?.[fileArr.length-1]?.toLowerCase();
+				const displayName = `${name}${countFiles}.${type}`;
+				if (filesize > 10) {
+					showNotification("danger", `${filename} - File size must be less than or equal to <b>10mb</b>`);
+				} else if (!["png", "jpg", "jpeg", "doc", "docx", "pdf"].includes(type)) {
+					showNotification("danger", `${filename} - <b>Invalid file type</b>`);
+				} else {
+					newVendorFilename.push(displayName);
+					newVendorFiles.push(files[i]);
+					let blob = URL.createObjectURL(files[i]);
+					$(`#displayFile`).append(displayFile(displayName, blob, true, false));
+				}
+			}
+			$(this).val("");
         }
 	})
 	// ----- END SELECT FILE -----
@@ -552,6 +594,8 @@ $(document).ready(function () {
 
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false) {
+		oldVendorFilename = [], newVendorFilename = [], newVendorFiles = []
+
 		let {
 			inventoryVendorID           = "",
 			inventoryVendorName         = "",
@@ -621,49 +665,9 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-supplierName"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Region <code>*</code></label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryVendorRegion" id="input_inventoryVendorRegion" style="width: 100%" required>
-								<option value="" selected>Select Region</option>
-								${getRegionOptions(inventoryVendorRegion)}
-                            </select>
-                            <div class="invalid-feedback d-block" id="invalid-input_inventoryVendorRegion"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Province <code>*</code></label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryVendorProvince" id="inventoryVendorProvince" style="width: 100%" required>
-                                <option value="" selected>Select Province</option>
-                                ${getProvinceOptions(inventoryVendorProvince, inventoryVendorRegion)}
-                            </select>
-                            <div class="invalid-feedback d-block" id="invalid-inventoryVendorProvince"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>City/Municipality <code>*</code></label>
-                            <select class=" form-control show-tick select2" id="inventoryVendorCity" name="inventoryVendorCity" style="width: 100%" required>
-                                <option value="" selected>Select City/Municipality</option>
-                                ${getMunicipalityOptions(inventoryVendorCity, inventoryVendorRegion, inventoryVendorProvince)}
-                            </select> 
-                            <div class="invalid-feedback d-block" id="invalid-inventoryVendorCity"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Barangay <code>*</code></label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryVendorBarangay" id="inventoryVendorBarangay" style="width: 100%" required>
-                                <option value="" selected>Select Barangay</option>
-                                ${getBarangayOptions(inventoryVendorBarangay, inventoryVendorRegion, inventoryVendorProvince, inventoryVendorCity)}
-                            </select>
-                            <div class="invalid-feedback d-block" id="invalid-inventoryVendorBarangay"></div>
-                        </div>
-                    </div>
                     <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
                         <div class="form-group">
-                            <label>Unit Number </label>
+                            <label>Unit No. </label>
                             <input class="form-control validate"
 								data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/]"  
 								minlength="2"
@@ -678,7 +682,7 @@ $(document).ready(function () {
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
                         <div class="form-group">
-                            <label>Building/House Number <code>*</code></label>
+                            <label>Building/House No. <code>*</code></label>
                             <input class="form-control validate"
                             	data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  
 								minlength="2" 
@@ -746,6 +750,46 @@ $(document).ready(function () {
                                 data-allowcharacters="[0-9]" id="inventoryVendorZipCode" name="inventoryVendorZipCode" minlength="4" autocomplete="off"
                                 maxlength="4" value="${inventoryVendorZipCode}" type="text">
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorZipCode"></div>
+                        </div>
+                    </div>
+					<div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Region <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="inventoryVendorRegion" id="input_inventoryVendorRegion" style="width: 100%" required>
+								<option value="" selected>Select Region</option>
+								${getRegionOptions(inventoryVendorRegion)}
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-input_inventoryVendorRegion"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Province <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="inventoryVendorProvince" id="inventoryVendorProvince" style="width: 100%" required>
+                                <option value="" selected>Select Province</option>
+                                ${getProvinceOptions(inventoryVendorProvince, inventoryVendorRegion)}
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-inventoryVendorProvince"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>City/Municipality <code>*</code></label>
+                            <select class=" form-control show-tick select2" id="inventoryVendorCity" name="inventoryVendorCity" style="width: 100%" required>
+                                <option value="" selected>Select City/Municipality</option>
+                                ${getMunicipalityOptions(inventoryVendorCity, inventoryVendorRegion, inventoryVendorProvince)}
+                            </select> 
+                            <div class="invalid-feedback d-block" id="invalid-inventoryVendorCity"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Barangay <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="inventoryVendorBarangay" id="inventoryVendorBarangay" style="width: 100%" required>
+                                <option value="" selected>Select Barangay</option>
+                                ${getBarangayOptions(inventoryVendorBarangay, inventoryVendorRegion, inventoryVendorProvince, inventoryVendorCity)}
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-inventoryVendorBarangay"></div>
                         </div>
                     </div>
                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
@@ -972,22 +1016,23 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccNo"></div>
 						</div>
 					</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-sm-12">
                         <div class="form-group">
                             <label>File</label>
-							<div id="displayImage" style="${file ? "display: block;" : "display: none;"} font-size: 12px; border: 1px solid black; border-radius: 5px; background: #d1ffe0; padding: 2px 10px;">
-								${displayImage(file)}
-							</div>
                             <input type="file"
 								name="file|vendor"
 								class="form-control validate"
 								id="inventoryVendorFile"
 								accept="image/*, .pdf, .docx, .doc"
+								multiple="multiple"
 								filename="${file}">
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorFile"></div>
+							<div class="row display-image-parent" id="displayFile">
+								${displayFile(file)}
+							</div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>VAT <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorVAT" id="inventoryVendorVAT" autocomplete="off" style="width: 100%">
@@ -997,7 +1042,7 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorVAT"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Status <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" 
@@ -1023,6 +1068,18 @@ $(document).ready(function () {
 	}
 	// ----- END MODAL CONTENT -----
 
+
+	// ----- CHECK FILE LENGTH -----
+	function checkFileLength() {
+		let count = oldVendorFilename.length + newVendorFilename.length;
+		if (count > 5) {
+			showNotification("danger", "Only 5 files are allowed to upload.");
+			return false;
+		}
+		return true;
+	}
+	// ----- END CHECK FILE LENGTH -----
+
 	
 	// ----- OPEN ADD MODAL -----
 	$(document).on("click", "#btnAdd", function () {
@@ -1042,19 +1099,25 @@ $(document).ready(function () {
 	// ----- SAVE MODAL -----
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_inventory_vendor");
-		if (validate) {
-			let data = getFormData("modal_inventory_vendor");
-			
-			if (!$(`[name="file|vendor"]`).attr("filename") || $(`[name="file|vendor"]`).attr("filename") == "") {
-				data.delete("tableData[file]");
-				data.append("tableData[file]", null);
-			}
+		const validateFileLength = checkFileLength();
 
+		if (validate && validateFileLength) {
+			let data = getFormData("modal_inventory_vendor");
 			data.append("tableData[inventoryVendorCode]", generateCode("VEN", false, "ims_inventory_vendor_tbl", "inventoryVendorCode"))
 			data.append("tableData[createdBy]", sessionID);
 			data.append("tableData[updatedBy]", sessionID);
 			data.append("tableName", "ims_inventory_vendor_tbl");
 			data.append("feedback", $("[name=inventoryVendorName]").val()?.trim());
+
+			// ----- FILES -----
+			data.append("uploadFileFolder", "inventory-vendor");
+			data.append("uploadFileColumnName[0]", "file");
+			data.append("uploadFileNewFilename[0]", newVendorFilename.join("|"));
+			data.append("uploadFileOldFilename[0]", oldVendorFilename.join("|"));
+			newVendorFiles.map((file, index) => {
+				data.append(`uploadFiles[0][${index}]`, file);
+			})
+			// ----- FILES -----
 
 			sweetAlertConfirmation(
 				"add",
@@ -1110,16 +1173,24 @@ $(document).ready(function () {
 		const id = $(this).attr("vendorID");
 
 		const validate = validateForm("modal_inventory_vendor");
-		if (validate) {
+		const validateFileLength = checkFileLength();
+
+		if (validate && validateFileLength) {
 			let data = getFormData("modal_inventory_vendor");
-			if (!$(`[name="file|vendor"]`).attr("filename") || $(`[name="file|vendor"]`).attr("filename") == "") {
-				data.delete("tableData[file]");
-				data.append("tableData[file]", null);
-			}
 			data.append("tableData[updatedBy]", sessionID);
 			data.append("tableName", "ims_inventory_vendor_tbl");
 			data.append("whereFilter", `inventoryVendorID = ${id}`);
 			data.append("feedback", $("[name=inventoryVendorName]").val()?.trim());
+
+			// ----- FILES -----
+			data.append("uploadFileFolder", "inventory-vendor");
+			data.append("uploadFileColumnName[0]", "file");
+			data.append("uploadFileNewFilename[0]", newVendorFilename.join("|"));
+			data.append("uploadFileOldFilename[0]", oldVendorFilename.join("|"));
+			newVendorFiles.map((file, index) => {
+				data.append(`uploadFiles[0][${index}]`, file);
+			})
+			// ----- FILES -----
 
 			sweetAlertConfirmation(
 				"update",

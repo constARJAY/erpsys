@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 26, 2021 at 05:16 AM
+-- Generation Time: Nov 02, 2021 at 12:53 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -68,22 +68,24 @@ END$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_get_material_withdrawal_approve` (IN `id` BIGINT(255))  BEGIN
 DECLARE materialUsageID  INT DEFAULT NULL;
 
-INSERT INTO  ims_material_usage_tbl(employeeID, materialWithdrawalID,	materialWithdrawalCode, inventoryValidationID, inventoryValidationCode, materialRequestID, materialRequestCode, projectCode, projectName, projectCategory,clientCode, clientName, clientAddress, materialUsageStatus, recordID) 
+INSERT INTO  ims_material_usage_tbl(employeeID, materialWithdrawalID,	materialWithdrawalCode, inventoryValidationID, inventoryValidationCode, materialRequestID, materialRequestCode, projectCode, projectName, projectCategory,clientCode, clientName, clientAddress, materialUsageDate, materialUsageStatus, recordID) 
 SELECT 
 		employeeID, 				materialWithdrawalID, 		materialWithdrawalCode, inventoryValidationID,
         inventoryValidationCode,	materialRequestID, 			materialRequestCode, 	projectCode, 			
         projectName,				projectCategory, 			clientCode, 			clientName, 			
-        clientAddress,				materialUsageStatus,		'0' AS recordID
+        clientAddress,				materialUsageDate,			materialUsageStatus,		'0' AS recordID
 FROM	
 (
 SELECT 
-		employeeID, 				materialWithdrawalID, 	materialWithdrawalCode,		inventoryValidationID, 
-		inventoryValidationCode,	materialRequestID, 	 	materialRequestCode,		projectCode,
-		projectName, 				projectCategory,		clientCode,					clientName,
-        clientAddress,	 'O' AS materialUsageStatus		
-FROM ims_material_withdrawal_tbl 
-WHERE materialWithdrawalID =id AND inventoryItemStatus = 9 
-)w;
+		employeeID, 				mw.materialWithdrawalID, 	materialWithdrawalCode,		mw.inventoryValidationID, 
+		mw.inventoryValidationCode,	mw.materialRequestID, 	 	materialRequestCode,		projectCode,
+		projectName, 				projectCategory,			clientCode,					clientName,
+        clientAddress,	 			dateNeeded AS materialUsageDate,					'O' AS materialUsageStatus		
+FROM ims_material_withdrawal_tbl AS mw
+LEFT JOIN ims_material_withdrawal_item_tbl AS mwi ON mw.materialWithdrawalID = mwi.materialWithdrawalID
+WHERE mwi.materialWithdrawalID = id AND inventoryItemStatus = 9 
+GROUP BY mw.materialWithdrawalID
+)w GROUP BY materialWithdrawalID;
 
  SET materialUsageID  = LAST_INSERT_ID();
  
@@ -97,12 +99,11 @@ FROM
 			itemCode, 						itemBrandName AS Brand, 
 			itemName, 						itemClassification AS classificationName,
 			itemCategory AS categoryName, 	itemUom AS uom, 
-            remaining AS quantity
+			SUM(stockOut) AS quantity
 	FROM ims_material_withdrawal_item_tbl AS ri
 	LEFT JOIN ims_material_withdrawal_tbl AS po ON ri.materialWithdrawalID = po.materialWithdrawalID
-	WHERE po.materialWithdrawalID = id AND ri.withdrawalItemStatus = 1
-)a; 
-
+	WHERE po.materialWithdrawalID = id AND ri.withdrawalItemStatus = 1 GROUP BY ri.itemID
+)i;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_get_purchase_order_approve` (IN `id` BIGINT(255))  BEGIN
@@ -155,6 +156,40 @@ FROM
 	WHERE ra.purchaseOrderID = id AND purchaseOrderStatus = 2
 )a; 
 
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_get_receiving_report_remaining` (IN `id` BIGINT(255))  BEGIN
+DECLARE inventoryReceivingID INT DEFAULT NULL;
+
+ INSERT INTO  ims_inventory_receiving_tbl(employeeID, purchaseOrderID,purchaseOrderCode, timelineBuilderID, projectCode, projectName, projectCategory, clientCode,clientName, clientAddress,inventoryReceivingStatus, recordID) 
+ SELECT employeeID, 		purchaseOrderID, 			purchaseOrderCode,
+		timelineBuilderID, 	projectCode,	 			projectName,
+		projectCategory, 	clientCode, 				clientName, 
+		clientAddress,		inventoryReceivingStatus,   recordID
+FROM 
+(
+ SELECT
+		employeeID, 		purchaseOrderID, 			purchaseOrderCode,
+		timelineBuilderID, 	projectCode,	 			projectName,
+		projectCategory, 	clientCode, 				clientName, 
+		clientAddress,		0 AS inventoryReceivingStatus,   iir.recordID
+FROM ims_inventory_receiving_tbl AS iir 
+LEFT JOIN ims_inventory_request_details_tbl AS iird ON iir.inventoryReceivingID = iird.inventoryReceivingID
+WHERE iir.inventoryReceivingID=id AND inventoryReceivingStatus = 2 AND iird.remainingQuantity <>0.00
+)w GROUP BY purchaseOrderID;
+ 
+SET inventoryReceivingID = LAST_INSERT_ID();
+ 
+INSERT INTO ims_inventory_request_details_tbl(inventoryReceivingID, recordID, itemID, itemCode, Brand, itemName, classificationName, quantity, uom)	
+SELECT inventoryReceivingID, recordID, itemID, itemCode, Brand, itemName, classificationName,  quantity, uom
+FROM 
+(
+	SELECT iir.recordID, itemID, itemCode, Brand, itemName, classificationName, remainingQuantity AS quantity, uom
+	FROM ims_inventory_request_details_tbl AS iird
+	LEFT JOIN ims_inventory_receiving_tbl AS iir ON iird.inventoryReceivingID = iir.inventoryReceivingID
+	WHERE iird.inventoryReceivingID=id AND inventoryReceivingStatus = 2 AND remainingQuantity <>0.00
+	GROUP BY iird.itemID
+)i;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_update_bid_po_items` (IN `iBidRecapID` BIGINT(21), IN `iInventoryVendorID` BIGINT(21), IN `documentStatus` INT(11))  BEGIN
@@ -9123,6 +9158,8 @@ CREATE TABLE `hris_leave_request_tbl` (
   `leaveID` bigint(20) NOT NULL,
   `leaveName` varchar(100) DEFAULT NULL,
   `leaveRequestRemainingLeave` bigint(20) NOT NULL,
+  `leaveStatus` bigint(20) NOT NULL,
+  `leaveWorkingDay` bigint(20) NOT NULL,
   `leaveRequestReason` text DEFAULT NULL,
   `approversID` text DEFAULT NULL,
   `approversStatus` text DEFAULT NULL,
@@ -9140,14 +9177,14 @@ CREATE TABLE `hris_leave_request_tbl` (
 -- Dumping data for table `hris_leave_request_tbl`
 --
 
-INSERT INTO `hris_leave_request_tbl` (`leaveRequestID`, `reviseLeaveRequestID`, `leaveRequestCode`, `employeeID`, `leaveRequestDate`, `leaveRequestDateFrom`, `leaveRequestDateTo`, `leaveRequestNumberOfDate`, `leaveID`, `leaveName`, `leaveRequestRemainingLeave`, `leaveRequestReason`, `approversID`, `approversStatus`, `approversDate`, `leaveRequestStatus`, `leaveRequestRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, NULL, '', 1, 'July 30, 2021 - July 30, 2021', '2021-07-30', '2021-07-30', 1, 1, 'Sick Leave', 55, 'Test', '4|2|6', '2|3|2', '2021-07-08 08:26:40|2021-07-08 08:29:02|2021-07-08 08:33:31', 2, 'Rejected', '2021-07-08 00:30:22', 1, 6, '2021-07-07 23:45:39', '2021-07-08 00:33:32'),
-(2, NULL, '', 1, 'July 13, 2021 - July 19, 2021', '2021-07-13', '2021-07-19', 7, 1, 'Sick Leave', 55, 'Reasons', '4|2|6', '3', '2021-07-08 08:28:22', 3, 'Denied', '2021-07-07 23:49:31', 1, 4, '2021-07-07 23:49:31', '2021-07-08 00:28:24'),
-(3, NULL, '', 1, 'July 13, 2021 - July 16, 2021', '2021-07-13', '2021-07-16', 4, 2, 'Vacation Leave', 4, 'ressss', '4|2|6', NULL, NULL, 4, NULL, '2021-07-07 23:51:21', 1, 1, '2021-07-07 23:50:12', '2021-07-08 00:26:16'),
-(4, NULL, '', 1, 'August 30, 2021 - August 30, 2021', '2021-08-30', '2021-08-30', 1, 3, 'Emergency Leave', 10, 'ressss', '4|2|6', '2|2|3', '2021-07-08 08:26:46|2021-07-08 08:28:51|2021-07-08 08:33:25', 3, 'Rejected', '2021-07-08 00:34:16', 1, 1, '2021-07-07 23:50:28', '2021-07-08 00:35:34'),
-(5, NULL, '', 1, 'July 30, 2021 - July 30, 2021', '2021-07-30', '2021-07-30', 1, 2, 'Vacation Leave', 4, 'test', NULL, NULL, NULL, 4, NULL, NULL, 1, 1, '2021-07-08 00:21:36', '2021-07-08 01:17:17'),
-(6, 4, '', 1, 'August 11, 2021 - August 12, 2021', '2021-08-11', '2021-08-12', 2, 3, 'Emergency Leave', 10, 'ressss', NULL, NULL, NULL, 0, NULL, NULL, 1, 1, '2021-07-08 00:41:03', '2021-07-08 00:41:05'),
-(7, 2, '', 1, 'July 13, 2021 - July 19, 2021', '2021-07-13', '2021-07-19', 7, 1, 'Sick Leave', 55, 'Reasons', NULL, NULL, NULL, 0, NULL, NULL, 1, 1, '2021-07-08 01:26:44', '2021-07-08 01:26:45');
+INSERT INTO `hris_leave_request_tbl` (`leaveRequestID`, `reviseLeaveRequestID`, `leaveRequestCode`, `employeeID`, `leaveRequestDate`, `leaveRequestDateFrom`, `leaveRequestDateTo`, `leaveRequestNumberOfDate`, `leaveID`, `leaveName`, `leaveRequestRemainingLeave`, `leaveStatus`, `leaveWorkingDay`, `leaveRequestReason`, `approversID`, `approversStatus`, `approversDate`, `leaveRequestStatus`, `leaveRequestRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, NULL, '', 1, 'July 30, 2021 - July 30, 2021', '2021-07-30', '2021-07-30', 1, 1, 'Sick Leave', 55, 0, 0, 'Test', '4|2|6', '2|3|2', '2021-07-08 08:26:40|2021-07-08 08:29:02|2021-07-08 08:33:31', 2, 'Rejected', '2021-07-08 00:30:22', 1, 6, '2021-07-07 23:45:39', '2021-07-08 00:33:32'),
+(2, NULL, '', 1, 'July 13, 2021 - July 19, 2021', '2021-07-13', '2021-07-19', 7, 1, 'Sick Leave', 55, 0, 0, 'Reasons', '4|2|6', '3', '2021-07-08 08:28:22', 3, 'Denied', '2021-07-07 23:49:31', 1, 4, '2021-07-07 23:49:31', '2021-07-08 00:28:24'),
+(3, NULL, '', 1, 'July 13, 2021 - July 16, 2021', '2021-07-13', '2021-07-16', 4, 2, 'Vacation Leave', 4, 0, 0, 'ressss', '4|2|6', NULL, NULL, 4, NULL, '2021-07-07 23:51:21', 1, 1, '2021-07-07 23:50:12', '2021-07-08 00:26:16'),
+(4, NULL, '', 1, 'August 30, 2021 - August 30, 2021', '2021-08-30', '2021-08-30', 1, 3, 'Emergency Leave', 10, 0, 0, 'ressss', '4|2|6', '2|2|3', '2021-07-08 08:26:46|2021-07-08 08:28:51|2021-07-08 08:33:25', 3, 'Rejected', '2021-07-08 00:34:16', 1, 1, '2021-07-07 23:50:28', '2021-07-08 00:35:34'),
+(5, NULL, '', 1, 'July 30, 2021 - July 30, 2021', '2021-07-30', '2021-07-30', 1, 2, 'Vacation Leave', 4, 0, 0, 'test', NULL, NULL, NULL, 4, NULL, NULL, 1, 1, '2021-07-08 00:21:36', '2021-07-08 01:17:17'),
+(6, 4, '', 1, 'August 11, 2021 - August 12, 2021', '2021-08-11', '2021-08-12', 2, 3, 'Emergency Leave', 10, 0, 0, 'ressss', NULL, NULL, NULL, 0, NULL, NULL, 1, 1, '2021-07-08 00:41:03', '2021-07-08 00:41:05'),
+(7, 2, '', 1, 'July 13, 2021 - July 19, 2021', '2021-07-13', '2021-07-19', 7, 1, 'Sick Leave', 55, 0, 0, 'Reasons', NULL, NULL, NULL, 0, NULL, NULL, 1, 1, '2021-07-08 01:26:44', '2021-07-08 01:26:45');
 
 -- --------------------------------------------------------
 
@@ -10247,12 +10284,20 @@ INSERT INTO `ims_inventory_condition_tbl` (`conditionID`, `conditionCode`, `cond
 CREATE TABLE `ims_inventory_disposal_details_tbl` (
   `disposalDetailID` bigint(20) NOT NULL,
   `disposalID` bigint(20) NOT NULL,
+  `stockInAssetID` bigint(20) NOT NULL,
   `inventoryStorageID` bigint(50) NOT NULL,
-  `itemID` bigint(50) NOT NULL,
-  `itemName` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `inventoryStorageCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryStorageOfficeName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `assetID` bigint(50) NOT NULL,
+  `assetCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `assetName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `barcode` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `brand` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `assetClassification` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `assetCategory` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `serialnumber` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `quantity` int(50) NOT NULL,
+  `quantity` decimal(15,2) NOT NULL,
+  `availableStock` decimal(15,2) NOT NULL,
   `unitOfMeasurement` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `disposalDetailRemarks` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `createdBy` bigint(20) NOT NULL,
@@ -10511,7 +10556,7 @@ CREATE TABLE `ims_inventory_request_details_tbl` (
   `itemID` int(255) DEFAULT NULL,
   `itemCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `itemName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Brand` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Brand` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `borrowedQuantity` decimal(15,2) DEFAULT NULL,
   `quantity` decimal(15,2) NOT NULL,
   `used` decimal(15,2) NOT NULL,
@@ -11385,6 +11430,7 @@ CREATE TABLE `ims_service_order_tbl` (
   `paymentTerms` varchar(100) DEFAULT NULL,
   `discountType` varchar(100) DEFAULT NULL,
   `scheduleDate` date DEFAULT NULL,
+  `serviceOrderInvoice` text DEFAULT NULL,
   `total` decimal(15,2) DEFAULT NULL,
   `discount` decimal(15,2) DEFAULT NULL,
   `totalAmount` decimal(15,2) DEFAULT NULL,
@@ -11935,12 +11981,12 @@ CREATE TABLE `pms_employeetaskboard_log_tbl` (
   `logID` bigint(20) NOT NULL,
   `taskboardID` bigint(20) DEFAULT NULL,
   `subtaskboardID` bigint(20) DEFAULT NULL,
-  `action` varchar(255) DEFAULT NULL,
-  `object_label` varchar(255) DEFAULT NULL,
-  `object_value` longtext DEFAULT NULL,
+  `action` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `object_label` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `object_value` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -11955,10 +12001,10 @@ CREATE TABLE `pms_employeetaskoard_details_tbl` (
   `projectMilestoneID` bigint(20) DEFAULT NULL,
   `milestoneBuilderID` bigint(20) DEFAULT NULL,
   `taskID` bigint(20) DEFAULT NULL,
-  `subTaskName` varchar(255) DEFAULT NULL,
-  `subTaskAssignee` text DEFAULT NULL,
-  `subTaskDescription` longtext DEFAULT NULL,
-  `subTaskManHours` varchar(255) DEFAULT NULL,
+  `subTaskName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subTaskAssignee` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subTaskDescription` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subTaskManHours` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `subTaskUsedHours` decimal(10,2) DEFAULT NULL,
   `subTaskStartDates` date DEFAULT NULL,
   `subTaskEndDates` date DEFAULT NULL,
@@ -11966,11 +12012,11 @@ CREATE TABLE `pms_employeetaskoard_details_tbl` (
   `subTaskSeverity` int(50) DEFAULT NULL,
   `subTaskTimeLeft` decimal(10,2) DEFAULT NULL,
   `subTaskStatus` int(50) DEFAULT NULL,
-  `subTaskNotes` longtext DEFAULT NULL,
+  `subTaskNotes` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `extension` date DEFAULT NULL,
   `createdBy` bigint(20) DEFAULT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -11984,19 +12030,19 @@ CREATE TABLE `pms_employeetaskoard_tbl` (
   `projectMilestoneID` bigint(20) DEFAULT NULL,
   `milestoneBuilderID` bigint(20) DEFAULT NULL,
   `taskID` bigint(20) DEFAULT NULL,
-  `taskName` varchar(255) DEFAULT NULL,
+  `taskName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `taskUsedHours` decimal(10,2) DEFAULT NULL,
-  `taskDescription` longtext DEFAULT NULL,
+  `taskDescription` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `taskStartDates` date DEFAULT NULL,
   `taskEndDates` date DEFAULT NULL,
   `taskPriority` int(50) DEFAULT NULL,
   `taskSeverity` int(50) DEFAULT NULL,
   `taskTimeLeft` decimal(10,2) DEFAULT NULL,
   `taskStatus` int(50) DEFAULT NULL,
-  `taskNotes` longtext DEFAULT NULL,
+  `taskNotes` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `extension` date DEFAULT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 

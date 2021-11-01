@@ -1916,7 +1916,7 @@ $(document).ready(function() {
 								autocomplete="off"
 								${billMaterialID ? "disabled" : ""}
 								${requiredAttr}
-								value="${sumRequestQuantity || "0.00"}">` : sumRequestManHours}
+								value="${sumRequestManHours || "0.00"}">` : sumRequestManHours}
 								<div class="invalid-feedback d-block" id="invalid"></div>
 							</div>
 						</td>

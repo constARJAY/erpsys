@@ -874,27 +874,6 @@ $(document).ready(function() {
 	// ----- END GET INVENTORY VENDOR LIST -----
 
 
-	// ----- GET PROJECT LIST -----
-    function getProjectList(id = null, display = true) {
-		let html = `
-		<option 
-			value       = "0"
-			projectCode = "-"
-			${id == "0" && "selected"}>N/A</option>`;
-        html += projectList.map(project => {
-            return `
-            <option 
-                value       = "${project.projectListID}" 
-                projectCode = "${getFormCode("PRJ", project.createdAt, project.projectListID)}"
-                ${project.projectListID == id && "selected"}>
-                ${project.projectName}
-            </option>`;
-        }).join("")
-        return display ? html : projectList;
-    }
-    // ----- END GET PROJECT LIST -----
-
-
 	// ----- UPDATE SERVICE OPTIONS -----
 	function updateServiceOptions() {
 		let serviceIDArr = []; // 0 IS THE DEFAULT VALUE
@@ -967,6 +946,7 @@ $(document).ready(function() {
         <div class="d-flex justify-content-start align-items-center">
             ${btnDelete}
             <a class="ml-1 display-image-filename"
+				${readOnly ? "display='true'" : ""}
                 href="${href}"
                 ${target}
 				title="${file}">
@@ -1002,7 +982,7 @@ $(document).ready(function() {
 			html = `
 			<tr>
 				<td>
-					<div class="servicefile">
+					<div class=" servicefile">
 						<div class="input-group mb-0">
 							<input type="file"
 								class="form-control validate"
@@ -1016,8 +996,7 @@ $(document).ready(function() {
 								required>
 							<div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serviceFile"></div>
 						</div>
-						<div class="display-image displayservicefile" 
-							style="display: ${serviceFile ? "block" : "none"}">
+						<div class="display-image-parent displayservicefile">
                             ${serviceFile}
                         </div>
 					</div>
@@ -1052,7 +1031,7 @@ $(document).ready(function() {
 			html = `
 			<tr>
 				<td>
-					<div class="servicefile">
+					<div class="display-image servicefile">
 						${serviceFile || "-"}
 					</div>
 				</td>
@@ -1275,6 +1254,19 @@ $(document).ready(function() {
 	// ----- END UPDATE TABLE ITEMS -----
 
 
+	// ----- MODAL IMAGE -----
+	$(document).on("click", `.display-image-filename`, function(e) {
+		let display = $(this).attr("display") == "true";
+		let source  = $(this).attr("blob") || $(this).attr("href");
+		if (display) {
+			e.preventDefault();
+			$("#display-image-preview").attr("src", source);
+			$("#display-image-modal").modal("show");
+		}
+	})
+	// ----- END MODAL IMAGE -----
+
+
 	// ----- SELECT PROJECT LIST -----
     $(document).on("change", "[name=projectID]", function() {
         const projectCode = $('option:selected', this).attr("projectCode");
@@ -1485,7 +1477,7 @@ $(document).ready(function() {
 			const filename    = filenameArr[0];
 			const extension   = filenameArr[1];
 			const filetypeArr = files[0].type.split("/");
-			const filetype    = filetypeArr[0];
+			const filetype    = filetypeArr[0]?.toLowerCase();
 			if (filesize > 10) {
 				showNotification("danger", `${filenameArr.join(".")} size must be less than or equal to 10mb`);
 			} else {

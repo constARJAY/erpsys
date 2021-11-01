@@ -1402,6 +1402,13 @@ $(function () {
 	// ----- END CHECK IF THE INPUTS IS VALID OR INVALID BASED ON THE LENGTH -----
 
 
+	// ----- PREVENT PASTE -----
+	$(document).on("paste", ".validate", function(e) {
+		e.preventDefault();
+	})
+	// ----- END PREVENT PASTE -----
+
+
 	// ----- EVERY TIME THE SELECT CHANGES -----
 	$(document).on("change", "select", function () {
 		let value = $(this).val();

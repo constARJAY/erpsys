@@ -1,3 +1,22 @@
+		<div class="modal fade" id="display-image-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-xl">
+				<div class="modal-content" style="height: 75vh;">              
+					<div class="modal-body position-relative d-flex justify-content-center align-items-center">
+						<button type="button" class="close position-absolute" 
+							style="top: 0; right: 0; margin: 10px 10px 0 0"
+							data-dismiss="modal">
+							<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+						</button>
+						<img src="" id="display-image-preview" 
+							style="height: 80%;
+								width: auto;
+								max-width: 80%;">
+					</div>
+				</div>
+			</div>
+		</div>
+	
+	
 	</div>
 	<!-- FOOTER -->
 	<div class="container sticky-bottom">

@@ -135,9 +135,11 @@ class Service_requisition extends CI_Controller {
                         }
                     }
                 }
+            } else if ($method == "drop") {
+                $dropServices = $this->servicerequisition->dropServices($serviceRequisitionID);
             }
             
-
+            
             // ----- INSERT SERVICE ORDER -----
             if ($serviceRequisitionStatus == "2") {
                 $insertServiceOrderData = $this->servicerequisition->insertServiceOrderData($serviceRequisitionID);

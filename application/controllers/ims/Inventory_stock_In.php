@@ -41,7 +41,7 @@ class Inventory_stock_in extends CI_Controller {
         $recievedQuantity = $this->input->post("recievedQuantity");
         $serialnumber = $this->input->post("serialnumber");
         $inventoryStorageID = $this->input->post("inventoryStorageID");
-        $inventoryStorageCode = $this->input->post("inventoryStorgeCode");
+        $inventoryStorageCode = $this->input->post("inventoryStorageCode");
         $inventoryStorageOfficeName = $this->input->post("inventoryStorageOfficeName");
         $manufactureDate = $this->input->post("manufactureDate");
         $expirationdate = $this->input->post("expirationdate");
@@ -60,7 +60,7 @@ class Inventory_stock_in extends CI_Controller {
                      'InventoryReceivingID'		=>$InventoryReceivingID[$i],
                      'MaterialUsageID'		    =>$MaterialUsageID[$i],
                      'ReturnItemID'		        =>$ReturnItemID[$i],
-                     'itemCode'		            =>$itemCode[$i],
+                     'itemCode'		            =>$itemCode,
                      'itemID'		            =>$itemID[$i],
                      'itemName'		            =>$itemName[$i],
                      'barcode'		            =>$barcode[$i],
@@ -86,7 +86,7 @@ class Inventory_stock_in extends CI_Controller {
                      'InventoryReceivingID'		=>$InventoryReceivingID[$i],
                      'MaterialUsageID'		    =>$MaterialUsageID[$i],
                      'ReturnItemID'		        =>$ReturnItemID[$i],
-                     'assetCode'		        =>$itemCode[$i],
+                     'assetCode'		        =>$itemCode,
                      'assetID'		            =>$itemID[$i],
                      'assetName'		        =>$itemName[$i],
                      'barcode'		            =>$barcode[$i],

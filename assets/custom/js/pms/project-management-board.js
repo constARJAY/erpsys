@@ -22,7 +22,7 @@ $(document).ready(function() {
         `holidayStatus = 1`
     );
 
-    let employeeSchedule = null;
+    let employeeSchedule = [];
     // ----- END REUSABLE VARIABLE/FUNCTIONS -----
 
 
@@ -914,7 +914,7 @@ $(document).ready(function() {
                     executeonce         = "true"
                     required
                     ${disabled}>
-                    <option disabled>${!disabled ? "Select Employee" : "-"}</option>
+                    <option readonly disabled>${!disabled ? "Select Employee" : "-"}</option>
                     ${teamMemberOptions}
                 </select>
                 <div class="invalid-feedback d-block"></div>
@@ -1220,7 +1220,7 @@ $(document).ready(function() {
         })
 
         let html = `
-        <div class="row px-2">
+        <div class="row px-2" id="project_board_form">
             ${documentReviseNo}
             <div class="${documentHeaderClass}">
                 <div class="card">
@@ -1237,7 +1237,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-                            ${managementBoardStatus && !isRevise ? getStatusStyle(managementBoardStatus, employeeID) : "---"}
+                            ${managementBoardStatus && !isRevise ? getStatusStyle(managementBoardStatus, managementBoardCode) : "---"}
                         </h6>      
                     </div>
                 </div>
@@ -1313,7 +1313,7 @@ $(document).ready(function() {
                         value="${employeeDesignation}">
                 </div>
             </div>
-            <div class="col-md-12 col-sm-12" id="project_board_header">
+            <div class="col-md-12 col-sm-12">
                 <div class="form-group">
                     <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
@@ -1335,7 +1335,7 @@ $(document).ready(function() {
                     <span class="text-danger font-weight-bold mb-1 float-right" style="font-size: 1.5rem;">${projectCode}</span>
                 </div>
             </div>
-            <div class="col-12">
+            <div class="col-12" id="project_board_phase">
                 ${phaseHTML}
             </div>
             <div class="col-12 text-right mt-3">
@@ -1646,7 +1646,12 @@ $(document).ready(function() {
             })
             // ----- END CHECK IF DATE EXISTS -----
 
-            $(`[name="employeeManHours"]`).trigger("keyup");
+            $(`[name="employeeManHours"]`).each(function() {
+                const manHours = getNonFormattedAmount($(this).val());
+                if (manHours > 0) {
+                    $(this).trigger("keyup");
+                }
+            })
         }
     }
 
@@ -1778,54 +1783,56 @@ $(document).ready(function() {
                 employeeID, fullname, image, employeeCode, departmentName, designationName
             } = employeeData;
 
+            employeeSchedule = getTableData(
+                `hris_employee_list_tbl as helt
+                    LEFT JOIN hris_schedule_setup_tbl AS hsst USING(scheduleID)`,
+                `hsst.*`,
+                `employeeID = ${employeeID}`
+            );
+
             let tbodyHTML = "";
-            taskData.map(task => {
+            taskData.map((task, idx) => {
 
-                const { employeeID, timelineBuilderID, taskID, milestoneID } = task;
-
-                employeeSchedule = getTableData(
-                    `hris_employee_list_tbl as helt
-                        LEFT JOIN hris_schedule_setup_tbl AS hsst USING(scheduleID)`,
-                    `hsst.*`,
-                    `employeeID = ${employeeID}`
-                );
+                const { employeeID, milestoneID, taskID } = task;
 
                 let data = [];
-                $(`[name="manHours"][phase="${phase}"][taskID="${taskID}"][milestoneID="${milestoneID}"]`).each(function() {
-                    const employeeArr = $(this).attr("employees")?.split("|") || [];
-                    if (employeeArr.includes(employeeID)) {
-                        const employeeIndex  = employeeArr.indexOf(employeeID);
+                if (phase && taskID && milestoneID) {
+                    $(`[name="manHours"][phase="${phase}"][taskID="${taskID}"][milestoneID="${milestoneID}"]`).each(function() {
+                        const employeeArr = $(this).attr("employees")?.split("|") || [];
+                        if (employeeArr.includes(employeeID)) {
+                            const employeeIndex  = employeeArr.indexOf(employeeID);
 
-                        const datesArr         = $(this).attr("dates")?.split("|") || [];
-                        const manHoursArr      = $(this).attr("manHours")?.split("|") || [];
-                        const regularHoursArr  = $(this).attr("regularHours")?.split("|") || [];
-                        const overtimeHoursArr = $(this).attr("overtimeHours")?.split("|") || [];
+                            const datesArr         = $(this).attr("dates")?.split("|") || [];
+                            const manHoursArr      = $(this).attr("manHours")?.split("|") || [];
+                            const regularHoursArr  = $(this).attr("regularHours")?.split("|") || [];
+                            const overtimeHoursArr = $(this).attr("overtimeHours")?.split("|") || [];
 
-                        const datesArr2         = datesArr[employeeIndex] ?? "";
-                        const manHoursArr2      = manHoursArr[employeeIndex] ?? "";
-                        const regularHoursArr2  = regularHoursArr[employeeIndex] ?? "";
-                        const overtimeHoursArr2 = overtimeHoursArr[employeeIndex] ?? "";
+                            const datesArr2         = datesArr[employeeIndex] ?? "";
+                            const manHoursArr2      = manHoursArr[employeeIndex] ?? "";
+                            const regularHoursArr2  = regularHoursArr[employeeIndex] ?? "";
+                            const overtimeHoursArr2 = overtimeHoursArr[employeeIndex] ?? "";
 
-                        const datesArr3         = datesArr2?.split("~") ?? [];
-                        const manHoursArr3      = manHoursArr2?.split("~") ?? [];
-                        const regularHoursArr3  = regularHoursArr2?.split("~") ?? [];
-                        const overtimeHoursArr3 = overtimeHoursArr2?.split("~") ?? [];
-                        datesArr3.map((arr, index) => {
-                            const date          = datesArr3[index] ?? "";
-                            const manHours      = manHoursArr3[index] ?? "";
-                            const regularHours  = regularHoursArr3[index] ?? "";
-                            const overtimeHours = overtimeHoursArr3[index] ?? "";
+                            const datesArr3         = datesArr2?.split("~") ?? [];
+                            const manHoursArr3      = manHoursArr2?.split("~") ?? [];
+                            const regularHoursArr3  = regularHoursArr2?.split("~") ?? [];
+                            const overtimeHoursArr3 = overtimeHoursArr2?.split("~") ?? [];
+                            datesArr3.map((arr, index) => {
+                                const date          = datesArr3[index] ?? "";
+                                const manHours      = manHoursArr3[index] ?? "";
+                                const regularHours  = regularHoursArr3[index] ?? "";
+                                const overtimeHours = overtimeHoursArr3[index] ?? "";
 
-                            employeeTotalManHours += ((+manHours) || 0);
+                                employeeTotalManHours += ((+manHours) || 0);
 
-                            let temp = {
-                                date, manHours, regularHours, overtimeHours
-                            };
-                            data.push(temp);
-                        })
+                                let temp = {
+                                    date, manHours, regularHours, overtimeHours
+                                };
+                                data.push(temp);
+                            })
 
-                    }
-                });
+                        }
+                    });
+                }
 
                 let remainingManHours = (+remaining) + (+employeeTotalManHours);
                 remainingManHours = remainingManHours > 0 ? remainingManHours : 0;
@@ -2113,7 +2120,7 @@ $(document).ready(function() {
         let flag = true;
 
         const checkManHours = validateManHours();
-        const checkAssignee = validateAssignee();
+        // const checkAssignee = validateAssignee();
         
         $(`[name="manHours"]`).each(function() {
             $parent = $(this).closest("tr");
@@ -2193,7 +2200,15 @@ $(document).ready(function() {
         // ----- END COMPUTE REGULAR AND OVERTIME HOURS -----
         
         $(elementID).attr("executed", "true");
-        $(`[name="employeeManHours"][date="${dateValue}"]:not([executed="true"])`).trigger("keyup");
+        let dateManHours = 0;
+        $(`[name="employeeManHours"][date="${dateValue}"]:not([executed="true"])`).each(function() {
+            dateManHours += getNonFormattedAmount($(this).val());
+        })
+        $(`[name="employeeManHours"][date="${dateValue}"]:not([executed="true"])`).each(function() {
+            if (dateManHours >= 24) {
+                $(this).trigger("keyup");
+            }
+        })
         $(elementID).attr("executed", "false");
 
         $table = $(elementID).closest("table#tableManHours");
@@ -2620,13 +2635,14 @@ $(document).ready(function() {
         const isRevise          = $(this).attr("revise") == "true" && $(this).attr("cancel") == "false";
 
         setTimeout(() => {
-            validateForm("project_board_header");
+            validateForm("project_board_form");
             validateInputs().then(res => {
                 if (res) {
                     saveProjectBoard("submit", managementBoardID, timelineBuilderID, code, isRevise, pageContent);
                 }
                 formButtonHTML(this, false);
-            })
+            });
+            removeIsValid("#project_board_phase");
         }, 10);
 	});
 	// ----- END CLICK BUTTON SUBMIT -----

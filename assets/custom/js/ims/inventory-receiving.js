@@ -3,12 +3,12 @@ $(document).ready(function() {
 	//------ MODULE FUNCTION IS ALLOWED UPDATE-----
 
 	const allowedUpdate = isUpdateAllowed(33);
-	if(!allowedUpdate){
-		$("#page_content").find("input, select, textarea").each(function(){
-			$(this).attr("disabled",true);
-		});
-		$("#btnSubmit").hide();
-	}
+	// if(!allowedUpdate){
+	// 	$("#page_content").find("input, select, textarea").each(function(){
+	// 		$(this).attr("disabled",true);
+	// 	});
+	// 	$("#btnSubmit").hide();
+	// }
 
 	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
 
@@ -170,7 +170,7 @@ function initDataTables() {
 			sorting: [],
 			scrollCollapse: true,
 			columnDefs: [
-				{ targets: 0,  width: 180 },
+				{ targets: 0,  width: 200 },
 				{ targets: 1,  width: 150 },
 				{ targets: 2,  width: 150 },
 				{ targets: 3,  width: 250 },
@@ -192,7 +192,7 @@ function initDataTables() {
 			sorting: [],
 			scrollCollapse: true,
 			columnDefs: [
-				{ targets: 0,  width: 180 },
+				{ targets: 0,  width: 200 },
 				{ targets: 1,  width: 150 },
 				{ targets: 2,  width: 100 },
 				{ targets: 3,  width: 250 },
@@ -218,7 +218,7 @@ function initDataTables() {
             info: false,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 200 },
+                { targets: 0,  width: 250 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 220 },
                 { targets: 3,  width: 250 },
@@ -241,7 +241,7 @@ function initDataTables() {
             scrollX: true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 200 },
+                { targets: 0,  width: 250 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 220 },
                 { targets: 3,  width: 250 },
@@ -293,8 +293,10 @@ function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancel
 		html = `
 		<button type="button" 
 		class="btn btn-default btn-light" 
-		id="btnBack" revise="${isRevise}" 
-		cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+		id="btnBack" 
+		revise="${isRevise}" 
+		cancel="${isFromCancelledDocument}">
+		<i class="fas fa-arrow-left"></i> Back</button>`;
 	}
 	$("#headerButton").html(html);
 }
@@ -1216,10 +1218,11 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
 	readOnly ? preventRefresh(false) : preventRefresh(true);
 
-	$("#btnBack").attr("inventoryReceivingID", inventoryReceivingID);
+	$("#btnBack").attr("inventoryReceivingID", encryptString(inventoryReceivingID));
 	$("#btnBack").attr("status", inventoryReceivingStatus);
 	$("#btnBack").attr("employeeID", employeeID);
 	$("#btnBack").attr("cancel", isFromCancelledDocument);
+	$("#btnBack").attr("inventoryReceivingCode", getFormCode("INR", dateToday(), inventoryReceivingID));
 
 	let disabled = readOnly ? "disabled" : "";
 	//let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
@@ -1787,135 +1790,57 @@ $(document).on("click", ".btnView", function () {
 
 
 // ----- VIEW DOCUMENT -----
-// $(document).on("click", "#btnRevise", function () {
-// 	const id = $(this).attr("inventoryReceivingID");
-// 	const fromCancelledDocument = $(this).attr("cancel") == "true";
-// 	viewDocument(id, false, true, fromCancelledDocument);
-// });
-// ----- END VIEW DOCUMENT -----
 $(document).on("click", "#btnRevise", function () {
-	const id     = decryptString($(this).attr("inventoryReceivingID"));
-	const status = $(this).attr("status");
-	const code    = $(this).attr("bidRecapCode");
+	const id = $(this).attr("inventoryReceivingID");
 	const fromCancelledDocument = $(this).attr("cancel") == "true";
-	if (status == "4") {
-		$("#page_content").html(preloader);
-		setTimeout(() => {
-			viewDocument(id, false, true, fromCancelledDocument);
-		}, 10);
-	} else {
-		const confirmation = getConfirmation("revise");
-		confirmation.then(res => {
-			if (res.isConfirmed) {
-				$.ajax({
-					method:      "POST",
-					url:         `bid_recap/reviseBidRecap`,
-					data:        { bidRecapID: id },
-					cache:       false,
-					async:       false,
-					dataType:    "json",
-					beforeSend: function() {
-						$("#loader").show();
-					},
-					success: function(data) {
-						let result = data.split("|");
-						setTimeout(() => {
-							$("#loader").hide();
-							let isSuccess   = result[0];
-							let feedback   = code || (result[1] || "Bid Recap");
-							let insertedID  = result[2];
-							let dateCreated = result[3];
-			
-							if (isSuccess == "true") {
-								showNotification("success", `${feedback} revised successfully!`);
-								viewDocument(insertedID);
-							} else {
-								Swal.fire({
-									icon:              "danger",
-									title:             "There's an error revising bid recap",
-									showConfirmButton: false,
-									timer:             2000,
-								});
-							}
-						}, 500);
-					},
-					error: function() {
-						setTimeout(() => {
-							$("#loader").hide();
-							showNotification("danger", "System error: Please contact the system administrator for assistance!");
-						}, 500);
-					}
-				}).done(function() {
-					setTimeout(() => {
-						$("#loader").hide();
-					}, 500);
-				})
-			}
-		});
-	}
+	//viewDocument(id, false, true, fromCancelledDocument);
+	$("#page_content").html(preloader);
+	setTimeout(() => {
+		viewDocument(id, false, true, fromCancelledDocument);
+	}, 10);
 });
+// ----- END VIEW DOCUMENT -----
 
 // ----- SAVE CLOSE FORM -----
 $(document).on("click", "#btnBack", function () {
-	const id         = $(this).attr("inventoryReceivingID");
-	const isFromCancelledDocument = $(this).attr("cancel") == "true";
-	const revise     = $(this).attr("revise") == "true";
-	const employeeID = $(this).attr("employeeID");
-	const feedback   = $(this).attr("code") || getFormCode("INR", dateToday(), id);
-	const status     = $(this).attr("status");
+	const id         = decryptString($(this).attr("inventoryReceivingID"));
+		const code       = $(this).attr("inventoryReceivingCode");
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise     = $(this).attr("revise") == "true";
+		const employeeID = $(this).attr("employeeID");
+		const status     = $(this).attr("status");
 
-	if (status && status != 0) {
-		
-		if (revise) {
-			// const action = revise && "insert" || (id && feedback ? "update" : "insert");
-			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-			const data   = getInventoryReceivingData(action, "save", "0", id);
-			
-			data["inventoryReceivingStatus"]   = 0;
-			data.append("inventoryReceivingStatus", 0);
-			
-			// data["reviseInventoryReceivingID"] = id;
+		if (status && status != 0) {
+			if (revise) {
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getInventoryReceivingData(action, "save", "0", id);
+				data.append("inventoryReceivingStatus", 0);
+				if (!isFromCancelledDocument) {
+					data.append("reviseInventoryReceivingID ", id);
+					data.delete("inventoryReceivingID ");
+				} else {
+					data.append("inventoryReceivingID ", id);
+					data.delete("action");
+					data.append("action", "update");
+				}
 
-			// delete data["inventoryReceivingID"];
-
-			if (!isFromCancelledDocument) {
-				data["reviseInventoryReceivingID"] = id;
-				data.append("reviseInventoryReceivingID", id);
-
-				delete data["inventoryReceivingID"];
-
-				// data.append("reviseInventoryReceivingID", id);
-				// data.delete("inventoryReceivingID");
+				saveInventoryReceiving(data, "save", null, pageContent, code);
 			} else {
-				// delete data["inventoryReceivingID"];
-
-				data["inventoryReceivingID"] = id;
-				delete data["action"];
-				data["action"] = update;
-
-				// data.append("inventoryReceivingID", id);
-				// data.delete("action");
-				// data.append("action", "update");
+				$("#page_content").html(preloader);
+				pageContent();
+	
+				if (employeeID != sessionID) {
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+				}
 			}
 
-			saveInventoryReceiving(data, "save", null, pageContent);
 		} else {
-			$("#page_content").html(preloader);
-			pageContent();
+			const action = id ? "update" : "insert";
+			const data   = getInventoryReceivingData(action, "save", "0", id);
+			data.append("inventoryReceivingStatus", 0);
 
-			if (employeeID != sessionID) {
-				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-			}
+			saveInventoryReceiving(data, "save", null, pageContent, code);
 		}
-
-	} else {
-		const action = id && feedback ? "update" : "insert";
-		const data   = getInventoryReceivingData(action, "save", "0", id);
-		data["inventoryReceivingStatus"] = 0;
-		// data.append("inventoryReceivingStatus", 0);
-
-		saveInventoryReceiving(data, "save", null, pageContent);
-	}
 });
 // ----- END SAVE CLOSE FORM -----
 
@@ -2282,7 +2207,7 @@ $(document).on("click", "#btnReject", function () {
 	</div>
 	<div class="modal-footer text-right">
 		<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-		inventoryReceivingID="${encryptString(id)}"
+		inventoryReceivingID="${id}"
 		code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 		<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 	</div>`;

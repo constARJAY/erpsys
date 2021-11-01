@@ -457,8 +457,8 @@ $(document).ready(function() {
             projectName,
             projectCategory,
             clientName,
-            clientAddress,
             timelineDate,
+            clientAddress,
             timelinePriority,
             timelineIssued,
             projectManager,
@@ -494,6 +494,8 @@ $(document).ready(function() {
             timelineDesign          =   ""
 
         } = tableData[0];
+
+       
         let html = `
         <div class="">
             <div class="row px-2">
@@ -627,7 +629,7 @@ $(document).ready(function() {
                         <input type="text" class="form-control" disabled value="${clientAddress}">
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-12">
+                <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Project Manager ${!disabled ? "<code>*</code>" : ""}</label>
                         <select class="form-control validate select2"
@@ -640,7 +642,7 @@ $(document).ready(function() {
                         <div class="invalid-feedback d-block" id="invalid-timelineProjectManager"></div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-12">
+                <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Team Leader ${!disabled ? "<code>*</code>" : ""}</label>
                         <select class="form-control validate select2"
@@ -654,17 +656,10 @@ $(document).ready(function() {
                     </div>
                 </div>
 
-                <div class="col-md-3 col-sm-12">
+                <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Start Date & End Date ${!disabled ? "<code>*</code>" : ""}</label>
                         <input type="text" class="form-control" disabled name="timelineDate" value="${timelineDate}">
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-12">
-                    <div class="form-group">
-                        <label>Design </label>
-                        ${ timelineDesign ? `<div class="w-100 ripple"> <a href="${base_url+"assets/upload-files/project-designs/"+timelineDesign}" class="ripple" target="_blank">${timelineDesign}</a></div>` 
-                            : `<input type="text" class="form-control" disabled name="timelineDate" value="-">` }
                     </div>
                 </div>
                 <div class="col-12">
@@ -695,7 +690,19 @@ $(document).ready(function() {
                                 <div class="invalid-feedback d-block" id="invalid-timelineTeamMemberNonOrganic"></div>
                             </div>
                         </div>
+
+                        <div class="col-md-12 col-sm-12">
+                            <div class="form-group">
+                                <label>Design </label>
+                            </div>
+                        </div>
                     </div>
+                </div>
+                <div class="col-12">
+                    <div class="row row-display-image">
+                        ${displayImage(timelineDesign , readOnly, "assets/upload-files/project-designs")}
+                    </div>
+                    
                 </div>
             </div>    
             
@@ -1048,3 +1055,42 @@ $(document).ready(function() {
     // ----- END SAVE PROJECT BUDGET -----
 
 })
+
+
+function displayImage(fileList = false, readOnly = false, path = "assets/upload-files/project-designs"){
+	let html 		= ``;
+	
+	let link 		= true;
+	if(fileList){
+		let parameterArray 	= fileList ? fileList.split("|") : [];
+		
+		let array   = parameterArray;
+		array.map(list =>{
+			let otherAttr = link ? `
+				href="${base_url+path+"/"+list}" 
+				target="_blank"` : `href="javascript:void(0)"`;
+			html += `	<div class="col-md-2 col-sm-2 image-column">
+							<div class="form-group">
+								<div class="d-flex justify-content align-items-center" style="font-size: 12px; border: 1px solid black; border-radius: 5px; color:black;background: #d1ffe0; padding: 2px 10px;">
+										${!readOnly ? `<span class="btnRemoveImage pr-2" style="cursor: pointer" filename="${list}"><i class="fas fa-close"></i></span>` : ""}
+										<a class="filename"
+											title="${list}"
+											style="display: block;
+											color:black !important;
+											width: 90%;
+											overflow: hidden;
+											white-space: nowrap;
+											text-overflow: ellipsis;"
+											${readOnly ? otherAttr : ""}>
+											${list}
+										</a>
+								</div>
+							</div>
+						</div>`;
+		});
+		$("#timelineDesign").val("");
+	}
+	setTimeout(() => {
+		$(".row-display-image").html(html);
+	}, 800);
+}

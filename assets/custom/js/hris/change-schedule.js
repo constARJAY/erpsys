@@ -46,6 +46,24 @@ $(document).ready(function () {
 		IF(sundayStatus = 1, 1, 0) AS sunday`,
 		`employeeID = ${sessionID}`
 	);
+
+	let leaveRequestData = getTableData(
+		`hris_leave_request_tbl`,
+		`leaveRequestDateFrom, leaveRequestDateTo`,
+		`leaveRequestStatus = 2 AND employeeID = ${sessionID}`
+	);
+	let leaveDates = [];
+	leaveRequestData.map(leave => {
+		const { leaveRequestDateFrom, leaveRequestDateTo } = leave;
+		let dateFrom = moment(leaveRequestDateFrom);
+		let dateTo   = moment(leaveRequestDateTo);
+		let duration = moment.duration(dateTo.diff(dateFrom)).asDays() + 1;
+		let date     = dateFrom.format("YYYY-MM-DD");
+		for (var i=0; i<duration; i++) {
+			if (!leaveDates.includes(date)) leaveDates.push(date);
+			date = moment(date).add(1, 'days').format("YYYY-MM-DD");
+		}
+	})
 	// ----- END REUSABLE FUNCTIONS -----
 
 
@@ -791,23 +809,15 @@ $(document).ready(function () {
 			initAll();
 			initDataTables();
 			initInputmaskTime(data ? true : false);
-			// if (data) {
-			// 	$("#changeScheduleDate").data("daterangepicker").startDate = moment(changeScheduleDate, "YYYY-MM-DD");
-			// 	$("#changeScheduleDate").data("daterangepicker").endDate   = moment(changeScheduleDate, "YYYY-MM-DD");
-			// } else {
-			// 	initInputmaskTime();
-			// 	$("#changeScheduleDate").val(moment(new Date).format("MMMM DD, YYYY"));
-			// }
-			// $("#changeScheduleDate").data("daterangepicker").minDate = moment();
 
 
-			$("#changeScheduleDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			// $("#changeScheduleDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			$("#changeScheduleDate").daterangepicker({
 				autoUpdateInput: false,
 				singleDatePicker: true,
 				showDropdowns: true,
 				autoApply: true,
-				startDate: moment(changeScheduleDate || new Date).format("YYYY-MM-DD"),
+				// startDate: moment(changeScheduleDate || new Date).format("YYYY-MM-DD"),
 				minDate: moment(),
 				// maxDate: moment().add(80, 'days'),
 				locale: {
@@ -828,7 +838,7 @@ $(document).ready(function () {
 					});
 
 					let optionDate = moment(date).format("YYYY-MM-DD");
-					return holidayData.includes(optionDate) || isActive == '0';
+					return holidayData.includes(optionDate) || leaveDates.includes(optionDate) || isActive == '0';
 				},
 			}, function(data) {
 				$("#changeScheduleDate").val(moment(data).format("MMMM DD, YYYY"));
@@ -915,42 +925,6 @@ $(document).ready(function () {
 		});
 	}
 	// ----- END CUSTOM INPUTMASK ------
-
-
-	// ----- CHECK TIME RANGE -----
-	function checkTimeRange(elementID = false, isReturnable = false) {
-		let element = elementID ? `#${elementID}` : ".timeOut";
-		let flag = 0;
-		$(element).each(function () {
-			const fromValue = $("#changeScheduleTimeIn").val() + ":00";
-			const validated = $(this).hasClass("validated");
-			const toValue   = $(this).val() + ":00";
-
-			const timeIn  = moment(`2021-01-01 ${fromValue}`);
-			const timeOut = moment(`2021-01-01 ${toValue}`);
-
-			let diff = moment.duration(timeOut.diff(timeIn));
-				diff = diff.asSeconds();
-
-			const invalidFeedback = $(this).parent().find(".invalid-feedback");
-
-			if (diff <= 0) {
-				$(this).removeClass("is-valid").addClass("is-invalid");
-				invalidFeedback.text("Invalid time range");
-				flag++;
-			} else {
-				isReturnable || validated
-					? $(this).removeClass("is-invalid").addClass("is-valid")
-					: $(this).removeClass("is-invalid").removeClass("is-valid");
-				invalidFeedback.text("");
-			}
-		});
-		if (isReturnable) {
-			$(".modal").find(".is-invalid").first().focus();
-			return flag > 0 ? false : true;
-		}
-	}
-	// ----- END CHECK TIME RANGE -----
 
 
 	// ----- GET DATA -----

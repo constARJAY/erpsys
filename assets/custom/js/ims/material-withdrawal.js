@@ -461,7 +461,7 @@
                         index="${index}"
                         itemID="${itemID}"
                         withdrawalItemID="${withdrawalItemID}"
-                        remainingValueItem="${formatAmount(remaining)}"
+                        remainingValueItem="${formatAmount(requestQuantity)}"
                         >${formatAmount(remaining)} </span>
                 </div>`;
 
@@ -686,7 +686,7 @@
             <div class="card-body">
                 <div class="mb-2">
                     <div class="text-primary font-weight-bold" style="font-size: 1.2rem;">
-                       Item/s Request
+                       WITHDRAWN (ITEM/S)
                     </div>
                 </div>
 
@@ -695,8 +695,8 @@
                         <thead style="line-height:8px; white-space:nowrap;">
                             <tr class="bg-dark">
                                 <th class="text-white">Item Code</th>
-                                <th class="text-white">Item Name/Brand Name</th>
-                                <th class="text-white">Item Classification/Item Category</th>
+                                <th class="text-white">Item Name</th>
+                                <th class="text-white">Item Classification</th>
                                 <th class="text-white">UOM</th>
                                 <th class="text-white">Quantity</th>
                                 <th class="text-white">Stock Out</th>
@@ -770,7 +770,7 @@
                 <div class="form-group my-1 text-center">
                     <input class="form-control input-quantity text-center"
                         value="${formatAmount(received)}"
-                        boorowedValue="${formatAmount(borrowed)}"
+                        borrowedValue="${formatAmount(borrowed)}"
                         name="receivedAssets"
                         min="0.00"
                         max="9999999999"
@@ -790,7 +790,7 @@
                         index="${index}"
                         assetID="${assetID}"
                         withdrawalAssetID="${withdrawalAssetID}"
-                        remainingValueAsset ="${formatAmount(remaining)}"
+                        remainingValueAsset ="${formatAmount(requestQuantity)}"
                         >${formatAmount(remaining)} </span>
                 </div>`;
 
@@ -1015,7 +1015,7 @@
             <div class="card-body">
                 <div class="mb-2">
                     <div class="text-primary font-weight-bold" style="font-size: 1.2rem;">
-                       Asset/s Request
+                     WITHDRAWN (ASSET/S)
                     </div>
                 </div>
 
@@ -1024,8 +1024,8 @@
                         <thead style="line-height:8px; white-space:nowrap;">
                             <tr class="bg-dark">
                                 <th class="text-white">Asset Code</th>
-                                <th class="text-white">Asset Name/Brand Name</th>
-                                <th class="text-white">Asset Classification/Asset Category</th>
+                                <th class="text-white">Asset Name</th>
+                                <th class="text-white">Asset Classification</th>
                                 <th class="text-white">UOM</th>
                                 <th class="text-white">Quantity</th>
                                 <th class="text-white">Borrowed Quantity</th>
@@ -1056,11 +1056,22 @@
     $(document).on("keyup", `[name="receivedItems"]`, function() {
         const itemID    = $(this).attr("itemID");
         const withdrawalItemID    = $(this).attr("withdrawalItemID");
+        const index = $(this).attr("index");
         const value = +$(this).val();
         var stockOutValue = +$(this).attr("stockOutValue");
-        const getRemainingItem = +$(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
+        const getRemainingItemDefault = +$(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
         var computeRemainingItem =0;
-        computeRemainingItem = getRemainingItem - value;
+      
+
+        $getAllReceivedItems =0;
+        $(`[name="receivedItems"][itemID="${itemID}"]`).each(function(){
+        
+            $getAllReceivedItems += +$(this).val().replaceAll(",","") || 0;
+
+        })
+
+        computeRemainingItem = getRemainingItemDefault - $getAllReceivedItems;
+
 
         if(value > stockOutValue){
             $(this).val(0);
@@ -1069,18 +1080,18 @@
         }
 
         if(value == 0){
-            $(`[name="receivedDateItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text("-");
-            $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(getRemainingItem));
+            $(`[name="receivedDateItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"][index=${index}]`).text("-");
+            $(`[name="remainingItem"][itemID="${itemID}"]`).text(formatAmount(computeRemainingItem));
 
 
         }else{
-            $(`[name="receivedDateItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(moment().format("MMMM DD, YYYY"));
+            $(`[name="receivedDateItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"][index=${index}]`).text(moment().format("MMMM DD, YYYY"));
             
             if(computeRemainingItem <0){
-                $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(0));
+                $(`[name="remainingItem"][itemID="${itemID}"]`).text(formatAmount(0));
 
             }else{
-                $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(computeRemainingItem));
+                $(`[name="remainingItem"][itemID="${itemID}"]`).text(formatAmount(computeRemainingItem));
 
             }
 
@@ -1091,40 +1102,49 @@
     $(document).on("keyup", `[name="receivedAssets"]`, function() {
         const assetID    = $(this).attr("assetID");
         const withdrawalAssetID    = $(this).attr("withdrawalAssetID");
-        var borrowedValue = $(this).attr("borrowedValue");
+        const index = $(this).attr("index");
         const value = +$(this).val();
-        const getRemainingAsset = +$(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).attr("remainingValueAsset").replaceAll(",","");
+        var borrowedValue = +$(this).attr("borrowedValue");
+        const getRemainingAssetDefault = +$(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).attr("remainingValueAsset").replaceAll(",","");
         var computeRemainingAsset =0;
-        computeRemainingAsset = getRemainingAsset - value;
+      
+
+        $getAllReceivedAssets =0;
+        $(`[name="receivedAssets"][assetID="${assetID}"]`).each(function(){
+        
+            $getAllReceivedAssets += +$(this).val().replaceAll(",","") || 0;
+
+        })
+
+        computeRemainingAsset = getRemainingAssetDefault - $getAllReceivedAssets;
+
 
         if(value > borrowedValue){
             $(this).val(0);
             showNotification("danger", "Incorrect Quantity Inserted!");
+            
         }
-     
 
         if(value == 0){
-        
-            $(`[name="receivedDateAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text("-");
-            $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(getRemainingAsset));
+            $(`[name="receivedDateAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"][index=${index}]`).text("-");
+            $(`[name="remainingAsset"][assetID="${assetID}"]`).text(formatAmount(computeRemainingAsset));
 
 
         }else{
-
-            $(`[name="receivedDateAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(moment().format("MMMM DD, YYYY"));
-
+            $(`[name="receivedDateAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"][index=${index}]`).text(moment().format("MMMM DD, YYYY"));
+            
             if(computeRemainingAsset <0){
-                $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(0));
+                $(`[name="remainingAsset"][assetID="${assetID}"]`).text(formatAmount(0));
 
             }else{
-                $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(computeRemainingAsset));
+                $(`[name="remainingAsset"][assetID="${assetID}"]`).text(formatAmount(computeRemainingAsset));
 
             }
-
 
         }
 
     });
+
     // ----- END KEYUP QUANTITY -----
 
 

@@ -44,35 +44,91 @@ class Operations extends CI_Controller {
     {
         $data = [];
         if (is_array($_FILES)) {
-            if (count($_FILES) > 0) {
+            if (count($_FILES) > 0 && !empty($_FILES["tableData"])) {
                 $keys = array_keys($_FILES["tableData"]["name"]);
                 for($x=0; $x<count($keys); $x++) {
+                    $mixedFileName = "";
+
                     $fileKeyStr = $keys[$x];
-                    $fileKeyArr = explode("|", $keys[$x]);
-                    $fileKey    = $fileKeyArr[0];
-                    $folder     = $fileKeyArr[1] ? $fileKeyArr[1] : "";
-                    $fileName   = "";
+                    $fileKeyArrParent = explode("|", $keys[$x]);
+                    $fileKey    = $fileKeyArrParent[0];
+                    $folderName = $fileKeyArrParent[1] ? $fileKeyArrParent[1] : "";
                     $fileLength = count($_FILES["tableData"]["name"][$fileKeyStr]);
                     for($i=0; $i<$fileLength; $i++) {
-                        $target_dir = "assets/upload-files/$folder/";
-                        if (!is_dir($target_dir)) {
-                            mkdir($target_dir);
+                        $fileName    = $_FILES["tableData"]["name"][$fileKeyStr][$i];
+                        $fileTmpName = $_FILES["tableData"]["tmp_name"][$fileKeyStr][$i];
+
+                        $targetDir = "assets/upload-files/$folderName/";
+                        if (!is_dir($targetDir)) {
+                            mkdir($targetDir);
                         }
-                        $keyArr = explode(".", $_FILES["tableData"]["name"][$fileKeyStr][$i]);
-                        $fileType = pathinfo(basename($_FILES["tableData"]["name"][$fileKeyStr][$i]),PATHINFO_EXTENSION);
-                        $target_file = $target_dir.$i.time().'.'.$fileType;
+
+                        if (!file_exists($targetDir."index.html")) {
+                            copy('assets/index.html', $targetDir."index.html");
+                        }
+
+                        $fileKeyArr  = explode(".", explode("|", $fileName)[1] ?? "");
+                        $fileKeyName = $fileKeyArr[0] ?? "";
+                        $fileKeyType = $fileKeyArr[1] ?? "";
+
+                        $targetFileName = $fileKeyName.$i.time().'.'.$fileKeyType;
+                        $targetFile     = $targetDir.$targetFileName;
             
-                        if (move_uploaded_file($_FILES["tableData"]["tmp_name"][$fileKeyStr][$i], $target_file)) {
-                            $temp = $i.time().'.'.$fileType;
-                            $fileName = $fileName ? $fileName."|".$temp : $temp;
+                        if (move_uploaded_file($fileTmpName, $targetFile)) {
+                            $mixedFileName = $mixedFileName ? $mixedFileName."|".$targetFileName : $targetFileName;
                             
                         }
-                        $data[$fileKey] = $fileName;
+                        $data[$fileKey] = $mixedFileName;
                     }
                 }
             }
         }
-        // var_dump($data);
+        return $data;
+    }
+
+    public function getUploadedMultipleFiles() 
+    {
+        $data = [];
+        $columNames  = $this->input->post("uploadFileColumnName") ?? null;
+        $oldFilename = $this->input->post("uploadFileOldFilename") ?? null;
+        $folderName  = $this->input->post("uploadFileFolder") ?? "uploads";
+
+        if ($columNames && !empty($columNames) && is_array($columNames)) {
+            foreach($columNames as $index => $columnName) {
+                $mixedFileName = $oldFilename[$index] ?? "";
+
+                $uploadFiles = $_FILES["uploadFiles"]["name"][$index] ?? null;
+                if ($uploadFiles) {
+                    $countFiles = count($uploadFiles);
+                    for ($i=0; $i<$countFiles; $i++) {
+                        $fileName    = $_FILES["uploadFiles"]["name"][$index][$i];
+                        $fileType    = $_FILES["uploadFiles"]["type"][$index][$i];
+                        $fileTmpName = $_FILES["uploadFiles"]["tmp_name"][$index][$i];
+
+                        $targetDir = "assets/upload-files/$folderName/";
+                        if (!is_dir($targetDir)) {
+                            mkdir($targetDir);
+                        }
+
+                        if (!file_exists($targetDir."index.html")) {
+                            copy('assets/index.html', $targetDir."index.html");
+                        }
+
+                        $fileKeyArr  = explode(".", $fileName);
+                        $fileKeyName = $fileKeyArr[0];
+                        $fileKeyType = $fileKeyArr[1];
+
+                        $targetFileName = $fileKeyName.$i.time().'.'.$fileKeyType;
+                        $targetFile     = $targetDir.$targetFileName;
+                        if (move_uploaded_file($fileTmpName, $targetFile)) {
+                            $mixedFileName = $mixedFileName ? $mixedFileName."|".$targetFileName : $targetFileName;
+                        }
+                    }
+                }
+
+                $data[$columnName] = $mixedFileName;
+            }
+        }
         return $data;
     }
 
@@ -85,14 +141,23 @@ class Operations extends CI_Controller {
         $data = array();
 
         $uploadedFiles = $this->getUploadedFiles();
-        if ($uploadedFiles) {
+        if ($uploadedFiles && !empty($uploadedFiles)) {
             foreach ($uploadedFiles as $fileKey => $fileValue) {
+                unset($data[$fileKey]);
                 $data[$fileKey] = $fileValue;
             }
         }
 
+        $uploadedMultipleFiles = $this->getUploadedMultipleFiles();
+        if ($uploadedMultipleFiles && !empty($uploadedMultipleFiles)) {
+            foreach ($uploadedMultipleFiles as $fileKey2 => $fileValue2) {
+                unset($data[$fileKey2]);
+                $data[$fileKey2] = $fileValue2;
+            }
+        }
+
         if ($tableName) {
-            if ($tableData && count($tableData) > 0) {
+            if ($tableData && !empty($tableData)) {
                 foreach ($tableData as $key => $value) {
                     $data[$key] = $value;
                 }
@@ -124,14 +189,23 @@ class Operations extends CI_Controller {
         $data = array();
 
         $uploadedFiles = $this->getUploadedFiles();
-        if ($uploadedFiles) {
+        if ($uploadedFiles && !empty($uploadedFiles)) {
             foreach ($uploadedFiles as $fileKey => $fileValue) {
+                unset($data[$fileKey]);
                 $data[$fileKey] = $fileValue;
+            }
+        }
+
+        $uploadedMultipleFiles = $this->getUploadedMultipleFiles();
+        if ($uploadedMultipleFiles && !empty($uploadedMultipleFiles)) {
+            foreach ($uploadedMultipleFiles as $fileKey2 => $fileValue2) {
+                unset($data[$fileKey2]);
+                $data[$fileKey2] = $fileValue2;
             }
         }
         
         if ($tableName && $whereFilter) {
-            if ($tableData && count($tableData) > 0) {
+            if ($tableData && !empty($tableData)) {
                 foreach ($tableData as $key => $value) {
                     $data[$key] = $value;
                 }

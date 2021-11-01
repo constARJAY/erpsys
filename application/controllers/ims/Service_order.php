@@ -102,6 +102,14 @@ class Service_order extends CI_Controller {
             "updatedBy"             => $updatedBy,
         ];
 
+        $multipleFiles = getUploadedMultipleFiles($_POST, $_FILES);
+        if ($multipleFiles && !empty($multipleFiles)) {
+            foreach ($multipleFiles as $fileKey => $fileValue) {
+                unset($serviceOrderData[$fileKey]);
+                $serviceOrderData[$fileKey] = $fileValue;
+            }
+        }
+
         if ($reviseServiceOrderID) {
             $soData = $this->serviceorder->getServiceOrder($reviseServiceOrderID);
             if ($soData) {
@@ -183,6 +191,11 @@ class Service_order extends CI_Controller {
 
             }
             
+            // ----- INSERT SERVICE ORDER -----
+            if ($serviceOrderStatus == "2") {
+                $insertServiceCompletionData = $this->serviceorder->insertServiceCompletionData($serviceOrderID);
+            }
+            // ----- END INSERT SERVICE ORDER -----
         }
         echo json_encode($saveServiceOrderData);
     }
@@ -520,8 +533,8 @@ class Service_order extends CI_Controller {
                 $sheet->setCellValue("C$rowNumber", $scope["description"]);
                 $sheet->setCellValue("H$rowNumber", $scope["quantity"]);
                 $sheet->setCellValue("I$rowNumber", $scope["uom"]);
-                $sheet->setCellValue("J$rowNumber", formatAmount($scope["unitCost"], true));
-                $sheet->setCellValue("K$rowNumber", formatAmount($scope["totalCost"], true));
+                $sheet->setCellValue("J$rowNumber", formatAmount($scope["unitCost"]));
+                $sheet->setCellValue("K$rowNumber", formatAmount($scope["totalCost"]));
 
                 $sheet->getStyle("B$rowNumber")->applyFromArray($sideBorderStyle);
                 $sheet->getStyle("C$rowNumber")->applyFromArray($sideBorderStyle);
@@ -559,7 +572,7 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("B$rowNumber:I".($rowNumber+3))->applyFromArray($commentInstructionStyle);
         $sheet->setCellValue("J$rowNumber", "Discount");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $discountValue = $data["discountType"] == "percent" ? formatAmount($data["discount"] ?? 0.00)."%" : formatAmount($data["discount"] ?? 0.00, true);
+        $discountValue = $data["discountType"] == "percent" ? formatAmount($data["discount"] ?? 0.00)."%" : formatAmount($data["discount"] ?? 0.00);
         $sheet->setCellValue("K$rowNumber", $discountValue);
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
@@ -567,7 +580,7 @@ class Service_order extends CI_Controller {
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Total Amount");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["totalAmount"] ?? 0.00, true));
+        $sheet->setCellValue("K$rowNumber", stringToDecimal(formatAmount($data["totalAmount"] ?? 0.00)));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
         $sheet->getStyle("K$rowNumber")->applyFromArray($boldStyle);
@@ -575,14 +588,14 @@ class Service_order extends CI_Controller {
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Vatable Sales");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["vatSales"] ?? 0.00, true));
+        $sheet->setCellValue("K$rowNumber", stringToDecimal(formatAmount($data["vatSales"] ?? 0.00)));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Vat 12%");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["vat"] ?? 0.00, true));
+        $sheet->setCellValue("K$rowNumber", stringToDecimal(formatAmount($data["vat"] ?? 0.00)));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
@@ -593,7 +606,7 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("B$rowNumber:I$rowNumber")->applyFromArray($labelFillStyle);
         $sheet->setCellValue("J$rowNumber", "Total");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["totalVat"] ?? 0.00, true));
+        $sheet->setCellValue("K$rowNumber", stringToDecimal(formatAmount($data["totalVat"] ?? 0.00)));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
         $sheet->getStyle("K$rowNumber")->applyFromArray($boldStyle);
@@ -604,7 +617,7 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("B$rowNumber:I".($rowNumber+1))->applyFromArray($amountWordStyle);
         $sheet->setCellValue("J$rowNumber", "Less EWT");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["lessEwt"] ?? 0.00, true));
+        $sheet->setCellValue("K$rowNumber", stringToDecimal(formatAmount($data["lessEwt"] ?? 0.00)));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(15);

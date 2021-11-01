@@ -1,6 +1,7 @@
 $(document).ready(function() {
 	const allowedUpdate = isUpdateAllowed(41);
 
+	let oldInvoiceFilename = [], newInvoiceFilename = [], newInvoiceFiles = [];
 
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("service order");
@@ -1275,32 +1276,35 @@ $(document).ready(function() {
 	// ----- END KEYUP QUANTITY OR UNITCOST -----
 
 
-	// ----- SELECT FILE -----
-	$(document).on("change", "[name=files]", function(e) {
-		const filename = this.files[0].name;
-		const filesize = this.files[0].size/1024/1024; // Size in MB
-		if (filesize > 10) {
-			$(this).val("");
-			$(this).parent().parent().find(".displayfile").empty();
-			showNotification("danger", "File size must be less than or equal to 10mb");
-		} else {
-			let html = `
-			<div class="d-flex justify-content-between align-items-center py-2">
-				<span class="filename">${filename}</span>
-				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>`;
-			$(this).parent().find(".displayfile").first().html(html);
-		}
-	})
-	// ----- END SELECT FILE -----
-
-
 	// ----- REMOVE FILE -----
 	$(document).on("click", ".btnRemoveFile", function() {
-		$(this).parent().parent().parent().find("[name=files]").first().val("");
-		$(this).closest(".displayfile").empty();
+		const filename     = $(this).attr("filename");
+		const newFileIndex = newInvoiceFilename.indexOf(filename);
+		const oldFileIndex = oldInvoiceFilename.indexOf(filename);
+
+		newFileIndex != -1 && newInvoiceFilename.splice(newFileIndex, 1);
+		newFileIndex != -1 && newInvoiceFiles.splice(newFileIndex, 1);
+		oldFileIndex != -1 && oldInvoiceFilename.splice(oldFileIndex, 1);
+
+		$display = $(this).closest(".display-image-content");
+		$display.fadeOut(500, function() {
+			$display.remove();
+		})
 	})
 	// ----- END REMOVE FILE -----
+
+
+	// ----- MODAL IMAGE -----
+	$(document).on("click", `.display-image-filename`, function(e) {
+		let display = $(this).attr("display") == "true";
+		let source  = $(this).attr("blob") || $(this).attr("href");
+		if (display) {
+			e.preventDefault();
+			$("#display-image-preview").attr("src", source);
+			$("#display-image-modal").modal("show");
+		}
+	})
+	// ----- END MODAL IMAGE -----
 
 
 	// ----- CLICK DELETE ROW -----
@@ -1549,7 +1553,8 @@ $(document).ready(function() {
 			const total = +getNonFormattedAmount($("#total").text());
 			const vatSales = total / 1.12;
 			const vat      = total - vatSales;
-			const lessEwt  = vatSales != 0 ? vatSales * 0.02 : 0;
+			// const lessEwt  = vatSales != 0 ? vatSales * 0.02 : 0;
+			const lessEwt  = 0;
 			const totalVat = getNonFormattedAmount($(`#totalVat`).text());
 			const grandTotalAmount = totalVat - lessEwt;
 			$(`#vatSales`).text(formatAmount(vatSales, true));
@@ -1590,94 +1595,96 @@ $(document).ready(function() {
 		 * ----- END METHOD -----
 		 */
 
-		 let data = { items: [] };
+		//  let data = { items: [] };
+		 let data = new FormData;
 		 const approversID = method != "approve" && moduleApprover;
  
 		 if (id) {
-			data["serviceOrderID"] = id;
+			data.append("serviceOrderID", id);
 
 			if (status != "2") {
-				data["serviceOrderStatus"] = status;
+				data.append("serviceOrderStatus", status);
 			}
 		}
 
-		data["action"]     = action;
-		data["method"]     = method;
-		data["updatedBy"]  = sessionID;
+		data.append("action", action);
+		data.append("method", method);
+		data.append("updatedBy", sessionID);
 		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3" || (currentStatus == "4" && isRevise)) && method != "approve") {
 
-			data["serviceRequisitionID"]  = $("[name=referenceNo]").attr("serviceRequisitionID") || null;
-			data["employeeID"] = sessionID;
+			data.append("serviceRequisitionID", $("[name=referenceNo]").attr("serviceRequisitionID") || null);
+			data.append("employeeID", sessionID);
 
-			data["inventoryVendorID"]     = $("[name=inventoryVendorID]").val() || null;
-			data["companyName"]           = $("[name=inventoryVendorID] option:selected").text()?.trim() || null;
-			data["companyContactDetails"] = $(`[name="companyContactDetails"]`).val()?.trim() || null;
-			data["companyContactPerson"]  = $(`[name="companyContactPerson"]`).val()?.trim() || null;
-			data["companyAddress"]        = $(`[name="companyAddress"]`).val()?.trim() || null;
+			data.append("inventoryVendorID", $("[name=inventoryVendorID]").val() || null);
+			data.append("companyName", $("[name=inventoryVendorID] option:selected").text()?.trim() || null);
+			data.append("companyContactDetails", $(`[name="companyContactDetails"]`).val()?.trim() || null);
+			data.append("companyContactPerson", $(`[name="companyContactPerson"]`).val()?.trim() || null);
+			data.append("companyAddress", $(`[name="companyAddress"]`).val()?.trim() || null);
 
-			data["paymentTerms"]     = $("[name=paymentTerms]").val()?.trim();
-			data["discountType"]     = $("[name=discountType]").val();
-			data["scheduleDate"]     = moment($("[name=scheduleDate]").val()).format("YYYY-MM-DD");
-			data["serviceOrderReason"] = $("[name=serviceOrderReason]").val()?.trim();
-			data["total"]            = +getNonFormattedAmount($("#total").text());
-			data["discount"]         = +getNonFormattedAmount($("#discount").val());
-			data["totalAmount"]      = +getNonFormattedAmount($("#totalAmount").text());
-			data["vatSales"]         = +getNonFormattedAmount($("#vatSales").text());
-			data["vat"]              = +getNonFormattedAmount($("#vat").val());
-			data["totalVat"]         = +getNonFormattedAmount($("#totalVat").text());
-			data["lessEwt"]          = +getNonFormattedAmount($("#lessEwt").val());
-			data["grandTotalAmount"] = +getNonFormattedAmount($("#grandTotalAmount").text());
+			data.append("paymentTerms", $("[name=paymentTerms]").val()?.trim());
+			data.append("discountType", $("[name=discountType]").val());
+			data.append("scheduleDate", moment($("[name=scheduleDate]").val()).format("YYYY-MM-DD"));
+			data.append("serviceOrderReason", $("[name=serviceOrderReason]").val()?.trim());
+			data.append("total", +getNonFormattedAmount($("#total").text()));
+			data.append("discount", +getNonFormattedAmount($("#discount").val()));
+			data.append("totalAmount", +getNonFormattedAmount($("#totalAmount").text()));
+			data.append("vatSales", +getNonFormattedAmount($("#vatSales").text()));
+			data.append("vat", +getNonFormattedAmount($("#vat").val()));
+			data.append("totalVat", +getNonFormattedAmount($("#totalVat").text()));
+			data.append("lessEwt", +getNonFormattedAmount($("#lessEwt").val()));
+			data.append("grandTotalAmount", +getNonFormattedAmount($("#grandTotalAmount").text()));
 
 			if (action == "insert") {
-				data["createdBy"] = sessionID;
-				data["createdAt"] = dateToday();
+				data.append("createdBy", sessionID);
+				data.append("createdAt", dateToday());
 			} else if (action == "update") {
-				data["serviceOrderID"]  = id;
+				data.append("serviceOrderID", id);
 			}
 
 			if (method == "submit") {
-				data["submittedAt"] = dateToday();
+				data.append("submittedAt", dateToday());
 				if (approversID) {
-					data["approversID"]         = approversID;
-					data["serviceOrderStatus"] = 1;
+					data.append("approversID", approversID);
+					data.append("serviceOrderStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-					data["approversID"]         = sessionID;
-					data["approversStatus"]     = 2;
-					data["approversDate"]       = dateToday();
-					data["serviceOrderStatus"] = 2;
+					data.append("approversID", sessionID);
+					data.append("approversStatus", 2);
+					data.append("approversDate", dateToday());
+					data.append("serviceOrderStatus", 2);
 				}
 			}
 
-			// if (isRevise) {
-				$(".itemTableRow").each(function(i, obj) {
-					const serviceID   = $(this).attr("serviceID");	
-					const serviceName = $(this).attr("serviceName");
-					const remarks     = $("td [name=remarks]", this).val()?.trim() || $("td .remarks", this).text()?.trim();	
-	
-					let temp = {
-						serviceID, 
-						serviceName,
-						remarks,
-						scopes: []
-					};
-	
-					$(`td .tableScopeBody tr`, this).each(function() {
-						const quantity = +getNonFormattedAmount($(`[name="quantity"]`, this).val()) || +getNonFormattedAmount($(`.quantity`, this).text());
-						const unitCost = +getNonFormattedAmount($(`[name="unitCost"]`, this).val()) || +getNonFormattedAmount($(`.unitcost`, this).text());
-						let scope = {
-							description: $('[name="serviceDescription"]', this).val()?.trim() || $(`.servicescope`, this).text().trim(),
-							uom: $(`[name="serviceUom"]`, this).val(),
-							quantity,
-							unitCost,
-							totalCost: (quantity * unitCost)
-						}
-						temp["scopes"].push(scope);
-					})
-	
-					data["items"].push(temp);
-				});
-			// }
+			$(".itemTableRow").each(function(i, obj) {
+				const serviceID   = $(this).attr("serviceID");	
+				const serviceName = $(this).attr("serviceName");
+				const remarks     = $("td [name=remarks]", this).val()?.trim() || $("td .remarks", this).text()?.trim();	
+
+				data.append(`items[${i}][serviceID]`, serviceID);
+				data.append(`items[${i}][serviceName]`, serviceName);
+				data.append(`items[${i}][remarks]`, remarks);
+
+				$(`td .tableScopeBody tr`, this).each(function(x) {
+					const quantity = +getNonFormattedAmount($(`[name="quantity"]`, this).val()) || +getNonFormattedAmount($(`.quantity`, this).text());
+					const unitCost = +getNonFormattedAmount($(`[name="unitCost"]`, this).val()) || +getNonFormattedAmount($(`.unitcost`, this).text());
+
+					data.append(`items[${i}][scopes][${x}][description]`, $('[name="serviceDescription"]', this).val()?.trim() || $(`.servicescope`, this).text().trim());
+					data.append(`items[${i}][scopes][${x}][uom]`, $(`[name="serviceUom"]`, this).val());
+					data.append(`items[${i}][scopes][${x}][quantity]`, quantity);
+					data.append(`items[${i}][scopes][${x}][unitCost]`, unitCost);
+					data.append(`items[${i}][scopes][${x}][totalCost]`, (quantity * unitCost));
+				})
+			});
 		} 
+
+		// ----- FILES -----
+		data.append("uploadFileFolder", "service-order");
+		data.append("uploadFileColumnName[0]", "serviceOrderInvoice");
+		data.append("uploadFileNewFilename[0]", newInvoiceFilename.join("|"));
+		data.append("uploadFileOldFilename[0]", oldInvoiceFilename.join("|"));
+		newInvoiceFiles.map((file, index) => {
+			data.append(`uploadFiles[0][${index}]`, file);
+		})
+		// ----- FILES -----
 
 		return data;
 	} 
@@ -2009,6 +2016,8 @@ $(document).ready(function() {
 
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		oldInvoiceFilename = [], newInvoiceFilename = [], newInvoiceFiles = [];
+		
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 
@@ -2037,6 +2046,7 @@ $(document).ready(function() {
 			paymentTerms,
 			discountType,
 			scheduleDate,
+			serviceOrderInvoice,
 			total,
 			discount,
 			totalAmount,
@@ -2342,6 +2352,19 @@ $(document).ready(function() {
 					<div class="d-block invalid-feedback" id="invalid-scheduleDate"></div>
                 </div>
             </div>
+			<div class="col-sm-12">
+				<div class="form-group">
+                    <label>Upload Invoice ${!disabled ? "<code>*</code>" : ""}</label>
+                    ${!disabled ? `<input type="file" class="form-control validate"
+						name="serviceOrderInvoice"
+						id="serviceOrderInvoice"
+						multiple="multiple">` : ""}
+					<div class="d-block invalid-feedback" id="invalid-serviceOrderInvoice"></div>
+					<div class="row display-image-parent" id="displayFile">
+						${displayFile(readOnly, serviceOrderInvoice)}
+					</div>
+                </div>
+			</div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Prepared By</label>
@@ -2467,6 +2490,84 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
+	// ----- DISPLAY FILE -----
+    function displayFile(readOnly = false, file = null, isAdd = false, blob = "", link = true, oldFiles = true) {
+        let html = ``;
+        if (file && file != null && file != "null") {
+			let fileArr = file.split("|");
+			fileArr.forEach(soFile => {
+				if (oldFiles) oldInvoiceFilename.push(soFile);
+				
+				let fileType = soFile.split(".");
+					fileType = fileType[fileType.length-1].toLowerCase();
+				let imageExtensions = ["jpg", "png", "jpeg"];
+				let isFileImage = imageExtensions.includes(fileType);
+				let targetAttr = isFileImage ? `display="true" blob="${blob}"` : 
+					(oldFiles ? `target="_blank"` : "");
+
+				let buttonRemove = !readOnly ? `<span class="btnRemoveFile pr-2 display-image-remove"
+					filename="${soFile}">
+					<i class="fas fa-close"></i>
+				</span>` : "";
+
+				let otherAttr = !link || isAdd ? `href="javascript:void(0)"` : `
+				href="${base_url+"assets/upload-files/service-order/"+soFile}"`;
+				html += `
+				<div class="col-md-4 col-sm-12 display-image-content">
+					<div class="display-image">
+						<div class="d-flex justify-content-start align-items-center p-0">
+							${buttonRemove}
+							<a class="filename display-image-filename"
+								title="${soFile}"
+								${otherAttr}
+								${targetAttr}>
+								${soFile}
+							</a>
+						</div>
+					</div>
+				</div>`;
+			})
+        }
+        return html;
+    }
+    // ----- END DISPLAY FILE -----
+
+
+	// ----- UPLOAD INVOICE -----
+	$(document).on("change", `[name="serviceOrderInvoice"]`, function() {
+		let countFiles = oldInvoiceFilename.length + newInvoiceFilename.length;
+		if (this.files && this.files[0]) {
+			let files = this.files;
+			let filesLength = this.files.length;
+			for (var i=0; i<filesLength; i++) {
+				countFiles++;
+
+				const filesize = files[i].size/1024/1024; // Size in MB
+				const filetype = files[i].type;
+				const filename = files[i].name;
+				const fileArr  = filename.split(".");
+				const name     = fileArr?.[0];
+				const type     = fileArr?.[fileArr.length-1]?.toLowerCase();
+				const displayName = `${name}${countFiles}.${type}`;
+				if (filesize > 10) {
+					showNotification("danger", `${filename} - File size must be less than or equal to <b>10mb</b>`);
+				} else if (!["png", "jpg", "jpeg", "doc", "docx", "pdf"].includes(type)) {
+					showNotification("danger", `${filename} - <b>Invalid file type</b>`);
+				} else {
+					newInvoiceFilename.push(displayName);
+					newInvoiceFiles.push(files[i]);
+					let blob = URL.createObjectURL(files[i]);
+					$(`#displayFile`).append(displayFile(false, displayName, true, blob, true, false));
+				}
+			}
+			$("#serviceOrderInvoice").removeClass("is-valid").removeClass("is-invalid");
+			$("#invalid-serviceOrderInvoice").text("");
+			$(this).val("");
+        }
+	})
+	// ----- END UPLOAD INVOICE -----
+
+
 	// ----- OPEN ADD FORM -----
 	$(document).on("click", "#btnAdd", function () {
 		pageContent(true);
@@ -2513,14 +2614,14 @@ $(document).ready(function() {
 			
 			if (revise) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-				const data   = getServiceOrderData(action, "save", "0", id, status, revise);
+				let data = getServiceOrderData(action, "save", "0", id, status, revise);
 				if (!isFromCancelledDocument) {
-					delete data["serviceOrderID"];
-					data["reviseServiceOrderID"] = id;
+					data.delete("serviceOrderID");
+					data.append("reviseServiceOrderID", id);
 				} else {
-					delete data["action"];
-					data["serviceOrderStatus"] = 0;
-					data["action"]             = "update";
+					data.delete("action");
+					data.append("serviceOrderStatus", 0);
+					data.append("action", "update");
 				}
 	
 				saveServiceOrder(data, "save", null, pageContent);
@@ -2537,8 +2638,8 @@ $(document).ready(function() {
 
 		} else {
 			const action = id && feedback ? "update" : "insert";
-			const data   = getServiceOrderData(action, "save", "0", id, status, revise);
-			data["serviceOrderStatus"] = 0;
+			let data = getServiceOrderData(action, "save", "0", id, status, revise);
+			data.append("serviceOrderStatus", 0);
 
 			saveServiceOrder(data, "save", null, pageContent);
 		}
@@ -2553,17 +2654,18 @@ $(document).ready(function() {
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("SO", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
-		const data     = getServiceOrderData(action, "save", "0", id, "0", revise);
-		data["serviceOrderStatus"] = 0;
+		
+		let data = getServiceOrderData(action, "save", "0", id, "0", revise);
+		data.append("serviceOrderStatus", 0);
 
 		if (revise) {
 			if (!isFromCancelledDocument) {
-				data["reviseServiceOrderID"] = id;
-				delete data["serviceOrderID"];
+				data.append("reviseServiceOrderID", id);
+				data.delete("serviceOrderID");
 			} else {
-				data["serviceOrderID"] = id;
-				delete data["action"];
-				data["action"] = "update";
+				data.append("serviceOrderID", id);
+				data.delete("action");
+				data.append("action", "update");
 			}
 		}
 
@@ -2605,6 +2707,22 @@ $(document).ready(function() {
 	// ----- END CHECK COST SUMMARY -----
 
 
+	// ----- CHECK FILE LENGTH -----
+	function checkFileLength() {
+		let count = oldInvoiceFilename.length + newInvoiceFilename.length;
+		if (count > 5) {
+			showNotification("danger", "Only 5 files are allowed to upload.");
+			return false;
+		} else if (count == 0) {
+			$("#serviceOrderInvoice").removeClass("is-valid").addClass("is-invalid");
+			$("#invalid-serviceOrderInvoice").text("This field is required");
+			return false;
+		}
+		return true;
+	}
+	// ----- END CHECK FILE LENGTH -----
+
+
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id       = decryptString($(this).attr("serviceOrderID"));
@@ -2613,16 +2731,16 @@ $(document).ready(function() {
 		const validate = validateForm("form_service_order");
 		removeIsValid("#tableServiceOrderItems0");
 		const costSummary = checkCostSummary();
+		const validateFileLength = checkFileLength();
 
-		if (validate && costSummary) {
+		if (validate && costSummary && validateFileLength) {
 
 			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-			const data   = getServiceOrderData(action, "submit", "1", id, "0", revise);
-
+			let data = getServiceOrderData(action, "submit", "1", id, "0", revise);
 			if (revise) {
 				if (!isFromCancelledDocument) {
-					delete data["serviceOrderID"];
-					data["reviseServiceOrderID"] = id;
+					data.delete("serviceOrderID");
+					data.append("reviseServiceOrderID", id);
 				}
 			}
 
@@ -2925,6 +3043,8 @@ $(document).ready(function() {
 						method:      "POST",
 						url:         `service_order/saveServiceOrder`,
 						data,
+						processData: false,
+						contentType: false,
 						cache:       false,
 						async:       false,
 						dataType:    "json",

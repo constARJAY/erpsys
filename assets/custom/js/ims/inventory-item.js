@@ -50,9 +50,10 @@ $(document).ready(function(){
             async:    false,
             dataType: 'json',
             data:     {tableName: "ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID)",
-                        columnName: `CONCAT('ITM','-',classification.classificationShortcut,'-',SUBSTR(item.createdAt,3,2),'-',LPAD(item.itemID, 5, '0')) as itemCode,
+                        columnName: `
                                     item.itemID,
                                     item.itemName,
+                                    item.itemCode,
                                     item.unitOfMeasurementID,
                                     item.brandName,
                                     category.categoryName,

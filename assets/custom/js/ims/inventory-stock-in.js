@@ -691,9 +691,9 @@ $(document).ready(function () {
                     <table class="table table-bordered table-striped table-hover" id="tableListItems">
                         <thead>
                             <tr style="white-space: nowrap">
-                                <th>Item Code</th>
-                                <th>Item Name</th>
-                                <th>Item Classification</th>
+                                <th>${services} Code</th>
+                                <th>${services} Name</th>
+                                <th>${services} Classification</th>
                                 <th>Request</th>
 								<th>Received</th>
                                 <th>Remaining</th>
@@ -1085,6 +1085,12 @@ $(document).ready(function () {
 			categoryName				= ""
 		} = data && data[0];
 
+		if(recordID =='0'){
+			services = 'Item';
+		}else{
+			services = 'Asset';
+		}
+
 		let button = `<button 
 		 				class="btn btn-save px-5 p-2" 
 		 				id="btnSave"><i class="fas fa-save"></i>
@@ -1144,7 +1150,7 @@ $(document).ready(function () {
 						</div>
 						<div class="col-md-4 col-sm-12">
 							<div class="form-group">
-								<label>Item Classification</label>
+								<label>${services} Classification</label>
 								<input 
 									type="text" 
 									class="form-control " 
@@ -1390,6 +1396,7 @@ $(document).ready(function () {
 			const todaydate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
 			var dateString = moment(todaydate).format('YYYY-MM-DD');
 			const inventoryStorageID = $(`#inventoryStorageID${number}`).val();
+			var inventoryStorageCode 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageCode");
 			var inventoryStorageRoom 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageRoom");
 			var inventoryStorageFloor 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageFloor");
 			var inventoryStorageBay 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageBay");
@@ -1437,7 +1444,7 @@ $(document).ready(function () {
 			var getlastthreedigititemcode = myItemcode.slice(-5);
 			
 		//const barcode = `${warehouse}-${myExpDate}-${getlastthreedigititemcode}`;
-		const barcode = `${warehouse}-${myExpDate}-${getlastthreedigititemcode}-${mytodayDate}`;
+		const barcode = `${warehouse}-${getlastthreedigititemcode}-${mytodayDate}`;
 		$("#barcode" + number).val(barcode);
 		}else{
 			
@@ -1478,6 +1485,7 @@ $(document).ready(function () {
 		const todaydate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
 		var dateString = moment(todaydate).format('YYYY-MM-DD');
 		//let formatted_date = todaydate.getFullYear() + "-" + (todaydate.getMonth() + 1) + "-" + todaydate.getDate();
+		var inventoryStorageCode 		= $('option:selected', this).attr("inventoryStorageCode");
 		var inventoryStorageRoom 		= $('option:selected', this).attr("inventoryStorageRoom");
 		var inventoryStorageFloor 		= $('option:selected', this).attr("inventoryStorageFloor");
 		var inventoryStorageBay 		= $('option:selected', this).attr("inventoryStorageBay");
@@ -1580,7 +1588,7 @@ $(document).ready(function () {
 		// var getlastthreedigitinventorycode = myInventorycode.slice(-3);
 		
 		//const barcode = `${myItemcode}-${myInventorycode}-${serialnumberlastFive}`;
-		const barcode = `${consolidatevalue}-${myExpDate}-${todaymyMDate}-${getlastthreedigititemcode}`;
+		const barcode = `${consolidatevalue}-${getlastthreedigititemcode}-${todaymyMDate}`;
 		$("#barcode" + number).val(barcode);
 		//$(".inventorystorageIDquantity"+storageID);
 		}

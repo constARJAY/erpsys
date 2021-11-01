@@ -23,6 +23,7 @@ function initDataTables() {
         serverSide:     false,
         scrollX:        true,
         scrollCollapse: true,
+        lengthMenu: [ 50, 75, 100, 150],
         columnDefs: [
             { targets: 0, width: 100 },
             { targets: 1, width: 150 },

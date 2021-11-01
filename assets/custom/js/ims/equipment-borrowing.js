@@ -156,7 +156,24 @@ $(document).ready(function() {
              borrowing.materialRequestID,
              borrowing.clientCode,
              borrowing.clientName`,
-            `IF(borrowing.employeeID = 0 ,borrowing.createdBy = ${sessionID},borrowing.employeeID = ${sessionID})`);
+            ``);
+
+            // const data  = getTableData(
+            //     `ims_equipment_borrowing_tbl AS borrowing
+            //      LEFT JOIN hris_employee_list_tbl AS helt ON helt.employeeID = borrowing.createdBy
+            //      `,
+            //     `CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
+            //      borrowing.projectCode,
+            //      borrowing.projectName,
+            //      borrowing.inventoryAssetStatus,
+            //      borrowing.equipmentBorrowingID ,
+            //      borrowing.equipmentBorrowingCode,
+            //      borrowing.materialWithdrawalCode,
+            //      borrowing.materialWithdrawalID,
+            //      borrowing.materialRequestID,
+            //      borrowing.clientCode,
+            //      borrowing.clientName`,
+            //     `IF(borrowing.employeeID = 0 ,borrowing.createdBy = ${sessionID},borrowing.employeeID = ${sessionID})`);
         return data;
     }
     // ----- END TIMELINE DATA -----
@@ -833,7 +850,7 @@ $(document).ready(function() {
             <div class="card-body">
                 <div class="mb-2">
                     <div class="text-primary font-weight-bold" style="font-size: 1.2rem;">
-                       Asset/s Request
+                       BORROWED (ASSET/S)
                     </div>
                 </div>
 
@@ -1156,19 +1173,29 @@ $(document).ready(function() {
 
     // ----- KEYUP QUANTITY -----
     $(document).on("keyup", `[name="borrowed"]`, function() {
-        const assetID    = $(this).attr("assetID");
+        const assetID    = $(this).attr("assetID") || 0;
         const index    = $(this).attr("index");
         const withdrawalAssetID    = $(this).attr("withdrawalAssetID");
         const value = +$(this).val();
         var availableStocksValue = +$(this).attr("availableStocksValue");
+        var requestQuantity = +$(`div[assetID=${assetID}]`).find("span").eq(4).text().replace(",","") || 0;
 
         // const getRemainingItem = +$(`[name="remainingAsset"][assetID="${assetID}"]`).attr("remainingValueItem").replaceAll(",","");
         // var computeRemainingItem =0;
         // computeRemainingItem = getRemainingItem - value;
         
+        if(value > requestQuantity){
+            $(this).val(0);
+            showNotification("danger", "Incorrect Quantity Inserted!");
+            $(this).closest("tr").find("span").eq(3).text("-");
+            return false;
+        }
+
         if(value > availableStocksValue){
             $(this).val(0);
             showNotification("danger", "Incorrect Quantity Inserted!");
+            $(this).closest("tr").find("span").eq(3).text("-");
+            return false;
         }
         
         if(value == 0){

@@ -8,6 +8,12 @@ class ProjectTimelineBuilder_model extends CI_Model {
         parent::__construct();
     }
 
+    public function getProjectTimelineBuilderData($timelineBuilderID = null){
+        $sql = "SELECT * FROM pms_timeline_builder_tbl WHERE timelineBuilderID = '$timelineBuilderID'";
+        $query  =   $this->db->query($sql);
+        return $query ? $query->row() : [];
+    }
+
     public function saveTimelineBuilderData($action, $data, $id = null) 
     {
         if ($action == "insert") {

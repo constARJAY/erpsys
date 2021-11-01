@@ -203,15 +203,16 @@ $(document).ready(function() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 100  },
-					{ targets: 1,  width: 200 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 170  },
-					{ targets: 4,  width: 120 },
+					{ targets: 1,  width: 300 },
+					{ targets: 2,  width: 220 },
+					{ targets: 3,  width: 250  },
+					{ targets: 4,  width: 220 },
 					{ targets: 5,  width: 120 },
-                    { targets: 6,  width: 110 },
-					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 120 },
-					{ targets: 9,  width: 200 }
+                    { targets: 6,  width: 250 },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 250 },
+					{ targets: 10,  width: 200 }
 				],
 			});
 
@@ -226,7 +227,7 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 200  },
+					{ targets: 0,  width: 300  },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 170  },
@@ -234,8 +235,8 @@ $(document).ready(function() {
 					{ targets: 5,  width: 120 },
 					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 110 },
-					{ targets: 7,  width: 200 }
-					// { targets: 8,  width: 200 },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 }
 				],
 			});
 	}
@@ -529,15 +530,15 @@ $(document).ready(function() {
 					}
 				} else if (disposalStatus == 2) {
 					// DROP
-					button = `
-					<button type="button" 
-						class="btn btn-cancel px-5 p-2"
-						id="btnDrop" 
-						disposalID="${encryptString(disposalID)}"
-						code="${getFormCode("ADF", createdAt, disposalID)}"
-						status="${disposalStatus}"><i class="fas fa-ban"></i> 
-						Drop
-					</button>`;
+					// button = `
+					// <button type="button" 
+					// 	class="btn btn-cancel px-5 p-2"
+					// 	id="btnDrop" 
+					// 	disposalID="${encryptString(disposalID)}"
+					// 	code="${getFormCode("ADF", createdAt, disposalID)}"
+					// 	status="${disposalStatus}"><i class="fas fa-ban"></i> 
+					// 	Drop
+					// </button>`;
 				}else if (disposalStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(disposalID)) {
@@ -682,17 +683,22 @@ $(document).ready(function() {
 		const attr = isProject ? `project="true"` : ``;
 		let {
 			disposalID     				= "",
-            itemID      				= "",
-			itemName     				= "",
-            barcode           			="",
-            serialnumber      			= "",
-			quantity      				= "",
-			disposalDetailRemarks       = "",
-			inventoryStorageID     		= "",
-			inventoryStorageOfficeName 	="",
-			itemcreatedAt 				="",
-			inventorycreatedAt 			="",
-			unitOfMeasurement			=""
+            assetID      				= "",
+			assetCode     				= "",
+            assetName           		="",
+            barcode      				= "",
+			brand      					= "",
+			assetClassification       	= "",
+			assetCategory     			= "",
+			serialnumber 				= "",
+			quantity 					= "",
+			inventoryStorageID			= "",
+			inventoryStorageCode		= "",
+			inventoryStorageOfficeName	= "",
+			availableStock 				="",
+			unitOfMeasurement			="",
+			disposalDetailRemarks		="",
+
            
 
 		} = item;
@@ -711,12 +717,22 @@ $(document).ready(function() {
 				</td>
                 <td>
                 <div class="itemCode">
-					${getFormCode("ITM", itemcreatedAt, itemID) || "-"}
+					${assetCode || "-"}
                 </div>
                </td> 
+			   <td>
+					<div class="assetClassification">
+					${assetClassification || "-"}
+					</div>
+				</td>
+				<td>
+				<div class="unitofmeasurement" name="unitofmeasurement">
+					${unitOfMeasurement}
+				</div>
+				</td>
 				<td>
 					<div class="itemName">
-					${itemName || "-"}
+					${assetName || "-"}
 					</div>
 				</td>
 				<td>
@@ -726,32 +742,24 @@ $(document).ready(function() {
 				</td>
 				<td class="text-center">
 					<div class="quantity">
-						${quantity}
+						${quantity || "-"}
 					</div>
 				</td>
 				<td>
-				<div class="unitofmeasurement" name="unitofmeasurement">
-					${unitOfMeasurement}
-				</div>
-				</td>
-				<td>
-               	 <div class="storeCode">
-					${getFormCode("ISM", inventorycreatedAt, inventoryStorageID) || "-"}
+               	 <div class="availableStock text-center">
+					${availableStock || "-"}
                  </div>
             	</td>
 				<td>
-				<div class="inventoryStorage">
-					${inventoryStorageOfficeName}
-				</div>
-			</td>
+					<div class="inventoryStorage">
+						${inventoryStorageOfficeName}
+					</div>
+				</td>
                 <td>
 					<div class="disposalDetailRemarks">
 						${disposalDetailRemarks}
 					</div>
-				</td>
-              
-				
-				</td>
+				</td>	
 			</tr>`;
 		} else {
 		
@@ -766,14 +774,14 @@ $(document).ready(function() {
 					<div class="">
 					<input 
 						type="text" 
-						class="form-control barcode text-center"
+						class="form-control barcode text-left"
 						id="barcode" 
 						name="barcode" 
-						minlength="17" 
-						maxlength="17"  
+						minlength="25" 
+						maxlength="25"  
 						value="${barcode}"
-						itemID="${itemID}"
-						itemName="${itemName}"
+						itemID="${assetID}"
+						itemName="${assetName}"
 						inventoryStorageID="${inventoryStorageID}"
 						serialnumber="${serialnumber}"
 						required>
@@ -781,13 +789,19 @@ $(document).ready(function() {
 				</div>
 				</td>
 				<td>
-					<div class="itemCode">${getFormCode("ITM", itemcreatedAt, itemID) || "-"}</div>
+					<div class="assetCode" name="assetCode" assetID=${assetID}>${assetCode || "-"}</div>
 				</td>
 				<td>
-					<div class="itemName">${itemName || "-"}</div>
+					<div class="assetName" name="assetName"brand="${brand}">${assetName || "-"}</div>
 				</td>
 				<td>
-					<div class="serialnumber">-</div>
+					<div class="assetClassification" name="assetClassification"	assetCategory="${assetCategory}">${assetClassification || "-"}</div>
+				</td>
+				<td>	
+					<div class="unitofmeasurement" name="unitofmeasurement">${unitOfMeasurement || "-"}</div>
+				</td>
+				<td>
+					<div class="serialnumber" name="serialnumber">${serialnumber || "-"}</div>
 				</td>
                 <td class="text-center">
 					<div class="">
@@ -799,23 +813,20 @@ $(document).ready(function() {
 						max="999999999" 
 						id="quantity" 
 						name="quantity"
-						value="${quantity}" 
+						value="${quantity}"
+						availableStock="${availableStock}" 
 						minlength="1" 
 						maxlength="20" 
 						required>
 					<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 				</div>
             </td>
-				<td>	
-					<div class="unitofmeasurement" name="unitofmeasurement">-</div>
-				</td>
                  <td>
-				 <div class="storeCode">
-				 ${getFormCode("ISM", inventorycreatedAt, inventoryStorageID) || "-"}
+				 	<div class="availableStock text-center" name="availableStock">${availableStock || "-"}
 				 </div>
               	</td>
                   <td>
-				  	<div class="inventoryStorage">${inventoryStorageOfficeName || "-"}</div>
+				  	<div class="inventoryStorageOfficeName" name="inventoryStorageOfficeName" inventoryStorageID="${inventoryStorageID}" inventoryStorageCode="${inventoryStorageCode}" >${inventoryStorageOfficeName || "-"}</div>
 				</td>
 				<td>
 				<div class="">
@@ -853,15 +864,15 @@ $(document).ready(function() {
 
 			$("td .barcode", this).attr("id", `barcode${i}`);
 
-			$("td .itemcode", this).attr("id", `itemcode${i}`);
-			$("td .itemName", this).attr("id", `itemName${i}`);
+			$("td .assetCode", this).attr("id", `assetCode${i}`);
+			$("td .assetName", this).attr("id", `assetName${i}`);
+			$("td .unitofmeasurement", this).attr("id", `unitofmeasurement${i}`);
 			$("td .serialnumber", this).attr("id", `serialnumber${i}`);
 			$("td .quantity", this).attr("id", `quantity${i}`);
 			$("td .quantity [name=quantity]", this).attr("project", `true`);
-
+			$("td .availableStock", this).attr("id", `availableStock${i}`);
 			$("td .unitofmeasurement", this).attr("id", `unitofmeasurement${i}`);
-			$("td .StorageCode", this).attr("id", `StorageCode${i}`);
-			$("td .StorageName", this).attr("id", `StorageName${i}`);
+			$("td .inventoryStorageOfficeName", this).attr("id", `inventoryStorageOfficeName${i}`);
 			$("td .disposalDetailRemarks", this).attr("id", `disposalDetailRemarks${i}`);
  
 		})
@@ -927,40 +938,45 @@ $(document).ready(function() {
 			const barcode   = $(this).val(); 
 			const barcodeID   = $(this).attr("id");
 			const data = getTableData
-			(`ims_stock_in_total_tbl AS isit
-			LEFT JOIN ims_inventory_item_tbl 		AS iii 	ON isit.itemID = iii.itemID
-			LEFT JOIN ims_inventory_storage_tbl 	AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
-			LEFT JOIN ims_stock_in_tbl AS isi 				ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
-			`isit.itemID,iii.createdAt,iii.itemCode,iii.unitOfMeasurementID,isit.itemName,isit.inventoryStorageID,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,isi.barcode,isi.stockInSerialNumber`, `barcode = '${barcode}'`, ``,`itemID`); 
+			(`ims_stock_in_assets_tbl`, 
+			`stockInAssetID, assetID, assetCode, assetName, brand,quantity, classificationName, categoryName, uom, serialNumber, barcode, inventoryStorageID, inventoryStorageCode, inventoryStorageOfficeName`, `barcode = '${barcode}'`, ``,`barcode`); 
 			if(data.length != 0){
 			data.map((item) => {
 				let {
-					itemID ,
-					itemName,
+					stockInAssetID,
+					assetID ,
+					quantity,
+					assetName,
+					assetCode,
+					brand,
+					classificationName,
+					categoryName,
+					uom,
+					serialNumber,
+					barcode,
+					inventoryStorageID,
 					inventoryStorageCode,
 					inventoryStorageOfficeName,
-					stockInSerialNumber,
-					createdAt,
-					inventoryStorageID,
-					unitOfMeasurementID,
 				} = item;
-	
-				let item_ID       							= itemID ? itemID : "";
-				let item_Name       						= itemName ? itemName : "";
-				let inventory_Storage_Code       			= inventoryStorageCode ? inventoryStorageCode : "";
-				let inventory_Storage_Office_Name       	= inventoryStorageOfficeName ? inventoryStorageOfficeName : "";
-				//let barcode       							= barcode ? barcode : "";
-				let created_At       						= createdAt ? createdAt : "";
-				let unit_of_measurement       				= unitOfMeasurementID ? unitOfMeasurementID : "";
-				let stock_In_Serial_Number       			= stockInSerialNumber ? stockInSerialNumber : "";
-				let inventory_Storage_ID       			= inventoryStorageID ? inventoryStorageID : "";
-	
-		
+				var stockInAsset_ID							= stockInAssetID ? stockInAssetID : "";
+				var asset_ID 								= assetID ? assetID : "";
+				var asset_Name								= assetName ? assetName : "";
+				var asset_Code								= assetCode ? assetCode : "";
+				var available_Stock							= quantity ? quantity : "";
+				var brand_Name								= brand ? brand : "";
+				var classification_Name						= classificationName ? classificationName : "";
+				var category_Name							= categoryName ? categoryName : "";
+				var unitOfMeasurement						= uom ? uom : "";
+				var serial_Number							= serialNumber ? serialNumber : "";
+				var asset_Barcode							= barcode ? barcode : "";
+				var inventoryStorage_ID						= inventoryStorageID ? inventoryStorageID : "";
+				var inventoryStorage_Code					= inventoryStorageCode ? inventoryStorageCode : "";
+				var inventoryStorageOffice_Name				= inventoryStorageOfficeName ? inventoryStorageOfficeName : "";
 				let	barcodeArrayLength = barcodeArray.length || 0;
-				if(barcode.length  ==17){
+				if(barcode.length  <=25){
 	
 					
-					if(itemName != null){					
+					if(assetName != null){					
 						let counter =1;
 						if(barcodeArrayLength !=0){
 							for(var loop1 =0;loop1<barcodeArrayLength; loop1++ ){
@@ -985,20 +1001,20 @@ $(document).ready(function() {
 							barcodeArray[0] = barcode;
 							barcodeLocationArray[0] = barcodeID;
 						}
-	
-						$(this).closest("tr").find(`.itemCode`).first().text(getFormCode("ITM",created_At,item_ID));
-						$(this).closest("tr").find(`.itemName`).first().text(item_Name);
-						$(this).closest("tr").find(`[name=barcode]`).first().attr("itemID",item_ID);
-						$(this).closest("tr").find(`[name=barcode]`).first().attr("itemName",item_Name);
-						$(this).closest("tr").find(`[name=barcode]`).first().attr("inventoryStorageID",inventoryStorageID);
-						$(this).closest("tr").find(`[name=barcode]`).first().attr("unitofmeasurement",unit_of_measurement);
-						$(this).closest("tr").find(`[name=barcode]`).first().attr("serialnumber",stock_In_Serial_Number);
-						$(this).closest("tr").find(`[name=unitofmeasurement]`).first().text(unit_of_measurement);
-						$(this).closest("tr").find(`.storeCode`).first().text(inventory_Storage_Code);
-						$(this).closest("tr").find(`.inventoryStorage`).first().text(inventory_Storage_Office_Name);
-						$(this).closest("tr").find(`.serialnumber`).first().text(stock_In_Serial_Number);
-						// $(this).closest("tr").find(`[name=quantity]`).first().val(1);
-		
+						$(this).closest("tr").find(`.assetCode`).first().attr("assetID",asset_ID);
+						$(this).closest("tr").find(`.assetCode`).first().text(asset_Code);
+						$(this).closest("tr").find(`.assetName`).first().text(asset_Name);
+						$(this).closest("tr").find(`.assetName`).first().attr("brand",brand_Name);
+						$(this).closest("tr").find(`.assetClassification`).first().text(classification_Name);
+						$(this).closest("tr").find(`.assetClassification`).first().attr("assetCategory",category_Name);
+						$(this).closest("tr").find(`.unitofmeasurement`).first().text(unitOfMeasurement);
+						$(this).closest("tr").find(`.serialnumber`).first().text(serial_Number);
+						$(this).closest("tr").find(`.availableStock`).first().text(available_Stock);
+						$(this).closest("tr").find(`.inventoryStorageOfficeName`).first().attr("inventoryStorageID", inventoryStorage_ID);
+						$(this).closest("tr").find(`.inventoryStorageOfficeName`).first().attr("inventoryStorageCode", inventoryStorage_Code);
+						$(this).closest("tr").find(`.inventoryStorageOfficeName`).first().text(inventoryStorageOffice_Name);
+						$(this).closest("tr").find(`.quantity`).first().attr("availableStock", available_Stock);
+						$(this).closest("tr").find("[name=barcode]").first().attr("stockInAssetID",stockInAsset_ID);
 						$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
 						$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
 						$(this).closest("tr").find("#invalid-barcode").text('');
@@ -1011,24 +1027,26 @@ $(document).ready(function() {
 				}else{
 					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 					$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
+					$(this).closest("tr").find("#invalid-barcode").text('Please Input Less Than or Equal Characters!');
 				}
 				
 				})
 			}
 			else if(data.length == 0){
-				$(this).closest("tr").find(`.itemcode`).first().text("-");
-					$(this).closest("tr").find(`[name=barcode]`).first().attr('itemID',"-");
-					$(this).closest("tr").find(`[name=barcode]`).first().attr('itemName',"-");
-					$(this).closest("tr").find(`[name=barcode]`).first().attr('inventoryStorageID',"-");
-					$(this).closest("tr").find(`[name=barcode]`).first().attr('serialnumber',"-");
-					$(this).closest("tr").find(`[name=barcode]`).first().attr('unitofmeasurement',"-");
-					$(this).closest("tr").find(`.itemName`).first().text("-");
-					$(this).closest("tr").find(`[name=unitofmeasurement]`).first().text("-");
-					$(this).closest("tr").find(`.storeCode`).first().text("-");
-					$(this).closest("tr").find(`.inventoryStorage`).first().text("-");
+					$(this).closest("tr").find(`.assetCode`).first().text("-");
+					$(this).closest("tr").find(`.assetCode`).first().attr("assetID","-");
+					$(this).closest("tr").find(`.assetName`).first().text("-");
+					$(this).closest("tr").find(`.assetName`).first().attr("brand","-");
+					$(this).closest("tr").find(`.assetClassification`).first().text("-");
+					$(this).closest("tr").find(`.assetClassification`).first().attr("assetCategory","-");
+					$(this).closest("tr").find(`.unitofmeasurement`).first().text("-");
 					$(this).closest("tr").find(`.serialnumber`).first().text("-");
-	
+					$(this).closest("tr").find(`.availableStock`).first().text("-");
+					$(this).closest("tr").find(`.inventoryStorageOfficeName`).first().text("-");
+					$(this).closest("tr").find(`.inventoryStorageOfficeName`).first().attr("inventoryStorageID","-");
+					$(this).closest("tr").find(`.inventoryStorageOfficeName`).first().attr("inventoryStorageCode","-");
+					$(this).closest("tr").find(`.quantity`).first().attr("availableStock","-");
+					$(this).closest("tr").find("[name=barcode]").first().attr("stockInAssetID","-");
 					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 					$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
 					$(this).closest("tr").find("#invalid-barcode").text('No item available!');
@@ -1043,41 +1061,22 @@ $(document).ready(function() {
 	$(document).on("change", "[name=quantity]", function() {
 		const index     		= $(this).closest("tr").first().attr("index");
 		const quantity  		= parseInt($(`#quantity${index}`).val());
-        const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
-		const data = getTableData
-				 (`ims_stock_in_total_tbl AS isit
-				 LEFT JOIN ims_inventory_item_tbl 		AS iii 	ON isit.itemID = iii.itemID
-				 LEFT JOIN ims_inventory_storage_tbl 	AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
-				 LEFT JOIN ims_stock_in_tbl AS isi 				ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
-				 `isit.itemID,iii.itemCode,isit.itemName,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,isi.barcode,isi.stockInSerialNumber,isit.quantity as stocks`, `barcode = '${barcodeval}'`, ``,`itemID`);
-				 
-				 if(data.length >0){
-
-					data.map((item) => {
-						let {
-					
-							stocks
-						} = item;
-			
-						let stock  = stocks ? stocks : "0";
-						if(barcodeval !="" ){
-								if(stock > quantity || stock == quantity ){
-									$(`#quantity${index}`).removeClass("is-invalid").addClass("is-valid");
-									$(this).closest("tr").find("#invalid-quantity").removeClass("is-invalid").addClass("is-valid");
-									$(this).closest("tr").find("#invalid-quantity").text('');
-									removeIsValid("#tableProjectRequestItems");
-								}else{
-									$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
-									$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-									$(this).closest("tr").find("#invalid-quantity").text('Excessive amount of quantity!');
-								}
-							}else{
-								$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").text('Excessive amount of quantity Or No Stocks Available!');
-						}
+        const barcodeval  		= $(this).closest("tr").find('[name=barcode]').val();
+	
+		const stockQuantity  	= parseInt($(`#quantity${index}`).attr("availableStock"));
+		var stock = stockQuantity ? stockQuantity : "0";
+				 if(barcodeval !==""){
+						if(stock > quantity || stock == quantity ){
+							$(`#quantity${index}`).removeClass("is-invalid").addClass("is-valid");
+							$(this).closest("tr").find("#invalid-quantity").removeClass("is-invalid").addClass("is-valid");
+							$(this).closest("tr").find("#invalid-quantity").text('');
+							removeIsValid("#tableProjectRequestItems");
+						}else{
+							$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
+							$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
+							$(this).closest("tr").find("#invalid-quantity").text('Excessive amount of quantity!');
+						}	
 						
-						})
 				}else{
 					$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
 					$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
@@ -1171,14 +1170,9 @@ $(document).ready(function() {
 		let requestProjectItems = "";
 		if (disposalID) {
 			let disposalItemsData = getTableData(
-				`ims_inventory_disposal_details_tbl AS idd
-				LEFT JOIN ims_inventory_disposal_tbl 	AS iid ON	idd.disposalID = iid.disposalID
-				LEFT JOIN ims_stock_in_tbl 				AS isi ON 	idd.itemID = isi.itemID AND idd.barcode = isi.barcode
-				LEFT JOIN ims_inventory_item_tbl		AS iii ON 	idd.itemID = iii.itemID
-				LEFT JOIN ims_inventory_storage_tbl		AS iis ON 	idd.inventoryStorageID = iis.inventoryStorageID`, 
-				`idd.disposalID,idd.itemID,isi.itemName,idd.barcode,idd.serialnumber,FORMAT(idd.quantity,2) AS quantity,idd.disposalDetailRemarks,idd.inventoryStorageID,
-				iis.inventoryStorageOfficeName,iii.createdAt AS itemcreatedAt,idd.unitOfMeasurement, iis.createdAt AS inventorycreatedAt`, 
-				`iid.disposalID = ${disposalID}`,``,`idd.disposalID`);
+				`ims_inventory_disposal_details_tbl`, 
+				`*`, 
+				`disposalID = ${disposalID}`,``,`assetID`);
 				disposalItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
 			})
@@ -1351,12 +1345,13 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
 								${checkboxProjectHeader}
                                 <th>Barcode ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Item Code</th>
-								<th>Item Name </th>
-                                <th>Serial No. </th>
-                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Asset Code</th>
+								<th>Asset Name </th>
+								<th>Asset Classification </th>
 								<th>UOM</th>
-                                <th>Storage Code </th>
+                                <th>Serial No. </th>
+                                <th>Quantity Disposal ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Available Stocks </th>
                                 <th>Storage Name</th>
 								<th>Remarks ${!disabled ? "<code>*</code>" : ""}</th>
                             </tr>
@@ -1530,14 +1525,30 @@ $(document).ready(function() {
 			$(".itemTableRow").each(function(i, obj) {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
-				const itemID    			= $("td [name=barcode]", this).attr("itemID");
-				const itemName    			= $("td [name=barcode]", this).attr("itemName");
-				const inventoryStorageID   	= $("td [name=barcode]", this).attr("inventoryStorageID");
-				const serialnumber   		= $("td [name=barcode]", this).attr("serialnumber");	
-				const barcode 				= $("td [name=barcode]", this).val();
-				const quantity 				= $("td [name=quantity]", this).val().replaceAll(",","");	
-				const unitofmeasurement 	= $("td [name=barcode]", this).attr("unitofmeasurement");
-				const disposalDetailRemarks = $("td [name=disposalDetailRemarks]", this).val();	
+				const assetID 						= $("td [name=assetCode]", this).attr("assetID");
+				const assetCode 					= $("td [name=assetCode]", this).text();
+				const assetName 					= $("td [name=assetCode]", this).text();
+				const brand 						= $("td [name=assetName]", this).attr("brand");
+				const assetClassification 			= $("td [name=assetClassification]", this).text();
+				const assetCategory 				= $("td [name=assetClassification]", this).attr("assetCategory");
+				const unitofmeasurement 			= $("td [name=unitofmeasurement]", this).text();
+				const serialnumber 					= $("td [name=serialnumber]", this).text();
+				const inventoryStorageOfficeName 	= $("td [name=inventoryStorageOfficeName]", this).text();
+				const inventoryStorageID 			= $("td [name=inventoryStorageOfficeName]", this).attr("inventoryStorageID");
+				const inventoryStorageCode 			= $("td [name=inventoryStorageOfficeName]", this).attr("inventoryStorageCode");
+				const quantity 						= $("td [name=quantity]", this).val();
+				const availableStock 				= $("td [name=quantity]", this).attr("availableStock");
+				const barcode 						= $("td [name=barcode]", this).val();
+				const stockInAssetID 			    = $("td [name=barcode]", this).attr("stockInAssetID");
+				const disposalDetailRemarks 		= $("td [name=disposalDetailRemarks]", this).val();
+				// const itemID    			= $("td [name=barcode]", this).attr("itemID");
+				// const itemName    			= $("td [name=barcode]", this).attr("itemName");
+				// const inventoryStorageID   	= $("td [name=barcode]", this).attr("inventoryStorageID");
+				// const serialnumber   		= $("td [name=barcode]", this).attr("serialnumber");	
+				// const barcode 				= $("td [name=barcode]", this).val();
+				// const quantity 				= $("td [name=quantity]", this).val().replaceAll(",","");	
+				// const unitofmeasurement 	= $("td [name=barcode]", this).attr("unitofmeasurement");
+				// const disposalDetailRemarks = $("td [name=disposalDetailRemarks]", this).val();	
 			
 
 				// const itemID    = $("td [name=itemID]", this).val();
@@ -1546,16 +1557,24 @@ $(document).ready(function() {
 				//const quantity = formatdate.format('YYYY-MM-DD');
 			
 				let temp = {
-					itemID, quantity, disposalDetailRemarks
+					assetID, assetCode, assetName, brand, assetClassification, assetCategory, unitofmeasurement, serialnumber, inventoryStorageOfficeName, inventoryStorageID,  inventoryStorageCode, quantity, availableStock, barcode, disposalDetailRemarks 
 					
 				};
-				formData.append(`items[${i}][itemID]`, itemID);
-				formData.append(`items[${i}][itemName]`, itemName);
-				formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
-				formData.append(`items[${i}][barcode]`, barcode);
-				formData.append(`items[${i}][quantity]`, quantity);
+				formData.append(`items[${i}][assetID]`, assetID);
+				formData.append(`items[${i}][assetCode]`, assetCode);
+				formData.append(`items[${i}][assetName]`, assetName);
+				formData.append(`items[${i}][brand]`, brand);
+				formData.append(`items[${i}][assetClassification]`, assetClassification);
+				formData.append(`items[${i}][assetCategory]`, assetCategory);
 				formData.append(`items[${i}][unitofmeasurement]`, unitofmeasurement);
 				formData.append(`items[${i}][serialnumber]`, serialnumber);
+				formData.append(`items[${i}][inventoryStorageOfficeName]`, inventoryStorageOfficeName);
+				formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
+				formData.append(`items[${i}][inventoryStorageCode]`, inventoryStorageCode);
+				formData.append(`items[${i}][quantity]`, quantity);
+				formData.append(`items[${i}][availableStock]`, availableStock);
+				formData.append(`items[${i}][barcode]`, barcode);
+				formData.append(`items[${i}][stockInAssetID]`, stockInAssetID);
 				formData.append(`items[${i}][disposalDetailRemarks]`, disposalDetailRemarks);
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
@@ -1707,7 +1726,6 @@ $(document).ready(function() {
 			if (revise) {
 				if (!isFromCancelledDocument) {
 				//const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-				//alert(id);
 				// data["reviseDisposalID"] = id;
 				// delete data["disposalID"];
 				data.append("reviseDisposalID", id);
@@ -1806,8 +1824,6 @@ $(document).ready(function() {
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
 		const id       = decryptString($(this).attr("disposalID"));
-		//alert(id);
-		//const id       = $(this).attr("disposalID");
 		const feedback = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
 
 		$("#modal_item_disposal_content").html(preloader);
