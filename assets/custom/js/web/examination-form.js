@@ -305,9 +305,10 @@ function getMultipleChoiceQuestion(data = false,pageQuestionsNumber=1,examData=f
 					<h5 style="font-weight: bolder;">${pageQuestionsNumber}. ${data[0].question}</h5>
 				</div>
 			<div class="choices">
-				${getChoices("Multiple Choice",data[0].examinationQaID,pageQuestionsNumber)}
+				
 			</div>
 			<div class="answer pb-2">
+				${getChoices("Multiple Choice",data[0].examinationQaID,pageQuestionsNumber)}
 				<div class="row float-right mr-2">
 					
 					${questionsButton(nextQuestionID,data[0].examinationType,examData,pageQuestionsNumber,level,ExaminationID)}
@@ -506,9 +507,10 @@ function getTrueFalseQuestion(data = false,pageQuestionsNumber=1,examData=false,
 				</div>
 			</div>
 			<div class="choices">
-				${getChoices("True or False",data[0].examinationQaID,pageQuestionsNumber)}
+				
 			</div>
 			<div class="answer pb-2">
+				${getChoices("True or False",data[0].examinationQaID,pageQuestionsNumber)}
 				<div class="row float-right mr-2">
 					
 					${questionsButton(nextQuestionID,data[0].examinationType,examData,pageQuestionsNumber,level,ExaminationID)}
@@ -534,35 +536,35 @@ function listQuestionsContent(data = false,level="") {
 	let html = `
 	<h6 class="bg-primary text-light pt-3" style="line-height: 10px;">
 		<strong class="pl-3">Questions (${dataLength})
-			<div class="container mt-4 ">
+			<div class="container mt-4 text-center">
 				<div class="row">
 					<div class="col-3 p-1">
 						<label class="mb-0 " style="width: 45px; 
 						border-radius: 3px;
 						height: 12px; 
 						background-color: #2e93ffa8;"></label>
-						<label class="p-2" style="font: small-caption;">Current Item</label>
+						<label class="p-1" style="font: small-caption;">Current Item</label>
 					</div>
 					<div class="col-3 p-1">
 						<label class="mb-0 " style="width: 45px; 
 						border-radius: 3px;
 						height: 12px; 
 						background-color: #28a74594;"></label>
-						<label class="p-2" style="font: small-caption;">Answered</label>
+						<label class="p-1" style="font: small-caption;">Answered</label>
 					</div>
 					<div class="col-3 p-1">
 						<label class="mb-0 " style="width: 45px; 
 						border-radius: 3px;
 						height: 12px; 
 						background-color:#ffc107a3;"></label>
-						<label class="p-2" style="font: small-caption;">Skipped</label>
+						<label class="p-1" style="font: small-caption;">Skipped</label>
 					</div>
 					<div class="col-3 p-1">
 						<label class="mb-0 " style="width: 45px; 
 						border-radius: 3px;
 						height: 12px; 
 						background-color:#f2f2f2;"></label>
-						<label class="p-2" style="font: small-caption;">Yet to Attend</label>
+						<label class="p-1" style="font: small-caption;">Unanswered</label>
 					</div>
 				</div>
 			</div>	
@@ -942,9 +944,16 @@ $(document).on("click", ".nextQuestion", function (){
 	const getCategory = $(".answer").find("input").attr("id");
 	let getAnswer = '';
 	
-	if(getCategory == "identification"){
-		getAnswer = $(".answer").find("input").val();
+	if(getCategory == "identification" || getCategory == "multipleChoice" || getCategory == "trueOrfalse" || getCategory == "essay" ){
 		
+		if(getCategory == "identification" || getCategory == "essay"){
+			getAnswer = $(".answer").find("input").val();
+		}
+		if(getCategory == "multipleChoice" || getCategory == "trueOrfalse"){
+			getAnswer = $(".answer").find("input:checked").val() || 0;
+
+		}
+					
 		if(getAnswer != 0 || getAnswer != ''){
 			$("#listQuestion"+indexMinus).css('background-color','#28a74594'); // green
 			$("#listQuestion"+indexPlus).css('background-color','#2e93ffa8'); // blue

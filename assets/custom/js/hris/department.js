@@ -48,13 +48,12 @@ $(document).ready(function(){
             method:   'POST',
             async:    false,
             dataType: 'json',
-            data:     {tableName: "hris_department_tbl"},
+            data:     {tableName: "hris_department_tbl WHERE departmentID <> 1"},
             beforeSend: function() {
                 $("#table_content").html(preloader);
                 // $("#inv_headerID").text("List of Inventory Item");
             },
             success: function(data) {
-                console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover nowrap" id="tableHRISDepartment">
                     <thead>

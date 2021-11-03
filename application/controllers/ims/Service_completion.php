@@ -56,6 +56,14 @@ class Service_completion extends CI_Controller {
             "createdAt"                  => $createdAt
         ];
 
+        $multipleFiles = getUploadedMultipleFiles($_POST, $_FILES);
+        if ($multipleFiles && !empty($multipleFiles)) {
+            foreach ($multipleFiles as $fileKey => $fileValue) {
+                unset($serviceCompletionData[$fileKey]);
+                $serviceCompletionData[$fileKey] = $fileValue;
+            }
+        }
+
         if ($action == "update") {
             unset($serviceCompletionData["reviseServiceCompletionID"]);
             unset($serviceCompletionData["createdBy"]);

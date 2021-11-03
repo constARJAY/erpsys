@@ -136,6 +136,7 @@ class EmployeeTaskboard_model extends CI_Model {
         $query  = $this->db->query($sql);
         $tasks  = $query ? $query->result_array() : [];
         foreach ($tasks as $task) {
+            $getProjectMilestoneID = $task["projectMilestoneID"] ? $task["projectMilestoneID"] : $projectMilestoneID;
             $temp = [
                 "taskCode"      => 'TSK-'.SUBSTR($task["createdAt"],2,3).''.STR_PAD($task["taskID"],5,0,STR_PAD_LEFT),
                 "taskBoardID"        => $task["taskBoardID"] ? $task["taskBoardID"] : "" ,
@@ -156,7 +157,7 @@ class EmployeeTaskboard_model extends CI_Model {
                 "taskNotes"  => $task["taskNotes"] ? $task["taskNotes"] : "",
                 "taskDescription"  => $task["taskDescription"] ? $task["taskDescription"] : "",
                 "milestoneTask" => $this->getTimelineBoard($timelineBuilderID, $task["taskID"]),
-                "assignedEmployee"=>$this->getAssignEmployee($task["taskID"],$timelineBuilderID) ,
+                "assignedEmployee"=>$this->getAssignEmployee($task["taskID"],$timelineBuilderID,$getProjectMilestoneID) ,
                 "subTask"=>$this->getSubTaskList($task["timelineBuilderID"] ? $task["timelineBuilderID"] : $timelineBuilderID, 
                                                 $task["projectMilestoneID"] ? $task["projectMilestoneID"] : $projectMilestoneID,
                                                 $task["milestoneBuilderID"] ? $task["milestoneBuilderID"] : $milestoneBuilderID,
@@ -236,10 +237,10 @@ class EmployeeTaskboard_model extends CI_Model {
         return $output;
     }
 
-    public function getAssignEmployee($taskID = 0, $timelineBuilderID = 0)
+    public function getAssignEmployee($taskID = 0, $timelineBuilderID = 0,$projectMilestoneID = 0)
     {
         $output = [];
-        $sql    = "SELECT * FROM pms_timeline_management_tbl WHERE timelineBuilderID = $timelineBuilderID AND taskID = $taskID GROUP BY assignedEmployee ";
+        $sql    = "SELECT * FROM pms_timeline_management_tbl WHERE timelineBuilderID = $timelineBuilderID AND taskID = $taskID AND projectMilestoneID =  $projectMilestoneID GROUP BY assignedEmployee ";
         $query  = $this->db->query($sql);
         $tasks  = $query ? $query->result_array() : [];
         foreach ($tasks as $employee) {
@@ -333,27 +334,29 @@ class EmployeeTaskboard_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function updateExtension($taskBoardID,$subtaskboardID,$extension) {
-        $condition = '';
-        $databaseTables = "";
+    // public function updateExtension($taskBoardID,$subtaskboardID,$extension,$label) {
+    //     $condition = '';
+    //     $databaseTables = "";
 
-        if($taskBoardID !=0){
-            $condition = "taskBoardID = $taskBoardID";
-            $databaseTables = "pms_employeetaskoard_tbl";
-        }else{
-            $condition = "subtaskboardID = $subtaskboardID";
-            $databaseTables = "pms_employeetaskoard_details_tbl";
+    //     if($taskBoardID !=0){
+    //         $condition = "taskBoardID = $taskBoardID";
+    //         $databaseTables = "pms_employeetaskoard_tbl";
+    //         $this->logHistory($label,$data, $taskBoardID,"");
+    //     }else{
+    //         $condition = "subtaskboardID = $subtaskboardID";
+    //         $databaseTables = "pms_employeetaskoard_details_tbl";
+    //         $this->logHistory($label,$extension, $taskBoardID,$subtaskboardID);
+    //     }
 
-        }
+    //     $query = $this->db->query("UPDATE $databaseTables
+    //     SET extension = '$extension'
+    //     WHERE  $condition");
 
-        $query = $this->db->query("UPDATE $databaseTables
-        SET extension = '$extension'
-        WHERE  $condition");
 
-          return $query ? true : "false|System error: Please contact the system administrator for assistance!";
+    //       return $query ? true : "false|System error: Please contact the system administrator for assistance!";
 
       
-    }
+    // }
 
     public function autoSavedHeader($data,$taskBoardID,$label=null,$generateProejctData = ""){
     //    echo($taskBoardID);
@@ -493,7 +496,9 @@ class EmployeeTaskboard_model extends CI_Model {
       
     }
 
-    public function updateAssignee($subtaskboardID = null,$passListAssignee = null,$label=null) {
+    public function updateAssignee($subtaskboardID = null,$passListAssignee = null,$label=null,$passListAssigneeArray =[]) {
+
+        $listassigneeArray = explode (",", $passListAssigneeArray); 
 
         if ($passListAssignee && count($passListAssignee) > 0) {
           
@@ -503,7 +508,24 @@ class EmployeeTaskboard_model extends CI_Model {
                 $insertID = $subtaskboardID;
                 $this->logHistory($label,$passListAssignee,"",$subtaskboardID);
 
-            return $query ? true : "false|System error: Please contact the system administrator for assistance!";
+                $geExisitingAssignee = $this->db->query("SELECT * FROM pms_employee_taskboard_status_tbl WHERE subtaskboardID= $subtaskboardID");
+                $result = $geExisitingAssignee->result_array();
+
+                if(count($result)>0){
+                    foreach($result as $value){
+                        if (!in_array($value["employeeID"], $listassigneeArray)) {
+                            $employeeID = $value["employeeID"]; 
+                            $this->db->query("DELETE FROM pms_employee_taskboard_status_tbl WHERE subtaskboardID= $subtaskboardID AND employeeID = $employeeID");
+                        }
+                    }
+                }
+
+                $getUpdateSubtaskAssignee = $this->db->query("SELECT SUM(employeeManHours) as manHours ,SUM(employeeUsedHours) as usedHours FROM pms_employee_taskboard_status_tbl WHERE subtaskboardID= $subtaskboardID");
+                $resultDetailAssignee = $getUpdateSubtaskAssignee->result_array();
+
+
+
+            return $query ? $resultDetailAssignee : "false|System error: Please contact the system administrator for assistance!";
 
         }
     }

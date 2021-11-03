@@ -1,6 +1,8 @@
 $(document).ready(function() {
 	const allowedUpdate = isUpdateAllowed(128);
 
+	let oldInvoiceFilename = [], newInvoiceFilename = [], newInvoiceFiles = [];
+
 
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("service completion");
@@ -943,10 +945,10 @@ $(document).ready(function() {
 			scopeID="${scopeID}">x</span>` : "";
 		const target = link ? `target="_blank"` : "";
         let html = `
-        <div class="d-flex justify-content-start align-items-center">
+        <div class="display-image d-flex justify-content-start align-items-center">
             ${btnDelete}
             <a class="ml-1 display-image-filename"
-				${readOnly ? "display='true'" : ""}
+				display="true"
                 href="${href}"
                 ${target}
 				title="${file}">
@@ -982,7 +984,7 @@ $(document).ready(function() {
 			html = `
 			<tr>
 				<td>
-					<div class=" servicefile">
+					<div class=" servicefile" style="max-width: 300px;">
 						<div class="input-group mb-0">
 							<input type="file"
 								class="form-control validate"
@@ -1031,7 +1033,7 @@ $(document).ready(function() {
 			html = `
 			<tr>
 				<td>
-					<div class="display-image servicefile">
+					<div class="servicefile" style="max-width: 300px;">
 						${serviceFile || "-"}
 					</div>
 				</td>
@@ -1258,7 +1260,7 @@ $(document).ready(function() {
 	$(document).on("click", `.display-image-filename`, function(e) {
 		let display = $(this).attr("display") == "true";
 		let source  = $(this).attr("blob") || $(this).attr("href");
-		if (display) {
+		if (display && source != "javascript:void(0)") {
 			e.preventDefault();
 			$("#display-image-preview").attr("src", source);
 			$("#display-image-modal").modal("show");
@@ -1306,33 +1308,33 @@ $(document).ready(function() {
 
 
 	// ----- SELECT FILE -----
-	$(document).on("change", "[name=files]", function(e) {
-		const filename = this.files[0].name;
-		const filesize = this.files[0].size/1024/1024; // Size in MB
-		if (filesize > 10) {
-			$(this).val("");
-			$(this).parent().parent().find(".displayfile").empty();
-			$(this).parent().parent().find(".displayfile").css("display", "none");
-			showNotification("danger", "File size must be less than or equal to 10mb");
-		} else {
-			let html = `
-			<div class="d-flex justify-content-between align-items-center py-2 display-image">
-				<span class="filename display-image-filename">${filename}</span>
-				<span class="btnRemoveFile display-image-remove" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>`;
-			$(this).parent().find(".displayfile").first().html(html);
-			$(this).parent().find(".displayfile").css("display", "block");
-		}
-	})
+	// $(document).on("change", "[name=files]", function(e) {
+	// 	const filename = this.files[0].name;
+	// 	const filesize = this.files[0].size/1024/1024; // Size in MB
+	// 	if (filesize > 10) {
+	// 		$(this).val("");
+	// 		$(this).parent().parent().find(".displayfile").empty();
+	// 		$(this).parent().parent().find(".displayfile").css("display", "none");
+	// 		showNotification("danger", "File size must be less than or equal to 10mb");
+	// 	} else {
+	// 		let html = `
+	// 		<div class="d-flex justify-content-between align-items-center py-2 display-image">
+	// 			<span class="filename display-image-filename">${filename}</span>
+	// 			<span class="btnRemoveFile display-image-remove" style="cursor: pointer"><i class="fas fa-close"></i></span>
+	// 		</div>`;
+	// 		$(this).parent().find(".displayfile").first().html(html);
+	// 		$(this).parent().find(".displayfile").css("display", "block");
+	// 	}
+	// })
 	// ----- END SELECT FILE -----
 
 
 	// ----- REMOVE FILE -----
-	$(document).on("click", ".btnRemoveFile", function() {
-		$(this).parent().parent().parent().find("[name=files]").first().val("");
-		$(this).closest(".displayfile").empty();
-		$(this).closest(".displayfile").css("display", "none");
-	})
+	// $(document).on("click", ".btnRemoveFile", function() {
+	// 	$(this).parent().parent().parent().find("[name=files]").first().val("");
+	// 	$(this).closest(".displayfile").empty();
+	// 	$(this).closest(".displayfile").css("display", "none");
+	// })
 	// ----- END REMOVE FILE -----
 
 
@@ -1912,6 +1914,17 @@ $(document).ready(function() {
 				}
 			});
 
+
+			// ----- FILES -----
+			formData.append("uploadFileFolder", "service-completion");
+			formData.append("uploadFileColumnName[0]", "serviceCompletionInvoice");
+			formData.append("uploadFileNewFilename[0]", newInvoiceFilename.join("|"));
+			formData.append("uploadFileOldFilename[0]", oldInvoiceFilename.join("|"));
+			newInvoiceFiles.map((file, index) => {
+				formData.append(`uploadFiles[0][${index}]`, file);
+			})
+			// ----- FILES -----
+
 		} 
 		return formData;
 	} 
@@ -1922,6 +1935,8 @@ $(document).ready(function() {
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
+
+		oldInvoiceFilename = [], newInvoiceFilename = [], newInvoiceFiles = [];
 
 		let {
 			serviceCompletionID,
@@ -1962,6 +1977,7 @@ $(document).ready(function() {
 			totalVat,
 			lessEwt,
 			grandTotalAmount,
+			serviceCompletionInvoice,
 			serviceOrderReason,
 			contractFile,
 			isotCreatedAt,
@@ -2195,6 +2211,19 @@ $(document).ready(function() {
 					<div class="d-block invalid-feedback" id="invalid-scheduleDate"></div>
                 </div>
             </div>
+			<div class="col-sm-12">
+				<div class="form-group">
+                    <label>Upload Invoice ${!disabled ? "<code>*</code>" : ""}</label>
+                    ${!disabled ? `<input type="file" class="form-control validate"
+						name="serviceCompletionInvoice"
+						id="serviceCompletionInvoice"
+						multiple="multiple">` : ""}
+					<div class="d-block invalid-feedback" id="invalid-serviceCompletionInvoice"></div>
+					<div class="row display-image-parent" id="displayFile">
+						${displayFile(readOnly, serviceCompletionInvoice)}
+					</div>
+                </div>
+			</div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Prepared By</label>
@@ -2320,6 +2349,105 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
+	// ----- UPLOAD INVOICE -----
+	$(document).on("change", `[name="serviceCompletionInvoice"]`, function() {
+		let countFiles = oldInvoiceFilename.length + newInvoiceFilename.length;
+		if (this.files && this.files[0]) {
+			let files = this.files;
+			let filesLength = this.files.length;
+			for (var i=0; i<filesLength; i++) {
+				countFiles++;
+
+				const filesize = files[i].size/1024/1024; // Size in MB
+				const filetype = files[i].type;
+				const filename = files[i].name;
+				const fileArr  = filename.split(".");
+				const name     = fileArr?.[0];
+				const type     = fileArr?.[fileArr.length-1]?.toLowerCase();
+				const displayName = `${name}${countFiles}.${type}`;
+				if (filesize > 10) {
+					showNotification("danger", `${filename} - File size must be less than or equal to <b>10mb</b>`);
+				} else if (!["png", "jpg", "jpeg", "doc", "docx", "pdf"].includes(type)) {
+					showNotification("danger", `${filename} - <b>Invalid file type</b>`);
+				} else {
+					newInvoiceFilename.push(displayName);
+					newInvoiceFiles.push(files[i]);
+					let blob = URL.createObjectURL(files[i]);
+					$(`#displayFile`).append(displayFile(false, displayName, true, blob, true, false));
+				}
+			}
+			$("#serviceCompletionInvoice").removeClass("is-valid").removeClass("is-invalid");
+			$("#invalid-serviceCompletionInvoice").text("");
+			$(this).val("");
+        }
+	})
+	// ----- END UPLOAD INVOICE -----
+
+
+	// ----- DISPLAY FILE -----
+    function displayFile(readOnly = false, file = null, isAdd = false, blob = "", link = true, oldFiles = true) {
+        let html = ``;
+        if (file && file != null && file != "null") {
+			let fileArr = file.split("|");
+			fileArr.forEach(scFile => {
+				if (oldFiles) oldInvoiceFilename.push(scFile);
+
+				let fileType = scFile.split(".");
+					fileType = fileType[fileType.length-1].toLowerCase();
+				let imageExtensions = ["jpg", "png", "jpeg"];
+				let isFileImage = imageExtensions.includes(fileType);
+				let targetAttr = isFileImage ? `display="true" blob="${blob}"` : 
+					(oldFiles ? `target="_blank"` : "");
+
+				let buttonRemove = !readOnly ? `<span class="btnRemoveFile pr-2 display-image-remove"
+					filename="${scFile}">
+					<i class="fas fa-close"></i>
+				</span>` : "";
+
+				let otherAttr = !link || isAdd ? `href="javascript:void(0)"` : `
+				href="${base_url+"assets/upload-files/service-completion/"+scFile}"`;
+				let downloadAttr = isFileImage ? "" : `download="${scFile}"`;
+
+				html += `
+				<div class="col-md-4 col-sm-12 display-image-content">
+					<div class="display-image">
+						<div class="d-flex justify-content-start align-items-center p-0">
+							${buttonRemove}
+							<a class="filename display-image-filename"
+								title="${scFile}"
+								${otherAttr}
+								${targetAttr}
+								${downloadAttr}>
+								${scFile}
+							</a>
+						</div>
+					</div>
+				</div>`;
+			})
+        }
+        return html;
+    }
+    // ----- END DISPLAY FILE -----
+
+
+	// ----- REMOVE FILE -----
+	$(document).on("click", ".btnRemoveFile", function() {
+		const filename     = $(this).attr("filename");
+		const newFileIndex = newInvoiceFilename.indexOf(filename);
+		const oldFileIndex = oldInvoiceFilename.indexOf(filename);
+
+		newFileIndex != -1 && newInvoiceFilename.splice(newFileIndex, 1);
+		newFileIndex != -1 && newInvoiceFiles.splice(newFileIndex, 1);
+		oldFileIndex != -1 && oldInvoiceFilename.splice(oldFileIndex, 1);
+
+		$display = $(this).closest(".display-image-content");
+		$display.fadeOut(500, function() {
+			$display.remove();
+		})
+	})
+	// ----- END REMOVE FILE -----
+
+
 	// ----- OPEN ADD FORM -----
 	$(document).on("click", "#btnAdd", function () {
 		pageContent(true);
@@ -2361,6 +2489,8 @@ $(document).ready(function() {
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("SC", dateToday(), id);
 		const status     = $(this).attr("status");
+
+		console.log(oldInvoiceFilename, newInvoiceFilename, newInvoiceFiles);
 
 		if (status != "false" && status != 0) {
 			
@@ -2464,6 +2594,22 @@ $(document).ready(function() {
 	// ----- END VALIDATE SERVICE FILE ----- 
 
 
+	// ----- CHECK FILE LENGTH -----
+	function checkFileLength() {
+		let count = oldInvoiceFilename.length + newInvoiceFilename.length;
+		if (count > 5) {
+			showNotification("danger", "Only 5 files are allowed to upload.");
+			return false;
+		} else if (count == 0) {
+			$("#serviceCompletionInvoice").removeClass("is-valid").addClass("is-invalid");
+			$("#invalid-serviceCompletionInvoice").text("This field is required");
+			return false;
+		}
+		return true;
+	}
+	// ----- END CHECK FILE LENGTH -----
+
+
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id = decryptString($(this).attr("serviceCompletionID"));
@@ -2473,8 +2619,9 @@ $(document).ready(function() {
 		const validateFile = validateServiceFile();
 		const validateDate = validateServiceDate();
 		removeIsValid("#tableServiceCompletionItems0");
+		const validateFileLength = checkFileLength();
 
-		if (validate && validateFile && validateDate) {
+		if (validate && validateFile && validateDate && validateFileLength) {
 			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getServiceCompletionData(action, "submit", "1", id, "0", revise);
 
@@ -2534,7 +2681,7 @@ $(document).ready(function() {
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data = getServiceCompletionData("update", "approve", "2", id);
+			let data = getServiceCompletionData("update", "approve", "2", id, "1");
 			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
 			data.append("approversDate", dateApproved);
@@ -2844,8 +2991,9 @@ function saveServiceCompletion(data = null, method = "submit", notificationData 
 									title:             swalTitle,
 									showConfirmButton: false,
 									timer:             2000,
+								}).then(function() {
+									callback && callback();
 								});
-								callback && callback();
 
 								if (method == "approve" || method == "deny") {
 									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")

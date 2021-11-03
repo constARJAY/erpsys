@@ -790,7 +790,7 @@ $(document).ready(function() {
         <div class="row px-2">
             <div class="col-12 mb-3 text-right d-flex align-items-center justify-content-end">
                 <div id="displaySignedPO"
-					class="display-image w-50 d-${displaySignedPO ? "block" : "none"}">${displaySignedPO}</div>
+					class="display-image w-auto d-${displaySignedPO ? "block" : "none"}">${displaySignedPO}</div>
                 ${displayButtonSigned}
             </div>
             <div class="col-lg-3 col-md-4 col-sm-12 px-1">

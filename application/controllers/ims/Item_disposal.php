@@ -12,7 +12,7 @@ class Item_disposal extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Item Disposal";
+        $data["title"] = "Asset Disposal";
 
         $this->load->view("template/header",$data);
         $this->load->view("ims/item_disposal/index");

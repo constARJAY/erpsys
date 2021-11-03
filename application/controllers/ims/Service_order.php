@@ -102,13 +102,13 @@ class Service_order extends CI_Controller {
             "updatedBy"             => $updatedBy,
         ];
 
-        $multipleFiles = getUploadedMultipleFiles($_POST, $_FILES);
-        if ($multipleFiles && !empty($multipleFiles)) {
-            foreach ($multipleFiles as $fileKey => $fileValue) {
-                unset($serviceOrderData[$fileKey]);
-                $serviceOrderData[$fileKey] = $fileValue;
-            }
-        }
+        // $multipleFiles = getUploadedMultipleFiles($_POST, $_FILES);
+        // if ($multipleFiles && !empty($multipleFiles)) {
+        //     foreach ($multipleFiles as $fileKey => $fileValue) {
+        //         unset($serviceOrderData[$fileKey]);
+        //         $serviceOrderData[$fileKey] = $fileValue;
+        //     }
+        // }
 
         if ($reviseServiceOrderID) {
             $soData = $this->serviceorder->getServiceOrder($reviseServiceOrderID);
@@ -192,9 +192,9 @@ class Service_order extends CI_Controller {
             }
             
             // ----- INSERT SERVICE ORDER -----
-            if ($serviceOrderStatus == "2") {
-                $insertServiceCompletionData = $this->serviceorder->insertServiceCompletionData($serviceOrderID);
-            }
+            // if ($serviceOrderStatus == "2") {
+            //     $insertServiceCompletionData = $this->serviceorder->insertServiceCompletionData($serviceOrderID);
+            // }
             // ----- END INSERT SERVICE ORDER -----
         }
         echo json_encode($saveServiceOrderData);
@@ -736,7 +736,7 @@ class Service_order extends CI_Controller {
             if (move_uploaded_file($_FILES["files"]["tmp_name"], $targetDir)) {
 
                 $saveServiceOrderContract = $this->serviceorder->saveServiceOrderContract($serviceOrderID, $filename);
-                $insertServiceCompletion = $this->serviceorder->insertServiceCompletion($serviceOrderID);
+                $insertServiceCompletion = $this->serviceorder->insertServiceCompletionData($serviceOrderID);
                 echo json_encode($saveServiceOrderContract);
             }
         }

@@ -158,6 +158,12 @@ select{
     margin-left: -7px;
 }
 
+.center-block {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+ }
+
 </style>
 <div class="body_area after_bg ">
 	<div class="block-header pb-0">
@@ -180,23 +186,23 @@ select{
 	</div>
 
     <div class="container">
-    	<div class="row clearfix row-deck mx-1">
-    		<div class="card col-2 ">
+    	<div class="row clearfix row-deck">
+    		<div class="card col-sm-12 col-md-4 col-lg-3 col-xl-2">
 
     			<div class="text-primary font-weight-bold mb-2 mt-4 ml-2" style="font-size: 1.5rem;">
     				<span>List of projects</span>
     				<hr>
     			</div>
 
-    			<div class="card-body" id="page_sidebar">
+    			<div class="card-body p-0 mb-2" id="page_sidebar">
     				
     			</div>
 
     		</div>
 
 
-    		<div class="card col-10 ">
-    			<div class="card-body" id="page_content"></div>
+    		<div class="card col-sm-12 col-md-8 col-lg-9 col-xl-10">
+    			<div class="card-body p-1 mt-3" id="page_content"></div>
     		</div>
 			
     	</div>
@@ -369,9 +375,17 @@ select{
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">              
       <div class="modal-body">
-      	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 
-        <img src="" class="imagepreview" style="width: 100%;height:100%; " >
+      <div class="row">
+          <!-- <div class="col-8"><label class="title"></label> <button class="ml-2 btn btn-success"><a href="" class="text-white" target="_blank"  style="cursor:pointer;">Download</a></button></div> -->
+          <div class="col-8"><h5 class="title"></h5></div>
+          <div class="col-4">
+            <button type="button" class="close mr-2" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          </div>
+        </div>
+        
+        <hr class="w-100">
+        <img src="" class="imagepreview center-block" style="width: 100%;height:100%; " >
       </div>
     </div>
   </div>
@@ -387,7 +401,7 @@ select{
       <div class="modal-body">
         <div class="row">
           <!-- <div class="col-8"><label class="title"></label> <button class="ml-2 btn btn-success"><a href="" class="text-white" target="_blank"  style="cursor:pointer;">Download</a></button></div> -->
-          <div class="col-8"><label class="title"></label></div>
+          <div class="col-8"><h5 class="title"></h5></div>
           <div class="col-4">
             <button type="button" class="close mr-2" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
           </div>

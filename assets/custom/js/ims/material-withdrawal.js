@@ -296,7 +296,7 @@
                         <th>Project</th>
                         <th>Client</th>
                         <th>Item Request Status</th>
-                        <th>Asset Request status</th>
+                        <th>Asset Request Status</th>
                     </tr>
                 </thead>
                 <tbody>`;

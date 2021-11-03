@@ -217,16 +217,17 @@ class Employee_taskboard extends CI_Controller {
         echo json_encode($data);
    }
 
-     public function updateExtension(){
+  //    public function updateExtension(){
 
-      $taskBoardID           = $this->input->post('taskBoardID');
-      $subtaskboardID           = $this->input->post('subtaskboardID');
-      $extension           = $this->input->post('extension');
+  //     $taskBoardID           = $this->input->post('taskBoardID');
+  //     $subtaskboardID           = $this->input->post('subtaskboardID');
+  //     $extension           = $this->input->post('extension');
+  //     $label  ='extension';
 
-      $data = $this->employee_taskboard->updateExtension($taskBoardID,$subtaskboardID,$extension);
+  //     $data = $this->employee_taskboard->updateExtension($taskBoardID,$subtaskboardID,$extension, $label);
 
-        echo json_encode($data);
-   }
+  //       echo json_encode($data);
+  //  }
 
      public function saveImageContent(){
 
@@ -260,7 +261,7 @@ class Employee_taskboard extends CI_Controller {
               $new_filename                =  "ST-".date('y')."-".$selectedID."-".strtotime("now").$i;
               $config = array(
                 'file_name'     =>$new_filename,
-                'allowed_types' => 'jpg|jpeg|png|docs|doc|docx|xls|xlsx|pdf|csv|webm|mpg|mp2|mpeg|mpe|mpv|mp4|m4p|m4v|avi|wmv|mov|flv',
+                'allowed_types' => 'jpg|jpeg|png|docs|doc|docx|xls|xlsx|pdf|csv|mp4',
                 'overwrite'     => true,
                 
                 /* real path to upload folder ALWAYS */
@@ -297,6 +298,8 @@ class Employee_taskboard extends CI_Controller {
      public function deleteImageContent(){
       $label ="delete attachment";
       $imageSrc           = $this->input->post('imageSrc');
+      // echo $imageSrc;
+      // exit;
       unlink("assets/upload-files/taskboard-images/".$imageSrc);
 
       $data = $this->employee_taskboard->deleteImageContent($imageSrc,$label);
@@ -334,7 +337,7 @@ class Employee_taskboard extends CI_Controller {
         "subTaskAssignee"        => $passListAssignee
     );
 
-    $data = $this->employee_taskboard->updateAssignee($subtaskboardID,$sendData,$label);
+    $data = $this->employee_taskboard->updateAssignee($subtaskboardID,$sendData,$label,$listAssignee);
 
       echo json_encode($data);
 }

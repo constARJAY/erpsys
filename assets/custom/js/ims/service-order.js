@@ -1380,14 +1380,14 @@ $(document).ready(function() {
 			totalAmount = total - (total * (discount / 100));
 		}
 
-		$(`#totalAmount`).text(formatAmount(totalAmount, true));
+		$(`#totalAmount`).text(formatAmount(totalAmount));
 
 		const vat = getNonFormattedAmount($("#vat").val());
 		const vatSales = totalAmount - vat;
-		$(`#vatSales`).text(formatAmount(vatSales, true));
+		$(`#vatSales`).text(formatAmount(vatSales));
 		
 		const totalVat = totalAmount;
-		$(`#totalVat`).text(formatAmount(totalVat, true));
+		$(`#totalVat`).text(formatAmount(totalVat));
 		
 		const lessEwt = getNonFormattedAmount($("#lessEwt").val());
 		const grandTotalAmount = totalVat - lessEwt;
@@ -1431,7 +1431,7 @@ $(document).ready(function() {
 		if (discountType == "percent") {
 			totalAmount = total - (total * (discount / 100));
 		}
-		$("#totalAmount").html(formatAmount(totalAmount, true));
+		$("#totalAmount").html(formatAmount(totalAmount));
 
 		const isVatable = $(`[name="inventoryVendorID"] option:selected`).attr("companyVatable") == "1";
 		let vat = 0, vatSales = 0;
@@ -1440,11 +1440,11 @@ $(document).ready(function() {
 			vat      = totalAmount - vatSales;
 		}
 
-		$("#vatSales").html(formatAmount(vatSales, true));
+		$("#vatSales").html(formatAmount(vatSales));
 		$(`[name="vat"]`).val(vat);
 
 		const totalVat = totalAmount;
-		$("#totalVat").html(formatAmount(totalVat, true));
+		$("#totalVat").html(formatAmount(totalVat));
 
 		const lessEwt          = getNonFormattedAmount($("[name=lessEwt]").val());
 		const grandTotalAmount = totalVat - lessEwt;
@@ -1482,21 +1482,28 @@ $(document).ready(function() {
 
 	$(document).on("change", "[name=contractFile]", function(e) {
 		const serviceOrderID = decryptString($(this).attr("serviceOrderID"));
-		const files        = this.files || false;
+		const files = this.files || false;
 		if (files) {
 			const filesize    = files[0].size/1024/1024;
 			const filenameArr = files[0].name.split(".");
 			const filename    = filenameArr[0];
-			const extension   = filenameArr[1];
+			const extension   = filenameArr[filenameArr.length - 1];
 			const filetypeArr = files[0].type.split("/");
 			const filetype    = filetypeArr[0];
+			const acceptArr   = ["png", "jpg", "jpeg", "doc", "docx", "pdf"];
 			if (filesize > 10) {
 				showNotification("danger", `${filenameArr.join(".")} size must be less than or equal to 10mb`);
+				$(this).val("");
+			} else if (!acceptArr.includes(extension)) {
+				showNotification("danger", "Invalid file type");
+				$(this).val("");
 			} else {
 				let formData = new FormData();
 				formData.append("serviceOrderID", serviceOrderID);
+				formData.append("purchaseOrderStatus", "2");
+				formData.append("employeeID", sessionID);
 				formData.append("files", files[0]);
-				saveServiceOrderContract(formData, filenameArr.join("."));
+				saveServiceOrderContract(formData, serviceOrderID);
 			}
 		}
 	})
@@ -1677,13 +1684,13 @@ $(document).ready(function() {
 		} 
 
 		// ----- FILES -----
-		data.append("uploadFileFolder", "service-order");
-		data.append("uploadFileColumnName[0]", "serviceOrderInvoice");
-		data.append("uploadFileNewFilename[0]", newInvoiceFilename.join("|"));
-		data.append("uploadFileOldFilename[0]", oldInvoiceFilename.join("|"));
-		newInvoiceFiles.map((file, index) => {
-			data.append(`uploadFiles[0][${index}]`, file);
-		})
+		// data.append("uploadFileFolder", "service-order");
+		// data.append("uploadFileColumnName[0]", "serviceOrderInvoice");
+		// data.append("uploadFileNewFilename[0]", newInvoiceFilename.join("|"));
+		// data.append("uploadFileOldFilename[0]", oldInvoiceFilename.join("|"));
+		// newInvoiceFiles.map((file, index) => {
+		// 	data.append(`uploadFiles[0][${index}]`, file);
+		// })
 		// ----- FILES -----
 
 		return data;
@@ -1953,7 +1960,7 @@ $(document).ready(function() {
 
 			$("#total").text(formatAmount(totalCost, true));
 			$("#discount").val("0.00");
-			$("#totalAmount").text(formatAmount(totalCost, true));
+			$("#totalAmount").text(formatAmount(totalCost));
 
 			const isVatable = $(`[name="inventoryVendorID"] option:selected`).attr("companyVatable") == "1";
 			let vat = 0, vatSales = 0;
@@ -1962,9 +1969,9 @@ $(document).ready(function() {
 				vat      = totalCost - vatSales;
 			}
 			$("#vat").val(vat);
-			$("#vatSales").text(formatAmount(vatSales, true));
+			$("#vatSales").text(formatAmount(vatSales));
 			const totalVat = totalCost;
-			$("#totalVat").text(formatAmount(totalVat, true));
+			$("#totalVat").text(formatAmount(totalVat));
 			const lessEwt = vatSales != 0 ? vatSales * 0.01 : 0;
 			$("#lessEwt").val(lessEwt);
 			const grandTotalAmount = totalVat - lessEwt;
@@ -1981,11 +1988,11 @@ $(document).ready(function() {
 			if (link) {
 				result = `<a 
 					href="${base_url}assets/upload-files/contracts/${filename}"
-					class="pr-3"
+					class="display-image-filename"
 					target="_blank"
 					id="displayContract">${filename}</a>`;
 			} else {
-				result = `<div class="pr-3">${filename}<div>`
+				result = `<div class="display-image-filename">${filename}<div>`
 			}
 		}
 		return result;
@@ -2103,21 +2110,22 @@ $(document).ready(function() {
 
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
-		// ----- PRINT BUTTON -----
-		let approvedButton = '';
+		// ----- UPLOAD SIGNED SO -----
+		let displayUploadSignedSO = '';
 		if (serviceOrderStatus == 2) {
-			approvedButton += `<div class="w-100 text-right pb-4">`;
+			displayUploadSignedSO += `<div class="col-12 mb-3 text-right d-flex align-items-center justify-content-end">`;
 			if (grandTotalAmount > 0) {
 				const file = contractFile || "";
 				const path = file ? `${base_url}assets/upload-files/contracts/${file}` : "javascript:void(0)";
 
-				approvedButton += `
-				<span id="displayContractParent">
+				displayUploadSignedSO += `
+				<div class="display-image ${file ? "d-block" : "d-none"}" id="displayContractParent" style="min-width: 200px; width: auto; max-width: 300px;">
 					${displayContract(file, file ? true : false)}
-				</span>`;
+				</div>`;
 
-				if (employeeID == sessionID) {
-					approvedButton += `
+				// if (employeeID == sessionID) {
+				if (!file) {
+					displayUploadSignedSO += `
 					<input type="file"
 						id="contractFile"
 						name="contractFile"
@@ -2128,13 +2136,13 @@ $(document).ready(function() {
 						class="btn btn-secondary py-2" 
 						serviceOrderID="${encryptString(serviceOrderID)}"
 						id="btnUploadContract">
-						<i class="fas fa-file-upload"></i> Upload Contract
+						<i class="fas fa-file-upload"></i> Upload Signed S.O.
 					</button>`;
 				}
 			}
-			approvedButton += `</div>`;
+			displayUploadSignedSO += `</div>`;
 		}
-		// ----- END PRINT BUTTON -----
+		// ----- END UPLOAD SIGNED SO -----
 
 		let reviseDocumentNo    = isRevise ? serviceOrderID : reviseServiceOrderID;
 		let documentHeaderClass = isRevise || reviseServiceOrderID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -2152,8 +2160,8 @@ $(document).ready(function() {
 		</div>` : "";
 
 		let html = `
-		${approvedButton}
         <div class="row px-2">
+			${displayUploadSignedSO}
 			${documentReviseNo}
             <div class="${documentHeaderClass}">
                 <div class="card">
@@ -2352,7 +2360,7 @@ $(document).ready(function() {
 					<div class="d-block invalid-feedback" id="invalid-scheduleDate"></div>
                 </div>
             </div>
-			<div class="col-sm-12">
+			<!-- <div class="col-sm-12">
 				<div class="form-group">
                     <label>Upload Invoice ${!disabled ? "<code>*</code>" : ""}</label>
                     ${!disabled ? `<input type="file" class="form-control validate"
@@ -2364,7 +2372,7 @@ $(document).ready(function() {
 						${displayFile(readOnly, serviceOrderInvoice)}
 					</div>
                 </div>
-			</div>
+			</div> -->
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Prepared By</label>
@@ -2731,9 +2739,9 @@ $(document).ready(function() {
 		const validate = validateForm("form_service_order");
 		removeIsValid("#tableServiceOrderItems0");
 		const costSummary = checkCostSummary();
-		const validateFileLength = checkFileLength();
+		// const validateFileLength = checkFileLength();
 
-		if (validate && costSummary && validateFileLength) {
+		if (validate && costSummary) {
 
 			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			let data = getServiceOrderData(action, "submit", "1", id, "0", revise);
@@ -2787,10 +2795,10 @@ $(document).ready(function() {
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data = getServiceOrderData("update", "approve", "2", id);
-			data["approversStatus"] = updateApproveStatus(approversStatus, 2);
+			let data = getServiceOrderData("update", "approve", "2", id, "1");
+			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
-			data["approversDate"] = dateApproved;
+			data.append("approversDate", dateApproved);
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
@@ -2815,7 +2823,7 @@ $(document).ready(function() {
 				};
 			}
 
-			data["serviceOrderStatus"] = status;
+			data.append("serviceOrderStatus", status);
 
 			saveServiceOrder(data, "approve", notificationData, pageContent);
 		}
@@ -3009,8 +3017,8 @@ $(document).ready(function() {
 				swalImg   = `${base_url}assets/modal/drop.svg`;
 				break;
 			case "uploadcontract":
-				swalTitle = `UPLOAD CONTRACT`;
-				swalText  = "Are you sure to upload this contract?";
+				swalTitle = `UPLOAD SIGNED SERVICE ORDER`;
+				swalText  = "Are you sure to upload signed service order in this document?";
 				swalImg   = `${base_url}assets/modal/add.svg`;
 				break;
 			default:
@@ -3094,8 +3102,9 @@ $(document).ready(function() {
 										title:             swalTitle,
 										showConfirmButton: false,
 										timer:             2000,
+									}).then(function() {
+										callback && callback();
 									});
-									callback && callback();
 
 									if (method == "approve" || method == "deny") {
 										$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
@@ -3144,7 +3153,7 @@ $(document).ready(function() {
 		return false;
 	}
 
-	function saveServiceOrderContract(data = null, filename = null) {
+	function saveServiceOrderContract(data = null, serviceOrderID = null) {
 		if (data) {
 			const confirmation = getConfirmation("uploadcontract");
 			confirmation.then(res => {
@@ -3176,19 +3185,21 @@ $(document).ready(function() {
 									closeModals();
 									Swal.fire({
 										icon:              "success",
-										title:             "CONTRACT UPLOADED SUCCESSFULLY!",
+										title:             "SIGNED SERVICE ORDER UPLOADED SUCCESSFULLY!",
 										showConfirmButton: false,
 										timer:             2000,
+									}).then(function() {
+										viewDocument(serviceOrderID);
 									});
-									$("#displayContractParent").html(displayContract(message, true));
-									$("#btnUploadContract").css("display", "none");
+									// $("#displayContractParent").html(displayContract(message, true));
+									// $("#btnUploadContract").css("display", "none");
 								}, 500);
 							} else {
 								setTimeout(() => {
 									$("#loader").hide();
 									Swal.fire({
 										icon:              "danger",
-										title:             "CONTRACT FAILED TO UPLOAD",
+										title:             "FAILED TO UPLOAD SIGNED SERVICE ORDER",
 										showConfirmButton: false,
 										timer:             2000,
 									});

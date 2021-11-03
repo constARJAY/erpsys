@@ -117,7 +117,7 @@ $(document).ready(function() {
     pendingNotification();
     //------------ PENDING NOTIFICATION-----------------//
 
-    function viewDocument(view_id = false, readOnly = false,phaseCode = false,projectMilestoneName = false) {
+    function viewDocument(view_id = false, readOnly = false,phaseCode = 0,projectMilestoneName = 0) {
 
       
         const loadData = (id) => {
@@ -689,7 +689,15 @@ $(document).ready(function() {
                 if (assignedEmployee && assignedEmployee.length > 0) {
                     assignedEmployee.map((employee,index)=>{
                      splitEmployee  = employee.assignedEmployee.split("|");
-                        teamMembers.filter(tempID => tempID["id"] == splitEmployee[index]).map(tempID=>{
+
+                     let tempCondition = '';
+                     if(splitEmployee.length >1){
+                            tempCondition = splitEmployee[index];
+                     }else{
+                            tempCondition = splitEmployee[0];
+                     }
+
+                        teamMembers.filter(tempID => tempID["id"] == tempCondition).map(tempID=>{
                             let temp = { id:tempID.id, fullname:tempID.fullname, image:tempID.image,employeeCode:tempID.employeeCode,designationName:tempID.designationName,departmentName:tempID.departmentName };
                                 employees.push(temp);
                               
@@ -2377,6 +2385,14 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                 const {
                     employeeID, fullname, image, employeeCode, departmentName, designationName
                 } = employeeData;
+
+                let getImage ='';
+                var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
+                if(lastIndex.toLowerCase() == "null"){
+                    getImage = image.replace("null","default.jpg");
+                }else{
+                    getImage = image;
+                }
     
                 let tbodyHTML = "";
                 taskData.map(task => {
@@ -2518,7 +2534,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                     <div class="col-12">
                         <div class="d-flex justify-content-between align-items-center mb-3 px-2">
                             <div class="d-flex justify-content-start align-items-center">
-                                <img src="${image}"
+                                <img src="${getImage}"
                                     class="rounded-circle"
                                     style="width: 50px; height: 50px;"
                                     alt="${fullname}">
@@ -2946,7 +2962,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                
                     <div class="col-6">
                         <div class="row">
-                            <div class="col-4">
+                            <div class="col-sm-12 col-md-12 col-lg-6 col-xl-5">
                                 <small>PRIORITY STATUS: </small>
                                 <select class="badge modalPriorityBadge form-control show-thin text-center" style="height: auto !important;-webkit-appearance: none;
                                 margin-top:10px;-moz-appearance: none;" disabled>
@@ -2957,7 +2973,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                     <option class="badge badge-primary" value="4" ${modalPriority == 4 ? "selected" : ""}><span class="text-center">Low</span></option>
                                 </select>
                             </div>
-                            <div class="col-8 border-left">
+                            <div class="col-sm-12 col-md-12 col-lg-6 col-xl-7 border-left">
                             <small>ASSIGNEE: </small><br>`;
 
                             if(taskHeaderID != 0 ){
@@ -3018,7 +3034,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
                                     if (index <= 5) {
                                         html += `
-                                        <span class="avatar"><img src="${image}" 
+                                        <span class="avatar"><img src="${getImage}" 
                                         width="45" height="45"
                                         title="${fullname}"></span>`;
                                     }
@@ -3043,14 +3059,14 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                     </div>
                     <div class="col-6 border-left">
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6">
                                 <div class="form-group">
                                 <small> CREATED: </small><br>
                                 <span class="ml-1 mt-3">${modalCreatedAt}</span>                                
                                 </div>
                             </div>
                            
-                            <div class="col-6">
+                            <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6">
                                 <div class="form-group">
                                 <small> DUE DATE: </small><br>
                                 <span class="ml-1">${modaldueDate}</span>                                
@@ -3064,7 +3080,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
             <div class="modal-body">
                 
                 <div class="row">
-                    <div class="col-6 modalContentLeft" id="modalContentLeft">
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 modalContentLeft" id="modalContentLeft">
                       
 
                         <div class="form-group my-1 mb-3">
@@ -3078,7 +3094,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                         <table class="table table-bordered ">
                             <tbody>
                                 <tr>
-                                    <td style="width:40%;"> <i class="far ml-4 fa-bookmark"></i>&nbsp;<span class=" ml-4 font-weight-bold">SEVERITY</span></td>
+                                    <td style="width:40%;"> <i class="far ml-0 fa-bookmark"></i>&nbsp;<span class=" ml-4 font-weight-bold">SEVERITY</span></td>
                                     <td><select class="badge  modalCriticalBadge form-control show-tick text-left" style="width:50%;height: auto !important;-webkit-appearance: none;
                                     -moz-appearance: none;" disabled>
                                     <option value="">---</option>
@@ -3092,7 +3108,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                 </tr>
 
                                 <tr>
-                                    <td style="width:40%;"><i class="far ml-4 fa-bookmark"></i>&nbsp; <span class="ml-4 font-weight-bold">STATUS</span></td>
+                                    <td style="width:40%;"><i class="far ml-0 fa-bookmark"></i>&nbsp; <span class="ml-4 font-weight-bold">STATUS</span></td>
                                     <td> <select class="badge  modalStatusBadge form-control show-tick text-center"  style="width:50%;height: auto !important;-webkit-appearance: none;
                                     -moz-appearance: none;" disabled>
                                     <option value="">---</option>
@@ -3107,31 +3123,31 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                 </tr>
 
                                 <tr>
-                                    <td style="width:40%;"><i class="far ml-4 fa-calendar-alt"></i>&nbsp; <span class="ml-4 font-weight-bold">Actual End Date</span></td>
+                                    <td style="width:40%;"><i class="far ml-0 fa-calendar-alt"></i>&nbsp; <span class="ml-4 font-weight-bold">Actual End Date</span></td>
                                     <td>${modalActualEndDate}</td>
-                                </tr>
+                                </tr>`;
 
-                                <tr>
-                                    <td style="width:40%;"><i class="far ml-4 fa-calendar-alt"></i>&nbsp; <span class="ml-4 font-weight-bold">Extension</span></td>
-                                    <td>
-                                        <div class="form-group my-1">
-                                            <input type="text" class="form-control text-left updateExtension"
-                                            name="modalExtension"
-                                            id="modalExtension"
-                                            taskBoardID="${taskHeaderID}"
-                                            subtaskboardID="${subtaskboardID}"
-                                            value="${extension}">
-                                        </div>
-                                        </td>
-                                </tr>
+                                // <tr>
+                                //     <td style="width:40%;"><i class="far ml-0 fa-calendar-alt"></i>&nbsp; <span class="ml-4 font-weight-bold">Extension</span></td>
+                                //     <td>
+                                //         <div class="form-group my-1">
+                                //             <input type="text" class="form-control text-left updateExtension"
+                                //             name="modalExtension"
+                                //             id="modalExtension"
+                                //             taskBoardID="${taskHeaderID}"
+                                //             subtaskboardID="${subtaskboardID}"
+                                //             value="${extension}">
+                                //         </div>
+                                //         </td>
+                                // </tr>
 
-                                <tr>
-                                    <td style="width:40%;"><i class="fas ml-4 fa-hourglass"></i>&nbsp; <span class="ml-4 font-weight-bold">Man Hours</span></td>
+                        html +=`<tr>
+                                    <td style="width:40%;"><i class="fas ml-0 fa-hourglass"></i>&nbsp; <span class="ml-4 font-weight-bold">Man Hours</span></td>
                                     <td>${modalManHours}</td>
                                 </tr>
 
                                 <tr>
-                                    <td style="width:40%;"><i class="far ml-4 fa-sticky-note"></i>&nbsp;  <span class="ml-4 font-weight-bold">Notes</span></td>
+                                    <td style="width:40%;"><i class="far ml-0 fa-sticky-note"></i>&nbsp;  <span class="ml-4 font-weight-bold">Notes</span></td>
                                     <td>${modalNotes}</td>
                                 </tr>
                                 
@@ -3156,7 +3172,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                 } = image;
                                 var extension ='';
                                 var fileFormat = ['jpg','jpeg','png','gif'];
-                                var videofileformat= ['webm','mpg','mp2','mpeg','mpe','mpv','mp4','m4p','m4v','avi','wmv','mov','flv'];
+                                var videofileformat= ['webm','mpg','mp2','mpeg','mpe','mpv','mp4','m4p','m4v','avi','wmv','mov','flv','ogv','mkv','3gp','3g2'];
                                 extension = imageName.substring(imageName.lastIndexOf(".") + 1, imageName.length);
                                 if(fileFormat.includes(extension.toLowerCase())){
                                     html +=`
@@ -3175,7 +3191,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                     html +=`
                                     <tr>
                                     <td>
-                                    <div class="container video_modal" id="img${imageName}" style="cursor:pointer;" href="../assets/upload-files/taskboard-images/${imageName}">
+                                    <div class="container video_modal" id="img${imageName}" imageSrc="${imageName}" style="cursor:pointer;" href="../assets/upload-files/taskboard-images/${imageName}">
                                         <span>${imageName}</span>
                                     </div>
                                                     
@@ -3187,7 +3203,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                     <tr>
                                     <td>
                                         <div class="container"  style="cursor:pointer;">
-                                            <a href="../assets/upload-files/taskboard-images/${imageName}" class="text-dark" id="img${index}" imageSrc="${imageName}" target="_blank">${imageName}</a>
+                                            <a href="../assets/upload-files/taskboard-images/${imageName}" class="text-dark" id="img${index}" download="${imageName}" imageSrc="${imageName}" target="_blank">${imageName}</a>
                                         </div>               
                                     </td>`;
                                 }
@@ -3218,7 +3234,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                     
                     </div>
 
-                    <div class="col-6 log-content border-left overflow-auto" style="background-color:#F8F8F8;max-height: 500px;-ms-overflow-style: none;scrollbar-width: none;">`;
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 log-content border-left overflow-auto" style="background-color:#F8F8F8;max-height: 500px;-ms-overflow-style: none;scrollbar-width: none;">`;
                         
                         logData.map((logs,index) => {
                         const { 
@@ -3980,7 +3996,17 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                 async         : true,
                                 dataType      : 'json',
                                 success       : function(data){
-            
+                                    let getManHours = 0;
+                                    let getUsedHours = 0;
+                                    let getTotalHours = 0;
+
+                                    getManHours = data[0].manHours || 0;
+                                    getUsedHours = data[0].usedHours || 0;
+                                    getTotalHours = getManHours - getUsedHours;
+                                   
+                                    $parent.find('input[name=subTaskManHours]').val(formatAmount(getManHours));
+                                    $parent.find('input[name=subTaskUsedHours]').val(formatAmount(getUsedHours));
+                                    $parent.find('input[name=subTaskTimeLeft]').val(formatAmount(getTotalHours));
                                 },
                                 error: function() {
                                     setTimeout(() => {
@@ -4375,45 +4401,44 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         }, 150);
     })
 
-    $(document).on('change','.updateExtension',function() {
-        var taskBoardID = $(this).attr("taskboardID")
-        var subtaskboardID = $(this).attr("subtaskboardID")
-        var extension =moment($(this).val()?.trim()).format("YYYY-MM-DD");
-        // console.log(extension)
+    // $(document).on('change','.updateExtension',function() {
+    //     var taskBoardID = $(this).attr("taskboardID")
+    //     var subtaskboardID = $(this).attr("subtaskboardID")
+    //     var extension =moment($(this).val()?.trim()).format("YYYY-MM-DD");
+    //     // console.log(extension)
 
-                var data = new FormData();
+    //             var data = new FormData();
 
-                data.append('extension', extension);
-                data.append('taskBoardID', taskBoardID);
-                data.append('subtaskboardID', subtaskboardID);
+    //             data.append('extension', extension);
+    //             data.append('taskBoardID', taskBoardID);
+    //             data.append('subtaskboardID', subtaskboardID);
 
-                $.ajax({
-                    url           :"Employee_taskboard/updateExtension",
-                    method        : "POST",
-                    dataType      : 'text', // what to expect back from the server
-                    cache         : false,
-                    contentType   : false,
-                    processData   : false,
-                    data          : data,
-                    async         : true,
-                    dataType      : 'json',
-                    success       : function(data){
-                        $(`span[subtaskboardID=${subtaskboardID}]`).attr("extension",extension);
-                    },
-                    error: function() {
-                        setTimeout(() => {
-                            // $("#loader").hide();
-                            showNotification("danger", "System error: Please contact the system administrator for assistance!");
-                        }, 500);
-                    }
+    //             $.ajax({
+    //                 url           :"Employee_taskboard/updateExtension",
+    //                 method        : "POST",
+    //                 dataType      : 'text', // what to expect back from the server
+    //                 cache         : false,
+    //                 contentType   : false,
+    //                 processData   : false,
+    //                 data          : data,
+    //                 async         : true,
+    //                 dataType      : 'json',
+    //                 success       : function(data){
+    //                     $(`span[subtaskboardID=${subtaskboardID}]`).attr("extension",extension);
+    //                 },
+    //                 error: function() {
+    //                     setTimeout(() => {
+    //                         // $("#loader").hide();
+    //                         showNotification("danger", "System error: Please contact the system administrator for assistance!");
+    //                     }, 500);
+    //                 }
                       
-                  });
+    //               });
 
           
 
         
-    }
-    )
+    // })
 
     $(document).on('change','.updateImgComment',function() {
         var imageID = $(this).attr("imageID")
@@ -4456,6 +4481,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
     // ----- END CLICK TIMELINE ROW -----
     $(document).on('click','.pop_modal',function(e) {
         $('.imagepreview').attr('src', $(this).find('img').attr('src'));
+        $('#imagemodal .title').text($(this).find("img").attr("imageSrc"));
         $('#imagemodal').modal('show');   
     })
 
@@ -4466,10 +4492,10 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
     })
 
     $(document).on('click','.delete_image',function() {
-        var tmp = $(this).closest("tr").find("img").attr("imageSrc");
-        var imageSrc = (tmp == undefined ? $(this).closest("tr").find("a").attr("imageSrc") : $(this).closest("tr").find("img").attr("imageSrc"));
+       
+        var imageSrc =$(this).closest("tr").find("img").attr("imageSrc") || $(this).closest("tr").find("div").attr("imageSrc") || $(this).closest("tr").find("a").attr("imageSrc");
      
-
+       
         Swal.fire({
             title: 'Delete',
         text: "Are you sure want to delete?",
@@ -4566,8 +4592,30 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         var uniqueArray =[];
         var extension ="";
         var fileFormat = ['jpg','jpeg','png','gif'];
-        var videofileformat= ['webm','mpg','mp2','mpeg','mpe','mpv','mp4','m4p','m4v','avi','wmv','mov','flv'];
-        console.log(extension)
+        var videofileformat= ['webm','mpg','mp2','mpeg','mpe','mpv','mp4','m4p','m4v','avi','wmv','mov','flv','ogv','mkv','3gp','3g2'];
+           
+            if(fileLength > 5){
+                showNotification("danger","Maximum of 20 upload files only!");
+                $("#file_input_id").val('');
+                return false;
+            }
+
+            for(var checkFile =0;checkFile < fileLength;checkFile ++){
+                if(files[checkFile].size > 210763776){ // 201 mb
+                    showNotification("danger","File size must be less than or equal to 200mb!");
+                    $("#file_input_id").val('');
+                    return false;
+                }   
+
+                extension = files[checkFile].name.substring(files[checkFile].name.lastIndexOf(".") + 1, files[checkFile].name.length);
+                if(videofileformat.includes(extension.toLowerCase())){
+                    if(extension.toLowerCase() != "mp4"){ // not format to mp4
+                        showNotification("danger","File video format allowed (MP4) only!");
+                        $("#file_input_id").val('');
+                        return false;
+                    }
+                }
+            }
         for(var loop=0; loop <fileLength;loop++){
 
              extension = files[loop].name.substring(files[loop].name.lastIndexOf(".") + 1, files[loop].name.length);
@@ -4642,6 +4690,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
             }else{
                 $("#img"+uniqueArray[loop]).attr('href','../assets/upload-files/taskboard-images/'+files[loop].name);
                 $("#img"+uniqueArray[loop]).text(files[loop].name);
+                $("#img"+uniqueArray[loop]).attr('download',files[loop].name);
             }
 
             uploadImg[loop] = files[loop]; 
@@ -4679,7 +4728,10 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                         $("#img"+uniqueArray[setnewName]).find("span").text(data.newImageName[setnewName]);
                     }else{
                         $("#img"+uniqueArray[setnewName]).attr('href','../assets/upload-files/taskboard-images/'+data.newImageName[setnewName]);
+                        $("#img"+uniqueArray[setnewName]).attr('imageSrc',data.newImageName[setnewName]);
+
                         $("#img"+uniqueArray[setnewName]).text(data.newImageName[setnewName]);
+                        $("#img"+uniqueArray[setnewName]).attr('download',data.newImageName[setnewName]);
                     }
                   
                     $("#imgDescripiton"+uniqueArray[setnewName]).attr('imageID',data.data[setnewName]);

@@ -62,16 +62,19 @@ $(document).ready(function() {
                 let statusClass = examinationStatus == 1 ? "badge-success bg-success" : "badge-danger bg-danger";
     
                 examinationHTML += `
-                <tr class="exam-name-menu examName" 
+                <tr class="exam-name-menu" 
                     style="height: 50px;" 
                     examinationID="${examinationID}"
                     examinationName="${examinationName}"
                     examinationType="${examinationType}">
-                    <td style="cursor: pointer; 
-                            position: relative;">
+                    <td style="position: relative;">
                         <div class="d-flex justify-content-start align-items-center ml-1">
                             <span class="badge ${statusClass} rounded-circle" style="height: 10px; width: 10px;">&nbsp;</span>
-                            <div class="ml-2 name d-flex flex-column justify-content-center">
+                            <div class="ml-2 name d-flex flex-column justify-content-center examName"
+                                style="cursor: pointer;"
+                                examinationID="${examinationID}"
+                                examinationName="${examinationName}"
+                                examinationType="${examinationType}">
                                 <span>${examinationName}</span>
                                 <small>${examinationType}</small>
                             </div>
@@ -79,8 +82,9 @@ $(document).ready(function() {
                         <div style="position: absolute;
                                         right: 0;
                                         top: 0;
-                                        margin-top: 15px;
-                                        margin-right: 10px;">
+                                        margin-top: 18px;
+                                        margin-right: 10px;
+                                        cursor: pointer;">
                             <i class="fas fa-pencil btnEditExam" 
                                 examinationID="${examinationID}"
                                 hasData="${hasData}"></i>
@@ -1168,7 +1172,7 @@ $(document).ready(function() {
 
 
     // ----- SELECT EXAM -----
-    $(document).on("click", ".examName", function () {
+    $(document).on("click", ".examName", function (e) {
 		const examinationID   = $(this).attr("examinationID");
 		const examinationType = $(this).attr("examinationType");
 		

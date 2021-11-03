@@ -62,7 +62,7 @@ $(document).ready(function(){
             method:   'POST',
             async:    false,
             dataType: 'json',
-            data:     {tableName: "hris_designation_tbl as designation INNER JOIN hris_department_tbl as department USING(departmentID)"},
+            data:     {tableName: "hris_designation_tbl as designation INNER JOIN hris_department_tbl as department USING(departmentID) WHERE designationID <> 1"},
             beforeSend: function() {
                 $("#table_content").html(preloader);
                 // $("#inv_headerID").text("List of Inventory Item");

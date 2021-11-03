@@ -185,12 +185,13 @@ $(document).ready(function() {
                 sorting: false,
                 info: false,
 				columnDefs: [
-					{ targets: 0, width: "50%"  },
+					{ targets: 0, width: "40%"  },
 					{ targets: 1, width: "10%" },
 					{ targets: 2, width: "10%" },
 					{ targets: 3, width: "10%" },
 					{ targets: 4, width: "10%" },
 					{ targets: 5, width: "10%" },
+					{ targets: 6, width: "10%" },
 				],
 			});
 
@@ -223,24 +224,32 @@ $(document).ready(function() {
     function alertNoticeContent() {
         let html = "";
         const noticePersonnels = getPersonnelNotInBiometrics();
-        noticePersonnels.map(emp => {
-            const { employeeID = 0, employeeFirstname = "", employeeLastname = "" } = emp;
-            if (employeeID != 1) {
-                const fullname = `${employeeFirstname} ${employeeLastname}`;
-                html += `
-                <div class="alert alert-warning alert-dismissible fade show w-100 mb-1" role="alert">
-                    <div class="d-flex justify-content-start align-items-center">
-                        <div class="font-weight-bold text-danger pr-2"><i class="fas fa-exclamation"></i> NOTICE:</div>
-                        <div>
-                            <span class="font-weight-bold">${fullname}</span> is not yet synced on the biometrics.
+        if (noticePersonnels && noticePersonnels.length > 0) {
+            html += `
+            <div class="d-flex justify-content-start align-items-center mb-2" id="dropdown_notice" show="true" style="cursor: pointer;">
+                <i class="fad fa-caret-up mr-3"></i><div class="w-100 border-top"></div>
+            </div>
+            <div id="notice_content">`;
+            noticePersonnels.map(emp => {
+                const { employeeID = 0, employeeFirstname = "", employeeLastname = "" } = emp;
+                if (employeeID != 1) {
+                    const fullname = `${employeeFirstname} ${employeeLastname}`;
+                    html += `
+                    <div class="alert alert-warning alert-dismissible fade show w-100 mb-1" role="alert">
+                        <div class="d-flex justify-content-start align-items-center">
+                            <div class="font-weight-bold text-danger pr-2"><i class="fas fa-exclamation"></i> NOTICE:</div>
+                            <div>
+                                <span class="font-weight-bold">${fullname}</span> is not yet synced on the biometrics.
+                            </div>
                         </div>
-                    </div>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>`;
-            }
-        });
+                        <button type="button" class="close alert-notice" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>`;
+                }
+            });
+            html += `</div>`;
+        }
 
         setTimeout(() => {
             $("#alert_notice_content").html(html);
@@ -532,6 +541,33 @@ $(document).ready(function() {
         })
     }
     // ----- END CITIZENSHIP OPTIONS -----
+
+
+    // ----- REMOVE ALERT NOTICE -----
+    $(document).on("click", `.alert-notice`, function() {
+        setTimeout(() => {
+            let hasContent = $("#notice_content").text().trim().length > 0;
+            if (!hasContent) {
+                $("#alert_notice_content").empty();
+            }
+        }, 1000);
+    })
+    // ----- END REMOVE ALERT NOTICE -----
+
+
+    // ----- DROPDOWN NOTICE -----
+    $(document).on("click", `#dropdown_notice`, function() {
+        const show = $(this).attr("show") == "true";
+        if (show) {
+            $(this).find('i').removeClass("fa-caret-up").addClass("fa-caret-down");
+            $(this).attr("show", "false");
+        } else {
+            $(this).find('i').removeClass("fa-caret-down").addClass("fa-caret-up");
+            $(this).attr("show", "true");
+        }
+        $(`#notice_content`).toggle(500);
+    })
+    // ----- END DROPDOWN NOTICE -----
 
 
     // ----- CHANGE GENDER -----
@@ -1086,59 +1122,6 @@ $(document).ready(function() {
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label>Region <code>*</code></label>
-                        <select class="form-control validate select2"
-                            style="width: 100%"
-                            name="employeeRegion"
-                            id="employeeRegion"
-                            required>
-                            <option value="" selected disabled>Select Region</option>
-                            ${regionOptions(employeeRegion)}
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-employeeRegion"></div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Province <code>*</code></label>
-                        <select class="form-control validate select2"
-                            style="width: 100%"
-                            name="employeeProvince"
-                            id="employeeProvince"
-                            required>
-                            ${provinceOptions(employeeProvince, employeeRegion)}
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-employeeProvince"></div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>City/Municipality <code>*</code></label>
-                        <select class="form-control validate select2"
-                            style="width: 100%"
-                            name="employeeCity"
-                            id="employeeCity"
-                            required>
-                            ${cityOptions(employeeCity, employeeRegion, employeeProvince)}
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-employeeCity"></div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Barangay <code>*</code></label>
-                        <select class="form-control validate select2"
-                            style="width: 100%"
-                            name="employeeBarangay"
-                            id="employeeBarangay"
-                            required>
-                            ${barangayOptions(employeeBarangay, employeeRegion, employeeProvince, employeeCity)}
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-employeeBarangay"></div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-12">
-                    <div class="form-group">
                         <label>Unit No.</label>
                         <input type="text"
                             class="form-control validate"
@@ -1198,6 +1181,59 @@ $(document).ready(function() {
                             required
                             value="${employeeSubdivision}">
                         <div class="invalid-feedback d-block" id="invalid-employeeSubdivision"></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Region <code>*</code></label>
+                        <select class="form-control validate select2"
+                            style="width: 100%"
+                            name="employeeRegion"
+                            id="employeeRegion"
+                            required>
+                            <option value="" selected disabled>Select Region</option>
+                            ${regionOptions(employeeRegion)}
+                        </select>
+                        <div class="invalid-feedback d-block" id="invalid-employeeRegion"></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Province <code>*</code></label>
+                        <select class="form-control validate select2"
+                            style="width: 100%"
+                            name="employeeProvince"
+                            id="employeeProvince"
+                            required>
+                            ${provinceOptions(employeeProvince, employeeRegion)}
+                        </select>
+                        <div class="invalid-feedback d-block" id="invalid-employeeProvince"></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>City/Municipality <code>*</code></label>
+                        <select class="form-control validate select2"
+                            style="width: 100%"
+                            name="employeeCity"
+                            id="employeeCity"
+                            required>
+                            ${cityOptions(employeeCity, employeeRegion, employeeProvince)}
+                        </select>
+                        <div class="invalid-feedback d-block" id="invalid-employeeCity"></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Barangay <code>*</code></label>
+                        <select class="form-control validate select2"
+                            style="width: 100%"
+                            name="employeeBarangay"
+                            id="employeeBarangay"
+                            required>
+                            ${barangayOptions(employeeBarangay, employeeRegion, employeeProvince, employeeCity)}
+                        </select>
+                        <div class="invalid-feedback d-block" id="invalid-employeeBarangay"></div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12">
@@ -2083,6 +2119,9 @@ $(document).ready(function() {
             <tr class="module" moduleid="${module.moduleID}">
                 <td>${module.moduleName}</td>
                 <td class="text-center">
+                    <input type="checkbox" name="checkall" ${disabled}>
+                </td>
+                <td class="text-center">
                     <input type="checkbox" name="read" moduleid="${module.moduleID}" ${readStatus} ${disabled}>
                 </td>
                 <td class="text-center">
@@ -2114,6 +2153,7 @@ $(document).ready(function() {
                             <thead>
                                 <tr>
                                     <th>Module Name</th>
+                                    <th>Check All</th>
                                     <th>View</th>
                                     <th>Add</th>
                                     <th>Edit</th>
@@ -2259,6 +2299,7 @@ $(document).ready(function() {
         }
         return html;
     }
+    
 
     $(document).on("click", ".removeDocument", function() {
         const documentType = $(this).attr("documentType");
@@ -2331,6 +2372,27 @@ $(document).ready(function() {
         $(this).val("");
     });
     // ----- END UPLOAD FILE -----
+
+
+    // ----- CHECK ALL ACCESSIBILITY -----
+    $(document).on("change", `[type="checkbox"]:not([name="checkall"])`, function() {
+        $tr = $(this).closest("tr");
+        let isCheckedAll = $tr.find(`[type="checkbox"]:not([name="checkall"]):checked`).length == 5;
+        if (!isCheckedAll) {
+            $tr.find(`[name="checkall"]`).prop("checked", false);
+        }
+    })
+
+    $(document).on("change", `[name="checkall"]`, function() {
+        const isChecked = this.checked;
+        $tr = $(this).closest("tr");
+        if (isChecked) {
+            $tr.find(`[type="checkbox"]:not([name="checkall"])`).prop("checked", true);
+        } else {
+            $tr.find(`[type="checkbox"]:not([name="checkall"])`).prop("checked", false);
+        }
+    })
+    // ----- END CHECK ALL ACCESSIBILITY -----
 
 
     // ----- CHANGE STATUS -----

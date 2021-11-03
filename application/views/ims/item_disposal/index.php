@@ -6,10 +6,10 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fad fa-boxes-alt"></i> &nbsp;Inventory Modules</li>
-                        <li class="breadcrumb-item active">Item Disposal</li>
+                        <li class="breadcrumb-item active">Asset Disposal</li>
                     </ul>
-                    <h1 class="mt-3">Item Disposal</h1>
-                    <span>This module is used to manage the submission and approval of item disposal.</span>
+                    <h1 class="mt-3">Asset Disposal</h1>
+                    <span>This module is used to manage the submission and approval of asset disposal.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
             </div>
@@ -34,7 +34,7 @@
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h6 class="page-title font-weight-bold">ADD ITEM DISPOSAL</h6>
+				<h6 class="page-title font-weight-bold">ADD ASSET DISPOSAL</h6>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
