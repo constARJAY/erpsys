@@ -694,7 +694,7 @@ $(document).ready(function () {
                                 <th>${services} Code</th>
                                 <th>${services} Name</th>
                                 <th>${services} Classification</th>
-                                <th>Request</th>
+                                <th>Request Quantity</th>
 								<th>Received</th>
                                 <th>Remaining</th>
                                 <th>Action</th>
@@ -703,7 +703,7 @@ $(document).ready(function () {
                         <tbody class="">`;
 
 		let ItemData	= getUnionTableData(`
-											SELECT id, itemCode,recordCode AS referenceCode, recordID, employeeID, requestName, itemID, itemCode, name_Brand, IFNULL(classification_category,'') AS classification_category, quantity, SUM(remaining) AS remaining, Brand, itemName, classificationName, categoryName,uom
+											SELECT id, itemCode,recordCode AS referenceCode, recordID, employeeID, requestName, itemID, itemCode, name_Brand, IFNULL(classification_category,'') AS classification_category, requestQuantity,quantity, SUM(remaining) AS remaining, Brand, itemName, classificationName, categoryName,uom
 											FROM
 											(
 											SELECT
@@ -720,6 +720,7 @@ $(document).ready(function () {
 												itemCode, 
 												CONCAT(itemName,' / ',brand) AS name_Brand,
 												CONCAT(classificationName,' / ',categoryName) AS classification_category,
+												0 AS requestQuantity,
 												sum(receivedQuantity) AS quantity,
 												0 AS remaining,
 												uom
@@ -743,6 +744,7 @@ $(document).ready(function () {
 												itemCode, 
 												CONCAT(itemName,' / ',brand) AS name_Brand,
 												CONCAT(classificationName,' / ',categoryName) AS classification_category,
+												0 AS requestQuantity, 
 												sum(unused) AS quantity,
 												0 AS remaining,
 												uom
@@ -766,6 +768,7 @@ $(document).ready(function () {
 												itemCode, 
 												CONCAT(itemName,' / ',brand) AS name_Brand,
 												CONCAT(classificationName,' / ',categoryName) AS classification_category,
+												quantity AS requestQuantity,
 												sum(receivedQuantity) AS quantity,
 												0 AS remaining,
 												uom
@@ -789,6 +792,7 @@ $(document).ready(function () {
 												NULL AS itemCode, 
 												NULL AS name_Brand,
 												NULL AS classification_category,
+												0 AS requestQuantity,
 												0 AS quantity,
 												sum(quantityForStockin) AS remaining,
 												NULL AS uom
@@ -810,6 +814,7 @@ $(document).ready(function () {
 												NULL AS itemCode, 
 												NULL AS name_Brand,
 												NULL AS classification_category,
+												0 AS requestQuantity,
 												0 AS quantity,
 												sum(quantityForStockin) AS remaining,
 												NULL AS uom
@@ -840,7 +845,7 @@ $(document).ready(function () {
 							</div>
 							<small style="color:#848482;">${item.categoryName}</small>
 						</td>
-						<td>${item.requestName}</td>
+						<td class="text-center">${parseFloat(item.requestQuantity).toFixed(2)}</td>
 						<td class="text-center">${item.quantity}</td>
 						<td class="text-center">${(parseFloat(item.quantity) - parseFloat(item.remaining)).toFixed(2)}</td>
 						<td>`;
@@ -1597,7 +1602,7 @@ $(document).ready(function () {
 	});
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_product_record");
-		
+		$("input,select,span").removeClass("is-valid").removeClass("no-error"); // remove is-valid,no-error
 		if (validate) {
 			var itemCode = $("#itemCode").val();
 			var inventoryCode = $("#itemCode").attr("inventoryCode");

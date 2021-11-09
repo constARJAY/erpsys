@@ -46,55 +46,56 @@
 
     <!-- <div class="container" id="page_loader"></div> -->
 
-	<div class="container" id="container_1"> <!-- table front page -->
+	<div class="container" id="container_1">
+		<!-- table front page -->
 		<div class="row clearfix">
 			<div class="col-lg-12">
 				<div class="card">
 					<div class="body" id="main_body">
 						<div class="row">
-                            
-                            <div class="col-sm-12 col-md-4">
-                                <div class="form-group">
-                                    <label>Classification Name <code>*</code></label>
-                                    <select
-                                        class="form-control select2 validate input_classificationID"
-                                        id="input_classificationID"
-                                        name="classificationID"
-                                        style="width: 100%"
-                                        required>
-                                    </select>
-                                    <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
-                                </div>
-                            </div>    
-                            <div class="col-sm-12 col-md-4">
-                                <div class="form-group">
-                                    <label>Category Name <code>*</code></label>
-                                    <select
-                                        class="form-control select2 validate"
-                                        id="input_categoryID"
-                                        name="CategoryID"
-                                        style="width: 100%"
-                                        required>
-                                        <option value=""selected disabled>Select Category Name</option>
-                                    </select>
-                                    <div class="invalid-feedback d-block" id="invalid-input_input_categoryID"></div>
-                                </div>
-                            </div> 
-                            <div class="col-sm-12 col-md-4">
-                                <div class="form-group">
-                                <button type="button" class="btn btn-primary w-100 p-2 mt-4 ml-2"  id="btnSearch"><i class="icon-magnifier"></i> &nbsp;Search</button>
-                                </div>
-                            </div>         
-                            <div class="col-12">
-                                <div class="border">
-                                    <div class="imageboarder"></div>
-                                    <div class="card-body">
-                                        <div class="table-responsive" id="table_content"></div>
-                                    </div>
-                                    <div class="card-body mt-1">
-                                        <div class="table-responsive" id="table_content1"></div>
-                                    </div>
-                                </div>
+
+							<div class="col-sm-12 col-md-4">
+								<div class="form-group">
+									<label>Classification Name <code>*</code></label>
+									<select class="form-control select2 validate input_classificationID"
+										id="input_classificationID" name="classificationID" style="width: 100%" required>
+									</select>
+									<div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
+								</div>
+							</div>
+							<div class="col-sm-12 col-md-4">
+								<div class="form-group">
+									<label>Category Name <code>*</code></label>
+									<select class="form-control select2 validate" id="input_categoryID" name="CategoryID"
+										style="width: 100%" required>
+										<option value="" selected disabled>Select Category Name</option>
+									</select>
+									<div class="invalid-feedback d-block" id="invalid-input_input_categoryID"></div>
+								</div>
+							</div>
+							<div class="col-sm-12 col-md-4">
+								<div class="form-group">
+									<button type="button" class="btn btn-primary w-100 p-2 mt-4 ml-2" id="btnSearch"><i
+											class="icon-magnifier"></i> &nbsp;Search</button>
+								</div>
+							</div>
+							<div class="col-12">
+								<div class="border">
+									<div class="imageboarder"></div>
+									<div id="tabButton"></div>
+									<div class="tab-content">
+										<div id="itemPage" class="tab-pane fade in active">
+											<div class="card-body">
+												<div class="table-responsive" id="table_content"></div>
+											</div>
+										</div>
+										<div id="assetPage" class="tab-pane fade">
+											<div class="card-body">
+												<div class="table-responsive" id="table_content1"></div>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

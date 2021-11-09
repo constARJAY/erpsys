@@ -3,7 +3,7 @@
 <style>
 div.b128{
  border-left: 1px black solid;
- height: 30px;
+ height: 40px;
 } 
 </style>
 
@@ -35,9 +35,9 @@ div.b128{
 		} 
 		$w.= $char128wid[ $sum % 103 ].$char128wid[106]; //Check Code, then END
 		//Part 2, Write rows
-		$html="<table cellpadding=0 cellspacing=0><tr>"; 
+		$html="<table cellpadding=0 cellspacing=0 class='w-65'><tr>"; 
 		for($x=0;$x<strlen($w);$x+=2) // code 128 widths: black border, then white space
-		$html .= "<td><div class=\"b128\" style=\"border-left-width:{$w[$x]};width:{$w[$x+1]}\"></div></td>"; 
+		$html .= "<td><div class=\"b128\" style=\"border-left-width:{$w[$x]};width:{$w[$x+1]};box-sizing: unset !important;\"></div></td>"; 
 		return "$html<tr><td colspan=".strlen($w)." align=left><font family=arial size=2>$text</td></tr></table>"; 
 	}
 ?>

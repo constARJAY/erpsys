@@ -1,147 +1,110 @@
+
 <?php
     get_instance()->load->helper('barcode_helper');
 ?>
 <html>
-<head>
-<title><?= $title ?></title>
-<style type="text/css" media="print">
- @page 
-    {
-        size: auto;   /* auto is the initial value */
-        margin: 0mm;  /* this affects the margin in the printer settings */
-        
-        page-break-before:outside;
-       
+  <head>
+    <title><?= $title ?></title>
+    <style>
+     body {
+       /* width: 230mm;
+       height: 100%; */
+       /* margin: 0 auto !important;
+       padding: 0; */
+       /* font-size: 12pt;
+       background: rgb(204,204,204);  */
+     }
+/* 
+     * {
+      box-sizing: border-box;
+    } */
+    
+     .container{
+      float: none !important;
+     }
+     @page {
+       size: A4;
+       margin: 0 auto;
+     }
+
+     @media print {
+       html, body {
+     	width: 210mm;
+     	height: 297mm;        
+       }
+
+       .pagebreak {
+        clear: both;
+        page-break-before: always;
     }
-
-.grid-container {
-  display: grid;
-  grid-template-columns: auto auto;
-  grid-gap: 50px;
-  background-color: #2196F3;
-  padding: 0px;
-}
-
-.grid-container > div {
-  background-color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-  padding: 5px 0;
-  font-size: 30px;
-}
-
- 
-.grid-item {
+  
+     }
    
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 0.1px;
-  margin-top: 10px;
-  margin-right: 20px;
-  margin-left: 1px;
-  font-size: 1px;
-  height: 50px;
-  text-align: center;
-} 
-.grid-item1 {
-    page-break-before:outside;  
-   background-color: rgba(255, 255, 255, 0.8);
-   padding: 0.1px;
-   margin-top: 20px;
-   margin-bottom: 50px;
-   margin-right: 70px;
-   font-size: 30px;
-   text-align: center;
- }
-.coderecord{
-    font-size: 12px;
-    margin-top: -20px;
-
-}
-.forimagesize{
-    height: 200px;
-    width: 200px;
+     img{
+           height: 199px;
+            width: 199spx;
+       }
     
-}
-.data{
-    page-break-before:outside;   
-}
 
+  </style>
+    <link rel="stylesheet" href="<?=base_url('assets/plugins/bootstrap/css/bootstrap.min.css')?>">
 
-html { font-size: 22px; }
-body { padding: 1rem; }
+  </head>
+  <body>
+       <?php
+       if($recordID =="1"){
+        $i =1;
+        $counter1 = 1; 
+       ?>
 
-.grid-item {
-  background-color: dodgerblue;
-  color: white;
-  padding: 1rem;
-  height: 4rem;
-}
+      <div class="container" >
+  			<div class="row clearfix">
+          <?php foreach($barcodes as $item){
+            $barcode = $item['barcode'];
+            $qrPieces = $item['quantityForStockin'];
 
-.grid-container {
-    column-count: 1;
-    line-height:20px;
-height:40px;
-  margin: 0 auto;
-  display: grid;
-  margin-right: -20px;
-  margin-left: -20px;
-  grid-gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-@media (min-width: 600px) {
-  .cards { grid-template-columns: repeat(2, 1fr); }
-}
-@media print {
-    .pagebreak { page-break-before: always; } /* page-break-after works, as well */
-}
+            for($countQr =0;$countQr<$qrPieces;$countQr++){
+          ?>
+            <div class="col-6" style="margin-top:30px;<?php if(($counter1 == 37  || $counter1 == 38) ){  echo 'margin-bottom: 30px;'; } else{ echo 'margin-bottom: 26px;';}  ?>" >
+             <?php echo bar128(stripcslashes($barcode));
+             
+             if($counter1 == 38) {$counter1 =1;}
+                else{$counter1++;}
+             ?>
+            </div>
+            <?php }} ?>
+  			</div>
 
-</style>
-</head>
-<body onload="window.print();">
-	<div style="margin: 0 2.5%">
-        <br><hr><br>
-        <div class='grid-container'>
-        <?php
-        if($recordID =="1"){
-            $i =1;
-            $count = 1; 
-            // /$code = $barcodes["barcode"];
-            // echo '<pre>';
-            // $quantity = $barcodes["quantityForStockin"];
-            // var_dump($quantity);
-            // echo '</pre>';
-           // print_r($quantity);
-        //    $result = 1;
-        //    $quantity = array();
+       <?php }else{?>
+       
+
+      <div class="container">
+  			<div class="row clearfix">
+          <?php
+            $counter2 =1;
             foreach($barcodes as $item){
-                $barcode = $item['barcode'];
-                $quantity = $item['quantityForStockin'];               
-                for($i=1;$i<=$quantity;$i++){
-                            echo"<div class='grid-item'>".bar128(stripcslashes($barcode))."</div>";  
-                    }  
-                }
-          
+             $barcode = $item['barcode'];
+             $barcodePieces = $item['quantityForStockin'];
 
-                
-    
-            
-        }else{
-            foreach($barcodes as $asset){
-                $barcode = $asset['barcode'];
-                $quantity = $asset['quantityForStockin'];     
+             for($countBarcode =0;$countBarcode<$barcodePieces;$countBarcode++){
+          ?>
+            <div class="col-4"   style="<?php if(($counter2 == 16  || $counter2 == 17 || $counter2 == 18) ){  echo 'margin-bottom:49px;'; } else{ echo 'margin-bottom:40px;';}  ?>" >
+              <div > <!-- style="border: 1px dashed black;" -->
+               <?php echo " <img src=".base_url().'/assets/upload-files/images/'.$barcode. ".png
+                  class='rounded mx-auto d-block'>
+                <center>".$barcode."</center>";
 
-                for($i=1;$i<=$quantity;$i++){
-                echo "
-                        <div class='grid-item1'><img class='mr-1 forimagesize' src=".base_url().'/assets/upload-files/images/'.$barcode. ".png>
-                         <p class='text-center coderecord'>".$barcode."</p>
-                        
-                        </div>";      
-                }  
-            }  
-            
-        }
-        
-              
-        ?>
-	</div>
-</body>
+                if($counter2 == 18) {$counter2 =1;}
+                else{$counter2++;}
+                ?>
+            </div>
+            </div>
+            <?php }} ?>
+  			</div>
+      </div>
+
+      <?php }?>
+
+
+  </body>
 </html>

@@ -55,7 +55,7 @@ $(document).ready(function(){
                 { targets: 9, width: 200},
                 { targets: 10, width: 150},
                 { targets: 11, width: 200},  
-                { targets: 12, width: 200},   
+                // { targets: 12, width: 200},   
             ],
           
         });
@@ -84,8 +84,9 @@ $(document).ready(function(){
                  { targets: 8, width: 200},
                  { targets: 9, width: 200},
                  { targets: 10, width: 150},
-                 { targets: 11, width: 200},   
+                 { targets: 11, width: 150},   
                  { targets: 12, width: 200},    
+                 { targets: 13, width: 200},    
              ],
            
          });
@@ -95,6 +96,15 @@ $(document).ready(function(){
     }
   
     // ----- END DATATABLES -----
+
+
+    //  tab toggle function//
+    $(document).on("click", ".tabBtn", function() {
+        setTimeout(() => {                         
+            initDataTables();
+        }, 200);
+    })
+    //  tab toggle function//
 
     $(document).on("click", "#btnSearch", function() {
         var classificationID    =$("#input_classificationID").val();
@@ -150,15 +160,22 @@ $(document).ready(function(){
             async: true,
             dataType: "json",
             beforeSend: function() {
-            
+            $('.imageboarder').show();
             $(".imageboarder").html(preloader);
+            $("#tabButton").html('');
+            $("#table_content").html('');
+            $("#table_content1").html('');
             },
             success: function(data) {
+                          let tabs =`<ul class="nav nav-tabs" style="padding:15px;">
+                          <li class="active"><a data-toggle="tab" href="#itemPage" class="btn btn-primary ml-2 mr-2 active tabBtn">Items</a></li>
+                          <li><a data-toggle="tab" href="#assetPage" class="btn btn-primary tabBtn">Assets</a></li>
+                        </ul>`;
 
-                           let assets =`
+                          let assets =`
                            <div class="col-sm-12">
                             <div class="w-100">
-                            <hr class="pb-1">
+                            
                            <div class="card mt-2 bg-white rounded shadow-sm">
                             <div class="card-header bg-primary text-white">
                                 <div class="row">
@@ -180,6 +197,7 @@ $(document).ready(function(){
                                 <th>UOM</th>
                                 <th>Stock In</th>
                                 <th>Borrowed</th>
+                                <th>Withdrawn</th>
                                 <th>Returned</th>
                                 <th>Transferred</th>
                                 <th>Disposed</th>
@@ -209,11 +227,12 @@ $(document).ready(function(){
                                     <td>${data["assets"][i].uom}</td>
                                     <td class="text-center">${data["assets"][i].stockIN}</td> 
                                     <td class="text-center">${data["assets"][i].totalequipmentBorrowing}</td>
+                                    <td class="text-center">${data["assets"][i].materiaWithdrawalQuantity}</td>
                                     <td class="text-center">${data["assets"][i].returnQuantity}</td>
                                     <td class="text-center">${data["assets"][i].Transferred}</td>
                                     <td class="text-center">${data["assets"][i].disposed}</td> 
                                     <td class="text-center">${data["assets"][i].reservedAsset}</td> 
-                                    <td class="text-center">${data["assets"][i].reOrderLevel}</td>
+                                    <td class="text-center">${formatAmount(data["assets"][i].reOrderLevel)}</td>
                                     <td class="text-center">${data["assets"][i].available}</td>
                                     <td class="text-center">${data["assets"][i].totalQuantity}</td>
                                 </tr>`;
@@ -222,9 +241,10 @@ $(document).ready(function(){
                             </table>`;
 
                             let item =`
+                             
                             <div class="col-sm-12">
                             <div class="w-100">
-                            <hr class="pb-1">
+                            
                             <div class="card mt-2 shadow-sm bg-white rounded">
                             <div class="card-header bg-primary text-white">
                                 <div class="row">
@@ -248,7 +268,6 @@ $(document).ready(function(){
                                 <th>Stock Out</th>
                                 <th>Withdrawn</th>
                                 <th>Unused</th>
-                                <th>Disposed</th>
                                 <th>Reserved</th>
                                 <th>Re-order</th>
                                 <th>Available</th>
@@ -281,15 +300,16 @@ $(document).ready(function(){
                                 <td class="text-center">${data["item"][i].totalStockOut}</td>
                                 <td class="text-center">${data["item"][i].materiaWithdrawalQuantity}</td>
                                 <td class="text-center">${data["item"][i].Unused}</td>
-                                <td class="text-center">${data["item"][i].disposed}</td>
                                 <td class="text-center">${data["item"][i].reservedItem}</td> 
-                                <td class="text-center">${data["item"][i].reOrderLevel}</td>
+                                <td class="text-center">${formatAmount(data["item"][i].reOrderLevel)}</td>
                                 <td class="text-center">${data["item"][i].available}</td>
                                 <td class="text-center">${data["item"][i].totalQuantity}</td>
                            </tr>`;
                             }
                             item +=`</tbody>
-                            </table>`;
+                            </table>
+                            `;
+        
         
                                  
                           
@@ -299,6 +319,7 @@ $(document).ready(function(){
                                     setTimeout(() => {
                                         
                                         $('.imageboarder').hide();
+                                        $("#tabButton").html(tabs);
                                         $("#table_content").html(item);
                                        $("#table_content1").html(assets);
                                      

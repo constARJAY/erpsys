@@ -325,6 +325,7 @@ class StockOut_model extends CI_Model {
                     'itemCode' => $requestItems[0]['itemCode'],
                     'itemName'     => $requestItems[0]['itemName'],
                     'brand'    => $requestItems[0]['brand'],
+                    'uom'    => $requestItems[0]['uom'],
                     'classificationName'       => $requestItems[0]['classificationName'],
                     'categoryName'     => $requestItems[0]['categoryName'],
                     'serialNumber'     => $requestItems[0]['serialNumber'],
@@ -366,7 +367,7 @@ class StockOut_model extends CI_Model {
                         WHERE
                         stockOutDate IS NUll 
                         AND stockInDate IS NOT NULL 
-                        AND ( returnItemID IS NOT NULL OR inventoryReceivingID IS NOT NULL )
+                        AND (returnItemID IS NOT NULL OR inventoryReceivingID IS NOT NULL )
                         AND itemID = '$item_ID' 
                         ORDER BY expirationDate asc");
 

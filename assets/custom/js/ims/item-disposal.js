@@ -679,7 +679,7 @@ $(document).ready(function() {
 	// ----- END UPDATE INVENTORYT NAME -----
 
 	// ----- GET ITEM ROW -----
-    function getItemRow(isProject = true, item = {}, readOnly = false) {
+    function getItemRow(isProject = true, item = {}, readOnly = false,disposalStatus=0) {
 		const attr = isProject ? `project="true"` : ``;
 		let {
 			disposalID     				= "",
@@ -707,6 +707,12 @@ $(document).ready(function() {
 
 		let html = "";
 		if (readOnly) {
+
+			getRealTimeAvailableStocks = getTableData(`ims_stock_in_assets_tbl as stockAsset
+			LEFT JOIN ims_inventory_asset_tbl AS masterAsset
+			ON masterAsset.assetID = stockAsset.assetID`,
+			"SUM(quantity) - reOrderLevel  as availableStocks",
+			`stockOutDate IS NUll AND stockInDate IS NOT NULL AND stockAsset.assetID = ${assetID}`);
 		
 			html += `
 			<tr class="itemTableRow">
@@ -755,7 +761,7 @@ $(document).ready(function() {
 				</td>
 				<td>
                	 <div class="availableStock text-center">
-					${availableStock || "-"}
+					${disposalStatus == 1 ? formatAmount(getRealTimeAvailableStocks[0].availableStocks)  : availableStock}
                  </div>
             	</td>
 				<td>
@@ -785,7 +791,7 @@ $(document).ready(function() {
 						class="form-control validate barcode text-left"
 						id="barcode" 
 						name="barcode" 
-						minlength="25" 
+						minlength="18" 
 						maxlength="64"  
 						value="${barcode}"
 						itemID="${assetID}"
@@ -958,7 +964,7 @@ $(document).ready(function() {
 			const barcodeID = $(this).attr("id");
 
 
-			if (barcode.length >= 25) {
+			if (barcode.length >= 18) {
 				const data = getTableData(`ims_stock_in_assets_tbl`,
 					`stockInAssetID, assetID, assetCode, assetName, brand,quantity, classificationName, categoryName, uom, serialNumber, barcode, inventoryStorageID, inventoryStorageCode, inventoryStorageOfficeName`, `barcode = '${barcode}'`, ``, `barcode`);
 				if (data.length != 0) {
@@ -994,7 +1000,7 @@ $(document).ready(function() {
 						var inventoryStorage_Code = inventoryStorageCode ? inventoryStorageCode : "";
 						var inventoryStorageOffice_Name = inventoryStorageOfficeName ? inventoryStorageOfficeName : "";
 						let barcodeArrayLength = barcodeArray.length || 0;
-						if (barcode.length <= 25) {
+						if (barcode.length <= 64) {
 
 
 							if (assetName != null) {
@@ -1026,8 +1032,10 @@ $(document).ready(function() {
 								$(this).closest("tr").find(`.assetCode`).first().text(asset_Code);
 								$(this).closest("tr").find(`.assetName`).first().text(asset_Name);
 								$(this).closest("tr").find(`.assetName`).first().attr("brand", brand_Name);
+								$(this).closest("tr").find(`small`).first().text(brand_Name);
 								$(this).closest("tr").find(`.assetClassification`).first().text(classification_Name);
 								$(this).closest("tr").find(`.assetClassification`).first().attr("assetCategory", category_Name);
+								$(this).closest("tr").find(`small`).last().text(category_Name);
 								$(this).closest("tr").find(`.unitofmeasurement`).first().text(unitOfMeasurement);
 								$(this).closest("tr").find(`.serialnumber`).first().text(serial_Number);
 								$(this).closest("tr").find(`.availableStock`).first().text(available_Stock);
@@ -1039,6 +1047,7 @@ $(document).ready(function() {
 								$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
 								$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
 								$(this).closest("tr").find("#invalid-barcode").text('');
+
 
 							} else {
 								$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
@@ -1057,8 +1066,10 @@ $(document).ready(function() {
 					$(this).closest("tr").find(`.assetCode`).first().attr("assetID", "-");
 					$(this).closest("tr").find(`.assetName`).first().text("-");
 					$(this).closest("tr").find(`.assetName`).first().attr("brand", "-");
+					$(this).closest("tr").find(`small`).first().text("-");
 					$(this).closest("tr").find(`.assetClassification`).first().text("-");
 					$(this).closest("tr").find(`.assetClassification`).first().attr("assetCategory", "-");
+					$(this).closest("tr").find(`small`).last().text("-");
 					$(this).closest("tr").find(`.unitofmeasurement`).first().text("-");
 					$(this).closest("tr").find(`.serialnumber`).first().text("-");
 					$(this).closest("tr").find(`.availableStock`).first().text("-");
@@ -1197,7 +1208,7 @@ $(document).ready(function() {
 				`*`, 
 				`disposalID = ${disposalID}`,``,`assetID`);
 				disposalItemsData.map(item => {
-				requestProjectItems += getItemRow(true, item, readOnly);
+				requestProjectItems += getItemRow(true, item, readOnly,disposalStatus);
 			})
 			// requestProjectItems += getItemRow(true);
 		} else {

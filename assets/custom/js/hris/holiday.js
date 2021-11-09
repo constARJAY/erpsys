@@ -105,6 +105,8 @@ $(document).on("click",".addHoliday", function(){
         }
         initDateRangePicker("#inputholidayDate");
         initSelect2("#inputholidayType");
+        initSelect2("#inputholidayStatus");
+        
         $("#inputholidayDate").data("daterangepicker").startDate = moment();
         $("#inputholidayDate").data("daterangepicker").endDate 	= moment();
         // getYearList();
@@ -203,7 +205,7 @@ $(document).on("click",".editHoliday", function(){
             })
             $("#btnUpdate").hide();
         }
-
+        initSelect2("#inputholidayStatus");
         // initAll();
         
     },500);

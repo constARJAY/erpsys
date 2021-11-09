@@ -366,11 +366,11 @@ class MaterialWithdrawal_model extends CI_Model {
            }
 
             // CHECK THE ALL ITEM STATUS IS COMPLETE ITEMS/ASSETS//
-            // if($updateFooterStatus){
+            if($updateFooterStatus){
                 
                
-            $sqlCountItems = $this->db->query("SELECT COUNT(requestItemID) as totalValidationItems 
-            FROM ims_request_items_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL");
+                $sqlCountItems = $this->db->query("SELECT COUNT(requestItemID) as totalValidationItems 
+                FROM ims_request_items_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL");
                     
                     
                if(floatVal($sqlCountItems->row()->totalValidationItems)){
@@ -405,7 +405,7 @@ class MaterialWithdrawal_model extends CI_Model {
                 }
     
                
-            // }
+            }
             // END CHECK THE ALL ITEM STATUS IS COMPLET ITEMS/ASSETS//            
 
     

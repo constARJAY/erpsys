@@ -10,7 +10,7 @@ class InventoryReceiving_model extends CI_Model {
 
 
 
-    public function saveInventoryReceivingData($action, $data, $id = null) 
+    public function saveInventoryReceivingData($action, $data, $id = null, $approversStatus =0) 
     {
         //    echo "<pre>";
     //     print_r($data);
@@ -34,15 +34,19 @@ class InventoryReceiving_model extends CI_Model {
               $this->db->where('inventoryReceivingID', $id);
               $this->db->update('ims_inventory_receiving_tbl', $data);
             } 
-           $newdata = $this->db->query("SELECT ird.inventoryReceivingID FROM 
+
+            if($approversStatus == 2){
+                $newdata = $this->db->query("SELECT ird.inventoryReceivingID FROM 
                                         ims_inventory_request_details_tbl AS ird 
                                         LEFT JOIN ims_inventory_receiving_tbl AS ir ON ird.inventoryReceivingID = ir.inventoryReceivingID
                                         WHERE ird.inventoryReceivingID = $insertID AND remainingQuantity <>0  GROUP BY inventoryReceivingID");
-           if ($newdata->num_rows() !== 0) {
-              
-            $this->db->query("CALL proc_get_receiving_report_remaining($insertID)");
-            
-           } 
+                if ($newdata->num_rows() !== 0) {
+                    
+                    $this->db->query("CALL proc_get_receiving_report_remaining($insertID)");
+                    
+                } 
+            }
+           
            // ----- UPDATE ORDERED PENDING -----
             // if ($data["inventoryReceivingStatus"] == 2) {
             //     $updateOrderedPending = $this->updateOrderedPending($insertID);
@@ -61,8 +65,8 @@ class InventoryReceiving_model extends CI_Model {
         return $query1 && $query2 ? true : false;
     }
 
-    public function saveScopes($scopes = null)
-    {
+    public function saveScopes($scopes = null,$inventoryReceivingID = 0)
+    {   $this->db->query("DELETE FROM ims_inventory_request_serial_tbl WHERE  inventoryReceivingID =  $inventoryReceivingID");
         $query = $this->db->insert_batch("ims_inventory_request_serial_tbl", $scopes);
         return $query ? true : false;
     }
@@ -84,7 +88,7 @@ class InventoryReceiving_model extends CI_Model {
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
         if ($scopes) {
-                $insertID  = $this->db->insert_id();
+                // $insertID  = $this->db->insert_id();
                 $scopeData = [];
                 foreach ($scopes as $scope) {
 
@@ -98,7 +102,7 @@ class InventoryReceiving_model extends CI_Model {
                         ];
                         array_push($scopeData, $temp);
                 }
-                $saveScopes = $this->saveScopes($scopeData);
+                $saveScopes = $this->saveScopes($scopeData, $inventoryReceivingID);
                 if ($saveScopes) {
                     return true;
                 }

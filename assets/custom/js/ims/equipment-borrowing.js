@@ -155,7 +155,8 @@ $(document).ready(function() {
              borrowing.materialWithdrawalID,
              borrowing.materialRequestID,
              borrowing.clientCode,
-             borrowing.clientName`,
+             borrowing.clientName,
+             borrowing.dateNeeded`,
             ``);
 
             // const data  = getTableData(
@@ -214,12 +215,14 @@ $(document).ready(function() {
 				scrollX:        true,
 				sorting:        [],
 				scrollCollapse: true,
-				columnDefs: [
+                columnDefs: [
 					{ targets: 0, width: 250 },
 					{ targets: 1, width: 250 },
-					{ targets: 2, width: 250 },
-					{ targets: 3, width: 150 },
+					{ targets: 2, width: 150 },
+					{ targets: 3, width: 250 },
 					{ targets: 4, width: 150 },
+					{ targets: 5, width: 130 },
+					{ targets: 6, width: 150 },
 					// { targets: 5, width: 150 },
 				],
 			});
@@ -297,8 +300,10 @@ $(document).ready(function() {
                     <tr>
                         <th>Document No.</th>
                         <th>Prepared By</th>
+                        <th>Reference No.</th>
                         <th>Project</th>
                         <th>Client</th>
+                        <th>Date Needed</th>
                         <th>Asset Request Status</th>
                     </tr>
                 </thead>
@@ -317,6 +322,7 @@ $(document).ready(function() {
                 inventoryAssetStatus       = 0,
                 clientCode       = "",
                 clientName       = "",
+                dateNeeded       = "",
             } = timeline;
 
             html += `
@@ -326,6 +332,7 @@ $(document).ready(function() {
                     <!-- <small style="color:#848482;">put description here</small> -->
                 </td>
                 <td>${preparedBy || "-"}</td>
+                <td>${materialWithdrawalCode || "-"}</td>
                 <td>
                     <div>
                         ${projectCode || '-'}
@@ -338,6 +345,7 @@ $(document).ready(function() {
                     </div>
                     <small style="color:#848482;">${clientName || '-'}</small>
                 </td>
+                <td>${dateNeeded ? moment(dateNeeded).format("MMMM DD, YYYY") : "-"}</td>
                 <td>${getStatusStyle(inventoryAssetStatus,true)}</td>
             </tr>`
         });

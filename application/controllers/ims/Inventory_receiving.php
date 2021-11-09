@@ -21,6 +21,9 @@ class Inventory_receiving extends CI_Controller {
 
     public function saveInventoryReceiving()
     {
+        print_r($_POST);
+        exit;
+       
         $action                     = $this->input->post("action");
         $method                     = $this->input->post("method");
         $purchaseOrderID            = $this->input->post("purchaseOrderID") ?? null;
@@ -66,7 +69,7 @@ class Inventory_receiving extends CI_Controller {
             "clientAddress"                 => $clientAddress,
             "recordID"                      => $recordID,
             "employeeID"                    => $employeeID,
-            "receiptNo"                     => $receiptNo,
+            // "receiptNo"                     => $receiptNo,
             "approversID"                   => $approversID,
             "approversStatus"               => $approversStatus,
             "approversDate"                 => $approversDate,
@@ -112,7 +115,7 @@ class Inventory_receiving extends CI_Controller {
                 $this->inventoryreceiving->deleteItemAndSerial($inventoryReceivingID);
             }
         }
-        $saveInventoryReceivingData = $this->inventoryreceiving->saveInventoryReceivingData($action, $inventoryReceivingData, $inventoryReceivingID);
+        $saveInventoryReceivingData = $this->inventoryreceiving->saveInventoryReceivingData($action, $inventoryReceivingData, $inventoryReceivingID, $approversStatus);
 
         if ($saveInventoryReceivingData && ($method == "submit" || $method == "save")) {
             $result = explode("|", $saveInventoryReceivingData);
@@ -121,7 +124,10 @@ class Inventory_receiving extends CI_Controller {
                 //$scopes =[];
                 $inventoryReceivingID = $result[2];
                 if($_FILES){
-                    $fileType                   = strpos($_FILES($receiptNo), ".") + 1;
+
+                    $strArray = explode('.',$_FILES["file"]["name"]);
+                    $fileType = end($strArray);
+                    // $fileType                   = strpos($_FILES["file"]["name"], ".") + 1;
                      
                     $receiptNo             = "INR-".date("y")."-".str_pad($inventoryReceivingID, 5, '0', STR_PAD_LEFT).".".$fileType;
                     $updateReceiptData  = ["receiptNo" => $receiptNo];

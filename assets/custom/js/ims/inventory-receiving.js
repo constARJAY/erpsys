@@ -831,11 +831,6 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 			// ` : ""
 			var scopeData ="";
 
-			const buttonAddRow = !readOnly ? `
-				<div class="w-100 text-center">
-					<input type="checkbox" class="form-check-label btnAddSerial"> Add Serial Number</input>
-				</div>
-			`: "";
 			if(inventoryReceivingID ==""){
 				scopeData ="";
 			}else{
@@ -846,6 +841,13 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 				);
 
 			}
+		
+			const buttonAddRow = !readOnly ? `
+				<div class="w-100 text-center">
+					<input type="checkbox" class="form-check-label btnAddSerial" ${scopeData.length > 0 ? "checked" : ""}> Add Serial Number</input>
+				</div>
+			`: "";
+		
 			
 			let serialNumberData  		= 	scopeData.filter(x => x.serialNumber == "" || !x.serialNumber);
 			let serialNumberDataLength 	= 	serialNumberData.length;
@@ -978,7 +980,7 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 
 					</td>
 					<td class="text-center">
-						<div class="remaining" id="remaining${index}"name="remaining">${remaining || ""}</div>
+						<div class="remaining" id="remaining${index}"name="remaining">${quantity || ""}</div>
 					</td>
 					<td class="text-center">
 						<div class="uom" id="uom" name="uom">${uom || ""}</div>
@@ -1010,36 +1012,31 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 	return html;
 	
 }
-$(document).on("keyup change", "[name=receivedQuantity]", function() {
-	//$(document).on("keyup", ".record1111", function() {
-		//$('.record1111').bind('click keyup', function(event) {
-		var count = $(this).attr("number");
-		//const count     		= $(this).closest("tr").first().attr("index");
-		
-		//var quantity = $(this).attr("quantity");
-		
-		var quantity  = $(`#quantity${count}`).text().replaceAll(",","");
+	$(document).on("change", "[name=receivedQuantity]", function() {
+
+		$parent = $(this);
+		var count = $parent.attr("number") || 0;
+
+
+		var quantity  = $(`#quantity${count}`).text().replaceAll(",","") || 0;
 		var totalQuantity = parseInt(quantity);
-		var val = $(this).val().replaceAll(",","");
+		var val = $parent.val().replaceAll(",","") || 0;
 		var totalReceived = parseInt(val);
 		var totalremaining = parseFloat(quantity) - parseFloat(val);
 		var formatdecimalremaining = parseFloat(totalremaining).toFixed(2);
 		
-		$(`#remaining${count}`).text(formatdecimalremaining);
-		//var flag = ["true"];
-		if(totalQuantity < totalReceived){
-			// $(`.record1111 [name="receivedQuantity"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
-			// $(`.record1111 .invalid-feedback`, this).text("Excessive amount of quantity!");
 	
-			$(this).closest("tr").find(`#receivedQuantity${count}`).removeClass("is-valid, no-error").addClass("is-invalid");
-				$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).addClass("is-invalid");
+		if(totalQuantity < totalReceived){
+				$parent.closest("tr").find(`#receivedQuantity${count}`).removeClass("is-valid, no-error").addClass("is-invalid");
+				$parent.closest("tr").find(`#invalid-receivedQuantity${count}`).addClass("is-invalid");
 				$(`#invalid-receivedQuantity${count}`).html("Excessive amount of quantity!");
 		}else{
-			$(`#receivedQuantity${count}`).removeClass("is-invalid").addClass("is-valid");
-				$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).removeClass("is-invalid");
-				$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).text('');
+				$(`#receivedQuantity${count}`).removeClass("is-invalid").addClass("is-valid");
+				$parent.closest("tr").find(`#invalid-receivedQuantity${count}`).removeClass("is-invalid");
+				$parent.closest("tr").find(`#invalid-receivedQuantity${count}`).text('');
+				$(`#remaining${count}`).text(formatdecimalremaining);
 		}
-		//return flag;
+	
 		
 	
 	
@@ -1522,6 +1519,9 @@ $(document).on("change", "[name=receiptNo]", function(e) {
 		}
 
 	}
+			
+	fileLength >0 ? $(this).parent().find(".invalid-feedback").text("") : "";
+	fileLength >0 ? $(this).parent().find("input").removeClass("is-invalid") : "";
 });	
 // ----- REMOVE FILE -----
 $(document).on("click", ".btnRemoveFile", function() {
@@ -1620,10 +1620,10 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 	if (currentStatus == "0" && method != "approve") {
 		//var file = document.getElementById("receiptNo").files[0];files
 		data["employeeID"] 				 	= sessionID;
-		var files 							= $("[name=receiptNo]").attr("files");
+		// var files 							= $("[name=receiptNo]").attr("files");
 		///var files1 						= document.getElementById("receiptNo").files[0];
 		
-		//var files 						= document.getElementById("receiptNo").files[0];
+		var files 						= document.getElementById("receiptNo").files[0];
 		data["inventoryReceivingReason"] 	= $("[name=inventoryReceivingReason]").val()?.trim();
 		data["purchaseOrderCode"] 			= $("[name=inventoryReceivingCode]").val()?.trim();
 		data["purchaseOrderID"] 			= $("[name=inventoryReceivingCode]").attr("purchaseOrderID");
@@ -1803,7 +1803,8 @@ $(document).on("click", "#btnRevise", function () {
 
 // ----- SAVE CLOSE FORM -----
 $(document).on("click", "#btnBack", function () {
-	const id         = decryptString($(this).attr("inventoryReceivingID"));
+		checkSerialReceivedQuantity(); // part of  trigger attached attribute itemID on every serial number
+		const id         = decryptString($(this).attr("inventoryReceivingID"));
 		const code       = $(this).attr("inventoryReceivingCode");
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
