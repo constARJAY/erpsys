@@ -268,7 +268,7 @@ $(document).ready(function(){
     const validate = validateForm("modal_hris_designation");
     if (validate) {
         let data = getFormData("modal_hris_designation", true);
-        data["tableData[designationCode]"] = generateCode("DSN", false, "hris_designation_tbl", "designationCode");
+        data["tableData[designationCode]"] = generateCode("DSN", false, "hris_designation_tbl", "designationID", "", true);
         data["tableData[createdBy]"] = sessionID;
         data["tableData[updatedBy]"] = sessionID;
         data["tableName"]            = "hris_designation_tbl";

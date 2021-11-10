@@ -907,7 +907,7 @@ const checkExists = (elementID, invalidFeedback) => {
 			inputs["multiple"] = multiple;
 			uniqueData.map((data) => {
 				if (keys.length > 0) {
-					if (data["multiple"].id !== uniqueID && elementID && invalidFeedback) {
+					if ((data?.id != uniqueID && data["multiple"]?.id != uniqueID) && elementID && invalidFeedback) {
 						let countKeys = keys.length;
 						let countTemp = 0;
 						keys.map((item, index) => {

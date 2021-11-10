@@ -7,15 +7,15 @@ class Roles_permission extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("RolesPermission_model", "rolespermission");
-
-        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : false;
-        if ($sessionID && $sessionID != 1) {
-            isAllowed(2);
-        }
     }
 
     public function index()
     {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : false;
+        if ($sessionID && $sessionID != 1) {
+            isAllowed(2);
+        }
+
         $data["title"] = "Roles and Permission";
         $this->load->view('template/header', $data);
         $this->load->view('gen/roles_permission/index', $data);

@@ -1305,7 +1305,7 @@ $(document).ready(function() {
                             signature="${employeeSignature}"
                             accept="image/*">
                         <div class="invalid-feedback d-block" id="invalid-employeeSignature"></div>
-                        <div class="signature display-image" id="displaySignature" style="display: ${employeeSignature ? "block" : "none"}">
+                        <div class="signature display-image" id="displaySignature" style="display: ${employeeSignature && employeeSignature != "null" && employeeSignature != "undefined" ? "block" : "none"}">
                             ${displayPersonnelSignature(employeeSignature)}
                         </div>
                     </div>
