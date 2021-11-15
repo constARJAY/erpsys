@@ -21,8 +21,8 @@ class Inventory_receiving extends CI_Controller {
 
     public function saveInventoryReceiving()
     {
-        print_r($_POST);
-        exit;
+        // print_r($_POST);
+        // exit;
        
         $action                     = $this->input->post("action");
         $method                     = $this->input->post("method");

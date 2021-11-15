@@ -351,6 +351,8 @@ class MaterialWithdrawal_model extends CI_Model {
                     }
                     // END UPDATE THE STOCK OUT ALL ITEM STATUS//
                     $updateFooterStatus = true;
+                    // $this->updateItemAndAssetStatus($materialWithdrawalID,$inventoryValidationID,"item");
+
             }
 
             if($statusAssetFlag == true){
@@ -362,7 +364,7 @@ class MaterialWithdrawal_model extends CI_Model {
                 }
                 // END UPDATE THE STOCK OUT ALL ASSET STATUS//
                 $updateFooterStatus = true;
-
+                // $this->updateItemAndAssetStatus($materialWithdrawalID,$inventoryValidationID,"asset");
            }
 
             // CHECK THE ALL ITEM STATUS IS COMPLETE ITEMS/ASSETS//
@@ -449,6 +451,8 @@ class MaterialWithdrawal_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
+
+    
     public function updateMaterialWithdrawalStatus($materialWithdrawalID = null, $param = "item"){
 
       if($materialWithdrawalID){
@@ -459,6 +463,42 @@ class MaterialWithdrawal_model extends CI_Model {
         return $query ? true : false; 
       }
     }
+    
+    public function updateItemAndAssetStatus($materialWithdrawalID = null, $param1 = "item"){
+
+        if($materialWithdrawalID){
+            
+            $tableNameRequest = $param == "item" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
+            $requestColumn = $param == "item" ? "requestItemID" : "requestAssetID";
+
+
+            $sqlCount = $this->db->query("SELECT COUNT($requestColumn) as totalValidation 
+            FROM $tableNameRequest WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL");
+                
+           if(floatVal($sqlCount->row()->totalValidation)){
+
+            $tableNameMaterial = $param == "item" ? "ims_material_withdrawal_item_tbl" : "ims_material_withdrawal_asset_tbl";
+            $materialColumn = $param == "item" ? "itemID" : "assetID";
+            $itemOrassetStatus = $param == "item" ? "withdrawalItemStatus" : "withdrawalAssetStatus";
+
+                $sql = $this->db->query("SELECT  COUNT(DISTINCT($materialColumn)) as totalCompleted
+                FROM $tableNameMaterial  WHERE materialWithdrawalID = $materialWithdrawalID AND $itemOrassetStatus =1");
+
+                    if(floatVal($sqlCount->row()->totalValidation) == floatVal($sql->row()->totalCompleted)){
+
+                        // START UPDATE THE INVENTORY ITEMS STATUS//
+                        $query =  $this->updateMaterialWithdrawalStatus($materialWithdrawalID, $param1);
+                        // END UPDATE THE INVENTORY ITEMS STATUS//
+                     }
+           }
+        //    else{
+        //         $this->updateMaterialWithdrawalStatus($materialWithdrawalID, $param1);
+        //    }
+        }
+          return $query ? true : false; 
+    }
+      
+
 
 }
 

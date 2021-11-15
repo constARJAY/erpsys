@@ -47,14 +47,14 @@ class Material_withdrawal extends CI_Controller {
         // print_r($_POST);
         // exit;
         if($items){
-            foreach ($items as $key=> $item) {
+            foreach ($items as $key1=> $item) {
                 $status = "0";
                 $getReceived = $item["received"];
                 $getRemaining = $item["remainingItem"];
                 if($getRemaining <= 0 && $getReceived !=0   ){
                     $status = "1";
                     $statusItemFlag = true;
-                    $getItemID[$key] = $item["itemID"];
+                    $getItemID[$key1] = $item["itemID"];
 
                 }
                 $temp = [
@@ -74,14 +74,14 @@ class Material_withdrawal extends CI_Controller {
         }
 
         if($assets){
-            foreach ($assets as $key=>$asset) {
+            foreach ($assets as $key2=>$asset) {
                 $status = "0";
                 $getReceived = $asset["received"];
                 $getRemaining = $asset["remainingAsset"];
-                if($getRemaining == 0 && $getReceived !=0   ){
+                if($getRemaining <= 0 && $getReceived !=0   ){
                     $status = "1";
                     $statusAssetFlag = false;
-                    $getAssetID[$key] =  $asset["assetID"];
+                    $getAssetID[$key2] =  $asset["assetID"];
 
                 }
                 $temp = [

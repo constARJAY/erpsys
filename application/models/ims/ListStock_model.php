@@ -22,15 +22,25 @@ class ListStock_model extends CI_Model {
         }
         $sqlItem = $this->db->query("SELECT  itemID, itemCode, brand, itemName, classificationName, categoryName, uom, stockIN, stockOut, totalStockOut,
                                     Unused,reservedItem, materiaWithdrawalQuantity, ROUND(reserved,2) AS reserved, IF(ROUND(available,2) <0,0,ROUND(available,2))  AS available,
-                                    ROUND((stockIN),2) AS totalQuantity,ROUND(reOrderLevel,2) AS reOrderLevel
+                                    ROUND(reOrderLevel,2) AS reOrderLevel,ROUND((available  + IFNULL(reOrderLevel,0)),2) AS totalQuantity
                                     FROM
                                     (
                                         SELECT i.itemID, i.itemCode, brand, i.itemName, classificationName, categoryName, uom, ROUND(stockIN,2) AS stockIN,
-                                        ROUND(Unused,2) AS Unused, ROUND(reservedItem,2) AS reservedItem, ROUND(materiaWithdrawalQuantity - Unused,2)  AS materiaWithdrawalQuantity, 
+                                        ROUND(IF((SELECT SUM(stockUsedIn.quantity) AS UnusedStockIn  FROM ims_stock_in_item_tbl as stockUsedIn WHERE stockUsedIn.materialUsageID <>0 AND  stockUsedIn.stockOutDate = '0000-00-00' AND stockUsedIn.stockInDate IS NOT NULL AND itemID = i.itemID),
+                                        IFNULL(
+                                        IF((SELECT SUM(stockUsedIn.quantity) AS UnusedStockIn  FROM ims_stock_in_item_tbl as stockUsedIn WHERE stockUsedIn.materialUsageID <>0 AND  stockUsedIn.stockOutDate = '0000-00-00' AND stockUsedIn.stockInDate IS NOT NULL AND itemID = i.itemID) >  Unused,
+                                        (SELECT SUM(stockUsedIn.quantity) AS UnusedStockIn  FROM ims_stock_in_item_tbl as stockUsedIn WHERE stockUsedIn.materialUsageID <>0 AND  stockUsedIn.stockOutDate = '0000-00-00' AND stockUsedIn.stockInDate IS NOT NULL AND itemID = i.itemID) -  Unused,
+                                        Unused - (SELECT SUM(stockUsedIn.quantity) AS UnusedStockIn  FROM ims_stock_in_item_tbl as stockUsedIn WHERE stockUsedIn.materialUsageID <>0 AND  stockUsedIn.stockOutDate = '0000-00-00' AND stockUsedIn.stockInDate IS NOT NULL AND itemID = i.itemID)),0),Unused - 0) ,2) AS Unused, 
+                                        
+                                        
+                                        ROUND(reservedItem,2) AS reservedItem, ROUND(materiaWithdrawalQuantity - Unused,2)  AS materiaWithdrawalQuantity, 
                                         ROUND(stockOut,2) AS stockOut,(stockOut - materiaWithdrawalQuantity) totalStockOut,
-                                        CASE WHEN materiaWithdrawalQuantity <>0 THEN (reservedItem - materiaWithdrawalQuantity)
-                                        ELSE reservedItem END reserved,(stockIN  - IFNULL(reOrderLevel,0) - reservedItem-materiaWithdrawalQuantity) AS available,
-                                       IFNULL(iii.reOrderLevel,0) AS reOrderLevel
+                                        CASE WHEN stockOut <>0 THEN (IF((reservedItem - stockOut)<0, 0,reservedItem - stockOut))
+                                        ELSE reservedItem END reserved,
+                                        IFNULL(iii.reOrderLevel,0) AS reOrderLevel,
+                                        (stockIN  - IFNULL(reOrderLevel,0) -materiaWithdrawalQuantity  - IF((materiaWithdrawalQuantity - Unused)>0,0,IF(stockOut = 0 ,reservedItem, IF(reservedItem = stockOut,stockOut,reservedItem - stockOut))) ) AS available
+
+                                       
                                         FROM
                                         (
                                             SELECT itemID, itemCode, brand, itemName, classificationName, categoryName, uom, IFNULL(SUM(stockIN),0) AS stockIN,IFNULL(SUM(stockOut),0) AS stockOut,
@@ -47,7 +57,7 @@ class ListStock_model extends CI_Model {
                                                 0 AS reservedItem,
                                                 0 AS materiaWithdrawalQuantity
                                                 FROM  ims_stock_in_item_tbl AS sii
-                                                WHERE  sii.inventoryReceivingID <>0  
+                                                WHERE  (sii.inventoryReceivingID <>0 OR sii.materialUsageID <>0) AND  sii.stockOutDate = '0000-00-00' AND sii.stockInDate IS NOT NULL
                                                 GROUP BY sii.itemID
                                                 -- Get Stock In Quantity in Stock In Item Table
                                                 UNION ALL
@@ -61,7 +71,7 @@ class ListStock_model extends CI_Model {
                                                 0 AS reservedItem,
                                                 0 AS materiaWithdrawalQuantity
                                                 FROM  ims_stock_in_item_tbl AS sii
-                                                WHERE sii.stockOutID <>0
+                                                WHERE sii.stockOutID <>0  AND sii.stockOutDate IS NOT NULL
                                                 GROUP BY sii.itemID
                                                 -- Get Stock Out Quantity in Stock In Item Table 
                                                 UNION ALL
@@ -103,7 +113,7 @@ class ListStock_model extends CI_Model {
                                                 itemUom AS uom,  0 AS stockIN,
                                                 0 AS stockOut,
                                                 0  Unused,
-                                                SUM(sii.reservedItem) AS reservedItem, -- Reserved Item
+                                                SUM(sii.requestQuantity) AS reservedItem, -- Reserved Item
                                                 0 AS materiaWithdrawalQuantity
                                                 FROM  ims_request_items_tbl AS sii
                                                 LEFT JOIN ims_inventory_validation_tbl AS iiv ON  sii.inventoryValidationID = iiv.inventoryValidationID
@@ -122,7 +132,7 @@ class ListStock_model extends CI_Model {
                                                 SUM(mww.received) AS materiaWithdrawalQuantity  -- Withdrawn Quantity
                                                 FROM  ims_material_withdrawal_tbl AS mw
                                                 LEFT JOIN ims_material_withdrawal_item_tbl AS mww ON mw.materialWithdrawalID = mww.materialWithdrawalID
-                                                WHERE  mw.inventoryItemStatus = 9  AND materialWithdrawalStatus = 9  
+                                                WHERE  mw.inventoryItemStatus = 9 AND mww.itemID IS NOT NULL
                                                 GROUP BY mww.itemID
                                                 -- Get Withdrawn Quantity in Material Withdrawal Table 
                                             )w 
@@ -136,17 +146,43 @@ class ListStock_model extends CI_Model {
        
             $sqlAsset = $this->db->query("SELECT assetID, assetCode, brand, assetName, classificationName, categoryName, uom, totalequipmentBorrowing,
                                     stockIN,equipmentBorrowing, ROUND(Transferred,2) AS Transferred, returnQuantity, ROUND(disposed,2) AS disposed, reservedAsset,reserved,materiaWithdrawalQuantity,IF(ROUND(available,2) <0,0,ROUND(available,2))  AS available,
-                                    ROUND(reOrderLevel,2) AS reOrderLevel, ROUND((stockIN - totalequipmentBorrowing - disposed),2) AS totalQuantity
+                                    ROUND(reOrderLevel,2) AS reOrderLevel, ROUND((available+ IFNULL(reOrderLevel,0) + reservedAsset),2) AS totalQuantity
                                     FROM
                                     (
-                                    SELECT i.assetID, i.assetCode , brand, i.assetName, classificationName, categoryName, uom,stockIN, ROUND(equipmentBorrowing,2) AS equipmentBorrowing,Transferred,returnQuantity,
-                                    ROUND(disposed,2) as disposed,reservedAsset, CASE WHEN equipmentBorrowing <>0 THEN (reservedAsset - materiaWithdrawalQuantity)
-                                    ELSE reservedAsset END reserved,ROUND(materiaWithdrawalQuantity,2)  AS materiaWithdrawalQuantity,(stockIN - equipmentBorrowing - disposed - IFNULL(reOrderLevel,0) - reservedAsset + returnQuantity) AS available,
-                                    IFNULL(iii.reOrderLevel,0) AS reOrderLevel,(IFNULL(equipmentBorrowing,2) - IFNULL(returnQuantity,2)) totalequipmentBorrowing
+                                    SELECT i.assetID, i.assetCode , brand, i.assetName, classificationName, categoryName, uom,stockIN,
+                                    ROUND(equipmentBorrowing,2) AS equipmentBorrowing,Transferred,
+
+                                    -- ROUND(IF((SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID),
+                                    --     (SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID),0) -  returnQuantity,2) AS returnQuantity, 
+                                    
+
+                                    ROUND(IF((SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID),
+                                        IFNULL(
+                                        IF((SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID) >  returnQuantity,
+                                        (SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID) -  returnQuantity,
+                                        returnQuantity - (SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID)),0),returnQuantity - 0) ,2) AS returnQuantity, 
+                                        
+                                    ROUND(disposed,2) as disposed,
+                                    reservedAsset, 
+                                    
+                                    CASE WHEN equipmentBorrowing <>0 THEN (IF((reservedAsset - equipmentBorrowing)<0,0,reservedAsset - equipmentBorrowing))
+                                    ELSE reservedAsset END reserved,
+                                    
+                                    ROUND(materiaWithdrawalQuantity  - returnQuantity,2)  AS materiaWithdrawalQuantity,
+                                    
+
+                                    IFNULL(iii.reOrderLevel,0) AS reOrderLevel,
+                                    
+                                    (IFNULL(equipmentBorrowing,2) - IFNULL(materiaWithdrawalQuantity,2)) totalequipmentBorrowing,
+
+                                    (stockIN - IFNULL(reOrderLevel,0) - materiaWithdrawalQuantity - returnQuantity - disposed - IF(equipmentBorrowing = 0,reservedAsset, IF(equipmentBorrowing = reservedAsset,equipmentBorrowing,reservedAsset - equipmentBorrowing))) AS available
+
                                     FROM
                                     (
                                     SELECT assetID, assetCode, brand, assetName, classificationName,categoryName,uom,
-                                    IFNULL(SUM(stockIN),0) AS stockIN,IFNULL(SUM(equipmentBorrowing),0) AS equipmentBorrowing,sum(Transferred) AS Transferred, SUM(returnQuantity) AS returnQuantity,
+                                    IFNULL(SUM(stockIN),0) AS stockIN,IFNULL(SUM(equipmentBorrowing),0) AS equipmentBorrowing,
+                                    sum(Transferred) AS Transferred,
+                                     SUM(returnQuantity) AS returnQuantity,
                                     IFNULL(SUM(disposed),0) AS disposed,IFNULL(SUM(reservedAsset),0) AS reservedAsset, IFNULL(SUM(materiaWithdrawalQuantity),0) AS materiaWithdrawalQuantity
                                     FROM
                                     (
@@ -161,7 +197,7 @@ class ListStock_model extends CI_Model {
                                         0 AS reservedAsset,
                                         0 AS materiaWithdrawalQuantity
                                         FROM  ims_stock_in_assets_tbl AS sii
-                                        WHERE  sii.inventoryReceivingID <>0  
+                                        WHERE   (sii.inventoryReceivingID <>0 OR sii.materialUsageID <>0)   AND  sii.stockOutDate = '0000-00-00' AND sii.stockInDate IS NOT NULL
                                         GROUP BY sii.assetID
                                         -- Get Stock In Quantity in  Stock In Assets Table
                                         UNION ALL
@@ -177,24 +213,43 @@ class ListStock_model extends CI_Model {
                                         0 AS reservedAsset,
                                         0 AS materiaWithdrawalQuantity
                                         FROM  ims_stock_in_assets_tbl AS sii
-                                        WHERE  sii.equipmentBorrowingID <>0  
+                                        WHERE  sii.equipmentBorrowingID <>0  AND  sii.stockOutDate IS NOT NULL
                                         GROUP BY sii.assetID
                                         -- Get Equipment Borrowing Request Quantity in Stock In Assets Table
                                         UNION ALL
 
+                                        -- SELECT 
+                                        -- sii.assetID, 			sii.assetCode, 		sii.brand,		sii.assetName,
+                                        -- sii.classificationName, sii.categoryName,	sii.uom,  
+                                        -- 0 AS stockIN,
+                                        -- 0 AS equipmentBorrowing,
+                                        -- SUM(quantity) AS returnQuantity, -- Return Quantity 
+                                        -- 0 AS Transferred,
+                                        -- '0.00'  AS disposed,
+                                        -- 0 AS reservedAsset,
+                                        -- 0 AS materiaWithdrawalQuantity
+                                        -- FROM  ims_stock_in_assets_tbl AS sii
+                                        -- WHERE  sii.returnItemID <>0  
+                                        -- GROUP BY sii.assetID
+                                        -- -- Get Return Quantity in Stock In Assets Table
+                                        -- UNION ALL
+
                                         SELECT 
-                                        sii.assetID, 			sii.assetCode, 		sii.brand,		sii.assetName,
+                                        sii.itemID as assetID, 			sii.itemCode as assetCode, 		sii.Brand as brand,		sii.itemName as assetName,
                                         sii.classificationName, sii.categoryName,	sii.uom,  
                                         0 AS stockIN,
                                         0 AS equipmentBorrowing,
-                                        SUM(quantity) AS returnQuantity, -- Return Quantity 
+                                        SUM(borrowedQuantity) AS returnQuantity, -- Return Quantity 
                                         0 AS Transferred,
                                         '0.00'  AS disposed,
                                         0 AS reservedAsset,
                                         0 AS materiaWithdrawalQuantity
-                                        FROM  ims_stock_in_assets_tbl AS sii
-                                        WHERE  sii.returnItemID <>0  
-                                        GROUP BY sii.assetID
+                                        FROM  ims_inventory_request_details_tbl AS sii
+                                        LEFT JOIN ims_return_item_tbl AS returnHeader 
+                                        ON  returnHeader.returnItemID = sii.returnItemID
+                                        WHERE sii.returnItemID <>0   AND
+                                        returnHeader.returnItemStatus = 2
+                                        GROUP BY sii.returnItemID
                                         -- Get Return Quantity in Stock In Assets Table
                                         UNION ALL
 
@@ -222,7 +277,7 @@ class ListStock_model extends CI_Model {
                                         0 AS returnQuantity,
                                         0 AS Transferred,
                                         '0.00'  AS disposed,
-                                        SUM(reservedAsset) AS reservedAsset, -- Reserved Asset
+                                        SUM(sii.requestQuantity) AS reservedAsset, -- Reserved Asset
                                         0 AS materiaWithdrawalQuantity
                                         FROM  ims_request_assets_tbl AS sii
                                         LEFT JOIN ims_inventory_validation_tbl AS iiv ON sii.inventoryValidationID = iiv.inventoryValidationID
@@ -242,8 +297,8 @@ class ListStock_model extends CI_Model {
                                         0 AS reservedAsset,
                                         SUM(mww.received) AS materiaWithdrawalQuantity  -- Withdrawn Quantity
                                         FROM  ims_material_withdrawal_tbl AS mw
-                                        LEFT JOIN ims_material_withdrawal_asset_tbl AS mww ON mw.materialWithdrawalID = mww.materialWithdrawalID
-                                        WHERE  mw.inventoryItemStatus = 9  AND materialWithdrawalStatus = 9  
+                                        LEFT JOIN ims_material_withdrawal_asset_tbl AS mww ON mw.materialWithdrawalID = mww.materialWithdrawalID 
+                                        WHERE  mw.inventoryAssetStatus = 9 AND mww.assetID IS NOT NULL
                                         GROUP BY mww.assetID
                                         -- Get Withdrawn Quantity in Material Withdrawal Table 
                                     ) w

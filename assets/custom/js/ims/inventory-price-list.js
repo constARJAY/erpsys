@@ -5,9 +5,11 @@ $(document).ready(function(){
 
 $(document).on("change","#classificationSelect", function(){
     let classificationID = $(this).val();
-    initDataTables();
-    tableContent(classificationID);
-    
+    $("#table_content").html(preloader);
+    setTimeout(() => {
+        initDataTables();
+        tableContent(classificationID);
+    }, 100);
 });
 
 $(document).on("click", "#btnAddRow",function(){
