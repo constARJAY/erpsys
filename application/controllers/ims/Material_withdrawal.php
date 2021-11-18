@@ -80,7 +80,7 @@ class Material_withdrawal extends CI_Controller {
                 $getRemaining = $asset["remainingAsset"];
                 if($getRemaining <= 0 && $getReceived !=0   ){
                     $status = "1";
-                    $statusAssetFlag = false;
+                    $statusAssetFlag = true;
                     $getAssetID[$key2] =  $asset["assetID"];
 
                 }

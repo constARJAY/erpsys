@@ -793,8 +793,12 @@ function getItemsRow(readOnly = false,returnItemID) {
 	let requestItemsData;	
 			requestItemsData = getTableData(
 				`ims_inventory_request_details_tbl AS ird`,
-				``,
-				`ird.returnItemID = ${returnItemID}`
+				`*, SUM(ird.quantity) AS fixBorrowedQuantity, 
+					(SELECT subTable.quantity FROM ims_inventory_request_details_tbl AS subTable 
+							WHERE subTable.returnItemID = '${returnItemID}' LIMIT 1 ) as requestQuantity`,
+				`ird.returnItemID = ${returnItemID}`,
+				"",
+				`returnItemID`,
 			);
 	if (requestItemsData.length > 0) {
 		requestItemsData.map((item, index) => {
@@ -807,7 +811,9 @@ function getItemsRow(readOnly = false,returnItemID) {
 				itemName                   			= "",
 				Brand								="",
 				quantity                 			= "",
+				requestQuantity 					= "",
 				borrowedQuantity					= "",
+				fixBorrowedQuantity 				= "",
 				classificationName                  = "",
 				categoryName						= "",
 				manHours                     		= "",
@@ -819,7 +825,9 @@ function getItemsRow(readOnly = false,returnItemID) {
 				receivedQuantity					= "",
 				createAt							="",
 			} = item;
-
+			
+			quantity  		 = requestQuantity
+			borrowedQuantity = borrowedQuantity || fixBorrowedQuantity;
 			//let pending = orderedPending ? orderedPending : forPurchase;
 
 			// const buttonAddRow = !readOnly ? `

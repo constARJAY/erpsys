@@ -7,7 +7,7 @@ class Service_requisition extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("ims/ServiceRequisition_model", "servicerequisition");
-        isAllowed(46);
+        isAllowed(49);
     }
 
     public function index()
