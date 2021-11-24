@@ -23,8 +23,79 @@ class List_stocks extends CI_Controller {
     {
         $classificationID                  = $this->input->post("classificationID");
         $categoryID                        = $this->input->post("categoryID");
-        echo json_encode($this->list_stock->getListStock($classificationID, $categoryID));
+        // echo json_encode($this->list_stock->getListStock($classificationID, $categoryID));
+        $result                            = $this->list_stock->getListStock($classificationID, $categoryID);
+        $item                              = $result["item"];
+        $asset                             = $result["assets"];
+        // var_dump($result);
+        $itemArr    = [];
+        $assetArr   = [];
 
+        for ($i=0; $i < count($item) ; $i++) { 
+            $itemRow    = $item[$i];
+            $itemID     = $itemRow["itemID"];
+            $itemInfo   = $this->list_stock->getTableInfo($itemID); 
+            
+            $temp = [
+               "Unused"                     => $itemRow["Unused"], 
+               "available"                  => $itemRow["available"], 
+               "brand"                      => $itemInfo->brandName,  
+               "categoryName"               => $itemInfo->categoryName,  
+               "classificationName"         => $itemInfo->classificationName,  
+               "itemCode"                   => $itemInfo->itemCode,  
+               "itemID"                     => $itemID, 
+               "itemName"                   => $itemInfo->itemName,  
+               "materiaWithdrawalQuantity"  => $itemRow["materiaWithdrawalQuantity"], 
+               "reOrderLevel"               => $itemInfo->reOrderLevel, 
+               "reserved"                   => $itemRow["reserved"], 
+               "reservedItem"               => $itemRow["reservedItem"], 
+               "stockIN"                    => $itemRow["stockIN"], 
+               "stockOut"                   => $itemRow["stockOut"], 
+               "totalQuantity"              => $itemRow["totalQuantity"], 
+               "totalStockOut"              => $itemRow["totalStockOut"], 
+               "uom"                        => $itemInfo->unitOfMeasurementID 
+            ];
+            array_push($itemArr, $temp);
+
+        }
+
+        for ($i=0; $i < count($asset) ; $i++) { 
+            $assetRow   = $asset[$i];
+            $assetID    = $assetRow["assetID"];
+            $assetInfo  = $this->list_stock->getTableInfo($assetID, "asset"); 
+
+            $temp = [
+                "Transferred"               => $assetRow["Transferred"],
+                "assetCode"                 => $assetInfo->assetCode,
+                "assetID"                   => $assetID,
+                "assetName"                 => $assetInfo->assetName,
+                "available"                 => $assetRow["available"],
+                "brand"                     => $assetInfo->brandName,
+                "categoryName"              => $assetInfo->categoryName,
+                "classificationName"        => $assetInfo->classificationName,
+                "disposed"                  => $assetRow["disposed"],
+                "equipmentBorrowing"        => $assetRow["equipmentBorrowing"],
+                "materiaWithdrawalQuantity" => $assetRow["materiaWithdrawalQuantity"],
+                "reOrderLevel"              => $assetInfo->reOrderLevel,
+                "reserved"                  => $assetRow["reserved"],
+                "reservedAsset"             => $assetRow["reservedAsset"],
+                "returnQuantity"            => $assetRow["returnQuantity"],
+                "stockIN"                   => $assetRow["stockIN"],
+                "totalQuantity"             => $assetRow["totalQuantity"],
+                "totalequipmentBorrowing"   => $assetRow["totalequipmentBorrowing"],
+                "uom"                       => $assetInfo->unitOfMeasurementID,
+            ];
+            array_push($assetArr, $temp);
+
+        }
+
+        $returnData = [
+                    "assets" => $assetArr,
+                    "item"   => $itemArr
+        ];
+
+        echo json_encode($returnData);
+        
 
     }
 

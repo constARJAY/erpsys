@@ -795,7 +795,11 @@ function getItemsRow(readOnly = false,returnItemID) {
 				`ims_inventory_request_details_tbl AS ird`,
 				`*, SUM(ird.quantity) AS fixBorrowedQuantity, 
 					(SELECT subTable.quantity FROM ims_inventory_request_details_tbl AS subTable 
-							WHERE subTable.returnItemID = '${returnItemID}' LIMIT 1 ) as requestQuantity`,
+							WHERE subTable.returnItemID = '${returnItemID}' LIMIT 1 ) as requestQuantity,
+				(SELECT unitOfMeasurementID FROM ims_inventory_item_tbl AS masterfileTable WHERE masterfileTable.itemID = ird.itemID) AS fixUom
+				`,
+					
+
 				`ird.returnItemID = ${returnItemID}`,
 				"",
 				`returnItemID`,
@@ -818,6 +822,7 @@ function getItemsRow(readOnly = false,returnItemID) {
 				categoryName						= "",
 				manHours                     		= "",
 				uom                     			= "",
+				fixUom 								= "",
 				borrowedDate						= "",
 				remarks                   			= "",
 				createdAt                   		= "",
@@ -828,6 +833,7 @@ function getItemsRow(readOnly = false,returnItemID) {
 			
 			quantity  		 = requestQuantity
 			borrowedQuantity = borrowedQuantity || fixBorrowedQuantity;
+			uom 			 = uom || fixUom;
 			//let pending = orderedPending ? orderedPending : forPurchase;
 
 			// const buttonAddRow = !readOnly ? `

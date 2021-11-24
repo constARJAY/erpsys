@@ -88,24 +88,24 @@ class ListStock_model extends CI_Model {
                                                 -- WHERE sii.materialUsageID <>0 
                                                 -- GROUP BY sii.itemID
 
-
-                                                SELECT 
-                                                iird.itemID, iird.itemCode, iird.Brand as brand,iird.itemName,
-                                                iird.classificationName, iird.categoryName,
-                                                iird.uom,  0 AS stockIN,
-                                                0 AS stockOut,
-                                                SUM(iird.unused) AS Unused, -- Unused Quantity
-                                                0 AS reservedItem,
-                                                0 AS materiaWithdrawalQuantity
-                                                FROM  ims_inventory_request_details_tbl AS iird
-                                                LEFT JOIN ims_material_usage_tbl AS imu 
-                                                ON  imu.materialUsageID = iird.materialUsageID
-                                                WHERE iird.materialUsageID <>0 AND
-                                                materialUsageStatus = 2
-                                                GROUP BY iird.itemID
+                                                -- EDITED BY CHARLES Novemeber 19, 2021
+                                                -- SELECT 
+                                                -- iird.itemID, iird.itemCode, iird.Brand as brand,iird.itemName,
+                                                -- iird.classificationName, iird.categoryName,
+                                                -- iird.uom,  0 AS stockIN,
+                                                -- 0 AS stockOut,
+                                                -- SUM(iird.unused) AS Unused, -- Unused Quantity
+                                                -- 0 AS reservedItem,
+                                                -- 0 AS materiaWithdrawalQuantity
+                                                -- FROM  ims_inventory_request_details_tbl AS iird
+                                                -- LEFT JOIN ims_material_usage_tbl AS imu 
+                                                -- ON  imu.materialUsageID = iird.materialUsageID
+                                                -- WHERE iird.materialUsageID <>0 AND
+                                                -- materialUsageStatus = 2
+                                                -- GROUP BY iird.itemID
                                                 
-                                                -- Get Unused Quantity in Stock In Item Table 
-                                                UNION ALL
+                                                -- -- Get Unused Quantity in Stock In Item Table 
+                                                -- UNION ALL
 
                                                 SELECT 
                                                 sii.itemID, itemCode AS itemCode, itemBrandName AS brand,  itemName AS itemName,
@@ -309,9 +309,25 @@ class ListStock_model extends CI_Model {
                                     $where $AND
                                     GROUP BY i.assetID
                                     )l GROUP BY assetID");        
-                                    return array('item' =>$sqlItem->result(),'assets' =>$sqlAsset->result());
+            // return array('item' =>$sqlItem->result(),'assets' =>$sqlAsset->result());
+            return [
+                "item"      => $sqlItem->result_array(),
+                "assets"    => $sqlAsset->result_array()
+            ];
         //return array('item',$this->db->query($sqlItem)->result_array(),'assets',$this->db->query($sqlAsset)->result_array());
 
+    }
+
+    public function getTableInfo($id, $param = "item" ){
+        $table  = $param == "item" ? "ims_inventory_item_tbl" : "ims_inventory_asset_tbl";
+        $where  = $param == "item" ? "primaryTable.itemID = '$id'" : "primaryTable.assetID = '$id'";
+        $sql    = "SELECT primaryTable.*, classificationName, categoryName   FROM $table AS primaryTable 
+                        JOIN ims_inventory_classification_tbl AS iict ON primaryTable.classificationID  = iict.classificationID 
+                        LEFT JOIN ims_inventory_category_tbl AS ict ON primaryTable.categoryID = ict.categoryID
+        WHERE $where";
+        $query  = $this->db->query($sql);
+
+        return $query ? $query->row() : [];
     }
 
 }    

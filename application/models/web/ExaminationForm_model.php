@@ -22,7 +22,8 @@ class ExaminationForm_model extends CI_Model {
                         $list = [
                             "examFormID" => $insertID,
                             "applicantAnswer"        => $applicantAnswer[$index],
-                            "applicantPoint"               => $getPoints[$index]
+                            "applicantPoint"               => $getPoints[$index],
+                            "examinationQaID"       => $examinationQAID[$index]
                         ];
                         array_push($examDataDetails, $list);
 

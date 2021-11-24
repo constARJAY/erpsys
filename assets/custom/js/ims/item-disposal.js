@@ -703,17 +703,17 @@ $(document).ready(function() {
 
 		} = item;
 
+		// getRealTimeAvailableStocks = getTableData(`ims_stock_in_assets_tbl as stockAsset
+		// 	LEFT JOIN ims_inventory_asset_tbl AS masterAsset
+		// 	ON masterAsset.assetID = stockAsset.assetID`,
+		// 	"SUM(quantity) - reOrderLevel  as availableStocks",
+		// 	`stockOutDate IS NUll AND stockInDate IS NOT NULL AND stockAsset.assetID = ${assetID}`);
 		
-
+		var final_availableStocks = disposalStatus == 1 ? formatAmount(getFixAvailableStocks(assetID))  : availableStock;
+		
 		let html = "";
 		if (readOnly) {
 
-			getRealTimeAvailableStocks = getTableData(`ims_stock_in_assets_tbl as stockAsset
-			LEFT JOIN ims_inventory_asset_tbl AS masterAsset
-			ON masterAsset.assetID = stockAsset.assetID`,
-			"SUM(quantity) - reOrderLevel  as availableStocks",
-			`stockOutDate IS NUll AND stockInDate IS NOT NULL AND stockAsset.assetID = ${assetID}`);
-		
 			html += `
 			<tr class="itemTableRow">
 				<td>
@@ -761,7 +761,7 @@ $(document).ready(function() {
 				</td>
 				<td>
                	 <div class="availableStock text-center">
-					${disposalStatus == 1 ? formatAmount(getRealTimeAvailableStocks[0].availableStocks)  : availableStock}
+					${final_availableStocks}
                  </div>
             	</td>
 				<td>
@@ -839,7 +839,7 @@ $(document).ready(function() {
 						id="quantity" 
 						name="quantity"
 						value="${quantity}"
-						availableStock="${availableStock}" 
+						availableStock="${final_availableStocks}" 
 						minlength="1" 
 						maxlength="20" 
 						required>
@@ -847,7 +847,7 @@ $(document).ready(function() {
 				</div>
             </td>
                  <td>
-				 	<div class="availableStock text-center" name="availableStock">${availableStock || "-"}
+				 	<div class="availableStock text-center" name="availableStock">${final_availableStocks || "-"}
 				 </div>
               	</td>
                   <td>
@@ -1203,6 +1203,7 @@ $(document).ready(function() {
 		
 		let requestProjectItems = "";
 		if (disposalID) {
+			// CHARLES
 			let disposalItemsData = getTableData(
 				`ims_inventory_disposal_details_tbl`, 
 				`*`, 
@@ -2166,5 +2167,35 @@ function saveDisposalItem(data = null, method = "submit", notificationData = nul
 	}
 	return false;
 }
+
+
+function getFixAvailableStocks(assetID = false){
+	let availableStocks;
+	if(assetID){
+		$.ajax({
+			method:      "POST",
+			url:         `list_stocks/getliststocks`,
+			data: 		 {classificationID:0,categoryID:0},
+			async:       false,
+			dataType:    "json",
+			success: function(data) {
+				let assetsArray = data["assets"].filter(x => x.assetID == assetID);
+				let assetRow					= assetsArray[0];
+				let stockIN						= assetRow.stockIN;
+				let totalequipmentBorrowing		= assetRow.totalequipmentBorrowing;
+				let materiaWithdrawalQuantity	= assetRow.materiaWithdrawalQuantity;
+				let disposed					= assetRow.disposed;
+				let reservedAsset				= assetRow.reservedAsset;
+				let reOrderLevel				= assetRow.reOrderLevel;
+				var assetTotalQty 	= parseFloat(stockIN) 		- (parseFloat(totalequipmentBorrowing) + parseFloat(materiaWithdrawalQuantity) + parseFloat(disposed) );
+				availableStocks  	= parseFloat(assetTotalQty) - (parseFloat(reservedAsset) + parseFloat(reOrderLevel) );
+			}
+		});
+	}
+	return availableStocks;
+
+}
+
+
 
 // --------------- END DATABASE RELATION ---------------

@@ -26,7 +26,7 @@ class Examination_form extends CI_Controller {
         $code = $this->input->get('id');
 
         //  generate encrypted url parameter
-        // $code = '1|2021-08-26';
+        // $code = '2|1|2021-11-02'; // applicantID|DesignationID|ExamDate
 
         // $url = $this->encryption->encrypt(str_replace("slash","/","$code"));
 
@@ -46,8 +46,10 @@ class Examination_form extends CI_Controller {
         $split =  explode("|",$url);
 
         $applicantID = $split[0];
-        $applicantSchedule = $split[1];
+        $designationID = $split[1];
+        $applicantSchedule = $split[2];
         $data['applicantID']= $applicantID;
+        $data['designationID'] = $designationID;
         $data['applicantSchedule'] = $applicantSchedule;
         // $data['applicantSchedule'] = "2021-08-03";
       
