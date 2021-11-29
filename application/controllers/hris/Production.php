@@ -8,7 +8,7 @@ class Production extends CI_Controller {
         parent::__construct();
         $this->load->model("hris/Production_model", "production");
         $this->load->model("hris/LeaveRequest_model", "leaverequest");
-        // isAllowed(143);
+        isAllowed(143);
     }
 
     public function index()
