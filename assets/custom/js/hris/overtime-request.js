@@ -24,6 +24,135 @@ $(document).ready(function () {
 	}
 	// ---- END GET EMPLOYEE DATA -----
 
+	// ----- REUSABLE FUNCTIONS -----	
+	const projectList = getTableData(
+		"pms_project_list_tbl AS project LEFT JOIN pms_timeline_builder_tbl AS timeline ON timeline.projectID = project.projectListID", 
+		"projectListID,clientID,projectListName",
+		"timelineBuilderStatus = 2");
+
+	const clientList = getTableData(
+		"pms_client_tbl", 
+		"clientID,clientName",
+		"clientStatus = 1");
+
+	// ----- END REUSABLE FUNCTIONS -----
+
+	// ----- UPDATE CLIENT -----
+	function updateClientOptions() {
+		let clientIDArr = []; // 0 IS THE DEFAULT VALUE
+		let clientElementID = [];
+
+
+		$("[name=overtimeRequestClientID]").each(function(i, obj) {
+			clientIDArr.push($(this).val());
+			clientElementID.push(`#${this.id}`);
+			// $(this).val() && $(this).trigger("change");
+		}) 
+		
+
+		clientElementID.map((element, index) => {
+			let html = `<option selected disabled>Select Client</option>`;
+			// let tmpClientList = [clientList];
+			html += clientList.filter(client => !clientIDArr.includes(client.clientID) || client.clientID == clientIDArr[index]).map(client => {
+				return `
+				<option 
+					value        = "${client.clientID}"
+					${client.clientID == clientIDArr[index] && "selected"}>
+					${client.clientName}
+				</option>`;
+			})
+			$(element).html(html);
+		});
+	}
+	// ----- END UPDATE CLIENT -----
+
+	// ----- UPDATE PROJECT NAME -----
+	function updateProjectOptions() {
+		let projectIDArr = []; // 0 IS THE DEFAULT VALUE
+		let projectElementID = [];
+		
+		$("[name=overtimeRequestProjectID]").each(function(i, obj) {
+			projectIDArr.push($(this).val());
+			projectElementID.push(`#${this.id}`);
+			// $(this).val() && $(this).trigger("change");
+		}) 
+
+		projectElementID.map((element, index) => {
+			let html = `<option selected disabled>Select Project</option>`;
+			// let itemList = [...inventoryStorageList];
+			html += projectList.map(project => {
+				return `
+				<option 
+				value        = "${project.projectListID}" 
+				${project.projectListID == projectIDArr[index] && "selected"}>
+				${project.projectListName}
+			</option>`;
+				
+			})
+			$(element).html(html);
+		});
+	}
+	// ----- END UPDATE PROJECT NAME -----
+
+
+	// ----- GET CLIENT LIST -----
+	function getClientList(id = null, display = true) {
+		let html ='';
+			html = `
+		<option 
+			value       = "0"
+			${id == "0" && "selected"}>Select Client</option>`;
+		html += clientList.map(client => {
+
+			return `
+			<option 
+				value       = "${client.clientID}" 
+				${client.clientID  == id && "selected"}>
+				${client.clientName}
+			</option>`;
+		})
+		return display ? html : clientList;
+	}
+	// ----- END GET CLIENT LIST -----
+
+	// ---- GET PROJECT LIST ----//
+	function getprojectList(id = null, display = true, clientID = null) {
+	
+		let html   = `<option selected disabled>Select Project</option>`;
+
+		let projectIDArr = []; // 0 IS THE DEFAULT VALUE
+		$(`[name=overtimeRequestProjectID]`).each(function(i, obj) {
+			projectIDArr.push($(this).val());
+		}) 
+
+		
+		html += projectList.map(project => {
+				
+			if( clientID == null){
+				return `
+				<option 
+					value        = "${project.projectListID}" 
+					${project.projectListID == id && "selected"}>
+					${project.projectListName}
+				</option>`;
+			}else{
+				if(project.clientID == clientID ){
+					return `
+					<option 
+						value        = "${project.projectListID}" 
+						${project.projectListID == id && "selected"}>
+						${project.projectListName}
+					</option>`;
+				}
+			}
+				
+			
+		})
+		
+		return display ? html : inventoryStorageList;
+	}
+	// ----- END GET PROJECT LIST -----
+
 
 	// ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false) {
@@ -360,6 +489,22 @@ $(document).ready(function () {
 	}
 	// ----- END MY FORMS CONTENT -----
 
+	// ---- EVENT FOR CLIENT OPTION -----//
+	$(document).on("change",`[name="overtimeRequestClientID"]`,function(){
+		var clientID = $('option:selected', this).val();
+		$(`[name=overtimeRequestClientID]`).each(function(i, obj) {
+			let clientD = $(this).val();
+			$(this).html(getClientList(clientD));
+		}) 
+
+		
+        $(`[name=overtimeRequestProjectID]`).each(function(i, obj) {
+			let projectID = $(this).val();
+			$(this).html(getprojectList(projectID,true,clientID));
+		}) 
+	
+	})
+
 
 	// ----- FORM BUTTONS -----
 	function formButtons(data = false) {
@@ -457,6 +602,7 @@ $(document).ready(function () {
 			overtimeRequestDate    = "",
 			overtimeRequestTimeIn  = "",
 			overtimeRequestTimeOut = "",
+			overtimeRequestBreak	="",
 			overtimeRequestReason  = "",
 			overtimeRequestRemarks = "",
 			approversID           = "",
@@ -465,6 +611,12 @@ $(document).ready(function () {
 			overtimeRequestStatus  = false,
 			submittedAt           = false,
 			createdAt             = false,
+			overtimeRequestLocation = "",
+			overtimeRequestClass	="",
+			overtimeRequestClientID	 ="",
+			overtimeRequestProjectID = "",
+			overtimeRequestProjectStatus =""
+
 		} = data && data[0];
 
 		// ----- GET EMPLOYEE DATA -----
@@ -571,7 +723,7 @@ $(document).ready(function () {
                     <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
@@ -586,10 +738,10 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestDate"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" 
+                    <input type="time" 
                         class="form-control timeIn" 
                         id="overtimeRequestTimeIn" 
                         name="overtimeRequestTimeIn" 
@@ -599,10 +751,10 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestTimeIn"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Time Out ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" 
+                    <input type="time" 
                         class="form-control timeOut" 
                         id="overtimeRequestTimeOut" 
                         name="overtimeRequestTimeOut" 
@@ -612,6 +764,95 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestTimeOut"></div>
                 </div>
             </div>
+
+			<div class="col-md-1 col-sm-12">
+                <div class="form-group">
+                    <label>Break ${!disabled ? "<code>*</code>" : ""}</label>
+                    <input type="text" 
+                        class="form-control" 
+                        id="overtimeRequestBreak" 
+                        name="overtimeRequestBreak" 
+                        required
+                        value="${formatAmount(overtimeRequestBreak || 0)}"
+						${disabled}>
+                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestBreak"></div>
+                </div>
+            </div>
+
+			<div class="col-md-2 col-sm-12">
+                <div class="form-group">
+                    <label>Class ${!disabled ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2" name="overtimeRequestClass" id="overtimeRequestClass"  required ${disabled}>
+						<option disabled selected>Select Class</option>
+						<option value="Billable" ${overtimeRequestClass == "Billable" ? "selected" : ""}>
+							Billable
+						</option>
+						<option value="Non-Billable" ${overtimeRequestClass == "Non-Billable" ? "selected" : ""}>
+							Non-billable
+						</option>
+						<option value="Pro-Bono" ${overtimeRequestClass == "Pro-Bono" ? "selected" : ""}>
+							Pro-bono
+						</option>
+					</select>
+
+                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestClass"></div>
+                </div>
+            </div>
+
+			<div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Location ${!disabled ? "<code>*</code>" : ""}</label>
+                    <input type="text" 
+                        class="form-control " 
+                        id="overtimeRequestLocation" 
+                        name="overtimeRequestLocation" 
+                        required
+                        value="${overtimeRequestLocation}"
+						${disabled}>
+                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestLocation"></div>
+                </div>
+            </div>
+
+
+			<div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Client ${!disabled ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2" name="overtimeRequestClientID" id="overtimeRequestClientID" ${disabled} required>
+						${getClientList(overtimeRequestClientID)}
+					</select>
+                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestClientID"></div>
+                </div>
+            </div>
+
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Project ${!disabled ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2" name="overtimeRequestProjectID" id="overtimeRequestProjectID" required ${disabled}>
+							${getprojectList(overtimeRequestProjectID)}
+						</select>
+                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestProjectID"></div>
+                </div>
+            </div>
+
+			<div class="col-md-2 col-sm-12">
+                <div class="form-group">
+                    <label>Status ${!disabled ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2 autoSaved" name="overtimeRequestProjectStatus"  id="overtimeRequestProjectStatus" ${disabled} required>
+						<option disabled selected>Select Status</option>
+						<option value="Pending" ${overtimeRequestProjectStatus == "Pending" ? "selected" : ""}>
+							Pending
+						</option>
+						<option value="Done" ${overtimeRequestProjectStatus == "Done" ? "selected" : ""}>
+							Done
+						</option>
+						<option value="Overdue" ${overtimeRequestProjectStatus == "Overdue" ? "selected" : ""}>
+							Overdue
+						</option>
+					</select>
+                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestProjectStatus"></div>
+                </div>
+            </div>
+
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
                     <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
@@ -640,6 +881,8 @@ $(document).ready(function () {
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
+			updateClientOptions();
+			updateProjectOptions();
 			if (data) {
 				initInputmaskTime(false);
 				$("#overtimeRequestDate").data("daterangepicker").startDate = moment(overtimeRequestDate, "YYYY-MM-DD");
@@ -781,6 +1024,8 @@ $(document).ready(function () {
 				data["tableData[employeeID]"]         = sessionID;
 				data["tableData[createdBy]"]          = sessionID;
 				data["tableData[createdAt]"]          = dateToday();
+				data["tableData[overtimeRequestClientName]"]  = $("#overtimeRequestClientID option:selected").text()?.trim() || "";
+				data["tableData[overtimeRequestProjectName]"]  = $("#overtimeRequestProjectID option:selected").text()?.trim() || "";
 
 				if (approversID && method == "submit") {
 					data["tableData[approversID]"] = approversID;
@@ -1014,6 +1259,61 @@ $(document).ready(function () {
 	});
 	// ----- END CANCEL DOCUMENT -----
 
+	// ----- UPDATE EMPLOYEE LEAVE -----
+	function generateProductionReport(employeeID =0 ,status = 0,overtimeRequestID  = 0) {
+		let getDateRange = getTableData(" hris_overtime_request_tbl","*",`overtimeRequestID  =${overtimeRequestID }`);
+
+
+		let getDate = moment(getDateRange[0].overtimeRequestDate).format("YYYY-MM-DD");
+		let overtimeRequestCode = getDateRange[0].overtimeRequestCode;
+		let timeIn = getDateRange[0].overtimeRequestTimeIn;
+		let timeOut = getDateRange[0].overtimeRequestTimeOut;
+		let breakDuration	= getDateRange[0].overtimeRequestBreak;
+		let paidStatus = 1;
+		let getLocation = getDateRange[0].overtimeRequestLocation;
+		let getStatus = getDateRange[0].overtimeRequestProjectStatus;
+		let getClass = getDateRange[0].overtimeRequestClass;
+		let getClientID = getDateRange[0].overtimeRequestClientID;
+		let getClientName = getDateRange[0].overtimeRequestClientName;
+		let getProjectID = getDateRange[0].overtimeRequestProjectID;
+		let getProjectName = getDateRange[0].overtimeRequestProjectName;
+		let reason =getDateRange[0].overtimeRequestReason;
+		$.ajax({
+            method:   "POST",
+            url:      "Overtime_request/generateProduction",
+            data:     { employeeID 	: employeeID,
+						overtimeRequestID	: overtimeRequestID,
+						overtimeRequestCode: overtimeRequestCode,
+						getDate		:	getDate,
+						timeIn		:	timeIn,
+						timeOut		:	timeOut,
+						breakDuration	: 	breakDuration,
+						paidStatus		:	paidStatus,
+						getLocation		:	getLocation,
+						getStatus		:	getStatus,
+						getClass		:	getClass,
+						getClientID		:	getClientID,
+						getClientName		:	getClientName,
+						getProjectID		: 	getProjectID,
+						getProjectName		:	getProjectName,
+						reason	 	: reason},
+            async:    false,
+            dataType: "json",
+			beforeSend: function() {
+				// $("#loader").show();
+			},
+			success: function(data) {
+			},
+			error: function() {
+				setTimeout(() => {
+					// $("#loader").hide();
+					showNotification("danger", "System error: Please contact the system administrator for assistance!");
+				}, 500);
+			}
+		})
+	}
+	// ----- END UPDATE EMPLOYEE LEAVE -----
+
 
 	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
@@ -1068,7 +1368,10 @@ $(document).ready(function () {
 					data,
 					true,
 					pageContent,
-					notificationData
+					notificationData,
+					this,
+					status == 2 ? generateProductionReport : false,
+					status == 2 ? [employeeID,2,id] : []
 				);
 			}, 300);
 		}

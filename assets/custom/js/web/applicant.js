@@ -11,13 +11,15 @@ $(document).ready(function() {
 
         $("#table_content").html(preloader);
         setTimeout(() => {
-            const applicantData = getTableData(
-                `web_applicant_list_tbl`,
-                `*`,
-                `applicantID = ${applicantID}`
-            );
+            // const applicantData = getTableData(
+            //     `web_applicant_list_tbl`,
+            //     `*`,
+            //     `applicantID = ${applicantID}`
+            // );
+            const applicantData = getProfileData(applicantID);
+                
 
-            $("#table_content").html(applicantDisplay(applicantData[0], applicantID));
+            $("#table_content").html(applicantDisplay(applicantData, applicantID));
             updateTableItems();
             initDashboardDataTables();
             initAll();
@@ -32,6 +34,73 @@ $(document).ready(function() {
                 maxDate: moment(new Date).format("MMMM DD, YYYY"),
             }
             initDateRangePicker("#applicantBirthday", disabledFutureDates);
+
+            if(applicantID){
+                $(`[name=applicantDependentBirthday]`).daterangepicker({
+								singleDatePicker: true,
+								showDropdowns: true,
+								autoApply: true,
+								maxDate: moment(new Date).format("MMMM DD, YYYY"),
+								locale: {
+									format: 'MMMM DD, YYYY'
+								},
+				});
+
+                $(`[name=employmentHistoryFromTo]`).daterangepicker({
+                    singleDatePicker: false,
+                    showDropdowns: true,
+                    autoApply: true,
+                    maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                    locale: {
+                        format: 'MMMM DD, YYYY'
+                    },
+                });
+
+                $(`[name=educationalAttainmentSchoolYear]`).daterangepicker({
+                    singleDatePicker: false,
+                    showDropdowns: true,
+                    autoApply: true,
+                    maxDate: moment(new Date).format("YYYY"),
+                    locale: {
+                        format: 'YYYY'
+                    },
+                });
+
+                $(`[name=organizationJoinedFromTo]`).daterangepicker({
+                    singleDatePicker: false,
+                    showDropdowns: true,
+                    autoApply: true,
+                    maxDate: moment(new Date).format("YYYY"),
+                    locale: {
+                        format: 'YYYY'
+                    },
+                });
+
+                $(`[name=examTakenDate]`).daterangepicker({
+                    singleDatePicker: false,
+                    showDropdowns: true,
+                    autoApply: true,
+                    maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                    locale: {
+                        format: 'MMMM DD, YYYY'
+                    },
+                });
+
+                $(`[name=seminarTakenDate]`).daterangepicker({
+                    singleDatePicker: false,
+                    showDropdowns: true,
+                    autoApply: true,
+                    maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                    locale: {
+                        format: 'YYYY'
+                    },
+                });
+
+                initAmount();
+            }
+
+
+
         }, 500);
 	}   
 
@@ -131,10 +200,10 @@ $(document).ready(function() {
 			scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: 50  },
-                { targets: 1, width: 250 },
+                { targets: 1, width: 300 },
                 { targets: 2, width: 250 },
-                { targets: 3, width: 250 },
-                { targets: 4, width: 150 },
+                { targets: 3, width: 350 },
+                { targets: 4, width: 190 },
                 { targets: 5, width: 350 },
                 { targets: 6, width: 150 },
             ],
@@ -282,13 +351,14 @@ $(document).ready(function() {
 
         setTimeout(() => {
             if(sidebarID=="profile"){
-                const applicantData = getTableData(
-                    `web_applicant_list_tbl`,
-                    `*`,
-                    `applicantID = ${applicantID}`
-                );
+                // const applicantData = getTableData(
+                //     `web_applicant_list_tbl`,
+                //     `*`,
+                //     `applicantID = ${applicantID}`
+                // );
+                const applicantData = getProfileData(applicantID);
                 
-                $("#table_content").html(applicantDisplay(applicantData[0], applicantID));
+                $("#table_content").html(applicantDisplay(applicantData, applicantID));
             }else if(sidebarID=="appliedjob"){
                 const appliedJobsData = getTableData( `web_applicant_job_tbl AS appJob
                                                        INNER JOIN hris_job_posting_tbl as postJob ON postJob.jobID = appJob.jobID
@@ -297,13 +367,38 @@ $(document).ready(function() {
                 $("#table_content").html(appliedJobsTab(appliedJobsData));
                 initAppliedDataTables();
             }else if(sidebarID=="vacant"){
-                const jobData = getTableData( `hris_job_posting_tbl`, `*` );
+                const jobData = getTableData( `
+                hris_job_posting_tbl as jpt
+                LEFT JOIN  pms_personnel_requisition_tbl AS ppr USING(requisitionID)
+                LEFT JOIN  hris_designation_tbl AS dsg ON dsg.designationID  = ppr.designationID 
+                LEFT JOIN  hris_department_tbl AS dept ON dept.departmentID  = ppr.departmentID`, 
+                `jobID,
+                CONCAT('JPG-',SUBSTR(jpt.createdAt,3,2),"-",LPAD(jpt.jobID,5,0)) as jobCode,
+                requisitionCode,
+                designationName as jobTitle,
+                jobDescription,
+                personnelStatement,
+          
+                CASE
+                WHEN personnelOption = '1' THEN 'Permanent'
+                WHEN personnelOption = '2' THEN 'Non-Permanent'
+                WHEN personnelOption = '3' THEN 'Other Justifications'
+                END as jobType,
+          
+                departmentName,
+                personnelQualification,
+                jobBenefits,
+                jobSlot,
+                salaryPackage as salaryRange,
+                jobStatus,
+                jpt.createdAt` );
 
                 $("#table_content").html(vacantTab(jobData));
                 initJobDataTables();
             }
             
             initAll();
+            initInputmask();
             const disabledFutureDates = {
                 autoUpdateInput:  false,
                 singleDatePicker: true,
@@ -315,7 +410,7 @@ $(document).ready(function() {
                 maxDate: moment(new Date).format("MMMM DD, YYYY"),
             }
             initDateRangePicker("#applicantBirthday", disabledFutureDates);
-        }, 500);
+        }, 1000);
     });
     // END OF SELECT SIDEBAR
     
@@ -711,7 +806,7 @@ $(document).ready(function() {
             applicantCountry       = "",
             applicantZipCode       = "",
             applicantStatus        = "",
-        } = data;
+        } = data[0];
 
         let profile = applicantProfile != null ? applicantProfile : "default.jpg";
 
@@ -791,7 +886,7 @@ $(document).ready(function() {
                     <div class="form-group col-md-4 col-sm-12">
                         <label>Birthdate <code>*</code></label>
                         <input type="button"
-                            class="form-control validate daterange text-left"
+                            class="form-control validate text-left"
                             name="applicantBirthday"
                             id="applicantBirthday"
                             autocomplete="off"
@@ -1039,6 +1134,65 @@ $(document).ready(function() {
                 </div>
             </div>
 
+            <div class="form-group col-md-1 col-sm-12">
+                <label>Unit No.</label>
+                <input type="text"
+                    class="form-control validate"
+                    name="applicantUnit"
+                    id="applicantUnit"
+                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][ ]"
+                    minlength="1"
+                    maxlength="10"
+                    autocomplete="off"
+                    value="${applicantUnit || ""}">
+                <div class="invalid-feedback d-block" id="invalid-applicantUnit"></div>
+            </div>
+
+            <div class="form-group col-md-2 col-sm-12">
+                <label>Building/House No. <code>*</code></label> 
+                <input type="text"
+                    class="form-control validate"
+                    name="applicantBuilding"
+                    id="applicantBuilding"
+                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][ ]"
+                    minlength="2"
+                    maxlength="75"
+                    autocomplete="off"
+                    required
+                    value="${applicantBuilding || ""}">
+                <div class="invalid-feedback d-block" id="invalid-applicantBuilding"></div>
+            </div>
+            
+            <div class="form-group col-md-3 col-sm-12">
+                <label>Street Name <code>*</code></label> 
+                <input type="text"
+                    class="form-control validate"
+                    name="applicantStreet"
+                    id="applicantStreet"
+                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][ ]"
+                    minlength="2"
+                    maxlength="75"
+                    autocomplete="off"
+                    required
+                    value="${applicantStreet || ""}">
+                <div class="invalid-feedback d-block" id="invalid-applicantStreet"></div>
+            </div>
+            
+            <div class="form-group col-md-3 col-sm-12">
+                <label>Subdivision Name <code>*</code></label> 
+                <input type="text"
+                    class="form-control validate"
+                    name="applicantSubdivision"
+                    id="applicantSubdivision"
+                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][ ]"
+                    minlength="2"
+                    maxlength="75"
+                    autocomplete="off"
+                    required
+                    value="${applicantSubdivision || ""}">
+                <div class="invalid-feedback d-block" id="invalid-applicantSubdivision"></div>
+            </div>
+
             <div class="form-group col-md-3 col-sm-12">
                 <label>Region <code>*</code></label>
                 <select class="form-control validate select2"
@@ -1051,7 +1205,7 @@ $(document).ready(function() {
                 </select>
                 <div class="invalid-feedback d-block" id="invalid-applicantRegion"></div>
             </div>
-            
+
             <div class="form-group col-md-3 col-sm-12">
                 <label>Province <code>*</code></label>
                 <select class="form-control validate select2"
@@ -1076,7 +1230,7 @@ $(document).ready(function() {
                 <div class="invalid-feedback d-block" id="invalid-applicantCity"></div>
             </div>
             
-            <div class="form-group col-md-3 col-sm-12">
+            <div class="form-group col-md-2 col-sm-12">
                 <label>Barangay <code>*</code></label>    
                 <select class="form-control validate select2"
                     style="width: 100%"
@@ -1087,67 +1241,8 @@ $(document).ready(function() {
                 </select>
                 <div class="invalid-feedback d-block" id="invalid-applicantBarangay"></div>
             </div>
-        
-            <div class="form-group col-md-4 col-sm-12">
-                <label>Unit No.</label>
-                <input type="text"
-                    class="form-control validate"
-                    name="applicantUnit"
-                    id="applicantUnit"
-                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][ ]"
-                    minlength="1"
-                    maxlength="10"
-                    autocomplete="off"
-                    value="${applicantUnit || ""}">
-                <div class="invalid-feedback d-block" id="invalid-applicantUnit"></div>
-            </div>
             
-            <div class="form-group col-md-4 col-sm-12">
-                <label>Building/House No. <code>*</code></label> 
-                <input type="text"
-                    class="form-control validate"
-                    name="applicantBuilding"
-                    id="applicantBuilding"
-                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][ ]"
-                    minlength="2"
-                    maxlength="75"
-                    autocomplete="off"
-                    required
-                    value="${applicantBuilding || ""}">
-                <div class="invalid-feedback d-block" id="invalid-applicantBuilding"></div>
-            </div>
-            
-            <div class="form-group col-md-4 col-sm-12">
-                <label>Street Name <code>*</code></label> 
-                <input type="text"
-                    class="form-control validate"
-                    name="applicantStreet"
-                    id="applicantStreet"
-                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][ ]"
-                    minlength="2"
-                    maxlength="75"
-                    autocomplete="off"
-                    required
-                    value="${applicantStreet || ""}">
-                <div class="invalid-feedback d-block" id="invalid-applicantStreet"></div>
-            </div>
-            
-            <div class="form-group col-md-4 col-sm-12">
-                <label>Subdivision Name <code>*</code></label> 
-                <input type="text"
-                    class="form-control validate"
-                    name="applicantSubdivision"
-                    id="applicantSubdivision"
-                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][ ]"
-                    minlength="2"
-                    maxlength="75"
-                    autocomplete="off"
-                    required
-                    value="${applicantSubdivision || ""}">
-                <div class="invalid-feedback d-block" id="invalid-applicantSubdivision"></div>
-            </div>
-            
-            <div class="form-group col-md-4 col-sm-12">
+            <div class="form-group col-md-2 col-sm-12">
                 <label>Country <code>*</code></label>
                 <input type="text"
                     class="form-control validate"
@@ -1162,7 +1257,7 @@ $(document).ready(function() {
                 <div class="invalid-feedback d-block" id="invalid-applicantCountry"></div>
             </div>
             
-            <div class="form-group col-md-4 col-sm-12">
+            <div class="form-group col-md-2 col-sm-12">
                 <label>Zip Code <code>*</code></label>
                 <input type="text"
                     class="form-control validate"
@@ -1215,6 +1310,14 @@ $(document).ready(function() {
             applicantMobile      = "",
             applicantResume      = "",
             applicantStatus      = "",
+
+            applicantFathersName = "",
+            applicantFathersAge = "",
+            applicantMothersName = "",
+            applicantMothersAge = "",
+            applicantSpouseName = "",
+            applicantSpouseAge = "",
+
         } = data;
 
         let html = `
@@ -1236,7 +1339,7 @@ $(document).ready(function() {
                     minlength="2"
                     maxlength="50"
                     autocomplete="off"
-                    value="">
+                    value="${applicantFathersName || '' }">
                 <div class="invalid-feedback d-block" id="invalid-applicantFathersName"></div>
             </div>
             <div class="form-group col-md-3 col-sm-3">
@@ -1249,7 +1352,7 @@ $(document).ready(function() {
                     minlength="1"
                     maxlength="3"
                     autocomplete="off"
-                    value="">
+                    value="${applicantFathersAge || '' }">
                 <div class="invalid-feedback d-block" id="invalid-applicantFathersAge"></div>
             </div>
 
@@ -1263,7 +1366,7 @@ $(document).ready(function() {
                     minlength="2"
                     maxlength="50"
                     autocomplete="off"
-                    value="">
+                    value="${applicantMothersName || '' }">
                 <div class="invalid-feedback d-block" id="invalid-applicantMothersName"></div>
             </div>
             <div class="form-group col-md-3 col-sm-3">
@@ -1276,7 +1379,7 @@ $(document).ready(function() {
                     minlength="1"
                     maxlength="3"
                     autocomplete="off"
-                    value="">
+                    value="${applicantMothersAge || '' }">
                 <div class="invalid-feedback d-block" id="invalid-applicantMothersAge"></div>
             </div>
 
@@ -1290,7 +1393,7 @@ $(document).ready(function() {
                     minlength="2"
                     maxlength="50"
                     autocomplete="off"
-                    value="">
+                    value="${applicantSpouseName || '' }">
                 <div class="invalid-feedback d-block" id="invalid-applicantSpouseName"></div>
             </div>
             <div class="form-group col-md-3 col-sm-3">
@@ -1303,7 +1406,7 @@ $(document).ready(function() {
                     minlength="1"
                     maxlength="3"
                     autocomplete="off"
-                    value="">
+                    value="${applicantSpouseAge || '' }">
                 <div class="invalid-feedback d-block" id="invalid-applicantSpouseAge"></div>
             </div>
             
@@ -1316,41 +1419,18 @@ $(document).ready(function() {
     // ----- APPLICANT DEPENDENT INFORMATION TAB -----
     function applicantDependentInformationTab(data = false) {
 
-        let {
-            applicantID          = "",
-            applicantProfile     = "default.jpg",
-            applicantFirstname   = "",
-            applicantMiddlename  = "",
-            applicantLastname    = "",
-            applicantBirthday    = "",
-            applicantGender      = "",
-            applicantCitizenship = "",
-            applicantCivilStatus = "",
-            applicantTIN         = "",
-            applicantSSS         = "",
-            applicantPhilHealth  = "",
-            applicantPagibig     = "",
-            applicantUsername    = "",
-            applicantPassword    = "",
-            applicantRegion      = "",
-            applicantProvince    = "",
-            applicantCity        = "",
-            applicantBarangay    = "",
-            applicantUnit        = "",
-            applicantBuilding    = "",
-            applicantStreet      = "",
-            applicantSubdivision = "",
-            applicantCountry     = "",
-            applicantZipCode     = "",
-            applicantEmail       = "",
-            applicantMobile      = "",
-            applicantResume      = "",
-            applicantStatus      = "",
-        } = data;
+        let tableRow = getTableRow("tableDependentInformationTab");
+        if(data && data.length != "0"){
+            tableRow = "";
+            data.map((dependentData, index)=>{
+                tableRow += getTableRow("tableDependentInformationTab", dependentData);
+            });
+        }
+
 
         let html = `
         <div class='row'>
-
+  
             <div class="col-12">
                 <div class="header pl-0 pt-0">
                     <h4><strong class="text-secondary">DEPENDENT'S INFORMATION</strong></h4>
@@ -1358,7 +1438,7 @@ $(document).ready(function() {
             </div>
 
             <div class="col-12">
-                <div class="table-responsive">
+                <div class="w-100">
                     <table class="table table-striped" id="tableDependentInformationTab" visited="false">
                         <thead>
                             <tr>
@@ -1373,7 +1453,7 @@ $(document).ready(function() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${getTableRow("tableDependentInformationTab")}
+                            ${tableRow}
                         </tbody>
                     </table>
 
@@ -1405,35 +1485,14 @@ $(document).ready(function() {
     function applicantPhIdInformationTab(data = false) {
 
         let {
-            applicantID          = "",
-            applicantProfile     = "default.jpg",
-            applicantFirstname   = "",
-            applicantMiddlename  = "",
-            applicantLastname    = "",
-            applicantBirthday    = "",
-            applicantGender      = "",
-            applicantCitizenship = "",
-            applicantCivilStatus = "",
+            applicationPRC         = "",
+            applicationPRCExpDate = "",
             applicantTIN         = "",
             applicantSSS         = "",
             applicantPhilHealth  = "",
             applicantPagibig     = "",
-            applicantUsername    = "",
-            applicantPassword    = "",
-            applicantRegion      = "",
-            applicantProvince    = "",
-            applicantCity        = "",
-            applicantBarangay    = "",
-            applicantUnit        = "",
-            applicantBuilding    = "",
-            applicantStreet      = "",
-            applicantSubdivision = "",
-            applicantCountry     = "",
-            applicantZipCode     = "",
-            applicantEmail       = "",
-            applicantMobile      = "",
-            applicantResume      = "",
-            applicantStatus      = "",
+            applicantNHNF        = "",
+            applicantPHIL        = "",
         } = data;
 
         let html = `
@@ -1450,77 +1509,112 @@ $(document).ready(function() {
                     <div class="col-md-6 col-sm-12 form-group">
                         <label>Professional Regulation Commission ID (PRC ID)</label>
                         <input type="text"
-                            class="form-control validate"
+                            class="form-control inputmask"
                             mask="999-999-9"
                             data-allowcharacters="[0-9]"
-                            minlength="9"
-                            maxlength="9"
+                            minlength="7"
+                            maxlength="7"
                             name="applicantPRC"
                             id="applicantPRC"
+                            value="${applicationPRC}"
                             autocomplete="off">
                         <div class="d-block invalid-feedback"></div>
                     </div>
                     <div class="col-md-6 col-sm-12 form-group">
                         <label>Expiration Date</label>
                         <input type="text"
-                            class="form-control validate"
+                            class="form-control inputmask"
+                            mask="99/99/99"
                             data-allowcharacters="[0-9]"
-                            minlength="9"
-                            maxlength="9"
                             name="applicantPRCExpiration"
                             id="applicantPRCExpiration"
+                            value="${applicationPRCExpDate}"
                             autocomplete="off">
                         <div class="d-block invalid-feedback"></div>
                     </div>
-                    <div class="col-sm-12 form-group">
-                        <label>Social Security System ID (SSS ID)</label>
-                        <input type="text"
-                            class="form-control validate"
-                            mask="99-9999999-9"
-                            data-allowcharacters="[0-9]"
-                            minlength="12"
-                            maxlength="12"
-                            name="applicantSSS"
-                            id="applicantSSS"
-                            autocomplete="off">
-                        <div class="d-block invalid-feedback"></div>
-                    </div>
-                    <div class="col-sm-12 form-group">
+
+                    <div class="col-md-4 col-sm-12  form-group">
                         <label>Tax Identification No. (TIN)</label>
                         <input type="text"
-                            class="form-control validate"
+                            class="form-control inputmask"
+                            maxlength="11"
+                            minlength="11"
                             mask="999-999-999"
                             data-allowcharacters="[0-9]"
-                            minlength="12"
-                            maxlength="12"
-                            name="applicantSSS"
-                            id="applicantSSS"
+                            name="applicantTIN"
+                            id="applicantTIN"
+                            value="${applicantTIN}"
                             autocomplete="off">
                         <div class="d-block invalid-feedback"></div>
                     </div>
-                    <div class="col-sm-12 form-group">
+
+                    <div class="col-md-4 col-sm-12 form-group">
+                        <label>Social Security System ID (SSS ID)</label>
+                        <input type="text"
+                            class="form-control inputmask"
+                            mask="99-9999999-9"
+                            maxlength="12"
+                            minlength="12"
+                            data-allowcharacters="[0-9]"
+                            name="applicantSSS"
+                            id="applicantSSS"
+                            value="${applicantSSS}"
+                            autocomplete="off">
+                        <div class="d-block invalid-feedback"></div>
+                    </div>
+                    <div class="col-md-4 col-sm-12 form-group">
+                        <label>Philippine Health Insurance Corporation ID (PhilHealth ID)</label>
+                        <input type="text"
+                            class="form-control inputmask"
+                            mask="99-999999999-9"
+                            data-allowcharacters="[0-9]"
+                            maxlength="13"
+                            minlength="13"
+                            name="applicantPhilHealth"
+                            id="applicantPhilHealth"
+                            value="${applicantPhilHealth}"
+                            autocomplete="off">
+                        <div class="d-block invalid-feedback"></div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-12 form-group">
+                        <label>Pag-IBIG ID</label>
+                        <input type="text"
+                            class="form-control inputmask"
+                            mask="9999-9999-9999"
+                            maxlength="14"
+                            minlength="14"
+                            data-allowcharacters="[0-9]"
+                            name="applicantPagibig"
+                            id="applicantPagibig"
+                            value="${applicantPagibig}"
+                            autocomplete="off">
+                        <div class="d-block invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="col-md-4 col-sm-12  form-group">
                         <label>Philippine Identification Card</label>
                         <input type="text"
                             class="form-control validate"
-                            mask="999-999-999"
-                            data-allowcharacters="[0-9]"
-                            minlength="12"
-                            maxlength="12"
+                            data-allowcharacters="[0-9][P][S][N][-]"
+                            placeholder="PSN-0000-0000000-0"
+                            maxlength="18"
+                            minlength="18"
                             name="applicantPHIL"
                             id="applicantPHIL"
+                            value="${applicantPHIL}"
                             autocomplete="off">
                         <div class="d-block invalid-feedback"></div>
                     </div>
-                    <div class="col-sm-12 form-group">
-                        <label>NHMF</label>
+
+                    <div class="col-md-4 col-sm-12 form-group">
+                        <label>National Home Mortgage Finance Corporation (NHMF)</label>
                         <input type="text"
                             class="form-control validate"
-                            mask="999-999-999"
-                            data-allowcharacters="[0-9]"
-                            minlength="12"
-                            maxlength="12"
+                            data-allowcharacters="[0-9][-]"
                             name="applicantNHNF"
                             id="applicantNHNF"
+                            value="${applicantNHNF}"
                             autocomplete="off">
                         <div class="d-block invalid-feedback"></div>
                     </div>
@@ -1536,37 +1630,14 @@ $(document).ready(function() {
     // ----- APPLICANT EMPLOYMENT HISTORY TAB -----
     function applicantEmploymentHistoryTab(data = false) {
 
-        let {
-            applicantID          = "",
-            applicantProfile     = "default.jpg",
-            applicantFirstname   = "",
-            applicantMiddlename  = "",
-            applicantLastname    = "",
-            applicantBirthday    = "",
-            applicantGender      = "",
-            applicantCitizenship = "",
-            applicantCivilStatus = "",
-            applicantTIN         = "",
-            applicantSSS         = "",
-            applicantPhilHealth  = "",
-            applicantPagibig     = "",
-            applicantUsername    = "",
-            applicantPassword    = "",
-            applicantRegion      = "",
-            applicantProvince    = "",
-            applicantCity        = "",
-            applicantBarangay    = "",
-            applicantUnit        = "",
-            applicantBuilding    = "",
-            applicantStreet      = "",
-            applicantSubdivision = "",
-            applicantCountry     = "",
-            applicantZipCode     = "",
-            applicantEmail       = "",
-            applicantMobile      = "",
-            applicantResume      = "",
-            applicantStatus      = "",
-        } = data;
+        let tableRow = getTableRow("tableEmploymentHistoryTab");
+
+        if(data && data.length != "0"){
+            tableRow = "";
+            data.map((employmentHistoryData, index)=>{
+                tableRow += getTableRow("tableEmploymentHistoryTab", employmentHistoryData);
+            });
+        }
 
         let html = `
         <div class='row'>
@@ -1578,7 +1649,7 @@ $(document).ready(function() {
             </div>
 
             <div class="col-12">
-                <div class="table-responsive">
+                <div class="w-100">
                     <table class="table table-striped" id="tableEmploymentHistoryTab" visited="false">
                         <thead>
                             <tr>
@@ -1596,7 +1667,7 @@ $(document).ready(function() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${getTableRow("tableEmploymentHistoryTab")}
+                            ${tableRow}
                         </tbody>
                     </table>
 
@@ -1749,38 +1820,14 @@ $(document).ready(function() {
 
     // ----- APPLICANT EDUCATIONAL ATTAINMENT TAB -----
     function applicantEducationalAttainmentTab(data = false) {
+        let tableRow = getTableRow("tableEducationalAttainmentTab"); 
 
-        let {
-            applicantID          = "",
-            applicantProfile     = "default.jpg",
-            applicantFirstname   = "",
-            applicantMiddlename  = "",
-            applicantLastname    = "",
-            applicantBirthday    = "",
-            applicantGender      = "",
-            applicantCitizenship = "",
-            applicantCivilStatus = "",
-            applicantTIN         = "",
-            applicantSSS         = "",
-            applicantPhilHealth  = "",
-            applicantPagibig     = "",
-            applicantUsername    = "",
-            applicantPassword    = "",
-            applicantRegion      = "",
-            applicantProvince    = "",
-            applicantCity        = "",
-            applicantBarangay    = "",
-            applicantUnit        = "",
-            applicantBuilding    = "",
-            applicantStreet      = "",
-            applicantSubdivision = "",
-            applicantCountry     = "",
-            applicantZipCode     = "",
-            applicantEmail       = "",
-            applicantMobile      = "",
-            applicantResume      = "",
-            applicantStatus      = "",
-        } = data;
+        if(data && data.length != "0"){
+            tableRow = "";
+            data.map((educationData, index)=>{
+                tableRow += getTableRow("tableEducationalAttainmentTab", educationData);
+            });
+        }
 
         let html = `
         <div class='row'>
@@ -1792,7 +1839,7 @@ $(document).ready(function() {
             </div>
 
             <div class="col-12">
-                <div class="table-responsive">
+                <div class="w-100">
                     <table class="table table-striped" id="tableEducationalAttainmentTab" visited="false">
                         <thead>
                             <tr>
@@ -1808,7 +1855,7 @@ $(document).ready(function() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${getTableRow("tableEducationalAttainmentTab")}
+                            ${tableRow}
                         </tbody>
                     </table>
 
@@ -1839,38 +1886,15 @@ $(document).ready(function() {
     // ----- APPLICANT ORGANIZATIONS JOINED TAB -----
     function applicantOrganizationJoinedTab(data = false) {
 
-        let {
-            applicantID          = "",
-            applicantProfile     = "default.jpg",
-            applicantFirstname   = "",
-            applicantMiddlename  = "",
-            applicantLastname    = "",
-            applicantBirthday    = "",
-            applicantGender      = "",
-            applicantCitizenship = "",
-            applicantCivilStatus = "",
-            applicantTIN         = "",
-            applicantSSS         = "",
-            applicantPhilHealth  = "",
-            applicantPagibig     = "",
-            applicantUsername    = "",
-            applicantPassword    = "",
-            applicantRegion      = "",
-            applicantProvince    = "",
-            applicantCity        = "",
-            applicantBarangay    = "",
-            applicantUnit        = "",
-            applicantBuilding    = "",
-            applicantStreet      = "",
-            applicantSubdivision = "",
-            applicantCountry     = "",
-            applicantZipCode     = "",
-            applicantEmail       = "",
-            applicantMobile      = "",
-            applicantResume      = "",
-            applicantStatus      = "",
-        } = data;
+        let tableRow = getTableRow("tableOrganizationJoinedTab"); 
 
+        if(data && data.length != "0"){
+            tableRow = "";
+            data.map((organizationData, index)=>{
+                tableRow += getTableRow("tableOrganizationJoinedTab", organizationData);
+            });
+        }
+        
         let html = `
         <div class='row'>
 
@@ -1881,7 +1905,7 @@ $(document).ready(function() {
             </div>
 
             <div class="col-12">
-                <div class="table-responsive">
+                <div class="w-100">
                     <table class="table table-striped" id="tableOrganizationJoinedTab" visited="false">
                         <thead>
                             <tr>
@@ -1896,7 +1920,7 @@ $(document).ready(function() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${getTableRow("tableOrganizationJoinedTab")}
+                            ${tableRow}
                         </tbody>
                     </table>
 
@@ -1926,38 +1950,14 @@ $(document).ready(function() {
 
     // ----- APPLICANT EXAM TAKEN TAB -----
     function applicantExamTakenTab(data = false) {
+        let tableRow = getTableRow("tableExamTakenTab"); 
 
-        let {
-            applicantID          = "",
-            applicantProfile     = "default.jpg",
-            applicantFirstname   = "",
-            applicantMiddlename  = "",
-            applicantLastname    = "",
-            applicantBirthday    = "",
-            applicantGender      = "",
-            applicantCitizenship = "",
-            applicantCivilStatus = "",
-            applicantTIN         = "",
-            applicantSSS         = "",
-            applicantPhilHealth  = "",
-            applicantPagibig     = "",
-            applicantUsername    = "",
-            applicantPassword    = "",
-            applicantRegion      = "",
-            applicantProvince    = "",
-            applicantCity        = "",
-            applicantBarangay    = "",
-            applicantUnit        = "",
-            applicantBuilding    = "",
-            applicantStreet      = "",
-            applicantSubdivision = "",
-            applicantCountry     = "",
-            applicantZipCode     = "",
-            applicantEmail       = "",
-            applicantMobile      = "",
-            applicantResume      = "",
-            applicantStatus      = "",
-        } = data;
+        if(data && data.length != "0"){
+            tableRow = "";
+            data.map((examData, index)=>{
+                tableRow += getTableRow("tableExamTakenTab", examData);
+            });
+        }
 
         let html = `
         <div class='row'>
@@ -1969,7 +1969,7 @@ $(document).ready(function() {
             </div>
 
             <div class="col-12">
-                <div class="table-responsive">
+                <div class="w-100">
                     <table class="table table-striped" id="tableExamTakenTab" visited="false">
                         <thead>
                             <tr>
@@ -1984,7 +1984,7 @@ $(document).ready(function() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${getTableRow("tableExamTakenTab")}
+                            ${tableRow}
                         </tbody>
                     </table>
 
@@ -2014,38 +2014,14 @@ $(document).ready(function() {
 
     // ----- APPLICANT SEMINARS TAKEN TAB -----
     function applicantSeminarsTakenTab(data = false) {
+        let tableRow = getTableRow("tableSeminarTakenTab"); 
 
-        let {
-            applicantID          = "",
-            applicantProfile     = "default.jpg",
-            applicantFirstname   = "",
-            applicantMiddlename  = "",
-            applicantLastname    = "",
-            applicantBirthday    = "",
-            applicantGender      = "",
-            applicantCitizenship = "",
-            applicantCivilStatus = "",
-            applicantTIN         = "",
-            applicantSSS         = "",
-            applicantPhilHealth  = "",
-            applicantPagibig     = "",
-            applicantUsername    = "",
-            applicantPassword    = "",
-            applicantRegion      = "",
-            applicantProvince    = "",
-            applicantCity        = "",
-            applicantBarangay    = "",
-            applicantUnit        = "",
-            applicantBuilding    = "",
-            applicantStreet      = "",
-            applicantSubdivision = "",
-            applicantCountry     = "",
-            applicantZipCode     = "",
-            applicantEmail       = "",
-            applicantMobile      = "",
-            applicantResume      = "",
-            applicantStatus      = "",
-        } = data;
+        if(data && data.length != "0"){
+            tableRow = "";
+            data.map((seminarData, index)=>{
+                tableRow += getTableRow("tableSeminarTakenTab", seminarData);
+            });
+        }
 
         let html = `
         <div class='row'>
@@ -2057,7 +2033,7 @@ $(document).ready(function() {
             </div>
 
             <div class="col-12">
-                <div class="table-responsive">
+                <div class="w-100">
                     <table class="table table-striped" id="tableSeminarTakenTab" visited="false">
                         <thead>
                             <tr>
@@ -2072,7 +2048,7 @@ $(document).ready(function() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${getTableRow("tableSeminarTakenTab")}
+                            ${tableRow}
                         </tbody>
                     </table>
 
@@ -2103,37 +2079,14 @@ $(document).ready(function() {
     // ----- APPLICANT CHARACTER REFERENCE TAB -----
     function applicantCharacterReferenceTab(data = false) {
 
-        let {
-            applicantID          = "",
-            applicantProfile     = "default.jpg",
-            applicantFirstname   = "",
-            applicantMiddlename  = "",
-            applicantLastname    = "",
-            applicantBirthday    = "",
-            applicantGender      = "",
-            applicantCitizenship = "",
-            applicantCivilStatus = "",
-            applicantTIN         = "",
-            applicantSSS         = "",
-            applicantPhilHealth  = "",
-            applicantPagibig     = "",
-            applicantUsername    = "",
-            applicantPassword    = "",
-            applicantRegion      = "",
-            applicantProvince    = "",
-            applicantCity        = "",
-            applicantBarangay    = "",
-            applicantUnit        = "",
-            applicantBuilding    = "",
-            applicantStreet      = "",
-            applicantSubdivision = "",
-            applicantCountry     = "",
-            applicantZipCode     = "",
-            applicantEmail       = "",
-            applicantMobile      = "",
-            applicantResume      = "",
-            applicantStatus      = "",
-        } = data;
+        let tableRow = getTableRow("tableCharacterReferenceTab"); 
+
+        if(data && data.length != "0"){
+            tableRow = "";
+            data.map((referenceData, index)=>{
+                tableRow += getTableRow("tableCharacterReferenceTab", referenceData);
+            });
+        }
 
         let html = `
         <div class='row'>
@@ -2145,7 +2098,7 @@ $(document).ready(function() {
             </div>
 
             <div class="col-12">
-                <div class="table-responsive">
+                <div class="w-100">
                     <table class="table table-striped" id="tableCharacterReferenceTab" visited="false">
                         <thead>
                             <tr>
@@ -2161,7 +2114,7 @@ $(document).ready(function() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${getTableRow("tableCharacterReferenceTab")}
+                            ${tableRow}
                         </tbody>
                     </table>
 
@@ -2191,6 +2144,13 @@ $(document).ready(function() {
 
     // ----- APPLICANT TAB CONTENT -----
     function applicantTabContent(data = false) {
+        // dependent            = [],
+        // employment           = [],
+        // education            = [],
+        // organization         = [],
+        // exam                 = [],
+        // seminar              = [],
+        // characterRef         = [],
         let html = `
         <div class="border">
             <ul class="nav nav-tabs nav-tabs-bottom nav-justified border" id="addtabs">
@@ -2230,37 +2190,37 @@ $(document).ready(function() {
             </ul>
             <div class="tab-content pt-4 border p-3" style="min-height: 41vh;">
                 <div class="tab-pane show active" id="address-information-tab">
-                    ${applicantAddressInformationTab(data)}
+                    ${applicantAddressInformationTab(data[0])}
                 </div>
                 <div class="tab-pane" id="family-background-tab">
-                    ${applicantFamilyBackgroundTab(data)}
+                    ${applicantFamilyBackgroundTab(data[0])}
                 </div>
                 <div class="tab-pane" id="dependent-information-tab">
-                    ${applicantDependentInformationTab(data)}
+                    ${applicantDependentInformationTab(data["dependent"])}
                 </div>
                 <div class="tab-pane" id="ph-id-information-tab">
-                    ${applicantPhIdInformationTab(data)}
+                    ${applicantPhIdInformationTab(data[0])}
                 </div>
                 <div class="tab-pane" id="employment-history-tab">
-                    ${applicantEmploymentHistoryTab(data)}
+                    ${applicantEmploymentHistoryTab(data["employment"])}
                 </div>
                 <div class="tab-pane" id="account-information-tab">
-                    ${applicantAccountInformationTab(data)}
+                    ${applicantAccountInformationTab(data[0])}
                 </div>
                 <div class="tab-pane" id="educational-attainment-tab">
-                    ${applicantEducationalAttainmentTab(data)}
+                    ${applicantEducationalAttainmentTab(data["education"])}
                 </div>
                 <div class="tab-pane" id="organization-joined-tab">
-                    ${applicantOrganizationJoinedTab(data)}
+                    ${applicantOrganizationJoinedTab(data["organization"])}
                 </div>
                 <div class="tab-pane" id="exam-taken-tab">
-                    ${applicantExamTakenTab(data)}
+                    ${applicantExamTakenTab(data["exam"])}
                 </div>
                 <div class="tab-pane" id="seminars-taken-tab">
-                    ${applicantSeminarsTakenTab(data)}
+                    ${applicantSeminarsTakenTab(data["seminar"])}
                 </div>
                 <div class="tab-pane" id="character-reference-tab">
-                    ${applicantCharacterReferenceTab(data)}
+                    ${applicantCharacterReferenceTab(data["characterRef"])}
                 </div>
             </div>
         </div>`;
@@ -2272,43 +2232,49 @@ $(document).ready(function() {
     // ----- APPLICANT DISPLAY -----
     function applicantDisplay(data = false, isHasApplicant = 0) {   
         
-        let {
-            applicantID          = "",
-            applicantProfile     = "default.jpg",
-            applicantFirstname   = "",
-            applicantMiddlename  = "",
-            applicantLastname    = "",
-            applicantBirthday    = "",
-            applicantGender      = "",
-            applicantCitizenship = "",
-            applicantCivilStatus = "",
-            applicantTIN         = "",
-            applicantSSS         = "",
-            applicantPhilHealth  = "",
-            applicantPagibig     = "",
-            applicantUsername    = "",
-            applicantPassword    = "",
-            applicantRegion      = "",
-            applicantProvince    = "",
-            applicantCity        = "",
-            applicantBarangay    = "",
-            applicantUnit        = "",
-            applicantBuilding    = "",
-            applicantStreet      = "",
-            applicantSubdivision = "",
-            applicantCountry     = "",
-            applicantZipCode     = "",
-            applicantEmail       = "",
-            applicantMobile      = "",
-            applicantResume      = "",
-            applicantStatus      = "",
-        } = data;
-
-        let profile = applicantProfile != null ? applicantProfile : "default.jpg";
+        
+        
+        // let profile = applicantProfile != null ? applicantProfile : "default.jpg";
+        let profile    = !data ? "default.jpg" : "";
 
         let html = "";
         if (isHasApplicant) 
         {
+            let {
+                applicantID          = "",
+                applicantProfile     = "default.jpg",
+                applicantFirstname   = "",
+                applicantMiddlename  = "",
+                applicantLastname    = "",
+                applicantBirthday    = "",
+                applicantGender      = "",
+                applicantCitizenship = "",
+                applicantCivilStatus = "",
+                applicantTIN         = "",
+                applicantSSS         = "",
+                applicantPhilHealth  = "",
+                applicantPagibig     = "",
+                applicantUsername    = "",
+                applicantPassword    = "",
+                applicantRegion      = "",
+                applicantProvince    = "",
+                applicantCity        = "",
+                applicantBarangay    = "",
+                applicantUnit        = "",
+                applicantBuilding    = "",
+                applicantStreet      = "",
+                applicantSubdivision = "",
+                applicantCountry     = "",
+                applicantZipCode     = "",
+                applicantEmail       = "",
+                applicantMobile      = "",
+                applicantResume      = "",
+                applicantStatus      = "",
+                
+            } = data[0];
+
+            profile = applicantProfile != null ? applicantProfile : "default.jpg";
+
             let button = applicantID ? `
             <button class="btn btn-save px-5 p-2" 
                 id="btnUpdate" 
@@ -2417,7 +2383,7 @@ $(document).ready(function() {
                         <div class="col-sm-12">
                             <div class="form-group inner-addon left-addon">
                                 <i class="fas fa-envelope login-icon"></i>
-                                <input type="text" 
+                                <input type="email" 
                                     tabindex="1" 
                                     class="form-control login-input validate" 
                                     data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][@][_]"
@@ -2443,7 +2409,7 @@ $(document).ready(function() {
                                     maxlength="75"
                                     id="applicantPassword"
                                     name="applicantPassword"
-                                    placeholder="Password *" 
+                                    placeholder="Password *"
                                     required>
                                 <div class="invalid-feedback text-left d-block" id="invalid-applicantPassword"></div>
                             </div>
@@ -2581,8 +2547,13 @@ $(document).ready(function() {
         if (table) {
             switch(table) {
                 case "tableDependentInformationTab":
+                    let {
+                        dependentName   = "",
+                        relationship    = "",
+                        birthday        = moment(new Date()).format("MMMM DD, YYYY")
+                    } = data;
                     html = `
-                    <tr>
+                    <tr class="table-row-dependent-information">
                         <td class="text-center">
                             <div class="action">
                                 <input type="checkbox" class="checkboxrow">
@@ -2597,7 +2568,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${dependentName}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2610,7 +2581,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${relationship}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2624,15 +2595,26 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${birthday}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
                     </tr>`;
                     break;
                 case "tableEmploymentHistoryTab":
+                    let {
+                        applicantID                      = "",
+                        applicantEmploymentHistoryID     = "",
+                        historyDaterange                 = "",
+                        historyEmployerAddress           = "",
+                        historyEmployerName              = "",
+                        historySalary                    = "",
+                        position                         = "",
+                        reasonLeaving                    = ""
+                    } = data;
+        
                     html = `
-                    <tr>
+                    <tr class="table-row-employment-history">
                         <td class="text-center">
                             <div class="action">
                                 <input type="checkbox" class="checkboxrow">
@@ -2641,13 +2623,11 @@ $(document).ready(function() {
                         <td>
                             <div class="form-group mb-0">
                                 <input type="text"
-                                    class="form-control validate"
+                                    class="form-control"
                                     name="employmentHistoryFromTo"
                                     data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
-                                    minlength="2"
-                                    maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${historyDaterange || ''}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2660,7 +2640,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${historyEmployerName || ''}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2673,7 +2653,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="75"
                                     autocomplete="off"
-                                    value="">
+                                    value="${historyEmployerAddress || ''}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2686,7 +2666,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${position || ''}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2694,33 +2674,40 @@ $(document).ready(function() {
                             <div class="form-group mb-0">
                                 <textarea class="form-control validate"
                                     name="employmentHistoryReason"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][;][:][']["][-][(][)][&][ ]"
+                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][;][:]['][''][-][(][)][&][ ]"
                                     minlength="2"
                                     maxlength="250"
                                     rows="3"
                                     style="resize: none"
-                                    autocomplete="off"></textarea>
+                                    autocomplete="off">${reasonLeaving || ''}</textarea>
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
                         <td>
                             <div class="form-group mb-0">
                                 <input type="text"
-                                    class="form-control validate"
+                                    class="form-control amount"
                                     name="employmentHistorySalary"
                                     data-allowcharacters="[a-z][A-Z][0-9][_][-]['][,][()][ ]"
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${historySalary || ''}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
                     </tr>`;
                     break;
                 case "tableEducationalAttainmentTab":
+                    let {
+                        schoolYear              = "",
+                        schoolName              = "",
+                        applicantCourse         = "",
+                        applicantActivities     = ""
+                    } = data;
+
                     html = `
-                    <tr>
+                    <tr class="table-row-educational-attainment">
                         <td class="text-center">
                             <div class="action">
                                 <input type="checkbox" class="checkboxrow">
@@ -2735,7 +2722,7 @@ $(document).ready(function() {
                                     minlength="4"
                                     maxlength="4"
                                     autocomplete="off"
-                                    value=""
+                                    value="${schoolYear || ""}"
                                     required>
                                 <div class="d-block invalid-feedback"></div>
                             </div>
@@ -2749,8 +2736,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value=""
-                                    required>
+                                    value="${schoolName || "" }">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2763,8 +2749,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value=""
-                                    required>
+                                    value="${applicantCourse || ""}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2777,15 +2762,21 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${applicantActivities || ""}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
                     </tr>`;
                     break;
                 case "tableOrganizationJoinedTab":
+                    let {
+                        organizationJoinDate   = "",
+                        organizationName       = "",
+                        organizationPosition   = "",
+                    } = data;
+            
                     html = `
-                    <tr>
+                    <tr class="table-row-organization-joined">
                         <td class="text-center">
                             <div class="action">
                                 <input type="checkbox" class="checkboxrow">
@@ -2800,7 +2791,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${organizationJoinDate || "" }">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2813,7 +2804,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${organizationName || "" }">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2826,15 +2817,21 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${organizationPosition || "" }">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
                     </tr>`;
                     break;
                 case "tableExamTakenTab":
+                    let {
+                        examTakenDate          = "",
+                        examTakenDescription   = "",
+                        examTakenResult        = ""
+                    } = data;
+                    
                     html = `
-                    <tr>
+                    <tr class="table-row-exam-taken">
                         <td class="text-center">
                             <div class="action">
                                 <input type="checkbox" class="checkboxrow">
@@ -2849,7 +2846,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${examTakenDate || ""}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2862,7 +2859,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${examTakenDescription || ""}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2875,15 +2872,22 @@ $(document).ready(function() {
                                     minlength="0"
                                     maxlength="250"
                                     autocomplete="off"
-                                    value="">
+                                    value="${examTakenResult || "" }">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
                     </tr>`;
                     break;
                 case "tableSeminarTakenTab":
+                    let {
+                        seminarTakenDate        = "",
+                        seminarTakenDescription = "",
+                        seminarTakenPosition    = ""
+                    } = data;
+
+            
                     html = `
-                    <tr>
+                    <tr class="table-row-seminar-taken">
                         <td class="text-center">
                             <div class="action">
                                 <input type="checkbox" class="checkboxrow">
@@ -2898,7 +2902,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${seminarTakenDate || ""}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2911,7 +2915,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${seminarTakenDescription || "" }">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2924,15 +2928,21 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${seminarTakenPosition || "" }">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
                     </tr>`;
                     break;
                 case "tableCharacterReferenceTab":
+                    let {
+                        characterReferenceName      = "",
+                        characterReferencePosition  = "",
+                        characterReferenceCompany   = "",
+                        characterReferenceNumber    = "",
+                    } = data;
                     html = `
-                    <tr>
+                    <tr class="table-row-character-reference">
                         <td class="text-center">
                             <div class="action">
                                 <input type="checkbox" class="checkboxrow">
@@ -2947,7 +2957,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${characterReferenceName || ""}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2960,7 +2970,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${characterReferencePosition || ""}">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2973,7 +2983,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="">
+                                    value="${characterReferenceCompany || "" }">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2987,8 +2997,8 @@ $(document).ready(function() {
                                     minlength="13"
                                     maxlength="13"
                                     name="characterReferenceContactNo"
-                                    autocomplete="off"
-                                    required>
+                                    autocomplete="off" 
+                                    value="${characterReferenceNumber || "" }">
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -3083,8 +3093,78 @@ $(document).ready(function() {
                     $(this).attr("id", `${name}${i}`);
                     $parent = $(this).parent();
                     $parent.find(".invalid-feedback").attr("id", `invalid-${name}${i}`);
-                })
-            })
+                });
+            });
+
+            $(`[name=applicantDependentBirthday]`).daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                autoApply: true,
+                maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                locale: {
+                    format: 'MMMM DD, YYYY'
+                },
+            });
+
+            $(`[name=employmentHistoryFromTo]`).daterangepicker({
+                singleDatePicker: false,
+                showDropdowns: true,
+                autoApply: true,
+                maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                locale: {
+                    format: 'MMMM DD, YYYY'
+                },
+            });
+
+            $(`[name=educationalAttainmentSchoolYear]`).daterangepicker({
+                singleDatePicker: false,
+                showDropdowns: true,
+                autoApply: true,
+                maxDate: moment(new Date).format("YYYY"),
+                locale: {
+                    format: 'YYYY'
+                },
+            });
+
+            $(`[name=examTakenDate]`).daterangepicker({
+                singleDatePicker: false,
+                showDropdowns: true,
+                autoApply: true,
+                maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                locale: {
+                    format: 'MMMM DD, YYYY'
+                },
+            });
+
+
+            $(`[name=organizationJoinedFromTo]`).daterangepicker({
+                singleDatePicker: false,
+                showDropdowns: true,
+                autoApply: true,
+                maxDate: moment(new Date).format("YYYY"),
+                locale: {
+                    format: 'YYYY'
+                },
+            });
+
+            $(`[name=seminarTakenDate]`).daterangepicker({
+                singleDatePicker: false,
+                showDropdowns: true,
+                autoApply: true,
+                maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                locale: {
+                    format: 'YYYY'
+                },
+            });
+
+            $(".table-row-employment-history").each(function(){
+                let lastSalary_field = $(this).find("[name=employmentHistorySalary]");
+                let lastSalay_value  = lastSalary_field.val();
+                let lastSalary_id    = lastSalary_field.attr("id");
+                initAmount(`#${lastSalary_id}`);
+            });
+
+
         } else {
             const tableArr = [
                 "tableDependentInformationTab", 
@@ -3190,51 +3270,76 @@ $(document).ready(function() {
 
     // ----- GET DATA -----
     function getApplicantInformationData() {
-        let applicantProfile       = $("[name=applicantProfile]").val();
-        const applicantFirstname   = $("[name=applicantFirstname]").val()?.trim();
-        const applicantMiddlename  = $("[name=applicantMiddlename]").val()?.trim();
-        const applicantLastname    = $("[name=applicantLastname]").val()?.trim();
-        let applicantBirthday      = $("[name=applicantBirthday]").val()?.trim();
-        let applicantGender        = $("[name=applicantGender]:checked").val();
-        const applicantCitizenship = $("[name=applicantCitizenship]").val();
-        const applicantCivilStatus = $("[name=applicantCivilStatus]").val();
-        const applicantRegion      = $("[name=applicantRegion]").val();
-        const applicantProvince    = $("[name=applicantProvince]").val();
-        const applicantCity        = $("[name=applicantCity]").val();
-        const applicantBarangay    = $("[name=applicantBarangay]").val();
-        const applicantUnit        = $("[name=applicantUnit]").val()?.trim();
-        const applicantBuilding    = $("[name=applicantBuilding]").val()?.trim();
-        const applicantStreet      = $("[name=applicantStreet]").val()?.trim();
-        const applicantSubdivision = $("[name=applicantSubdivision]").val()?.trim();
-        const applicantCountry     = $("[name=applicantCountry]").val()?.trim();
-        const applicantZipCode     = $("[name=applicantZipCode]").val()?.trim();
-        const applicantEmail       = $("[name=applicantEmail]").val()?.trim();
-        const applicantMobile      = $("[name=applicantMobile]").val()?.trim();
-        const applicantStatus      = $("[name=applicantStatus]").val();
-        let applicantResume        = $("[name=applicantResume]").val();
+        let applicantProfile                = $("[name=applicantProfile]").val();
+        const applicantFirstname            = $("[name=applicantFirstname]").val()?.trim();
+        const applicantMiddlename           = $("[name=applicantMiddlename]").val()?.trim();
+        const applicantLastname             = $("[name=applicantLastname]").val()?.trim();
+        let applicantBirthday               = $("[name=applicantBirthday]").val()?.trim();
+        let applicantGender                 = $("[name=applicantGender]:checked").val();
+        
+        const applicantCitizenship          = $("[name=applicantCitizenship]").val();
+        const applicantCivilStatus          = $("[name=applicantCivilStatus]").val();
+        const applicantRegion               = $("[name=applicantRegion]").val();
+        const applicantProvince             = $("[name=applicantProvince]").val();
+        const applicantCity                 = $("[name=applicantCity]").val();
+        const applicantBarangay             = $("[name=applicantBarangay]").val();
+        const applicantUnit                 = $("[name=applicantUnit]").val()?.trim();
+        const applicantBuilding             = $("[name=applicantBuilding]").val()?.trim();
+        const applicantStreet               = $("[name=applicantStreet]").val()?.trim();
+        const applicantSubdivision          = $("[name=applicantSubdivision]").val()?.trim();
+        const applicantCountry              = $("[name=applicantCountry]").val()?.trim();
+        const applicantZipCode              = $("[name=applicantZipCode]").val()?.trim();
+        const applicantEmail                = $("[name=applicantEmail]").val()?.trim();
+        const applicantMobile               = $("[name=applicantMobile]").val()?.trim();
+        const applicantTelephone            = $("[name=applicantTelephone]").val()?.trim();
+        const applicantStatus               = $("[name=applicantStatus]").val();
+        let applicantResume                 = $("[name=applicantResume]").val();
+        const applicantReligion             = $("[name=applicantReligion]").val();
+        const applicantBirthPlace           = $("[name=applicantBirthPlace]").val();
+        // PARENTS
+         const applicantFathersName         = $("[name=applicantFathersName]").val();
+         const applicantFathersAge          = $("[name=applicantFathersAge]").val();
+         const applicantMothersName         = $("[name=applicantMothersName]").val();
+         const applicantMothersAge          = $("[name=applicantMothersAge]").val();
+         const applicantSpouseName          = $("[name=applicantSpouseName]").val();
+         const applicantSpouseAge           = $("[name=applicantSpouseAge]").val();
+         const applicantContactPerson       = $("[name=applicantContactPerson]").val();
+         const applicantContactNumber       = $("[name=applicantContactNumber]").val();
+         
 
-        const applicantTIN             = $("[name=applicantTIN]").val();
-        const applicantSSS             = $("[name=applicantSSS]").val();
-        const applicantPhilHealth      = $("[name=applicantPhilHealth]").val();
-        const applicantPagibig         = $("[name=applicantPagibig]").val();
+        const applicantPRC                  = $("[name=applicantPRC]").val();
+        const applicantPRCExpiration        = $("[name=applicantPRCExpiration]").val();
+        const applicantTIN                  = $("[name=applicantTIN]").val();
+        const applicantSSS                  = $("[name=applicantSSS]").val();
+        const applicantPhilHealth           = $("[name=applicantPhilHealth]").val();
+        const applicantPagibig              = $("[name=applicantPagibig]").val();
+        const applicantPHIL                 = $("[name=applicantPHIL]").val();
+        const applicantNHNF                 = $("[name=applicantNHNF]").val();
 
-        const applicantUsername = $("[name=applicantUsername]").val()?.trim();
-        const applicantPassword = $("[name=applicantPassword]").val()?.trim();
-        const applicantEncryptedPassword = encryptString(applicantPassword);
+
+        const applicantUsername             = $("[name=applicantUsername]").val()?.trim();
+        const applicantPassword             = $("[name=applicantPassword]").val()?.trim();
+        const applicantEncryptedPassword    = encryptString(applicantPassword);
 
        
-        applicantProfile   = applicantProfile ? $("[name=applicantProfile]")[0].files[0].name : $("[name=applicantProfile]").attr("default");
-        applicantResume    = applicantResume ? $("[name=applicantResume]")[0].files[0].name : $("[name=applicantResume]").attr("resume");
-        applicantBirthday  = moment(applicantBirthday).format("YYYY-MM-DD");
-        applicantGender    = applicantGender == "Others" ? $("[name=applicantOtherGender]").val()?.trim() : applicantGender;
+        applicantProfile                    = applicantProfile ? $("[name=applicantProfile]")[0].files[0].name : $("[name=applicantProfile]").attr("default");
+        applicantResume                     = applicantResume ? $("[name=applicantResume]")[0].files[0].name : $("[name=applicantResume]").attr("resume");
+        applicantBirthday                   = moment(applicantBirthday).format("YYYY-MM-DD");
+        applicantGender                     = applicantGender == "Others" ? $("[name=applicantOtherGender]").val()?.trim() : applicantGender;
 
-        const file       = applicantProfile   ? $("[name=applicantProfile]")[0].files[0]   : null;
-        const resumeFile = applicantResume ? $("[name=applicantResume]")[0].files[0] : fileApplicantResume;
+        const file                          = applicantProfile  ? $("[name=applicantProfile]")[0].files[0]  : null;
+        const resumeFile                    = applicantResume   ? $("[name=applicantResume]")[0].files[0]   : fileApplicantResume;
         
         if (applicantID) {
             return {
-                applicantProfile, applicantFirstname, applicantMiddlename, applicantLastname, applicantBirthday, applicantGender, applicantCitizenship, applicantCivilStatus, applicantRegion, applicantProvince, applicantCity, applicantBarangay, applicantUnit, applicantBuilding, applicantStreet, applicantSubdivision, applicantCountry, applicantZipCode, applicantEmail, applicantMobile, applicantStatus, file, applicantResume, resumeFile
-                , applicantTIN, applicantSSS, applicantPhilHealth, applicantPagibig, applicantUsername, applicantPassword, applicantEncryptedPassword
+                applicantProfile, applicantFirstname, applicantMiddlename, applicantLastname, applicantBirthday, 
+                applicantGender, applicantCitizenship, applicantCivilStatus, applicantRegion, applicantProvince, 
+                applicantCity, applicantBarangay, applicantUnit, applicantBuilding, applicantStreet, applicantSubdivision, 
+                applicantCountry, applicantZipCode, applicantEmail, applicantMobile, applicantTelephone ,applicantStatus, file, applicantResume, 
+                resumeFile, applicantPRC, applicantPRCExpiration, applicantTIN, applicantSSS, applicantPhilHealth, applicantPagibig, 
+                applicantPHIL, applicantNHNF, applicantUsername, applicantPassword, applicantEncryptedPassword, 
+                applicantFathersName, applicantFathersAge, applicantMothersName, applicantMothersAge, applicantSpouseName, applicantSpouseAge, 
+                applicantContactPerson, applicantContactNumber,applicantReligion,applicantBirthPlace
             };
         } else {
             return {
@@ -3244,12 +3349,65 @@ $(document).ready(function() {
         
     }
 
-    async function getApplicantData() {
-        let formData = new FormData();
-        const informationData = getApplicantInformationData();
+    async function  getApplicantData() {
+        let formData            = new FormData();
+        const informationData   = getApplicantInformationData();
+
         Object.keys(informationData).map(informationKey => {
             formData.append(informationKey, informationData[informationKey]);
-        })
+        });
+
+       
+        $(".table-row-dependent-information").each(function(i,obj){
+            formData.append(`dependent[${i}][applicantDependentName]`, $(this).find(`[name=applicantDependentName]`).val() );
+            formData.append(`dependent[${i}][applicantDependentRelationship]`, $(this).find(`[name=applicantDependentRelationship]`).val() );
+            formData.append(`dependent[${i}][applicantDependentBirthday]`, $(this).find(`[name=applicantDependentBirthday]`).val() );
+        });
+
+        $(".table-row-employment-history").each(function(i,obj){
+            formData.append(`employment[${i}][employmentHistoryFromTo]`,        $(this).find(`[name=employmentHistoryFromTo]`).val() );
+            formData.append(`employment[${i}][employmentHistoryEmployerName]`,  $(this).find(`[name=employmentHistoryEmployerName]`).val() );
+            formData.append(`employment[${i}][employmentHistoryAddress]`,       $(this).find(`[name=employmentHistoryAddress]`).val() );
+            formData.append(`employment[${i}][employmentHistoryPosition]`,      $(this).find(`[name=employmentHistoryPosition]`).val() );
+            formData.append(`employment[${i}][employmentHistoryReason]`,        $(this).find(`[name=employmentHistoryReason]`).val() );
+            formData.append(`employment[${i}][employmentHistorySalary]`,        $(this).find(`[name=employmentHistorySalary]`).val() );
+
+        });
+
+        $(".table-row-educational-attainment").each(function(i,obj){
+            formData.append(`education[${i}][educationalAttainmentSchoolYear]`, $(this).find(`[name=educationalAttainmentSchoolYear]`).val() );
+            formData.append(`education[${i}][educationalAttainmentSchoolName]`, $(this).find(`[name=educationalAttainmentSchoolName]`).val() );
+            formData.append(`education[${i}][educationalAttainmentCourse]`, $(this).find(`[name=educationalAttainmentCourse]`).val() );
+            formData.append(`education[${i}][educationalAttainmentActivities]`, $(this).find(`[name=educationalAttainmentActivities]`).val() );
+        });
+
+        $(".table-row-organization-joined").each(function(i,obj){
+            formData.append(`organization[${i}][organizationJoinedFromTo]`,     $(this).find(`[name=organizationJoinedFromTo]`).val() );
+            formData.append(`organization[${i}][organizationJoinedName]`,       $(this).find(`[name=organizationJoinedName]`).val() );
+            formData.append(`organization[${i}][organizationJoinedPosition]`,   $(this).find(`[name=organizationJoinedPosition]`).val() );
+        });
+
+        $(".table-row-exam-taken").each(function(i,obj){
+            formData.append(`exam[${i}][examTakenDate]`,    $(this).find(`[name=examTakenDate]`).val() );
+            formData.append(`exam[${i}][examTakenName]`,    $(this).find(`[name=examTakenName]`).val() );
+            formData.append(`exam[${i}][examTakenResult]`,  $(this).find(`[name=examTakenResult]`).val() );
+        });
+        
+        $(".table-row-seminar-taken").each(function(i,obj){
+            formData.append(`seminar[${i}][seminarTakenDate]`, $(this).find(`[name=seminarTakenDate]`).val() );
+            formData.append(`seminar[${i}][seminarTakenName]`, $(this).find(`[name=seminarTakenName]`).val() );
+            formData.append(`seminar[${i}][seminarTakenResult]`, $(this).find(`[name=seminarTakenResult]`).val() );
+        });
+
+        $(".table-row-character-reference").each(function(i,obj){
+            formData.append(`characterRef[${i}][characterReferenceName]`, $(this).find(`[name=characterReferenceName]`).val() );
+            formData.append(`characterRef[${i}][characterReferencePosition]`, $(this).find(`[name=characterReferencePosition]`).val() );
+            formData.append(`characterRef[${i}][characterReferenceCompany]`, $(this).find(`[name=characterReferenceCompany]`).val() );
+            formData.append(`characterRef[${i}][characterReferenceContactNo]`, $(this).find(`[name=characterReferenceContactNo]`).val() );
+        });
+
+        
+
         return await formData;
     }
     // ----- END GET DATA -----
@@ -3277,6 +3435,7 @@ $(document).ready(function() {
         // const hasResume = validateResume();
 
 		if (validate && isValid) {
+
             setTimeout(() => {
                 getApplicantData()
                 .then(data => {
@@ -3289,6 +3448,7 @@ $(document).ready(function() {
                     }
                 })
             }, 100);
+
 		} else {
             formButtonHTML(this, false);
         }
@@ -3302,7 +3462,7 @@ $(document).ready(function() {
 		const validate  = validateForm("page_content");
         const isValid   = comparePassword();
         const hasResume = validateResume();
-
+        $(".form-control").removeClass("validated is-valid");
 		if (validate && isValid && hasResume) {
             setTimeout(() => {
                 getApplicantData()
@@ -3464,3 +3624,34 @@ $(document).ready(function() {
     });
     // END OF LOGOUT
 })
+
+
+function getProfileData(applicantID = null){
+    let result;
+
+    if(applicantID){
+        $.ajax({
+            method:  "POST",
+            url:     `${base_url}web/applicant/getProfileData`,
+            data:	 {applicantID},
+            async: false,
+            dataType: "json",
+            beforeSend: function() {
+                // $("#loader").show();
+            },
+
+            success: function(data) {
+                result = data;
+            },
+
+            error: function() {
+                setTimeout(() => {
+                    // $("#loader").hide();
+                    showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                }, 500);
+            }
+        });
+    }
+    
+    return result;
+}	

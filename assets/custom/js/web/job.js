@@ -12,12 +12,38 @@ $(document).ready(function() {
 
         $("#table_content").html(preloader);
         setTimeout(() => {
-            const jobData = getTableData(
-                `hris_job_posting_tbl`,
-                `*`,
-                `jobID = ${jobID}`
-            );
-
+            // const jobData = getTableData(
+            //     `hris_job_posting_tbl`,
+            //     `*`,
+            //     `jobID = ${jobID}`
+            // );
+            const jobData = getTableData( `
+                hris_job_posting_tbl as jpt
+                LEFT JOIN  pms_personnel_requisition_tbl AS ppr USING(requisitionID)
+                LEFT JOIN  hris_designation_tbl AS dsg ON dsg.designationID  = ppr.designationID 
+                LEFT JOIN  hris_department_tbl AS dept ON dept.departmentID  = ppr.departmentID`, 
+                `jobID,
+                CONCAT('JPG-',SUBSTR(jpt.createdAt,3,2),"-",LPAD(jpt.jobID,5,0)) as jobCode,
+                requisitionCode,
+                designationName as jobTitle,
+                jobDescription,
+                personnelStatement,
+          
+                CASE
+                WHEN personnelOption = '1' THEN 'Permanent'
+                WHEN personnelOption = '2' THEN 'Non-Permanent'
+                WHEN personnelOption = '3' THEN 'Other Justifications'
+                END as jobType,
+          
+                departmentName,
+                personnelQualification,
+                jobBenefits,
+                jobSlot,
+                salaryPackage as salaryRange,
+                jobStatus,
+                jpt.createdAt`,
+                `jobID=${jobID}`
+                );
             $("#table_content").html(jobInformation(jobData[0]));
             // initAll();
         }, 500);

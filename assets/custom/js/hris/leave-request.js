@@ -646,6 +646,8 @@ $(document).ready(function () {
 			leaveWorkingDay				= "",
 			leaveStatus   				= "",
 			leaveRequestStatus 			= false,
+			timeIn						="",
+			timeOut					="",
 			submittedAt 				= false,
 			createdAt 					= false,
 		} = data && data[0];
@@ -667,6 +669,7 @@ $(document).ready(function () {
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
+		let workDayDisabled = leaveWorkingDay == 1 ? "disabled" : "";
 		let button   = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? leaveRequestID : reviseLeaveRequestID;
@@ -799,7 +802,7 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-leaveStatus"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
@@ -814,7 +817,7 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-leaveRequestDate"></div>
                 </div>
             </div>
-             <div class="col-md-4 col-sm-12">
+			<div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Working Day ${!disabled ? "<code>*</code>" : ""}</label>
                       <select class="form-control select2" id="leaveWorkingDay" name="leaveWorkingDay" ${disabled} required>
@@ -825,7 +828,22 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-leaveWorkingDay"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+			<div class="col-md-2 col-sm-12">
+                <div class="form-group">
+				<label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
+				<input type="time" class="form-control text-center" name="timeIn" id="timeIn"  ${disabled} ${workDayDisabled} value="${timeIn}">
+                    <div class="d-block invalid-feedback" id="invalid-timeIn"></div>
+                </div>
+            </div>
+			<div class="col-md-2 col-sm-12">
+                <div class="form-group">
+				<label>Time Out ${!disabled ? "<code>*</code>" : ""}</label>
+				<input type="time" class="form-control text-center" name="timeOut" id="timeOut"  ${disabled} ${workDayDisabled}  value="${timeOut}">
+                    <div class="d-block invalid-feedback" id="invalid-timeOut"></div>
+                </div>
+            </div>
+            
+            <div class="col-md-2 col-sm-12">
                 <div class="form-group">
                     <label for="">Number of Day/s</label>
                     <input 
@@ -834,7 +852,7 @@ $(document).ready(function () {
                         disabled 
                         name="leaveRequestNumberOfDate" 
                         id="leaveRequestNumberOfDate"
-                        value="${leaveRequestNumberOfDate}">
+                        value="${leaveWorkingDay == "0" ? leaveRequestNumberOfDate - (leaveRequestNumberOfDate*.5) : leaveRequestNumberOfDate || "-"}">
                     <div class="invalid-feedback d-block" id="invalid-leaveRequestNumberOfDate"></div>
                 </div>
             </div>
@@ -851,6 +869,7 @@ $(document).ready(function () {
                         rows="4"
                         style="resize:none;"
 						${disabled}>${leaveRequestReason}</textarea>
+						<small><mark>Note: ';' to separate multiple activities</mark></small>
                     <div class="d-block invalid-feedback" id="invalid-leaveRequestReason"></div>
                 </div>
             </div>
@@ -939,11 +958,23 @@ $(document).ready(function () {
 	$(document).on("change", "#leaveWorkingDay", function() {
 		var workDay = $("#leaveWorkingDay option:selected").val();
 		var numberOfDays = $("#leaveRequestNumberOfDate").attr("numberofdays");
+		
 		if(workDay =="0"){
 			var countnumber = (parseInt(numberOfDays) - 0.5);
 			$("#leaveRequestNumberOfDate").val(countnumber);
+
+			$("#timeIn").prop("disabled",false);
+			$("#timeOut").prop("disabled",false);
+
 		}else{
 			$("#leaveRequestNumberOfDate").val(numberOfDays);
+
+			$("#timeIn").prop("disabled",true);
+			$("#timeIn").val(0);
+
+			$("#timeOut").prop("disabled",true);
+			$("#timeOut").val(0);
+
 		}
 	});	
 
@@ -1222,7 +1253,7 @@ $(document).ready(function () {
 
 
 	// ----- UPDATE EMPLOYEE LEAVE -----
-	function updateEmployeeLeave(employeeID = 0, leaveID = 0, leaveCredit = 0) {
+	function updateEmployeeLeave(employeeID = 0, leaveID = 0, leaveCredit = 0,leaveRequestID = 0) {
 		const data = { employeeID, leaveID, leaveCredit };
 		$.ajax({
 			method: "POST",
@@ -1231,6 +1262,8 @@ $(document).ready(function () {
 			dataType: "json",
 			success: function(data) {}
 		})
+
+		generateProductionReport(employeeID,2,leaveRequestID);
 	}
 	// ----- END UPDATE EMPLOYEE LEAVE -----
 
@@ -1267,6 +1300,9 @@ $(document).ready(function () {
 					notificationType:        7,
 					employeeID,
 				};
+
+				
+
 			} else {
 				status = 1;
 				notificationData = {
@@ -1278,7 +1314,6 @@ $(document).ready(function () {
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
 				};
 			}
-
 			data["tableData[leaveRequestStatus]"] = status;
 
 			setTimeout(() => {
@@ -1294,13 +1329,61 @@ $(document).ready(function () {
 					notificationData,
 					this,
 					status == 2 ? updateEmployeeLeave : false,
-					status == 2 ? [employeeID, leaveID, leaveCredit] : []
+					status == 2 ? [employeeID, leaveID, leaveCredit,id] : []
 				);
 				// updateEmployeeLeave(employeeID, leaveID, leaveCredit);
 			}, 300);
 		}
 	});
 	// ----- END APPROVE DOCUMENT -----
+
+	// ---- FUNCTION FOR GENERATE PRODUCTION REPORT WHEN APPROVED ---//
+	function generateProductionReport(employeeID = 0,status = 0,leaveRequestID = 0){
+
+		let getDateRange = getTableData("hris_leave_request_tbl","*",`leaveRequestID =${leaveRequestID}`);
+
+		let extractDate = getDateRange[0].leaveRequestDate.split("-");
+		let getDateFrom = moment(extractDate[0]).format("YYYY-MM-DD");
+		let getDateTo = moment(extractDate[1]).format("YYYY-MM-DD");
+
+		let leaveRequestCode = getDateRange[0].leaveRequestCode;
+		let paidStatus = getDateRange[0].leaveStatus;
+		let leaveType = getDateRange[0].leaveID;
+		let workType = getDateRange[0].leaveWorkingDay;
+		let timeIn =getDateRange[0].timeIn;
+		let timeOut =getDateRange[0].timeOut;
+		let reason =getDateRange[0].leaveRequestReason;
+		$.ajax({
+            method:   "POST",
+            url:      "leave_request/generateProduction",
+            data:     { employeeID 	: employeeID,
+						leaveRequestID 	:	leaveRequestID,
+						leaveRequestCode	:leaveRequestCode,
+						leaveStatus	: status,
+						dateFrom	: getDateFrom,
+						dateTo 		: getDateTo,
+						paidStatus	: paidStatus,
+						leaveType	: leaveType,
+						workType	: workType,
+						timeIn		: timeIn,
+						timeOut		: timeOut,
+						reason	 	: reason},
+            async:    false,
+            dataType: "json",
+			beforeSend: function() {
+				// $("#loader").show();
+			},
+			success: function(data) {
+			},
+			error: function() {
+				setTimeout(() => {
+					// $("#loader").hide();
+					showNotification("danger", "System error: Please contact the system administrator for assistance!");
+				}, 500);
+			}
+		})
+	}
+	// ---- FUNCTION FOR GENERATE PRODUCTION REPORT WHEN APPROVED ---//
 
 
 	// ----- REJECT DOCUMENT -----
@@ -1497,10 +1580,22 @@ $(document).on("change","#leaveRequestDate", function(){
     let fromDate            = new Date(splitingValue[0]); 	
     let toDate              = new Date(splitingValue[1]);
     let numberOfDays        = Math.round((toDate-fromDate)/(1000*60*60*24)) + 1;
+	var leaveWorkingDay 	= $("#leaveWorkingDay option:selected").val() || 0;
     var remaining_of_days   = $("#leaveRequestRemainingLeave").val();
+	var computeNumOfDays = 0;
 
-    $("#leaveRequestNumberOfDate").val(numberOfDays);
-    $("#leaveRequestNumberOfDate").attr("numberOfDays",numberOfDays);
+	if(leaveWorkingDay == 0){
+		let countDeductDays  = parseFloat(numberOfDays * .5);
+		computeNumOfDays = parseFloat(numberOfDays) - countDeductDays;
+
+	}else{
+		computeNumOfDays = parseFloat(numberOfDays);
+
+	}
+
+
+    $("#leaveRequestNumberOfDate").val(computeNumOfDays);
+    $("#leaveRequestNumberOfDate").attr("numberOfDays",computeNumOfDays);
     if(numberOfDays > remaining_of_days){
         $("#leaveRequestNumberOfDate").addClass("is-invalid");
         $("#invalid-leaveRequestNumberOfDate").addClass("is-invalid");
