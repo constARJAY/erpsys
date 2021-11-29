@@ -1,22 +1,5 @@
 <style>
 
-	.panel-title {
-		position: relative;
-	}
-	
-	.panel-title::after {
-		content: "\f107";
-		color: #fff;
-		top: 15px;
-		right: 10px;
-		position: absolute;
-		font-family: "FontAwesome"
-	}
-
-	.panel-title[aria-expanded="true"]::after {
-		content: "\f106";
-	}
-
 	tr.odd td.dtfc-fixed-left, tr.odd td.dtfc-fixed-right {
 		background: #f2f2f2;
 		border-left: 1px solid rgb(222 226 230);
@@ -59,14 +42,14 @@
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-money-check"></i> &nbsp;Payroll Modules</li>
-						<li class="breadcrumb-item active">Timekeeping Module</li>
+						<li class="breadcrumb-item active">Payroll Module</li>
 					</ul>
-					<h1 class="mt-3">Timekeeping Module</h1>
+					<h1 class="mt-3">Payroll Module</h1>
 					<span>This module is used to monitor and view the attendance activity for each employee.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">
 						<?php if(isCreateAllowed(109)){ ?>
-							<button type="button" class="btn btn-default btn-add" id="btnAddExam"> <i class="icon-plus"></i> &nbsp;Add Timekeeping</button>
+							<button type="button" class="btn btn-default btn-add" id="btnAddExam"> <i class="icon-plus"></i> &nbsp;Add Payroll</button>
 						<?php  } ?>
                     </ul>
 				</div>
@@ -84,16 +67,16 @@
 </div>
 
 <!-- ----- ADD MODAL ----- -->
-<div id="modal_timekeeping_module" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+<div id="modal_payroll_module" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h5 class="page-title font-weight-bold">Add Timekeeping</h5>
+				<h5 class="page-title font-weight-bold">Add Payroll</h5>
 				<button type="button" class="close btnCancel" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>
-            <div id="modal_timekeeping_module_content"></div>
+            <div id="modal_payroll_module_content"></div>
         </div>
 	</div>
 </div>
@@ -103,6 +86,5 @@
 <!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.11.3/fc-4.0.1/datatables.min.css"/> -->
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.11.3/fc-4.0.1/datatables.min.js"></script>
 
-
 <script src="<?=base_url()?>assets/custom/js/gen/approver-function.js"></script>
-<script src="<?=base_url()?>assets/custom/js/hris/timekeeping-module.js"></script>
+<script src="<?=base_url()?>assets/custom/js/hris/payroll-module.js"></script>

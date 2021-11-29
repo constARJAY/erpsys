@@ -19,6 +19,8 @@ function writeToFile(messages = []) {
 }
 
 $(document).ready(function() {
+
+	let approvedTimekeepingPeriod = [], disableDates = [];
 	const allowedUpdate = isUpdateAllowed(109);
 
 
@@ -172,6 +174,8 @@ $(document).ready(function() {
 
     // ----- DATATABLES -----
 	function initDataTables() {
+		$('[data-toggle="tooltip"]').tooltip();
+
 		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
 			$("#tableForApprroval").DataTable().destroy();
 		}
@@ -244,14 +248,17 @@ $(document).ready(function() {
 					[50, 100, 150, 200, "All"],
 				],
 				columnDefs: [
-					{ targets: 0,  width: "250px" },
-					{ targets: "thDay", width: "10px" },
-					{ targets: -1,  width: "100px" },	
-					{ targets: -2,  width: "100px" },	
-					{ targets: -3,  width: "100px" },	
-					{ targets: -4,  width: "100px" },	
-					{ targets: -5,  width: "100px" },	
+					{ targets: 0,       width: "250px" },
+					{ targets: "thDay", width: "10px"  },
+					{ targets: -1,      width: "100px" },	
+					{ targets: -2,      width: "100px" },	
+					{ targets: -3,      width: "120px" },	
+					{ targets: -4,      width: "100px" },	
+					{ targets: -5,      width: "100px" },	
 				],
+				fixedColumns: {
+					leftColumns: 1
+				}
 			});
 
 	}
@@ -396,6 +403,7 @@ $(document).ready(function() {
     // ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		uniqueData = [];
+		approvedTimekeepingPeriod = [];
 
 		$("#tableMyFormsParent .loader").length == 0 && $("#tableMyFormsParent").html(preloader);
 		let timekeepingData = getTableData(
@@ -448,9 +456,7 @@ $(document).ready(function() {
 			}
             let timekeepingDate = "-";
             if (timekeepingStartDate && timekeepingEndDate) {
-                timekeepingStartDate = moment(timekeepingStartDate).format("MMMM DD, YYYY");
-                timekeepingEndDate   = moment(timekeepingEndDate).format("MMMM DD, YYYY");
-                timekeepingDate      = `${timekeepingStartDate} - ${timekeepingEndDate}`;
+                timekeepingDate = `${moment(timekeepingStartDate).format("MMMM DD, YYYY")} - ${moment(timekeepingEndDate).format("MMMM DD, YYYY")}`;
             }
 			let btnClass = timekeepingStatus != 0 ? "btnView" : "btnEdit";
 
@@ -461,6 +467,7 @@ $(document).ready(function() {
 					timesheetDate,
 				}
 				uniqueData.push(unique);
+				approvedTimekeepingPeriod.push({start: timekeepingStartDate, end: timekeepingEndDate});
 			}
 
 			html += `
@@ -498,10 +505,10 @@ $(document).ready(function() {
 			let {
 				timekeepingID     = "",
 				timekeepingStatus = "",
-				employeeID               = "",
-				approversID              = "",
-				approversDate            = "",
-				createdAt                = new Date
+				employeeID        = "",
+				approversID       = "",
+				approversDate     = "",
+				createdAt         = new Date
 			} = data && data[0];
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
@@ -558,6 +565,7 @@ $(document).ready(function() {
 					}
 				} else if (timekeepingStatus == 2) {
 					// DROP
+					/*
 					button = `
 					<button type="button" 
 						class="btn btn-cancel px-5 p-2"
@@ -567,6 +575,7 @@ $(document).ready(function() {
 						status="${timekeepingStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
+					*/
 				} else if (timekeepingStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(timekeepingID)) {
@@ -634,7 +643,37 @@ $(document).ready(function() {
 
 
     // ----- DATERANGEPICKER -----
-    function dateRangePicker(inStart = "", inEnd = "") {
+    function dateRangePicker(inStart = "", inEnd = "", approvedTimekeepingPeriod = []) {
+		disableDates = [];
+		const getDates = (start, end) => {
+			let date = start;
+
+			let dates = [date];
+			if (start != end) {
+				date = moment(date).add(1, 'days').format("YYYY-MM-DD");
+				while (date != end) {
+					!dates.includes(date) && dates.push(date);
+					date = moment(date).add(1, 'days').format("YYYY-MM-DD");
+				}
+			}
+
+			return dates;
+		}
+
+		approvedTimekeepingPeriod.map(period => {
+			let { start, end } = period;
+			
+			let date = start;
+			!disableDates.includes(date) && disableDates.push(date);
+			while (date != end) {	
+				let dateToday = moment().format("YYYY-MM-DD");
+				if (date != dateToday) {
+					!disableDates.includes(date) && disableDates.push(date);
+				} 
+				date = moment(date).add(1, 'days').format("YYYY-MM-DD");
+			};
+		})
+
         const options = {
             autoUpdateInput: false,
             showDropdowns: true,
@@ -646,22 +685,43 @@ $(document).ready(function() {
             startDate: moment(inStart || new Date),
             endDate:   moment(inEnd || new Date),
 			maxDate:   moment(),
+			isInvalidDate: function(date) {
+				let optionDate = moment(date).format("YYYY-MM-DD");
+				return disableDates.includes(optionDate);
+			},
         }
 
         $("#timesheetDate").daterangepicker(options, function(start, end) {
+			let bStart = $("#btnSearch").attr("start");
+			let bEnd   = $("#btnSearch").attr("end");
+
             let startDate = start.format("YYYY-MM-DD");
             let endDate   = end.format("YYYY-MM-DD");
 
-			let tStart   = new Date(startDate);
-			let tEnd     = new Date(endDate);
+			let tStart = new Date(startDate);
+			let tEnd   = new Date(endDate);
+
+			const isDisabledDate = (startDate, endDate) => {
+				let flag = true;
+				if (startDate && endDate) {
+					let dates = [...getDates(startDate, endDate)];
+					dates.map(date => {
+						if (disableDates.includes(date)) flag = false;
+					})
+				}
+				return flag;
+			}
+
 			let duration = (tEnd - tStart)/1000/60/60/24;
-
-			if (duration > 20) {
-				let bStart = $("#btnSearch").attr("start");
-				let bEnd   = $("#btnSearch").attr("end");
-				dateRangePicker(bStart, bEnd);
-
+			if (duration >= 20) {
+				dateRangePicker(bStart, bEnd, approvedTimekeepingPeriod);
 				showNotification("danger", "Timekeeping coverage must not exceed up to 20 days.");
+			} else if (duration < 10) {
+				dateRangePicker(bStart, bEnd, approvedTimekeepingPeriod);
+				showNotification("danger", "Timekeeping coverage must be atleast 10 days or more");
+			} else if (!isDisabledDate(startDate, endDate)) {
+				dateRangePicker(bStart, bEnd, approvedTimekeepingPeriod);
+				showNotification("danger", "Invalid timekeeping period.");
 			} else {
 				let dateDisplay = `${start.format("MMMM DD, YYYY")} - ${end.format("MMMM DD, YYYY")}`;
 				$("#timesheetDate").attr("start", startDate);
@@ -800,7 +860,7 @@ $(document).ready(function() {
 
 
 	// ----- TIMEKEEPING TABLE -----
-	function timekeepingTable(data = false) {
+	function timekeepingTable(data = false, timekeepingStatus = 0) {
 		let {
 			header     = "",
 			columns    = [],
@@ -809,7 +869,7 @@ $(document).ready(function() {
 			success    = []
 		} = data;
 
-		let notification = dipslayFileUploadNotification(errors, success);
+		let notificationDisplay = dipslayFileUploadNotification(errors, success);
 
 		let columnDatesHTML = "";
 		columns.map(col => {
@@ -830,6 +890,9 @@ $(document).ready(function() {
 					scheduleOut,     
 					scheduleBreakDuration, 
 					scheduleDuration, 
+					restDay,
+					finalCheckIn,
+					finalCheckOut,
 					checkIn,          
 					checkOut,         
 					noTimeIn,        
@@ -846,55 +909,54 @@ $(document).ready(function() {
 					leaveID,          
 					leaveReference,  
 					leaveType, 
+					leaveWorkingDay,
 					leaveDuration,
 					checkDuration,   
 					basicHours,       
 					overtimeHours,    
 					nightDifferential, 
 					totalHours,      
-					status:scheduleStatus, 
-					production = []                 
+					status:scheduleStatus,           
 				} = data;
 
 				const NO_TIME_IN_OUT = `${base_url}/assets/images/attendance/no-time-in-out.svg`;
 				const ABSENT  = `${base_url}/assets/images/attendance/absent.svg`;
 				const ONGOING = `${base_url}/assets/images/attendance/ongoing.svg`;
 
-				let productionAttr = "";
-				for (const [key, value] of Object.entries(production)) {
-					productionAttr += `${key}="${value}"`;
-				}
-
+				// DISPLAY NG LEAVE WHILE HAVING PRODUCTION
 				const elementAttr = `
-					scheduleDate="${scheduleDate}"
-					scheduleIn="${scheduleIn}"
-					scheduleOut="${scheduleOut}"
-					scheduleBreakDuration="${scheduleBreakDuration}"
-					scheduleDuration="${scheduleDuration}"
-					checkIn="${checkIn}"
-					checkOut="${checkOut}"
-					noTimeIn="${noTimeIn}"
-					noTimeOut="${noTimeOut}"
-					noInOutID="${noInOutID}"
-					noInOutReference="${noInOutReference}"
-					overtimeIn="${overtimeIn}"
-					overtimeOut="${overtimeOut}"
-					overtimeBreakDuration="${overtimeBreakDuration}"
-					overtimeID="${overtimeID}"
-					overtimeReference="${overtimeReference}"
-					leaveIn="${leaveIn}"
-					leaveOut="${leaveOut}"
-					leaveID="${leaveID}"
-					leaveReference="${leaveReference}"
-					leaveType="${leaveType}"
-					leaveDuration="${leaveDuration}"
-					checkDuration="${checkDuration}"
-					basicHours="${basicHours}"
-					overtimeHours="${overtimeHours}"
-					totalHours="${totalHours}"
-					nightDifferential="${nightDifferential}"
-					status="${status}"
-					${productionAttr}`;
+					scheduleDate          = "${scheduleDate}"
+					scheduleIn            = "${scheduleIn}"
+					scheduleOut           = "${scheduleOut}"
+					scheduleBreakDuration = "${scheduleBreakDuration}"
+					scheduleDuration      = "${scheduleDuration}"
+					restDay				  = "${restDay}"
+					finalCheckIn          = "${finalCheckIn}"
+					finalCheckOut         = "${finalCheckOut}"
+					checkIn               = "${checkIn}"
+					checkOut              = "${checkOut}"
+					noTimeIn              = "${noTimeIn}"
+					noTimeOut             = "${noTimeOut}"
+					noInOutID             = "${noInOutID}"
+					noInOutReference      = "${noInOutReference}"
+					overtimeIn            = "${overtimeIn}"
+					overtimeOut           = "${overtimeOut}"
+					overtimeBreakDuration = "${overtimeBreakDuration}"
+					overtimeID            = "${overtimeID}"
+					overtimeReference     = "${overtimeReference}"
+					leaveIn               = "${leaveIn}"
+					leaveOut              = "${leaveOut}"
+					leaveID               = "${leaveID}"
+					leaveReference        = "${leaveReference}"
+					leaveType             = "${leaveType}"
+					leaveWorkingDay       = "${leaveWorkingDay}"
+					leaveDuration         = "${leaveDuration}"
+					checkDuration         = "${checkDuration}"
+					basicHours            = "${basicHours}"
+					overtimeHours         = "${overtimeHours}"
+					totalHours            = "${totalHours}"
+					nightDifferential     = "${nightDifferential}"
+					status                = "${status}"`;
 
 				if (status == "COMPLETE") {
 					html = `
@@ -1009,27 +1071,85 @@ $(document).ready(function() {
 			</tr>`;
 		})
 
+		let legendDisplay = `
+		<div class="row" id="legend">
+			<div class="col-md-5 col-sm-12">
+				<div class="card">
+					<div class="card-header font-weight-bold h5 bg-transparent">LEGEND</div>
+					<div class="card-body p-2" style="background: rgb(242 242 242);">
+						<div class="row">
+							<div class="col-md-6 col-sm-12">
+								<div class="d-flex justify-content-start align-items-center py-1">
+									<div style="text-align: right; width: 40px; color: #dc3450">00:00</div>
+									<div class="mx-2">-</div> 
+									<div class="font-weight-bold">Regular Hours</div>
+								</div>
+								<div class="d-flex justify-content-start align-items-center py-1">
+									<div style="text-align: right; width: 40px; color: #132eca">00:00</div>
+									<div class="mx-2">-</div> 
+									<div class="font-weight-bold">Leave/Overtime Hours</div>
+								</div>
+								<div class="d-flex justify-content-start align-items-center py-1">
+									<div style="text-align: right; width: 40px; color: #28a745">RD</div>
+									<div class="mx-2">-</div> 
+									<div class="font-weight-bold">Rest Day</div>
+								</div>
+							</div>
+							<div class="col-md-6 col-sm-12">
+								<div class="d-flex justify-content-start align-items-center py-1">
+									<div style="text-align: right; width: 40px; color: #132eca">
+										<img src="${base_url}assets/images/attendance/ongoing.svg" width="25" height="25">
+									</div>
+									<div class="mx-2">-</div> 
+									<div class="font-weight-bold">Ongoing</div>
+								</div>
+								<div class="d-flex justify-content-start align-items-center py-1">
+									<div style="text-align: right; width: 40px; color: #132eca">
+										<img src="${base_url}assets/images/attendance/no-time-in-out.svg" width="25" height="25">
+									</div>
+									<div class="mx-2">-</div> 
+									<div class="font-weight-bold">No Time-In/Time-Out</div>
+								</div>
+								<div class="d-flex justify-content-start align-items-center py-1">
+									<div style="text-align: right; width: 40px; color: #132eca">
+										<img src="${base_url}assets/images/attendance/absent.svg" width="25" height="25">
+									</div>
+									<div class="mx-2">-</div> 
+									<div class="font-weight-bold">Absent</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+
 		let html = `
-		${notification}
-		<table class="table table-bordered table-striped table-nowrap" id="tableTimekeeping">
-			<thead>
-				<tr class="theadheader bg-primary text-white">
-					<th colspan="${columns.length + 6}" class="text-center text-uppercase">${header}</th>
-				</tr>
-				<tr class="theadlabel">
-					<th class="thEmployeeName">Employee Name</th>
-					${columnDatesHTML}
-					<th class="thSummary">Total Hours</th>
-					<th class="thSummary">Basic Hours</th>
-					<th class="thSummary">Overtime Hours</th>
-					<th class="thSummary">Rest Day</th>
-					<th class="thSummary">No. of Days</th>
-				</tr>
-			</thead>
-			<tbody>
-				${attendanceHTML}
-			</tbody>
-		</table>`;
+		${notificationDisplay}
+		${legendDisplay}
+		<div class="card">
+			<div class="card-header bg-primary text-white text-center">
+				<h6 class="font-weight-bold">${header}</h6>
+			</div>
+			<div class="card-body" style="font-size: .9rem;">
+				<table class="table table-bordered table-striped table-nowrap" id="tableTimekeeping">
+					<thead>
+						<tr class="theadlabel">
+							<th class="thEmployeeName">Employee Name</th>
+							${columnDatesHTML}
+							<th class="thSummary">Total Hours</th>
+							<th class="thSummary">Basic Hours</th>
+							<th class="thSummary">Overtime Hours</th>
+							<th class="thSummary">Rest Day</th>
+							<th class="thSummary">No. of Days</th>
+						</tr>
+					</thead>
+					<tbody>
+						${attendanceHTML}
+					</tbody>
+				</table>
+			</div>
+		</div>`;
 		return html;
 	}
 	// ----- END TIMEKEEPING TABLE -----
@@ -1040,17 +1160,18 @@ $(document).ready(function() {
 		let html = `
 		<div class="col-12">
 				<div class="panel-group mt-2 mb-4">
-					<div class="panel panel-primary">
+					<div class="panel panel-danger">
 						<div class="panel-heading">
-							<h4 class="panel-title p-3 font-weight-bold" data-toggle="collapse" data-target="#panelBody" style="cursor: pointer;">UPLOAD TIMESHEET</h4>
+							<h4 class="panel-title p-3 font-weight-bold" data-toggle="collapse" data-target="#panelBody" aria-expanded="true" style="cursor: pointer;">UPLOAD TIMESHEET</h4>
 						</div>
-						<div id="panelBody" class="panel-collapse collapse">
+						<div id="panelBody" class="panel-collapse collapse show">
 							<div class="panel-body" style="background-color: #515151;">
 								<div class="row">
 									<div class="col-md-3 col-sm-12 align-self-center text-right">
 										<i><a href="${base_url}assets/format/TimesheetFormat.csv"
 											class="text-warning border-bottom pb-1"
-											target="_blank">
+											target="_blank"
+											donwload="TimesheetFormat.csv">
 											TimesheetFormat.csv
 										</a></i>
 									</div>
@@ -1078,7 +1199,14 @@ $(document).ready(function() {
 				<div class="row">
 					<div class="col-md-9 col-sm-12">
 						<div class="form-group">
-							<label>Timekeeping Period: <code>*</code></label>
+							<label>
+								<i class="fal fa-info-circle" 
+									style="color:#007bff;" 
+									data-toggle="tooltip" 
+									title="   PAYROLL CUT-OFF   \n   1st Cut-off: 1-15   \n   2nd Cut-off: 16-30   \n" 
+									data-original-title="   PAYROLL CUT-OFF   \n   1st Cut-off: 1-15   \n   2nd Cut-off: 16-30   \n"></i>
+								Timekeeping Period: <code>*</code>
+							</label>
 							<input type="button"
 								name="timesheetDate"
 								id="timesheetDate"
@@ -1111,19 +1239,21 @@ $(document).ready(function() {
 		readOnly = isRevise ? false : readOnly;
 
 		let {
-			timekeepingID        = "",
-			reviseTimekeepingID  = "",
-			employeeID           = "",
-            timekeepingStartDate = "",
-			timekeepingEndDate   = "",
-			timekeepingReason    = "",
-			timekeepingRemarks   = "",
-			approversID          = "",
-			approversStatus      = "",
-			approversDate        = "",
-			timekeepingStatus    = 0,
-			submittedAt          = false,
-			createdAt            = false,
+			timekeepingID         = "",
+			timekeepingCode       = "",
+			reviseTimekeepingID   = "",
+			reviseTimekeepingCode = "",
+			employeeID            = "",
+            timekeepingStartDate  = "",
+			timekeepingEndDate    = "",
+			timekeepingReason     = "",
+			timekeepingRemarks    = "",
+			approversID           = "",
+			approversStatus       = "",
+			approversDate         = "",
+			timekeepingStatus     = 0,
+			submittedAt           = false,
+			createdAt             = false,
 		} = data && data[0];
 
 		// ----- GET EMPLOYEE DATA -----
@@ -1173,7 +1303,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${timekeepingID && !isRevise ? getFormCode("TK", createdAt, timekeepingID) : "---"}
+							${timekeepingID && !isRevise ? timekeepingCode : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1274,11 +1404,9 @@ $(document).ready(function() {
 				${timekeepingStatus == 0 || (timekeepingStatus == 4 && isRevise) ? filterDisplay(timekeepingID, startDate, endDate, timesheetDate) : ""}
 			</div>
 
-			
-
             <div class="col-sm-12 mt-3">
-                <div class="table-responsive" id="tableTimekeepingParent">
-					${timekeepingTable(timesheetData)}
+                <div class="w-100" id="tableTimekeepingParent">
+					${timekeepingTable(timesheetData, timekeepingStatus)}
 				</div>
             </div>
 
@@ -1294,7 +1422,9 @@ $(document).ready(function() {
 			$("#page_content").html(html);
 			initDataTables();
 			initAll();
-            dateRangePicker(startDate, endDate);
+			if (timekeepingStatus == 0 || (timekeepingStatus == 4 && isRevise)) {
+				dateRangePicker(startDate, endDate, approvedTimekeepingPeriod);
+			}
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -1422,55 +1552,38 @@ $(document).ready(function() {
 				const employeeID = decryptString($(this).attr("employeeID"));
 
 				$("td a.viewAttendance", this).each(function() {
-					const scheduleDate = $(this).attr("scheduleDate");
-					const scheduleIn = $(this).attr("scheduleIn");
-					const scheduleOut = $(this).attr("scheduleOut");
+					const scheduleDate          = $(this).attr("scheduleDate");
+					const scheduleIn            = $(this).attr("scheduleIn");
+					const scheduleOut           = $(this).attr("scheduleOut");
 					const scheduleBreakDuration = $(this).attr("scheduleBreakDuration");
-					const scheduleDuration = $(this).attr("scheduleDuration");
-					const checkIn = $(this).attr("checkIn");
-					const checkOut = $(this).attr("checkOut");
-					const noTimeIn = $(this).attr("noTimeIn");
-					const noTimeOut = $(this).attr("noTimeOut");
-					const noInOutID = $(this).attr("noInOutID");
-					const noInOutReference = $(this).attr("noInOutReference");
-					const overtimeIn = $(this).attr("overtimeIn");
-					const overtimeOut = $(this).attr("overtimeOut");
+					const scheduleDuration      = $(this).attr("scheduleDuration");
+					const restDay               = $(this).attr("restDay");
+					const finalCheckIn          = $(this).attr("finalCheckIn");
+					const finalCheckOut         = $(this).attr("finalCheckOut");
+					const checkIn               = $(this).attr("checkIn");
+					const checkOut              = $(this).attr("checkOut");
+					const noTimeIn              = $(this).attr("noTimeIn");
+					const noTimeOut             = $(this).attr("noTimeOut");
+					const noInOutID             = $(this).attr("noInOutID");
+					const noInOutReference      = $(this).attr("noInOutReference");
+					const overtimeIn            = $(this).attr("overtimeIn");
+					const overtimeOut           = $(this).attr("overtimeOut");
 					const overtimeBreakDuration = $(this).attr("overtimeBreakDuration");
-					const overtimeID = $(this).attr("overtimeID");
-					const overtimeReference = $(this).attr("overtimeReference");
-					const leaveIn = $(this).attr("leaveIn");
-					const leaveOut = $(this).attr("leaveOut");
-					const leaveID = $(this).attr("leaveID");
-					const leaveReference = $(this).attr("leaveReference");
-					const leaveType = $(this).attr("leaveType");
-					const leaveDuration = $(this).attr("leaveDuration");
-					const checkDuration = $(this).attr("checkDuration");
-					const basicHours = $(this).attr("basicHours");
-					const overtimeHours = $(this).attr("overtimeHours");
-					const nightDifferential = $(this).attr("nightDifferential");
-					const totalHours = $(this).attr("totalHours");
-					const status = $(this).attr("status");
-
-					const odHours = $(this).attr("OdHours");
-					const odOtHours = $(this).attr("OdOtHours");
-					const odNsHours = $(this).attr("OdNsHours");
-					const odNsOtHours = $(this).attr("OdNsOtHours");
-					const odRdHours = $(this).attr("OdRdHours");
-					const odRdOtHours = $(this).attr("OdRdOtHours");
-					const odRdNsHours = $(this).attr("OdRdNsHours");
-					const odRdNsOtHours = $(this).attr("OdRdNsOtHours");
-					const sdRdHours = $(this).attr("SdRdHours");
-					const sdRdOtHours = $(this).attr("SdRdOtHours");
-					const sdRdNsHours = $(this).attr("SdRdNsHours");
-					const sdRdNsOtHours = $(this).attr("SdRdOtHours");
-					const rhRdHours = $(this).attr("RhRdHours");
-					const rhRdOtHours = $(this).attr("RhRdOtHours");
-					const rhRdNsHours = $(this).attr("RhRdNsHours");
-					const rhRdNsOtHours = $(this).attr("RhRdNsOtHours");
-					const dhRdHours = $(this).attr("DhRdHours");
-					const dhRdOtHours = $(this).attr("DhRdOtHours");
-					const dhRdNsHours = $(this).attr("DhRdNsHours");
-					const dhRdNsOtHours = $(this).attr("DhRdNsOtHours");
+					const overtimeID            = $(this).attr("overtimeID");
+					const overtimeReference     = $(this).attr("overtimeReference");
+					const leaveIn               = $(this).attr("leaveIn");
+					const leaveOut              = $(this).attr("leaveOut");
+					const leaveID               = $(this).attr("leaveID");
+					const leaveReference        = $(this).attr("leaveReference");
+					const leaveType             = $(this).attr("leaveType");
+					const leaveWorkingDay       = $(this).attr("leaveWorkingDay");
+					const leaveDuration         = $(this).attr("leaveDuration");
+					const checkDuration         = $(this).attr("checkDuration");
+					const basicHours            = $(this).attr("basicHours");
+					const overtimeHours         = $(this).attr("overtimeHours");
+					const nightDifferential     = $(this).attr("nightDifferential");
+					const totalHours            = $(this).attr("totalHours");
+					const status                = $(this).attr("status");
 
 					let temp = { 
 						employeeID,
@@ -1479,6 +1592,9 @@ $(document).ready(function() {
 						scheduleOut,     
 						scheduleBreakDuration,
 						scheduleDuration, 
+						restDay,
+						finalCheckIn,          
+						finalCheckOut,          
 						checkIn,          
 						checkOut,         
 						noTimeIn,        
@@ -1495,33 +1611,14 @@ $(document).ready(function() {
 						leaveID,          
 						leaveReference,  
 						leaveType, 
+						leaveWorkingDay, 
 						leaveDuration,
 						checkDuration,   
 						basicHours,       
 						overtimeHours,    
 						nightDifferential, 
 						totalHours,      
-						status, 
-						odHours,
-						odOtHours,
-						odNsHours,
-						odNsOtHours,
-						odRdHours,
-						odRdOtHours,
-						odRdNsHours,
-						odRdNsOtHours,
-						sdRdHours,
-						sdRdOtHours,
-						sdRdNsHours,
-						sdRdNsOtHours,
-						rhRdHours,
-						rhRdOtHours,
-						rhRdNsHours,
-						rhRdNsOtHours,
-						dhRdHours,
-						dhRdOtHours,
-						dhRdNsHours,
-						dhRdNsOtHours,
+						status
 					}
 
 					data["items"].push(temp);
@@ -1566,7 +1663,7 @@ $(document).ready(function() {
 		let leaveDuration     = $(this).attr("leaveDuration");    
 		let checkDuration     = $(this).attr("checkDuration");    
 		let basicHours        = $(this).attr("basicHours");    
-		let overtimeHours     = $(this).attr("overtimeHours");    
+		let overtimeHours     = $(this).attr("overtimeHours");   
 		let nightDifferential = $(this).attr("nightDifferential");    
 		let totalHours        = $(this).attr("totalHours");    
 		let status            = $(this).attr("status");    
@@ -1609,20 +1706,35 @@ $(document).ready(function() {
 
 		const getTimeFormat = (time = "0", substitute = null, id = null, reference = "", type = "ordinary") => {
 			if (time && time != "false" && time != "null" && time != "0") {
+				let html = "";
 				time = decimalToHours(time);
 				let arr = time.split(":");
 				if (arr.length > 1) {
 					let hour   = +arr[0];
 					let minute = +arr[1];
 					if (hour > 0 && minute > 0) {
-						return `${hour} hours and ${minute} minutes`;
+						html = `${hour} hours and ${minute} minutes`;
 					} else if (hour > 0 && minute <= 0) {
-						return `${hour} hours`;
+						html = `${hour} hours`;
 					} else if (hour <= 0 && minute > 0) {
-						return `${minute} minutes`;
+						html = `${minute} minutes`;
 					} else {
-						return "----";
+						html = "----";
 					}
+
+					if (type == "leave") {
+						let referHTML = id && reference ? `
+						<small>
+							<a href="${base_url}hris/leave_request?view_id=${encryptString(id)}"
+								target="_blank">${reference}</a>
+						</small>` : "";
+						return `
+						<div class="d-flex justify-content-end align-items-end flex-column">
+							${html}
+							${referHTML}
+						</div>`;
+					}
+					return html;
 				}
 			} else {
 				if (substitute && substitute != "false" && substitute != "null" && substitute != "0") {
@@ -1692,7 +1804,7 @@ $(document).ready(function() {
 			let html = `
 			<table class="table table-striped mt-2">
 				<thead class="bg-primary">
-					<tr><th colspan="2" class="text-center text-white py-2">SCHEDULE</th></tr>
+					<tr><th colspan="2" class="text-center text-white py-2 bg-primary">SCHEDULE</th></tr>
 				</thead>
 				<tbody>
 					${scheduleBodyHTML}
@@ -1711,11 +1823,13 @@ $(document).ready(function() {
 		let subTimeOut   = noTimeOut || leaveOut;
 		let subReference = noInOutReference || leaveReference;
 		let subType = noInOutID ? "NO_TIME" : "LEAVE";
+
+		
 		
 		let scheduleDataHTML = `
 		<table class="table table-striped mt-2">
 			<thead class="bg-primary">
-				<tr><th colspan="2" class="text-center text-white py-2">${scheduleDataTitle}</th></tr>
+				<tr><th colspan="2" class="text-center text-white py-2 bg-primary">${scheduleDataTitle}</th></tr>
 			</thead>
 			<tbody>
 				<tr>
@@ -1733,7 +1847,7 @@ $(document).ready(function() {
 				<tr>
 					<td class="text-left text-primary  p-1 m-2 font-weight-bold">Regular Hours: </td>
 					<td class="text-right p-1 m-2 " style="font-style: italic">
-						<div>${getTimeFormat(checkDuration, leaveDuration, leaveID, leaveReference, "leave")}</div>
+						<div>${getTimeFormat(totalHours, leaveDuration, leaveID, leaveReference, "leave")}</div>
 					</td>
 				</tr>
 				<tr>
@@ -1814,7 +1928,7 @@ $(document).ready(function() {
 					initDataTables();
 				}, 200);
 			} else {
-				dateRangePicker(oldStartDate, oldEndDate);
+				dateRangePicker(oldStartDate, oldEndDate, approvedTimekeepingPeriod);
 			}
 		})
 	})
@@ -1914,11 +2028,11 @@ $(document).ready(function() {
             const filetype = this.files[0].type;
             if (filesize > 10) {
                 $(this).val("");
-				$(".custom-file-label").text("Choose csv or file...");
+				$(".custom-file-label").text("Choose csv file...");
                 showNotification("danger", "File size must be less than or equal to 10mb");
             } else if (extension != "csv") {
                 $(this).val("");
-				$(".custom-file-label").text("Choose csv  orfile...");
+				$(".custom-file-label").text("Choose csv file...");
                 showNotification("danger", "Invalid file type");
             } else {
                 $(".custom-file-label").text(filename);
@@ -2456,12 +2570,13 @@ $(document).ready(function() {
 											title:             swalTitle,
 											showConfirmButton: false,
 											timer:             2000,
+										}).then(function() {
+											callback && callback();
+		
+											if (method == "approve" || method == "deny") {
+												$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+											}
 										});
-										callback && callback();
-	
-										if (method == "approve" || method == "deny") {
-											$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-										}
 									}, 500);
 								} else {
 									setTimeout(() => {

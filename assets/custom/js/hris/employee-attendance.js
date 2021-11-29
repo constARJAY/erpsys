@@ -507,7 +507,7 @@ $(document).ready(function() {
                     <div>
                         ${scheduleDate || '-'}
                     </div>
-                    <small style="color:#848482;">${scheduleDay} | ${scheduleTime}</small>
+                    <small style="color:#848482;">${scheduleDay || "-"} | ${scheduleTime || "-"}</small>
                 </td>
                 <td>
                     <div>${checkIn}</div>
