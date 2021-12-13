@@ -417,7 +417,6 @@ $(document).ready(function () {
 				
 				proccessing: false,
 				serverSide: false,
-				scrollX: true,
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
@@ -428,6 +427,26 @@ $(document).ready(function () {
 					{ targets: 4, width: 50  },
 				],
 				dom: 'lBfrtip',
+				buttons: [
+					{
+						extend: 'excelHtml5',
+						exportOptions: {
+							columns: [ 0, 1, 2, 3 ]
+						}
+					},
+					{
+						extend: 'pdfHtml5',
+						exportOptions: {
+							columns: [ 0, 1, 2, 3 ]
+						}
+					},
+					{
+						extend: 'print',
+						exportOptions: {
+							columns: [ 0, 1, 2, 3 ]
+						}
+					}
+				]
 				
 			
 			});
@@ -615,7 +634,7 @@ $(document).ready(function () {
 					<td>${remarks}</td>
 					<td>
 				<!-- Default dropright button -->
-					<div class="btn-group dropright w-100">
+					<div class="btn-group  w-100">
 					<button type="button" class="btn btn-danger text-white font-weight-800 dropdown-toggle " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						Action
 					</button>
@@ -786,6 +805,8 @@ $(document).ready(function () {
 		let productArr ={};
 		let outputFlag = true;
 		let html ='';
+		let msg ='';
+
 		productArr ={
 			prodDayArr:[],
 			prodManHours:[]
@@ -824,17 +845,7 @@ $(document).ready(function () {
 						
 						if(defaultHours > docHours){
 
-							 html += `<div class="alert alert-warning alert-dismissible fade show w-100 mb-1" role="alert">
-							<div class="d-flex justify-content-start align-items-center">
-								<div class="font-weight-bold text-danger pr-2"><i class="fas fa-exclamation"></i> NOTICE:</div>
-								<div>
-									<span class="font-weight-bold">${formatDate}</span> Kindly complete the hours.
-								</div>
-							</div>
-							<button type="button" class="close alert-notice" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">×</span>
-							</button>
-						</div>`;
+							 msg += `&bull; <span class="font-weight-bold">${formatDate}</span> Kindly complete the hours.<br>`;
 
 							outputFlag = false;
 						}
@@ -850,27 +861,27 @@ $(document).ready(function () {
 				}
 
 				if(!flag){
-
-
-					html += `<div class="alert alert-warning alert-dismissible fade show w-100 mb-1" role="alert">
-					<div class="d-flex justify-content-start align-items-center">
-						<div class="font-weight-bold text-danger pr-2"><i class="fas fa-exclamation"></i> NOTICE:</div>
-						<div>
-							<span class="font-weight-bold">${formatDate}</span> Kindly set activities.
-						</div>
-					</div>
-					<button type="button" class="close alert-notice" data-dismiss="alert" aria-label="Close">
-						<span aria-hidden="true">×</span>
-					</button>
-				</div>`;
+					msg += `&bull; <span class="font-weight-bold">${formatDate}</span> Kindly set activities.<br>`;
 
 					outputFlag = false;
 				}
 			}
 		}
 
+		html += `<div class="alert alert-danger alert-dismissible fade show w-100 mb-4" role="alert">
+					<div class="pb-2">
+						<span class="font-weight-bold text-danger"><i class="fas fa-exclamation-circle"></i> ERROR: A problem has been occured while submitting your data.</span>
+					</div>
+					<div>
+						${msg}
+					</div>
+					<button type="button" class="close alert-notice" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>`;
+
 		$("#notice_content").html(html);
-		$(`#notice_content`).toggle(500);
+		$(`#notice_content`).fadeIn(500);
 
 		return outputFlag;
 	}
@@ -882,17 +893,9 @@ $(document).ready(function () {
 
 		let html = `
 
-		<div id="alert_notice_content">
-    <div class="d-flex justify-content-start align-items-center mb-2" id="dropdown_notice" show="false"
-        style="cursor: pointer;">
-        <i class="fad mr-3 fa-caret-down"></i>
-        <div class="w-100 border-top"></div>
-    </div>
     <div id="notice_content" style="display: none;">
         
     </div>
-</div>
-
 		
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
 		<div class="row mt-2">
@@ -904,7 +907,7 @@ $(document).ready(function () {
 		value="${moment().format("MMMM DD, YYYY")}"
 		title="Date">
 		</div>
-		<div class="form-group col-sm-12 col-md-4 col-lg-2 col-xl-1"><button class=" form-control w-100 btn btn-primary addProductionDocument" action="add">Add</button></div>
+		<div class="form-group col-sm-12 col-md-4 col-lg-2 col-xl-1"><button class=" form-control w-100 btn btn-add addProductionDocument" action="add">Add</button></div>
 		</div>
 		<hr style="width:100%;">
             <thead>
@@ -969,14 +972,14 @@ $(document).ready(function () {
                 </td>
 				<td>
 				<!-- Default dropright button -->
-					<div class="btn-group dropright w-100">
-					<button type="button" class="btn btn-danger text-white font-weight-800 dropdown-toggle " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						Action
+					<div class="btn-group w-100">
+					<button type="button" class="btn btn-sm btn-default font-weight-800 dropdown-toggle " style="border:1px solid gray; width:100%;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						Action 
 					</button>
 					<div class="dropdown-menu">
 					<a class="dropdown-item btnOverView"  id="${encryptString(productionID)}" code="${productionCode}" href="javascript:void(0);"><i class="fas fa-list-ul"></i> Overview</a>
 					<a class="dropdown-item ${btnClass}"  id="${encryptString(productionID)}" code="${productionCode}" href="javascript:void(0);"><i class="fas fa-eye"></i> View</a>
-					${productionStatus == 0 ? `<a class="dropdown-item btn-submit"  id="btnSubmit" productionID="${encryptString(productionID)}" code="${productionCode}" revise="${false}" cancel="${false}"  href="javascript:void(0);"><i class="fas fa-paper-plane"></i> Send</a>` : ""}
+					${productionStatus == 0 ? `<a class="dropdown-item"  id="btnSubmit" productionID="${encryptString(productionID)}" code="${productionCode}" revise="${false}" cancel="${false}"  href="javascript:void(0);"><i class="fas fa-paper-plane"></i> Send</a>` : ""}
 					
 					
 					</div>
@@ -1079,68 +1082,95 @@ $(document).ready(function () {
 			action: 			action
         };
 
-		$.ajax({
-			method:      "POST",
-			url:         `production/saveProductionDocument`,
-			data,
-			cache:       false,
-			async:       false,
-			dataType:    "json",
-			beforeSend: function() {
-				$("#loader").show();
-			},
-			success: function(data) {
-			
-				let result = data.split("|");
-
-				let isSuccess   = result[0];
-				let message     = result[1];
-				let insertedID  = result[2];
-				let dateCreated = result[3];
-
-				let swalTitle;
-				if (action == "add") {
-					swalTitle = `${getFormCode("PRD", dateCreated, insertedID)} created successfully!`;
-				} else if (action == "update") {
-					swalTitle = `${getFormCode("PRD", dateCreated, insertedID)} updated successfully!`;
-				}
-
-				if (isSuccess == "true") {
+		
+		Swal.fire({
+            title: 'CREATE PRODUCTION DATES',
+        text: "Are you sure that you want to create a production?",
+            imageUrl: `${base_url}assets/modal/add.svg`,
+            imageWidth: 200,
+            imageHeight: 200,
+            imageAlt: 'Custom image',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#1A1A1A',
+            confirmButtonText: 'Add',
+            allowOutsideClick: false
+          }).then((result) => {
+            if (result.isConfirmed) {
+				$.ajax({
+					method:      "POST",
+					url:         `production/saveProductionDocument`,
+					data,
+					cache:       false,
+					async:       false,
+					dataType:    "json",
+					beforeSend: function() {
+						$("#loader").show();
+					},
+					success: function(data) {
+					
+						let result = data.split("|");
+		
+						let isSuccess   = result[0];
+						let message     = result[1];
+						let insertedID  = result[2];
+						let dateCreated = result[3];
+		
+						let swalTitle;
+						if (action == "add") {
+							swalTitle = `${getFormCode("PRD", dateCreated, insertedID)} created successfully!`;
+						} else if (action == "update") {
+							swalTitle = `${getFormCode("PRD", dateCreated, insertedID)} updated successfully!`;
+						}
+		
+						if (isSuccess == "true") {
+							setTimeout(() => {
+								$("#loader").hide();
+								closeModals();
+								// callback && callback();
+								Swal.fire({
+									icon:              "success",
+									title:             swalTitle,
+									showConfirmButton: false,
+									timer:             2000,
+								});
+								myFormsContent();
+							}, 500);
+						} else {
+							setTimeout(() => {
+								$("#loader").hide();
+								Swal.fire({
+									icon:              "danger",
+									title:             message,
+									showConfirmButton: false,
+									timer:             2000,
+								});
+							}, 500);
+						}
+					},
+					error: function() {
+						setTimeout(() => {
+							$("#loader").hide();
+							showNotification("danger", "System error: Please contact the system administrator for assistance!");
+						}, 500);
+					}
+				}).done(function() {
 					setTimeout(() => {
 						$("#loader").hide();
-						closeModals();
-						// callback && callback();
-						Swal.fire({
-							icon:              "success",
-							title:             swalTitle,
-							showConfirmButton: false,
-							timer:             2000,
-						});
-						myFormsContent();
 					}, 500);
-				} else {
-					setTimeout(() => {
-						$("#loader").hide();
-						Swal.fire({
-							icon:              "danger",
-							title:             message,
-							showConfirmButton: false,
-							timer:             2000,
-						});
-					}, 500);
-				}
-			},
-			error: function() {
-				setTimeout(() => {
-					$("#loader").hide();
-					showNotification("danger", "System error: Please contact the system administrator for assistance!");
-				}, 500);
-			}
-		}).done(function() {
-			setTimeout(() => {
-				$("#loader").hide();
-			}, 500);
-		})
+				})
+
+
+            Swal.fire({
+                icon: 'success',
+                title:  `${getDateSchedule} successfully created!`,
+                showConfirmButton: false,
+                timer: 800
+              })
+            }
+        });
+
+		
 	})
 
 	// ------ EVENT IN MY FORMS CONTENTS-------//
@@ -1168,18 +1198,16 @@ $(document).ready(function () {
 			var getDateEntries = $parent.find(`[name="timePeriodStart"]`).attr("getDateEntries");
 			var getDayEntries = $parent.find(`[name="timePeriodStart"]`).attr("getDayEntries");
 
-			
-		
 			let data = {
 				getTimeStartPeriod		:	getTimeStartPeriod,
 				getTimeEndPeriod		:	getTimeEndPeriod,
 				getLocation				:	getLocation,
-				getClass				:	getClass,
+				getClass				:	(getClass=='Select Class' ? '' : getClass),
 				getClientID				:	getClientID,
-				getClientName			:	getClientName,
+				getClientName			:	(getClientName=='Select Client' ? '' : getClientName),
 				getProjectID			:	getProjectID,
-				getProjectName			:	getProjectName,
-				getStatus				:	getStatus,
+				getProjectName			:	(getProjectName=='Select Project' ? '' : getProjectName),
+				getStatus				:	(getStatus=='Select Status' ? '' : getStatus),
 				getDescription			:	getDescription,
 				getManHours				:	getManHours,
 				createdBy				:	createdBy,
@@ -1252,7 +1280,7 @@ $(document).ready(function () {
 		// readOnly =  (readOnly === "true" ? "true" : " false");
 		let html ="";
 
-		$("#activityTableBody").html(preloader);
+		$("#activityTableBody").html('<tr><td colspan=10>'+preloader+'</td></tr>');
 
 		$(".entries").each(function(){
 			$(this).removeClass("bg-secondary");
@@ -1274,7 +1302,7 @@ $(document).ready(function () {
 
 		setTimeout(() => {
 			$("#activityTableBody").html(html);
-			$(".activityHeader").text(`VIEW ACTIVITIES - ${moment(getDateEntries).format("MMMM DD, YYYY")} - ${getDayEntries}`)
+			$(".activityHeader").text(`VIEW ACTIVITIES: ${moment(getDateEntries).format("MMMM DD, YYYY")} (${getDayEntries})`)
 			updateTableItems();
 			initSelect2();
 		}, 500);
@@ -1518,7 +1546,7 @@ $(document).ready(function () {
 					// DRAFT
 					// button = `
 					// <button 
-					// 	class="btn btn-submit px-5 py-2" 
+					// 	class="btn px-5 py-2" 
 					// 	id="btnSubmit" 
 					// 	productionID="${encryptString(productionID)}"
 					// 	code="${getFormCode("PRD", createdAt, productionID)}"
@@ -1606,7 +1634,7 @@ $(document).ready(function () {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit px-5 py-2" 
+							class="btn px-5 py-2" 
 							id="btnApprove" 
 							productionID="${encryptString(productionID)}"
 							code="${getFormCode("PRD", createdAt, productionID)}"><i class="fas fa-paper-plane"></i>
@@ -1625,7 +1653,7 @@ $(document).ready(function () {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit px-5 py-2" 
+				class="btn px-5 py-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
@@ -2321,7 +2349,7 @@ $(document).ready(function () {
 						} = entry;
 						
 						html +=`
-							<div class="card my-0 p-1 entries ${index == 0 ? `bg-secondary text-white` : ''}"  style="box-shadow: none !important;cursor:pointer;" productionID ="${productionID}"  productionEntriesID ="${productionEntriesID}" isreadOnly="${readOnly}" getDateEntries="${dateEntries}" getDayEntries="${dayEntries}" productionStatus="${productionStatus}">
+							<div class="card my-0 entries ${index == 0 ? `bg-secondary text-white` : ''}"  style="box-shadow: none !important;cursor:pointer;" productionID ="${productionID}"  productionEntriesID ="${productionEntriesID}" isreadOnly="${readOnly}" getDateEntries="${dateEntries}" getDayEntries="${dayEntries}" productionStatus="${productionStatus}">
 								<div class="card-body p-2" style="border: 1px black double;" >
 									<div><span class="card-title" style="font-weight:600;">${moment(dateEntries).format("MMMM DD, YYYY")}</span></div>
 									<small class="card-text" style="font-weight:800;">${dayEntries}</small>
@@ -2337,7 +2365,7 @@ $(document).ready(function () {
 			
 
 			<div class=" card-body col-sm-12 col-md-12 col-lg-10 col-xl-10 p-2 text-left">
-					<h6 class="bg-primary text-light p-3 mb-3"><strong class="activityHeader">VIEW ACTIVITIES - ${moment(entries[0].dateEntries).format("MMMM DD, YYYY")} - ${entries[0].dayEntries}</strong></h6>
+					<h6 class="bg-primary text-light p-3 mb-3"><strong class="activityHeader">VIEW ACTIVITIES: ${moment(entries[0].dateEntries).format("MMMM DD, YYYY")} (${entries[0].dayEntries})</strong></h6>
 					<table class="table table-bordered table-striped table-hover" id="${!readOnly ? "tableForActivity" : "tableForActivity0"}">
 						<thead>
 							<tr style="white-space: nowrap">
@@ -2644,10 +2672,10 @@ $(document).ready(function () {
 									html += `
 									<tr>
 										<td>
-											<small> ${moment(timeStart, 'HH:mm').format('hh:mm A')  || "-"} </small>
+											<small> ${ timeStart ? moment(timeStart, 'HH:mm').format('hh:mm A')  : "-"} </small>
 										</td>
 										<td>
-											<small> ${moment(timeEnd, 'HH:mm').format('hh:mm A') || "-"} </small>
+											<small> ${ timeEnd ? moment(timeEnd, 'HH:mm').format('hh:mm A') : "-"} </small>
 										</td>
 										<td>
 											<small> ${activityLocation || "-"} </small>

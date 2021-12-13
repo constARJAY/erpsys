@@ -27,6 +27,9 @@ class Approval_setup extends CI_Controller {
         $userAccountID  =   $this->input->post("approvalUsers");
         $data           =   [ "moduleID"=>$moduleID, "designationID" => $designationID, "userAccountID" =>$userAccountID];
         $result         =   $this->approval_setup->updateAttachDesignation($data);
+        if($result){
+            $this->approval_setup->updateUndefined();  
+        }
         echo json_encode($result);
     }
 

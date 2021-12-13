@@ -80,6 +80,7 @@ class Operations_model extends CI_Model {
                 $insertID = $this->db->insert_id();
                 $method = $method ? $method : "add";
                 $feedbackMessage = $this->getFeedbackMessage($feedback, $method);
+                insertAudit("insert", $tableName,$feedback);
                 return "true|$feedbackMessage|$insertID";
             }
             return "false|System error: Please contact the system administrator for assistance!";
@@ -91,8 +92,13 @@ class Operations_model extends CI_Model {
     {
         if ($tableName) {
             if ($whereFilter) {
-                $query = $this->db->update($tableName, $tableData, $whereFilter);
-                $method = $method ? $method : "update";
+                $oldData    = $this->db->get_where($tableName, $whereFilter)->result_array();
+                $query      = $this->db->update($tableName, $tableData, $whereFilter);
+                $method     = $method ? $method : "update";
+                $newData    = $this->db->get_where($tableName, $whereFilter)->result_array();
+
+                insertAudit("update",$tableName, $feedback, $oldData[0], $newData[0]);
+              
                 $feedbackMessage = $this->getFeedbackMessage($feedback, $method);
                 $idArr = explode("=", $whereFilter);
                 return $query ? "true|$feedbackMessage|$idArr[1]" : "false|System error: Please contact the system administrator for assistance!";

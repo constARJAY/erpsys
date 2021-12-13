@@ -618,6 +618,7 @@ console.log(`${sessionID}`);
 		} = data && data[0];
 
 		// ----- GET EMPLOYEE DATA -----
+		
 		let {
 			fullname:    employeeFullname    = "",
 			department:  employeeDepartment  = "",
@@ -768,7 +769,7 @@ console.log(`${sessionID}`);
                         required
                         id="noTimeinTimeoutDate"
                         name="noTimeinTimeoutDate"
-                        value="${noTimeinTimeoutDate && moment(noTimeinTimeoutDate).format("MMMM DD, YYYY")}"
+                        value="${noTimeinTimeoutDate ? moment(noTimeinTimeoutDate).format("MMMM DD, YYYY") : ""}"
 						${disabled}
 						unique="${noTimeinTimeoutID}"
 						title="Date"
@@ -847,14 +848,16 @@ console.log(`${sessionID}`);
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
-			$("#noTimeinTimeoutDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			$("#noTimeinTimeoutDate").val(moment().format("MMMM DD, YYYY"));
 			$("#noTimeinTimeoutDate").daterangepicker({
 				autoUpdateInput: false,
 				singleDatePicker: true,
 				showDropdowns: true,
 				autoApply: true,
-				startDate: moment(noTimeinTimeoutDate || new Date).format("YYYY-MM-DD"),
+					minDate:moment().subtract(10, 'days'),
+				startDate: moment(),
 				maxDate: moment(),
+
 				// maxDate: moment().add(80, 'days'),
 				locale: {
 					format: "MMMM DD, YYYY",
@@ -876,6 +879,7 @@ console.log(`${sessionID}`);
 					let optionDate = moment(date).format("YYYY-MM-DD");
 					return holidayData.includes(optionDate) || isActive == '0';
 				},
+			
 			}, function(data) {
 				$("#noTimeinTimeoutDate").val(moment(data).format("MMMM DD, YYYY"));
 			})
@@ -907,6 +911,7 @@ console.log(`${sessionID}`);
 			}
 			
 			//$("#noTimeinTimeoutDate").data("daterangepicker").maxDate = moment();
+		
 			return html;
 		}, 300);
 	}

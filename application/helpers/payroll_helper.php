@@ -11,8 +11,8 @@
             $timeOut = strtotime($timeOut);
 
             $difference = ($timeOut - $timeIn) / 3600; // COMPUTE IN HOURS 
-            $duration   = $difference - $breakDuration;
-            $duration   = $duration > 0 ? $duration : 0;
+            $duration = $difference - $breakDuration;
+            $duration = $duration > 0 ? $duration : 0;
         }
         return $duration;
     }
@@ -211,7 +211,7 @@
             $overtimeRate  = !$isRestDay ? 1.30 : 1.30;
             $nightDiffRate = !$isRestDay ? 0.10 : 0.10;
         }
-        else if ($dayType == "regulary holiday")
+        else if ($dayType == "regular holiday")
         {
             $basicRate     = !$isRestDay ? 2.00 : 2.60;
             $overtimeRate  = !$isRestDay ? 1.30 : 1.30;
@@ -331,9 +331,9 @@
         $total    = $employer + $employee;
 
         return [
-            "employee" => $employee,
-            "employer" => $employer,
-            "total"    => $total,
+            "employee" => 100, // $employee
+            "employer" => 100, // $employer,
+            "total"    => 200, // $total,
         ];
     }
 
@@ -406,6 +406,47 @@
         ];
     }
     // ---------- ********** END PAYROLL ********* ---------
+
+
+
+
+
+
+
+    // ---------- ********** CUTOFF ********** ----------
+    function getCutOff() 
+    {
+        $CI =& get_instance();
+        $sql = "
+        SELECT 
+            *,
+            IF(firstCutOffPayOut, '1', '0') AS firstCutOff,
+            IF(secondCutOffPayOut, '1', '0') AS secondCutOff,
+            IF(thirdCutOffPayOut, '1', '0') AS thirdCutOff,
+            IF(fourthCutOffPayOut, '1', '0') AS fourthCutOff
+        FROM gen_system_setting_tbl";
+        $query = $CI->db->query($sql);
+        return $query ? $query->row() : null;
+    }
+
+    function getCutOffCount()
+    {
+        $count = 0;
+
+        $cutoff = getCutOff();
+        $firstCutOff  = $cutoff->firstCutOff ?? 0;
+        $secondCutOff = $cutoff->secondCutOff ?? 0;
+        $thirdCutOff  = $cutoff->fthirdutOff ?? 0;
+        $fourthCutOff = $cutoff->fiourthutOff ?? 0;
+
+        if ($firstCutOff == 1) $count++;
+        if ($secondCutOff == 1) $count++;
+        if ($thirdCutOff == 1) $count++;
+        if ($fourthCutOff == 1) $count++;
+
+        return $count;
+    }
+    // ---------- ********** END CUTOFF ********** ----------
 
 
     

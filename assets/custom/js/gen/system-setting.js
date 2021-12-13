@@ -1,0 +1,259 @@
+let systemSettingData;
+let placing;
+$(document).ready(function(){
+    systemSettingData   = getTableData(`gen_system_setting_tbl`);
+    placing             = ["First", "Second","Third","Fourth"];
+    pageContent();
+
+    $(document).on("click", ".btnUpdate", function(){
+        let modalBodyContent    = "", modalHeader = "";
+        let thisAction          = $(this).attr("givenaction");
+            switch (thisAction) {
+                case "cuttoff":
+                        modalHeader      = "CUT OFF";
+                        modalBodyContent += getCutOffModal();
+                    break;
+                case "pettycash":
+                        modalHeader = "PETTY CASH";
+                        modalBodyContent += getPettyCash();
+                    break;
+                case "clientfund":
+                        modalHeader = "CLIENT FUND";
+                        modalBodyContent  += getClientFundModal();
+                    break;    
+                default:
+                        modalHeader = "APPROVAL";
+                        modalBodyContent  += getApprovalModal();
+                    break;
+            }
+        
+        let modalBody           =   `<form id="system_setting_form">${modalBodyContent}</form>`;
+        let modalFooterContent  =   `<button class="btn btn-save px-5 p-2" id="btnUpdate" givenaction="${thisAction}" settingid="${encryptString("1")}"><i class="fas fa-save"></i>&nbsp; Update</button>
+                                    <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i>&nbsp;Cancel</button>`;
+        $(".modal_content_header").text(`UPDATE ${modalHeader}`);
+        $("#modal_content_body").html(modalBody);
+        $("#modal_content_footer").html(modalFooterContent);
+        setTimeout(() => {
+            $("#modal_content").modal("show");
+            initAll();
+        }, 500);
+    });
+    
+    $(document).on("click", "#btnUpdate", function(){
+        let condition          = validateForm("system_setting_form");
+        let systemSettingID    = decryptString($(this).attr("settingid"));
+        let feedback;
+        switch ($(this).attr("givenaction")) {
+            case "cuttoff":
+                    feedback = "Cutoff";
+                break;
+            case "pettycash":
+                feedback = "Petty Cash";
+                break;
+            case "clientfund":
+                feedback = "Client Fund";
+                break;    
+            default:
+                feedback = "Approval";
+                break;
+        }
+
+        if(condition == true){
+            let data = getFormData("system_setting_form", true);
+            data["tableData"]["updatedBy"]   =  sessionID;
+            data["whereFilter"]              =  "systemSettingID ="+systemSettingID;
+            data["tableName"]                =  "gen_system_setting_tbl";
+            data["feedback"]                 =  feedback;
+            sweetAlertConfirmation("update", "System Setting","modal_content", null , data, true, pageContent);
+        }
+        
+    });
+    
+    $(document).on("click",".btnCancel", function(){
+        let condition = isFormEmpty("system_setting_form");
+        if(!condition){ 
+            sweetAlertConfirmation("cancel", "System Setting","modal_content");
+        }else{
+            $("#modal_content").modal("hide");
+        }
+        
+    });
+    
+    
+
+    function getApprovalModal(isEdit = false){
+        let {   minimumToApprove = "",
+                maximumToApprove = ""
+            } = systemSettingData[0];
+
+        let html = `
+                    <div class="row"> 
+                        <div class="col-md-12 col-sm-12">
+                            <div class="form-group">
+                                <label for="minimumToApprove" >Minimum Days to Approve <code>*</code></label>
+                                <input type="text" class="form-control validate" min="1" max="31 name="minimumToApprove" id="minimumToApprove" 
+                                    data-allowcharacters="[0-9]" value="${minimumToApprove}" required>
+                                <div class="invalid-feedback d-block" id="invalid-minimumToApprove"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-sm-12">
+                            <div class="form-group">
+                                <label for="">Maximum Days to Approve <code>*</code></label>
+                                <input type="text" class="form-control validate" min="1" max="31" name="maximumToApprove" id="maximumToApprove" 
+                                    data-allowcharacters="[0-9]" value="${maximumToApprove}" required >
+                                <div class="invalid-feedback d-block" id="invalid-maximumToApprove"></div>
+                            </div>
+                        </div>
+                    </div>`;
+        return html;
+    }
+    
+    function getCutOffModal(isEdit = false){
+        let html = "";
+        placing.map((value,index)=>{
+            let startDate    = `${value.toLowerCase()}CutOffDateStart`;
+            let endDate      = `${value.toLowerCase()}CutOffDateEnd`;
+            let payout       = `${value.toLowerCase()}CutOffPayOut`;
+            
+            html += `
+                    <div class="row"> 
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label for="${startDate}" >Cut off Start <code>*</code></label>
+                                <input type="text" class="form-control validate" min="1" max="31 name="${startDate}" id="${startDate}" 
+                                    data-allowcharacters="[0-9]" value="${systemSettingData[0][startDate] || "" }" ${index < 2 ? "required" : ""}>
+                                <div class="invalid-feedback d-block" id="invalid-${startDate}"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label for="${endDate}" >Cut off End <code>*</code></label>
+                                <input type="text" class="form-control validate" min="1" max="31 name="${endDate}" id="${endDate}" 
+                                    data-allowcharacters="[0-9]" value="${systemSettingData[0][endDate] || "" }" ${index < 2 ? "required" : ""}>
+                                <div class="invalid-feedback d-block" id="invalid-${endDate}"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-sm-12">
+                            <div class="form-group">
+                                <label for="${payout}">Payout Date <code>*</code></label>
+                                <input type="text" class="form-control validate" min="1" max="31" name="${payout}" id="${payout}" 
+                                    data-allowcharacters="[0-9]" value="${systemSettingData[0][payout] || ""}" ${index < 2 ? "required" : ""} >
+                                <div class="invalid-feedback d-block" id="invalid-${payout}"></div>
+                            </div>
+                        </div>
+                    </div>`;
+        });
+        return html;
+    }
+    
+    function getPettyCash(isEdit = false){
+
+        let html = `
+                    <div class="row"> 
+                        <div class="col-md-12 col-sm-12">
+                            <div class="form-group">
+                                <label for="${systemSettingData[0]["pettyCashReplenishmentLimit"]}" >Minimum Days to Approve <code>*</code></label>
+                                <input type="text" class="form-control validate input-quantity" min="1" max="31 name="${systemSettingData[0]["pettyCashReplenishmentLimit"]}" id="${systemSettingData[0]["pettyCashReplenishmentLimit"]}" 
+                                    data-allowcharacters="[0-9]" value="${systemSettingData[0]["pettyCashReplenishmentLimit"]}" required>
+                                <div class="invalid-feedback d-block" id="invalid-${systemSettingData[0]["pettyCashReplenishmentLimit"]}"></div>
+                            </div>
+                        </div>
+                    </div>`;
+        return html;
+    }
+    
+    function getClientFundModal(isEdit = false){
+          let html = `
+                    <div class="row"> 
+                        <div class="col-md-12 col-sm-12">
+                            <div class="form-group">
+                                <label for="${systemSettingData[0]["clientFundReplenishmentLimit	"]}" >Minimum Days to Approve <code>*</code></label>
+                                <input type="text" class="form-control validate input-quantity" min="1" max="31 name="${systemSettingData[0]["clientFundReplenishmentLimit	"]}" id="${systemSettingData[0]["clientFundReplenishmentLimit	"]}" 
+                                    data-allowcharacters="[0-9]" value="${systemSettingData[0]["clientFundReplenishmentLimit"]}" required>
+                                <div class="invalid-feedback d-block" id="invalid-${systemSettingData[0]["clientFundReplenishmentLimit	"]}"></div>
+                            </div>
+                        </div>
+                    </div>`;
+        return html;
+    }
+
+    function pageContent(){
+        let tableData   = systemSettingData[0];
+        let approvalRow = `
+                            <div class="col-lg-12 col-12">
+                                <label for="">Minimum Days to Approve</label>
+                                <p> <span>${tableData.minimumToApprove} Day/s</span> </p>
+                            </div>
+                            <div class="col-lg-12 col-12">
+                                <label for="">Maximum Days to Approve</label>
+                                <p> <span>${tableData.maximumToApprove} Day/s</span> </p>
+                            </div>`;
+        $(".approval-row").html(approvalRow);
+
+        let cutOffRow = "";
+        placing.map(value=>{
+            let startDate   = tableData[`${value.toLowerCase()}CutOffDateStart`];
+            let endDate     = tableData[`${value.toLowerCase()}CutOffDateEnd`];
+            let payout      = tableData[`${value.toLowerCase()}CutOffPayOut`]; 
+            cutOffRow += startDate ? 
+                                `   <div class="col-lg-4 col-12">
+                                        <label for="">Cutoff Number	</label>
+                                        <p> <span>${value} Cut off</span> </p>
+                                    </div>
+                                    <div class="col-lg-4 col-12">
+                                        <label for="">Cutoff Date</label>
+                                        <p> <span>${placingNumber(parseInt(startDate))} - ${placingNumber(parseInt(endDate))} day of the month</span> </p>
+                                    </div>
+                                    <div class="col-lg-4 col-12">
+                                        <label for="">Payout Date</label>
+                                        <p> <span>${placingNumber(parseInt(payout))} day of the month</span> </p>
+                                    </div>` : ``;
+        });
+
+        $(".cut-off-row").html(cutOffRow);
+
+        let pettyCashReplenishmentRow   = `
+                                            <div class="col-lg-12 col-12">
+                                                <label for="">Replenishment Limit</label>
+                                                <p> <span>${formatAmount(tableData.pettyCashReplenishmentLimit, true)}</span> </p>
+                                            </div>`;
+        $(".petty-cash-replenishment-row").html(pettyCashReplenishmentRow);
+
+        let clientFundReplenishmentRow  = `
+                                            <div class="col-lg-12 col-12">
+                                                <label for="">Replenishment Limit</label>
+                                                <p> <span>${formatAmount(tableData.clientFundReplenishmentLimit, true)}</span> </p>
+                                            </div>`;
+        $(".client-fund-replenishment-row").html(clientFundReplenishmentRow);
+
+    }
+
+    function placingNumber(number){
+        let stringNumber    =   number.toString();
+        let stringLength    =   stringNumber.length;
+        let lastNumber      =   stringNumber.charAt(stringLength - 1);
+        let extension       =   "th";
+        if(lastNumber == "3"){
+            extension = "rd";
+        }else if(lastNumber == "2"){
+            extension = "nd";
+        }else if(lastNumber == "1"){
+            extension = "st";
+        }
+        
+        if(number > 10 && number < 20){
+            extension = "th";
+        }
+    
+        return `${number}${extension}`;
+    }
+
+
+});
+
+
+
+
+
+
+

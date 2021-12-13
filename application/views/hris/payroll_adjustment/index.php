@@ -45,7 +45,7 @@
 						<li class="breadcrumb-item active">Payroll Adjustment</li>
 					</ul>
 					<h1 class="mt-3">Payroll Adjustment</h1>
-					<span>This module is used to monitor and view the attendance activity for each employee.</span>
+					<span>This module is used to generate and monitor the adjustments for the payroll before the payroll run.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">
 						<?php if(isCreateAllowed(111)){ ?>

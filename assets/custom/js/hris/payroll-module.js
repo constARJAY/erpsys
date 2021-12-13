@@ -162,9 +162,12 @@ $(document).ready(function() {
             }
         }
 
-        ["#tableForApproval", "#tableMyForms", "#tablePayroll"].map(elementID => {
-            manipulateDataTables(elementID);
-        })
+        // ["#tableForApproval", "#tableMyForms", "#tablePayroll"].map(elementID => {
+        //     manipulateDataTables(elementID);
+        // })
+		manipulateDataTables("#tableForApproval");
+		manipulateDataTables("#tableMyForms");
+		manipulateDataTables("#tablePayroll");
 	}
 	// ----- END DATATABLES -----
 
@@ -843,7 +846,8 @@ $(document).ready(function() {
 													name="deductSss" 
 													mandates="child"
 													sssBasis="${sssBasis}"
-													${sssDeduction > 0 ? "checked" : ""}>
+													${sssDeduction > 0 ? "checked" : ""}
+													${grossPay > 0 ? "" : "disabled"}>
 											</span>
 										</div>
 										<input type="text" 
@@ -865,7 +869,8 @@ $(document).ready(function() {
 													name="deductPhic" 
 													mandates="child"
 													phicBasis="${phicBasis}"
-													${phicDeduction > 0 ? "checked" : ""}>
+													${phicDeduction > 0 ? "checked" : ""}
+													${grossPay > 0 ? "" : "disabled"}>
 											</span>
 										</div>
 										<input type="text" 
@@ -887,7 +892,8 @@ $(document).ready(function() {
 													name="deductHdmf" 
 													mandates="child"
 													hdmfBasis="${hdmfBasis}"
-													${hdmfDeduction > 0 ? "checked" : ""}>
+													${hdmfDeduction > 0 ? "checked" : ""}
+													${grossPay > 0 ? "" : "disabled"}>
 											</span>
 										</div>
 										<input type="text" 
@@ -909,7 +915,8 @@ $(document).ready(function() {
 													name="deductWithHolding" 
 													mandates="child"
 													withHoldingBasis="${withHoldingBasis}"
-													${withHoldingDeduction > 0 ? "checked" : ""}>
+													${withHoldingDeduction > 0 ? "checked" : ""}
+													${grossPay > 0 ? "" : "disabled"}>
 											</span>
 										</div>
 										<input type="text" 
@@ -926,7 +933,8 @@ $(document).ready(function() {
 											<span class="input-group-text">
 												<input type="checkbox" 
 													name="deductLoan" 
-													${loanDeduction > 0 ? "checked" : ""}>
+													${loanDeduction > 0 ? "checked" : ""}
+													${grossPay > 0 ? "" : "disabled"}>
 											</span>
 										</div>
 										<input type="text" 
@@ -1713,11 +1721,11 @@ $(document).ready(function() {
 
 		$parent.find(`[name="sssDeduction"]`).val(deduction);
 
-		const deductSssLength  = $(`[name="deductSss"]`).length;
-		const deductSssChecked = $(`[name="deductSss"]:checked`).length;
+		// const deductSssLength  = $(`[name="deductSss"]`).length;
+		// const deductSssChecked = $(`[name="deductSss"]:checked`).length;
 
-		let checkParent = deductSssLength == deductSssChecked;
-		$(`[name="checkAllSss"]`).prop("checked", checkParent);
+		// let checkParent = deductSssLength == deductSssChecked;
+		// $(`[name="checkAllSss"]`).prop("checked", checkParent);
 
 		updateWithHoldingTax($parent);
 	})
@@ -1733,11 +1741,11 @@ $(document).ready(function() {
 
 		$parent.find(`[name="phicDeduction"]`).val(deduction);
 
-		const deductPhicLength  = $(`[name="deductPhic"]`).length;
-		const deductPhicChecked = $(`[name="deductPhic"]:checked`).length;
+		// const deductPhicLength  = $(`[name="deductPhic"]:not([disabled])`).length;
+		// const deductPhicChecked = $(`[name="deductPhic"]:checked`).length;
 
-		let checkParent = deductPhicLength == deductPhicChecked;
-		$(`[name="checkAllPhic"]`).prop("checked", checkParent);
+		// let checkParent = deductPhicLength == deductPhicChecked;
+		// $(`[name="checkAllPhic"]`).prop("checked", checkParent);
 
 		updateWithHoldingTax($parent);
 	})
@@ -1753,11 +1761,11 @@ $(document).ready(function() {
 
 		$parent.find(`[name="hdmfDeduction"]`).val(deduction);
 
-		const deductHdmfLength  = $(`[name="deductHdmf"]`).length;
-		const deductHdmfChecked = $(`[name="deductHdmf"]:checked`).length;
+		// const deductHdmfLength  = $(`[name="deductHdmf"]:not([disabled])`).length;
+		// const deductHdmfChecked = $(`[name="deductHdmf"]:checked`).length;
 
-		let checkParent = deductHdmfLength == deductHdmfChecked;
-		$(`[name="checkAllHdmf"]`).prop("checked", checkParent);
+		// let checkParent = deductHdmfLength == deductHdmfChecked;
+		// $(`[name="checkAllHdmf"]`).prop("checked", checkParent);
 
 		updateWithHoldingTax($parent);
 	})
@@ -1765,11 +1773,11 @@ $(document).ready(function() {
 	$(document).on("change", `[name="deductWithHolding"]`, function() {
 		$parent = $(this).closest(`tr`);
 
-		const deductWithHoldingLength  = $(`[name="deductWithHolding"]`).length;
-		const deductWithHoldingChecked = $(`[name="deductWithHolding"]:checked`).length;
+		// const deductWithHoldingLength  = $(`[name="deductWithHolding"]`).length;
+		// const deductWithHoldingChecked = $(`[name="deductWithHolding"]:checked`).length;
 
-		let checkParent = deductWithHoldingLength == deductWithHoldingChecked;
-		$(`[name="checkAllWithHolding"]`).prop("checked", checkParent);
+		// let checkParent = deductWithHoldingLength == deductWithHoldingChecked;
+		// $(`[name="checkAllWithHolding"]`).prop("checked", checkParent);
 
 		updateWithHoldingTax($parent);
 	})
@@ -1778,10 +1786,10 @@ $(document).ready(function() {
 		$parent = $(this).closest(`tr`);
 
 		const isChecked = $(this).prop("checked");
-		$parent.find(`[name="deductSss"]`).prop("checked", isChecked).trigger("change");
-		$parent.find(`[name="deductPhic"]`).prop("checked", isChecked).trigger("change");
-		$parent.find(`[name="deductHdmf"]`).prop("checked", isChecked).trigger("change");
-		$parent.find(`[name="deductWithHolding"]`).prop("checked", isChecked).trigger("change");
+		$parent.find(`[name="deductSss"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+		$parent.find(`[name="deductPhic"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+		$parent.find(`[name="deductHdmf"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+		$parent.find(`[name="deductWithHolding"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 
 		const deductMandateLength  = $(`[name="deductMandates"]`).length;
 		const deductMandateChecked = $(`[name="deductMandates"]:checked`).length;
@@ -1827,37 +1835,37 @@ $(document).ready(function() {
 	// ----- CHECK ALL -----
 	$(document).on("change", `[name="checkAllHoldSalary"]`, function() { // HOLD SALARY
 		const isChecked = $(this).prop("checked");
-		$(`[name="holdSalary"]`).prop("checked", isChecked).trigger("change");
+		$(`[name="holdSalary"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
 
 	$(document).on("change", `[name="checkAllDeductMandates"]`, function() { // MANDATES
 		const isChecked = $(this).prop("checked");
-		$(`[name="deductMandates"]`).prop("checked", isChecked).trigger("change");
+		$(`[name="deductMandates"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
 
 	$(document).on("change", `[name="checkAllDeductLoan"]`, function() { // LOAN
 		const isChecked = $(this).prop("checked");
-		$(`[name="deductLoan"]`).prop("checked", isChecked).trigger("change");
+		$(`[name="deductLoan"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
 
 	$(document).on("change", `[name="checkAllSss"]`, function() { // LOAN
 		const isChecked = $(this).prop("checked");
-		$(`[name="deductSss"]`).prop("checked", isChecked).trigger("change");
+		$(`[name="deductSss"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
 
 	$(document).on("change", `[name="checkAllPhic"]`, function() { // LOAN
 		const isChecked = $(this).prop("checked");
-		$(`[name="deductPhic"]`).prop("checked", isChecked).trigger("change");
+		$(`[name="deductPhic"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
 
 	$(document).on("change", `[name="checkAllHdmf"]`, function() { // LOAN
 		const isChecked = $(this).prop("checked");
-		$(`[name="deductHdmf"]`).prop("checked", isChecked).trigger("change");
+		$(`[name="deductHdmf"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
 
 	$(document).on("change", `[name="checkAllWithHolding"]`, function() { // LOAN
 		const isChecked = $(this).prop("checked");
-		$(`[name="deductWithHolding"]`).prop("checked", isChecked).trigger("change");
+		$(`[name="deductWithHolding"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
 	// ----- END CHECK ALL -----
 
@@ -2002,6 +2010,55 @@ $(document).ready(function() {
 		}
 	});
 	// ----- END BUTTON SUBMIT -----
+
+
+	// ----- APPROVE DOCUMENT -----
+	$(document).on("click", "#btnApprove", function () {
+		const id       = decryptString($(this).attr("payrollID"));
+		const feedback = $(this).attr("code") || getFormCode("PAY", dateToday(), id);
+		let tableData  = getTableData("hris_payroll_tbl", "", "payrollID = " + id);
+
+		if (tableData) {
+			let approversID     = tableData[0].approversID;
+			let approversStatus = tableData[0].approversStatus;
+			let approversDate   = tableData[0].approversDate;
+			let employeeID      = tableData[0].employeeID;
+			let createdAt       = tableData[0].createdAt;
+
+			let data = getPayrollData("update", "approve", "2", id);
+			data["approversStatus"] = updateApproveStatus(approversStatus, 2);
+			let dateApproved = updateApproveDate(approversDate)
+			data["approversDate"] = dateApproved;
+
+			let status, notificationData;
+			if (isImLastApprover(approversID, approversDate)) {
+				status = 2;
+				notificationData = {
+					moduleID:                110,
+					tableID:                 id,
+					notificationTitle:       "Payroll Module",
+					notificationDescription: `${feedback}: Your request has been approved.`,
+					notificationType:        7,
+					employeeID,
+				};
+			} else {
+				status = 1;
+				notificationData = {
+					moduleID:                110,
+					tableID:                 id,
+					notificationTitle:       "Payroll Module",
+					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
+					notificationType:         2,
+					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
+				};
+			}
+
+			data["payrollStatus"] = status;
+
+			savePayroll(data, "approve", notificationData, pageContent);
+		}
+	});
+	// ----- END APPROVE DOCUMENT -----
 
 
 	// ----- REJECT DOCUMENT -----

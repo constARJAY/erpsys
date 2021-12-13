@@ -124,7 +124,50 @@ class PayrollModule_model extends CI_Model {
             'hris_payroll_items_tbl', 
             $data,
             'payrollItemID');
-        $this->updateOtherPayrollItems($payrollID, $idStr);
+
+        if ($idStr) {
+            $this->updateOtherPayrollItems($payrollID, $idStr);
+        }
+    }
+
+    public function getTotalMandateDeduction($payrollID = 0, $employeeID = 0)
+    {
+        $sql = "
+        SELECT 
+            (sssDeduction + (IF(sssAdjustment, sssAdjustment, 0)) 
+            + phicDeduction + (IF(phicAdjustment, phicAdjustment, 0)) 
+            + hdmfDeduction + (IF(hdmfAdjustment, hdmfAdjustment, 0)) 
+            + withHoldingDeduction + (IF(withHoldingAdjustment, withHoldingAdjustment, 0))) AS totalDeduction 
+        FROM hris_payroll_items_tbl WHERE payrollID = $payrollID AND employeeID = $employeeID";
+        $query = $this->db->query($sql);
+        $result = $query ? $query->row() : null;
+        return $result ? $result->totalDeduction ?? 0 : 0;
+    }
+
+    public function updateTotalDeduction($payrollID = 0)
+    {
+        $items = $this->getAllPayrollItems($payrollID);
+        if ($items && !empty($items))
+        {
+            $data = [];
+
+            foreach ($items as $item) 
+            {
+                $employeeID    = $item['employeeID'];
+                $payrollItemID = $item['payrollItemID'];
+
+                $totalMandateDeduction = $this->getTotalMandateDeduction($payrollID, $employeeID);
+                $data[] = [
+                    'payrollItemID'  => $payrollItemID,
+                    'totalDeduction' => $totalMandateDeduction
+                ];
+            }
+
+            if ($data && !empty($data))
+            {
+                $this->updateBatchPayrollItems($payrollID, $data);
+            }
+        }
     }
 
     public function savePayrollItems($action = "", $payrollItems = [], $payrollID = "", $idStr = "")
@@ -148,6 +191,7 @@ class PayrollModule_model extends CI_Model {
                 }
                 $idStr = implode(', ', $idArr);
                 $this->updateBatchPayrollItems($payrollID, $data, $idStr);
+                $this->updateTotalDeduction($payrollID);
             }
         }
         return false;
@@ -183,6 +227,7 @@ class PayrollModule_model extends CI_Model {
                 employeeID,
                 CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
                 employeeCode,
+                IF(employeeBankAccountNo AND employeeBankAccountNo IS NOT NULL, 1, 0) AS hasBank,
                 IF(employeeProfile IS NOT NULL, employeeProfile, 'default.jpg') AS profile
             FROM hris_payroll_items_tbl AS hpit
                 LEFT JOIN hris_employee_list_tbl USING(employeeID)
@@ -357,4 +402,134 @@ class PayrollModule_model extends CI_Model {
     }
     // ---------- ********** END PAYROLL ADJUSTMENT ********** ---------
 
+
+
+
+
+    // ---------- ********** SALARY RELEASE ********** ----------
+    public function insertHoldSalary($payrollID = 0)
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
+
+        if ($payrollID)
+        {
+            $payrollItems = $this->getAllPayrollItems($payrollID);
+            if ($payrollItems && !empty($payrollItems))
+            {   
+                $data = [];
+                foreach ($payrollItems as $item) 
+                {
+                    $payrollItemID = $item['payrollItemID'];
+                    $payrollID     = $item['payrollID'];
+                    $holdSalary    = $item['holdSalary'];
+                    $employeeID    = $item['employeeID'];
+                    $netPay        = $item['netPay'];
+                    
+                    if ($holdSalary == 1)
+                    {
+                        $data[] = [
+                            'payrollID'         => $payrollID,
+                            'payrollItemID'     => $payrollItemID,
+                            'employeeID'        => $employeeID,
+                            'payrollHoldStatus' => 1,
+                            'netPay'            => $netPay,
+                            'createdBy'         => $sessionID,
+                            'updatedBy'         => $sessionID
+                        ];
+                    }
+                }
+
+                if ($data && !empty($data))
+                {
+                    $query = $this->db->insert_batch("hris_salary_release_tbl", $data);
+                    return $query ? true : false;
+                }
+            }
+        }
+        return false;
+    }
+    // ---------- ********** END SALARY RELEASE ********** ----------
+
+
+
+
+
+    // ---------- ********** PAYROLL REGISTER ********** ----------
+    public function insertPayrollRegisterItems($payrollID = 0, $payrollRegisterID = 0)
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
+
+        $items = $this->getAllPayrollItems($payrollID);
+        if ($items && !empty($items))
+        {
+            $data = [];
+            foreach ($items as $item) 
+            {
+                $data[] = [
+                    'payrollRegisterID'      => $payrollRegisterID,
+                    'payrollID'              => $payrollID,
+                    'basicSalary'            => $item['basicSalary'],
+                    'basicPay'               => $item['basicPay'],
+                    'holidayPay'             => ($item['holidayPay'] ?? 0) + ($item['holidayAdjustment']),
+                    'overtimePay'            => ($item['overtimePay'] ?? 0) + ($item['overtimeAdjustment'] ?? 0),
+                    'nightDifferentialPay'   => ($item['nightDifferentialPay'] ?? 0) + ($item['nightDifferentialAdjustment'] ?? 0),
+                    'allowance'              => ($item['allowance'] ?? 0) + ($item['allowanceAdjustment'] ?? 0),
+                    'additionalAdjustment'   => ($item['otherAdjustment'] ?? 0),
+                    'lateUndertimeDeduction' => ($item['lateUndertimeDeduction'] ?? 0) + ($item['lateUndertimeAdjustment'] ?? 0),
+                    'lwopDeduction'          => ($item['lwopDeduction'] ?? 0) + ($item['lwopAdjustment'] ?? 0),
+                    'grossPay'               => $item['grossPay'] ?? 0,
+                    'sssDeduction'           => ($item['sssDeduction'] ?? 0) + ($item['sssAdjustment'] ?? 0),
+                    'phicDeduction'          => ($item['phicDeduction'] ?? 0) + ($item['phicAdjustment'] ?? 0),
+                    'hdmfDeduction'          => ($item['hdmfDeduction'] ?? 0) + ($item['hdmfAdjustment'] ?? 0),
+                    'withHoldingDeduction'   => ($item['withHoldingDeduction'] ?? 0) + ($item['withHoldingAdjustment'] ?? 0), 
+                    'loanDeduction'          => ($item['loanDeduction'] ?? 0) + ($item['loanAdjustment'] ?? 0),
+                    'totalMandates'          => ($item['totalDeduction'] ?? 0),
+                    'otherDeductions'        => 0,
+                    'netPay'                 => $item['netPay'] ?? 0,
+                    'salaryWages'            => $item['grossPay'] - (($item['allowance'] ?? 0) + ($item['allowanceAdjustment'] ?? 0)),
+                    'onHoldSalary'           => $item['holdSalary'] == 1 ? $item['grossPay'] : 0, 
+                    'salaryOnBank'           => $item['holdSalary'] == 0 && $item['hasBank'] == 1 ? $item['grossPay'] : 0,
+                    'salaryOnCheck'          => $item['holdSalary'] == 0 && $item['hasBank'] == 1 ? 0 : $item['grossPay'],
+                    'totalSalary'            => $item['grossPay'],
+                    'createdBy'              => $sessionID,
+                    'updatedBy'              => $sessionID,
+                ];
+            }
+
+            if ($data && !empty($data))
+            {
+                $query = $this->db->insert_batch('hris_payroll_register_items_tbl', $data);
+                return $query ? true : false;
+            }
+        }
+        return false;
+    }
+
+    public function insertPayrollRegister($payrollID = 0)
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
+
+        $payroll = $this->getPayrollData($payrollID);
+        if ($payroll && !empty($payroll))
+        {
+            $data = [
+                'payrollID'             => $payrollID,
+                'payrollCode'           => $payroll->payrollCode,
+                'employeeID'            => 0,
+                'payrollRegisterStatus' => 0,
+                'createdBy'             => $sessionID,
+                'updatedBy'             => $sessionID,
+            ];
+            $query = $this->db->insert('hris_payroll_register_tbl', $data);
+            if ($query)
+            {
+                $payrollRegisterID   = $this->db->insert_id();
+                $payrollRegisterCode = getFormCode("PR", date("Y-m-d"), $payrollRegisterID);
+                $this->db->update("hris_payroll_register_tbl", ["payrollRegisterCode" => $payrollRegisterCode], ["payrollRegisterID" => $payrollRegisterID]);
+
+                $payrollRegisterItems = $this->insertPayrollRegisterItems($payrollID, $payrollRegisterID);
+            }
+        }
+    }
+    // ---------- ********** END PAYROLL REGISTER ********** ----------
 }

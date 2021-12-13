@@ -869,294 +869,384 @@ $(document).ready(function() {
 			success    = []
 		} = data;
 
-		let notificationDisplay = dipslayFileUploadNotification(errors, success);
+		let html = '';
 
-		let columnDatesHTML = "";
-		columns.map(col => {
-			const { day, date, number } = col;
-			columnDatesHTML += `
-			<th class="thDay text-center">
-				<div>${number}</div>
-				<small>${day}</small>
-			</th>`;
-		});
-
-		const displayData = (status = "", data) => {
-			let html = "";
-			if (data) {
-				const { 
-					scheduleDate,    
-					scheduleIn,      
-					scheduleOut,     
-					scheduleBreakDuration, 
-					scheduleDuration, 
-					restDay,
-					finalCheckIn,
-					finalCheckOut,
-					checkIn,          
-					checkOut,         
-					noTimeIn,        
-					noTimeOut,        
-					noInOutID,        
-					noInOutReference, 
-					overtimeIn,       
-					overtimeOut,      
-					overtimeBreakDuration, 
-					overtimeID,      
-					overtimeReference, 
-					leaveIn,          
-					leaveOut,        
-					leaveID,          
-					leaveReference,  
-					leaveType, 
-					leaveWorkingDay,
-					leaveDuration,
-					checkDuration,   
-					basicHours,       
-					overtimeHours,    
-					nightDifferential, 
-					totalHours,      
-					status:scheduleStatus,           
-				} = data;
-
-				const NO_TIME_IN_OUT = `${base_url}/assets/images/attendance/no-time-in-out.svg`;
-				const ABSENT  = `${base_url}/assets/images/attendance/absent.svg`;
-				const ONGOING = `${base_url}/assets/images/attendance/ongoing.svg`;
-
-				// DISPLAY NG LEAVE WHILE HAVING PRODUCTION
-				const elementAttr = `
-					scheduleDate          = "${scheduleDate}"
-					scheduleIn            = "${scheduleIn}"
-					scheduleOut           = "${scheduleOut}"
-					scheduleBreakDuration = "${scheduleBreakDuration}"
-					scheduleDuration      = "${scheduleDuration}"
-					restDay				  = "${restDay}"
-					finalCheckIn          = "${finalCheckIn}"
-					finalCheckOut         = "${finalCheckOut}"
-					checkIn               = "${checkIn}"
-					checkOut              = "${checkOut}"
-					noTimeIn              = "${noTimeIn}"
-					noTimeOut             = "${noTimeOut}"
-					noInOutID             = "${noInOutID}"
-					noInOutReference      = "${noInOutReference}"
-					overtimeIn            = "${overtimeIn}"
-					overtimeOut           = "${overtimeOut}"
-					overtimeBreakDuration = "${overtimeBreakDuration}"
-					overtimeID            = "${overtimeID}"
-					overtimeReference     = "${overtimeReference}"
-					leaveIn               = "${leaveIn}"
-					leaveOut              = "${leaveOut}"
-					leaveID               = "${leaveID}"
-					leaveReference        = "${leaveReference}"
-					leaveType             = "${leaveType}"
-					leaveWorkingDay       = "${leaveWorkingDay}"
-					leaveDuration         = "${leaveDuration}"
-					checkDuration         = "${checkDuration}"
-					basicHours            = "${basicHours}"
-					overtimeHours         = "${overtimeHours}"
-					totalHours            = "${totalHours}"
-					nightDifferential     = "${nightDifferential}"
-					status                = "${status}"`;
-
-				if (status == "COMPLETE") {
-					html = `
-					<a href="javascript:void(0)"
-						class="viewAttendance"
-						${elementAttr}>${decimalToHours(totalHours)}</a>`;
-				} else if (status == "REST_DAY" || status == "NO_SCHEDULE") {
-					html = `
-					<a href="javascript:void(0)"
-						class="viewAttendance font-weight-bold text-success"
-						${elementAttr}>RD</a>`;
-				} else if (status == "NO_TIME_IN" || status == "NO_TIME_OUT") {
-					html = `
-					<a href="javascript:void(0)"
-						class="viewAttendance"
-						${elementAttr}>
-						<img src="${NO_TIME_IN_OUT}" 
-							class="img-rounded"
-							alt="${status}"
-							title="${status}"
-							style="width: 40px; height: 40px;">
-					</a>`;
-				} else if (status == "ONGOING") {
-					html = `
-					<a href="javascript:void(0)"
-						class="viewAttendance"
-						${elementAttr}>
-						<img src="${ONGOING}" 
-							class="img-rounded"
-							alt="${status}"
-							title="${status}"
-							style="width: 40px; height: 40px;">
-					</a>`;
-				} else if (status == "ABSENT") {
-					html = `
-					<a href="javascript:void(0)"
-						class="viewAttendance"
-						${elementAttr}>
-						<img src="${ABSENT}" 
-							class="img-rounded"
-							alt="${status}"
-							title="${status}"
-							style="width: 30px; height: 30px;">
-					</a>`;
-				} else if (status == "COMPLETE_REST_DAY" || status == "COMPLETE_LEAVE") {
-					html = `
-					<a href="javascript:void(0)"
-						class="viewAttendance"
-						${elementAttr}
-						style="color: #132eca">${decimalToHours(totalHours)}</a>`;
-				} else {
-					html = `
-					<a href="javascript:void(0)"
-						class="viewAttendance"
-						${elementAttr}
-						style="color: #d8af32">${decimalToHours(totalHours)}</a>`;
-				}
-			}
-			return html;
-		}
-
-		let attendanceHTML = "";
-		attendance.map(att => {
-			const { 
-				employeeID, 
-				code, 
-				profile, 
-				fullname, 
-				totalBasicHours, 
-				totalOvertimeHours,
-				grandTotalHours,
-				totalRestDay,
-				totalNoDays,
-				data = [], 
-			} = att;
-
-			let attendanceDurationHTML = "";
+		if (header && columns.length) {
+			let notificationDisplay = dipslayFileUploadNotification(errors, success);
+	
+			let columnDatesHTML = "";
 			columns.map(col => {
-				const { date } = col;
-				data.filter(dt => dt.scheduleDate == date).map(item => {
-					const { status } = item;
-
-					attendanceDurationHTML += `<td class="text-center">${displayData(status, item)}</td>`;
+				const { day, date, number } = col;
+				columnDatesHTML += `
+				<th class="thDay text-center">
+					<div>${number}</div>
+					<small>${day}</small>
+				</th>`;
+			});
+	
+			const displayData = (status = "", data) => {
+				let html = "";
+				if (data) {
+					const { 
+						scheduleDate,    
+						scheduleIn,      
+						scheduleOut,     
+						scheduleBreakDuration, 
+						scheduleDuration, 
+						restDay,
+						finalCheckIn,
+						finalCheckOut,
+						checkIn,          
+						checkOut,         
+						noTimeIn,        
+						noTimeOut,        
+						noInOutID,        
+						noInOutReference, 
+						overtimeIn,       
+						overtimeOut,      
+						overtimeBreakDuration, 
+						overtimeID,      
+						overtimeReference, 
+						leaveIn,          
+						leaveOut,        
+						leaveID,          
+						leaveReference,  
+						leaveType, 
+						leaveWorkingDay,
+						leaveDuration,
+						checkDuration,   
+						basicHours,       
+						overtimeHours,    
+						nightDifferential, 
+						totalHours,      
+						status:scheduleStatus,           
+					} = data;
+	
+					const NO_TIME_IN_OUT = `${base_url}/assets/images/attendance/no-time-in-out.svg`;
+					const ABSENT  = `${base_url}/assets/images/attendance/absent.svg`;
+					const ONGOING = `${base_url}/assets/images/attendance/ongoing.svg`;
+	
+					// DISPLAY NG LEAVE WHILE HAVING PRODUCTION
+					const elementAttr = `
+						scheduleDate          = "${scheduleDate}"
+						scheduleIn            = "${scheduleIn}"
+						scheduleOut           = "${scheduleOut}"
+						scheduleBreakDuration = "${scheduleBreakDuration}"
+						scheduleDuration      = "${scheduleDuration}"
+						restDay				  = "${restDay}"
+						finalCheckIn          = "${finalCheckIn}"
+						finalCheckOut         = "${finalCheckOut}"
+						checkIn               = "${checkIn}"
+						checkOut              = "${checkOut}"
+						noTimeIn              = "${noTimeIn}"
+						noTimeOut             = "${noTimeOut}"
+						noInOutID             = "${noInOutID}"
+						noInOutReference      = "${noInOutReference}"
+						overtimeIn            = "${overtimeIn}"
+						overtimeOut           = "${overtimeOut}"
+						overtimeBreakDuration = "${overtimeBreakDuration}"
+						overtimeID            = "${overtimeID}"
+						overtimeReference     = "${overtimeReference}"
+						leaveIn               = "${leaveIn}"
+						leaveOut              = "${leaveOut}"
+						leaveID               = "${leaveID}"
+						leaveReference        = "${leaveReference}"
+						leaveType             = "${leaveType}"
+						leaveWorkingDay       = "${leaveWorkingDay}"
+						leaveDuration         = "${leaveDuration}"
+						checkDuration         = "${checkDuration}"
+						basicHours            = "${basicHours}"
+						overtimeHours         = "${overtimeHours}"
+						totalHours            = "${totalHours}"
+						nightDifferential     = "${nightDifferential}"
+						status                = "${status}"`;
+	
+					if (status == "COMPLETE") {
+						html = `
+						<a href="javascript:void(0)"
+							class="viewAttendance"
+							${elementAttr}>${decimalToHours(totalHours)}</a>`;
+					} else if (status == "REST_DAY" || status == "NO_SCHEDULE") {
+						html = `
+						<a href="javascript:void(0)"
+							class="viewAttendance font-weight-bold text-success"
+							${elementAttr}>RD</a>`;
+					} else if (status == "NO_TIME_IN" || status == "NO_TIME_OUT") {
+						html = `
+						<a href="javascript:void(0)"
+							class="viewAttendance"
+							${elementAttr}>
+							<img src="${NO_TIME_IN_OUT}" 
+								class="img-rounded"
+								alt="${status}"
+								title="${status}"
+								style="width: 40px; height: 40px;">
+						</a>`;
+					} else if (status == "ONGOING") {
+						html = `
+						<a href="javascript:void(0)"
+							class="viewAttendance"
+							${elementAttr}>
+							<img src="${ONGOING}" 
+								class="img-rounded"
+								alt="${status}"
+								title="${status}"
+								style="width: 40px; height: 40px;">
+						</a>`;
+					} else if (status == "ABSENT") {
+						html = `
+						<a href="javascript:void(0)"
+							class="viewAttendance"
+							${elementAttr}>
+							<img src="${ABSENT}" 
+								class="img-rounded"
+								alt="${status}"
+								title="${status}"
+								style="width: 30px; height: 30px;">
+						</a>`;
+					} else if (status == "COMPLETE_REST_DAY" || status == "COMPLETE_LEAVE") {
+						html = `
+						<a href="javascript:void(0)"
+							class="viewAttendance"
+							${elementAttr}
+							style="color: #132eca">${decimalToHours(totalHours)}</a>`;
+					} else {
+						html = `
+						<a href="javascript:void(0)"
+							class="viewAttendance"
+							${elementAttr}
+							style="color: #d8af32">${decimalToHours(totalHours)}</a>`;
+					}
+				}
+				return html;
+			}
+	
+			let attendanceHTML = "";
+			attendance.map(att => {
+				const { 
+					employeeID, 
+					code, 
+					profile, 
+					fullname, 
+					totalBasicHours, 
+					totalOvertimeHours,
+					grandTotalHours,
+					totalRestDay,
+					totalNoDays,
+					data = [], 
+				} = att;
+	
+				let attendanceDurationHTML = "";
+				columns.map(col => {
+					const { date } = col;
+					data.filter(dt => dt.scheduleDate == date).map(item => {
+						const { status } = item;
+	
+						attendanceDurationHTML += `<td class="text-center">${displayData(status, item)}</td>`;
+					})
 				})
-			})
-
-			attendanceHTML += `
-			<tr employeeID="${encryptString(employeeID)}"
-				fullname="${fullname}"
-				code="${code}">
-				<td>
-					<div class="d-flex justify-content-start align-items-center">
-						<img class="rounded-circle" 
-							src="${base_url}assets/upload-files/profile-images/${profile}"
-							alt="${fullname}"
-							style="width: 50px; height: 50px;">
-						<div class="ml-3 align-self-center">
-							<div>
-								<a href="${base_url}hris/employee_attendance?view_id=${encryptString(employeeID)}"
-									target="_blank">${fullname}</a>
+	
+				attendanceHTML += `
+				<tr employeeID="${encryptString(employeeID)}"
+					fullname="${fullname}"
+					code="${code}">
+					<td>
+						<div class="d-flex justify-content-start align-items-center">
+							<img class="rounded-circle" 
+								src="${base_url}assets/upload-files/profile-images/${profile}"
+								alt="${fullname}"
+								style="width: 50px; height: 50px;">
+							<div class="ml-3 align-self-center">
+								<div>
+									<a href="${base_url}hris/employee_attendance?view_id=${encryptString(employeeID)}"
+										target="_blank">${fullname}</a>
+								</div>
+								<small>${code}</small>
 							</div>
-							<small>${code}</small>
 						</div>
-					</div>
-				</td>
-				${attendanceDurationHTML}
-				<td class="text-center">${decimalToHours(grandTotalHours)}</td>
-				<td class="text-center">${decimalToHours(totalBasicHours)}</td>
-				<td class="text-center">${decimalToHours(totalOvertimeHours)}</td>
-				<td class="text-center">${totalRestDay}</td>
-				<td class="text-center">${totalNoDays}</td>
-			</tr>`;
-		})
-
-		let legendDisplay = `
-		<div class="row" id="legend">
-			<div class="col-md-5 col-sm-12">
-				<div class="card">
-					<div class="card-header font-weight-bold h5 bg-transparent">LEGEND</div>
-					<div class="card-body p-2" style="background: rgb(242 242 242);">
-						<div class="row">
-							<div class="col-md-6 col-sm-12">
-								<div class="d-flex justify-content-start align-items-center py-1">
-									<div style="text-align: right; width: 40px; color: #dc3450">00:00</div>
-									<div class="mx-2">-</div> 
-									<div class="font-weight-bold">Regular Hours</div>
-								</div>
-								<div class="d-flex justify-content-start align-items-center py-1">
-									<div style="text-align: right; width: 40px; color: #132eca">00:00</div>
-									<div class="mx-2">-</div> 
-									<div class="font-weight-bold">Leave/Overtime Hours</div>
-								</div>
-								<div class="d-flex justify-content-start align-items-center py-1">
-									<div style="text-align: right; width: 40px; color: #28a745">RD</div>
-									<div class="mx-2">-</div> 
-									<div class="font-weight-bold">Rest Day</div>
-								</div>
-							</div>
-							<div class="col-md-6 col-sm-12">
-								<div class="d-flex justify-content-start align-items-center py-1">
-									<div style="text-align: right; width: 40px; color: #132eca">
-										<img src="${base_url}assets/images/attendance/ongoing.svg" width="25" height="25">
+					</td>
+					${attendanceDurationHTML}
+					<td class="text-center">${decimalToHours(grandTotalHours)}</td>
+					<td class="text-center">${decimalToHours(totalBasicHours)}</td>
+					<td class="text-center">${decimalToHours(totalOvertimeHours)}</td>
+					<td class="text-center">${totalRestDay}</td>
+					<td class="text-center">${totalNoDays}</td>
+				</tr>`;
+			})
+	
+			let legendDisplay = `
+			<div class="row" id="legend">
+				<div class="col-md-5 col-sm-12">
+					<div class="card">
+						<div class="card-header font-weight-bold h5 bg-transparent">LEGEND</div>
+						<div class="card-body p-2" style="background: rgb(242 242 242);">
+							<div class="row">
+								<div class="col-md-6 col-sm-12">
+									<div class="d-flex justify-content-start align-items-center py-1">
+										<div style="text-align: right; width: 40px; color: #dc3450">00:00</div>
+										<div class="mx-2">-</div> 
+										<div class="font-weight-bold">Regular Hours</div>
 									</div>
-									<div class="mx-2">-</div> 
-									<div class="font-weight-bold">Ongoing</div>
-								</div>
-								<div class="d-flex justify-content-start align-items-center py-1">
-									<div style="text-align: right; width: 40px; color: #132eca">
-										<img src="${base_url}assets/images/attendance/no-time-in-out.svg" width="25" height="25">
+									<div class="d-flex justify-content-start align-items-center py-1">
+										<div style="text-align: right; width: 40px; color: #132eca">00:00</div>
+										<div class="mx-2">-</div> 
+										<div class="font-weight-bold">Leave/Overtime Hours</div>
 									</div>
-									<div class="mx-2">-</div> 
-									<div class="font-weight-bold">No Time-In/Time-Out</div>
-								</div>
-								<div class="d-flex justify-content-start align-items-center py-1">
-									<div style="text-align: right; width: 40px; color: #132eca">
-										<img src="${base_url}assets/images/attendance/absent.svg" width="25" height="25">
+									<div class="d-flex justify-content-start align-items-center py-1">
+										<div style="text-align: right; width: 40px; color: #28a745">RD</div>
+										<div class="mx-2">-</div> 
+										<div class="font-weight-bold">Rest Day</div>
 									</div>
-									<div class="mx-2">-</div> 
-									<div class="font-weight-bold">Absent</div>
+								</div>
+								<div class="col-md-6 col-sm-12">
+									<div class="d-flex justify-content-start align-items-center py-1">
+										<div style="text-align: right; width: 40px; color: #132eca">
+											<img src="${base_url}assets/images/attendance/ongoing.svg" width="25" height="25">
+										</div>
+										<div class="mx-2">-</div> 
+										<div class="font-weight-bold">Ongoing</div>
+									</div>
+									<div class="d-flex justify-content-start align-items-center py-1">
+										<div style="text-align: right; width: 40px; color: #132eca">
+											<img src="${base_url}assets/images/attendance/no-time-in-out.svg" width="25" height="25">
+										</div>
+										<div class="mx-2">-</div> 
+										<div class="font-weight-bold">No Time-In/Time-Out</div>
+									</div>
+									<div class="d-flex justify-content-start align-items-center py-1">
+										<div style="text-align: right; width: 40px; color: #132eca">
+											<img src="${base_url}assets/images/attendance/absent.svg" width="25" height="25">
+										</div>
+										<div class="mx-2">-</div> 
+										<div class="font-weight-bold">Absent</div>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</div>`;
+			</div>`;
+	
+			html = `
+			${notificationDisplay}
+			${legendDisplay}
+			<div class="card">
+				<div class="card-header bg-primary text-white text-center">
+					<h6 class="font-weight-bold">${header}</h6>
+				</div>
+				<div class="card-body" style="font-size: .9rem;">
+					<table class="table table-bordered table-striped table-nowrap" id="tableTimekeeping">
+						<thead>
+							<tr class="theadlabel">
+								<th class="thEmployeeName">Employee Name</th>
+								${columnDatesHTML}
+								<th class="thSummary">Total Hours</th>
+								<th class="thSummary">Basic Hours</th>
+								<th class="thSummary">Overtime Hours</th>
+								<th class="thSummary">Rest Day</th>
+								<th class="thSummary">No. of Days</th>
+							</tr>
+						</thead>
+						<tbody id="tableTimekeepingTbody">
+							${attendanceHTML}
+						</tbody>
+					</table>
+				</div>
+			</div>`;
+		} else {
+			if (header) {
+				html = `
+				<div class="w-100 d-flex justify-content-center align-items-center flex-column">
+					<img src="${base_url}assets/modal/no-data.gif" width="300" height="300">
+					<h4>No data found</h4>
+				</div>`;
+			} else {
+				html = `
+				<div class="w-100 d-flex justify-content-center align-items-center flex-column">
+					<img src="${base_url}assets/modal/please-select.gif" width="300" height="300">
+					<h4>Please select cut-off</h4>
+				</div>`;
+			}
+		}
 
-		let html = `
-		${notificationDisplay}
-		${legendDisplay}
-		<div class="card">
-			<div class="card-header bg-primary text-white text-center">
-				<h6 class="font-weight-bold">${header}</h6>
-			</div>
-			<div class="card-body" style="font-size: .9rem;">
-				<table class="table table-bordered table-striped table-nowrap" id="tableTimekeeping">
-					<thead>
-						<tr class="theadlabel">
-							<th class="thEmployeeName">Employee Name</th>
-							${columnDatesHTML}
-							<th class="thSummary">Total Hours</th>
-							<th class="thSummary">Basic Hours</th>
-							<th class="thSummary">Overtime Hours</th>
-							<th class="thSummary">Rest Day</th>
-							<th class="thSummary">No. of Days</th>
-						</tr>
-					</thead>
-					<tbody>
-						${attendanceHTML}
-					</tbody>
-				</table>
-			</div>
-		</div>`;
 		return html;
 	}
 	// ----- END TIMEKEEPING TABLE -----
 
 
+	// ----- CUT-OFF -----
+	function getCutOff() {
+		let result = [];
+		$.ajax({
+			method: "POST",
+			url: `${base_url}hris/timekeeping_module/getCutOff`,
+			async: false,
+			dataType: 'json',
+			success: function(data) {
+				result = data;
+			}
+		})
+		return result;
+	}
+	// ----- END CUT-OFF -----
+
+
 	// ----- FILTER DISPLAY -----
 	function filterDisplay(timekeepingID, startDate, endDate, timesheetDate) {
+
+		let firstCutOff = 0, secondCutOff = 0, thirdCutOff = 0, fourthCutOff = 0;
+
+		let cutOffData = [];
+		let cutoff = getCutOff();
+		if (cutoff) {
+			firstCutOff  = cutoff.firstCutOff ?? 0;
+			secondCutOff = cutoff.secondCutOff ?? 0;
+			thirdCutOff  = cutoff.fthirdutOff ?? 0;
+			fourthCutOff = cutoff.ffourthutOff ?? 0;
+			if (firstCutOff) {
+				cutOffData.push({
+					cutoffID: 1,
+					cutoffName: "First Cut-Off",
+					start:  cutoff.firstCutOffDateStart,
+					end:    cutoff.firstCutOffDateEnd,
+				})
+			}
+			if (secondCutOff) {
+				cutOffData.push({
+					cutoffID: 2,
+					cutoffName: "Second Cut-Off",
+					start:  cutoff.secondCutOffDateStart,
+					end:    cutoff.secondCutOffDateEnd,
+				})
+			}
+			if (thirdCutOff) {
+				cutOffData.push({
+					cutoffID: 3,
+					cutoffName: "Third Cut-Off",
+					start:  cutoff.thirdCutOffDateStart,
+					end:    cutoff.thirdCutOffDateEnd,
+				})
+			}
+			if (fourthCutOff) {
+				cutOffData.push({
+					cutoffID: 4,
+					cutoffName: "Fourth Cut-Off",
+					start:  cutoff.fourthCutOffDateStart,
+					end:    cutoff.fourthCutOffDateEnd,
+				})
+			}
+		}
+
+		let cutoffHTML = '';
+		cutOffData.map(cod => {
+			let { cutoffID, cutoffName, start, end } = cod;
+
+			cutoffHTML += `
+			<option value="${cutoffID}"
+				start="${start}"
+				end="${end}">${cutoffName}</option>`;
+		})
+
 		let html = `
 		<div class="col-12">
 				<div class="panel-group mt-2 mb-4">
@@ -1196,29 +1286,48 @@ $(document).ready(function() {
 			</div>
 
             <div class="col-md-12 col-sm-12">
-				<div class="row">
-					<div class="col-md-9 col-sm-12">
+				<div class="row" id="filterGenerate">
+					<div class="col-md-3 col-sm-12">
 						<div class="form-group">
-							<label>
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="   PAYROLL CUT-OFF   \n   1st Cut-off: 1-15   \n   2nd Cut-off: 16-30   \n" 
-									data-original-title="   PAYROLL CUT-OFF   \n   1st Cut-off: 1-15   \n   2nd Cut-off: 16-30   \n"></i>
-								Timekeeping Period: <code>*</code>
-							</label>
-							<input type="button"
+							<label>Month & Year <code>*</code></label>
+							<input type="month"
+								class="form-control" 
+								name="monthYear"
+								id="monthYear"
+								value="${moment().format("YYYY-MM")}"
+								required>
+							<div class="d-block invalid-feedback" id="invalid-monthYear"></div>
+						</div>
+					</div>
+					<div class="col-md-3 col-sm-12">
+						<div class="form-group">
+							<label>Cut-off <code>*</code></label>
+							<select class="form-control select2 validate"
+								id="cutoff"
+								name="cutoff"
+								required>
+								<option value="" selected disabled>Select cut-off</option>
+								${cutoffHTML}
+							</select>
+							<div class="d-block invalid-feedback" id="invalid-cutoff"></div>
+						</div>
+					</div>
+					<div class="col-md-3 col-sm-12">
+						<div class="form-group">
+							<label>Timekeeping Period</label>
+							<input type="text"
 								name="timesheetDate"
 								id="timesheetDate"
 								class="form-control validate"
 								start="${startDate}"
 								end="${endDate}"
-								value="${timesheetDate}">
+								value="${timesheetDate}"
+								disabled>
 							<div class="d-block invalid-feedback" id="invalid-timesheetDate"></div>
 						</div>
 					</div>
-					<div class="col-md-3 col-sm-12 text-left align-self-end">
-						<div class="form-group">
+					<div class="col-md-3 col-sm-12 text-left">
+						<div class="form-group mb-0 mt-4">
 							<button class="btn btn-primary w-100 py-2"
 								id="btnSearch"
 								timekeepingID="${timekeepingID}"
@@ -1274,9 +1383,9 @@ $(document).ready(function() {
 		let disabled = readOnly ? "disabled" : "";
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
-		let startDate = timekeepingStartDate || moment().format("YYYY-MM-DD");
-		let endDate   = timekeepingEndDate || moment().format("YYYY-MM-DD");
-		let timesheetDate = `${moment(startDate).format("MMMM DD, YYYY")} - ${moment(endDate).format("MMMM DD, YYYY")}`;
+		let startDate = timekeepingStartDate;
+		let endDate   = timekeepingEndDate;
+		let timesheetDate = startDate && endDate ? `${moment(startDate).format("MMMM DD, YYYY")} - ${moment(endDate).format("MMMM DD, YYYY")}` : '-';
 
 		let timesheetData = searchTimesheet(timekeepingID, startDate, endDate);
 
@@ -1895,42 +2004,41 @@ $(document).ready(function() {
 
 	// ----- SEARCH TIMESHEET BY DATA RANGE -----
 	$(document).on("click", "#btnSearch", function(e) {
-		
-		const oldStartDate = $(this).attr("start");
-		const oldEndDate   = $(this).attr("end");
 
-		e.preventDefault();
-		Swal.fire({
-			title:              "GENERATE TIMEKEEPING",
-			html:               `Are you sure that you want to generate timekeeping?<br><br><div><b class="text-danger">Note:</b> This action will override the current timesheet data.</div>`,
-			imageUrl:           `${base_url}assets/modal/update.svg`,
-			imageWidth:         200,
-			imageHeight:        200,
-			imageAlt:           "Custom image",
-			showCancelButton:   true,
-			confirmButtonColor: "#dc3545",
-			cancelButtonColor:  "#1a1a1a",
-			cancelButtonText:   "No",
-			confirmButtonText:  "Yes"
-		}).then(res => {
-			if (res.isConfirmed) {
-				const startDate = $(`[name="timesheetDate"]`).attr("start");
-				const endDate   = $(`[name="timesheetDate"]`).attr("end");
-				$(this).attr("start", startDate);
-				$(this).attr("end", endDate);
-				$(this).removeAttr("timekeepingID");
+		let validate = validateForm("filterGenerate");
+		if (validate) {
+			e.preventDefault();
+			Swal.fire({
+				title:              "GENERATE TIMEKEEPING",
+				html:               `Are you sure that you want to generate timekeeping?<br><br><div><b class="text-danger">Note:</b> This action will override the current timesheet data.</div>`,
+				imageUrl:           `${base_url}assets/modal/update.svg`,
+				imageWidth:         200,
+				imageHeight:        200,
+				imageAlt:           "Custom image",
+				showCancelButton:   true,
+				confirmButtonColor: "#dc3545",
+				cancelButtonColor:  "#1a1a1a",
+				cancelButtonText:   "No",
+				confirmButtonText:  "Yes"
+			}).then(res => {
+				if (res.isConfirmed) {
+					const startDate = $(`[name="timesheetDate"]`).attr("start");
+					const endDate   = $(`[name="timesheetDate"]`).attr("end");
+					$(this).attr("start", startDate);
+					$(this).attr("end", endDate);
+					$(this).removeAttr("timekeepingID");
+	
+					$("#tableTimekeepingParent").html(preloader);
+					setTimeout(() => {
+						const data = searchTimesheet(0, startDate, endDate);
+						const html = timekeepingTable(data);
+						$("#tableTimekeepingParent").html(html);
+						initDataTables();
+					}, 200);
+				} 
+			})
+		} 
 
-				$("#tableTimekeepingParent").html(preloader);
-				setTimeout(() => {
-					const data = searchTimesheet(0, startDate, endDate);
-					const html = timekeepingTable(data);
-					$("#tableTimekeepingParent").html(html);
-					initDataTables();
-				}, 200);
-			} else {
-				dateRangePicker(oldStartDate, oldEndDate, approvedTimekeepingPeriod);
-			}
-		})
 	})
 	// ----- END SEARCH TIMESHEET BY DATA RANGE -----
 
@@ -2144,6 +2252,40 @@ $(document).ready(function() {
 	// ----- END SAVE DOCUMENT -----
 
 
+	// ----- SELECT CUTOFF -----
+	$(document).on('change', `[name="cutoff"], [name="monthYear"]`, function() {
+		let monthYear = $(`[name="monthYear"]`).val();
+		let monthYearArr = monthYear.split('-');
+
+		let cutOffStart = +$(`[name="cutoff"] option:selected`).attr("start");
+		let cutOffEnd   = +$(`[name="cutoff"] option:selected`).attr("end");
+
+		const isFullMonth = (month, year) => {
+			return new Date(year, month, 0).getDate() == 31;
+		}
+
+		const transformDate = (num) => {
+			let temp = num.toString();
+			return temp.length == 1 ? `0${num}` : num;
+		}
+
+		let year = monthYearArr[0];
+		let firstMonth  = +monthYearArr[1];
+		let secondMonth = cutOffStart > cutOffEnd ? (firstMonth == 12 ? 1 : firstMonth+1) : firstMonth;
+
+		let start = `${year}-${transformDate(firstMonth)}-${transformDate(cutOffStart)}`;
+		let end   = `${year}-${transformDate(secondMonth)}-${transformDate(cutOffEnd)}`;
+
+		$(`[name="timesheetDate"]`).attr("start", start);
+		$(`[name="timesheetDate"]`).attr("end", end);
+		$(`[id="btnSearch"]`).attr("start", start);
+		$(`[id="btnSearch"]`).attr("end", end);
+
+		dateRangePicker(start, end);
+	})
+	// ----- END SELECT CUTOFF -----
+
+
 	// ----- REMOVE IS-VALID IN TABLE -----
 	function removeIsValid(element = "table") {
 		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
@@ -2171,34 +2313,39 @@ $(document).ready(function() {
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_timekeeping");
 		const timekeepingPeriod = uniqueTimekeepingPeriod();
+		const timekeepingTable  = $(`#tableTimekeepingTbody tr`).length;
 		
 		if (validate && timekeepingPeriod) {
-			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-			const data   = getTimekeepingData(action, "submit", "1", id);
-
-			if (revise) {
-				if (!isFromCancelledDocument) {
-					data["reviseTimekeepingID"] = id;
-					delete data["timekeepingID"];
+			if (timekeepingTable) {
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getTimekeepingData(action, "submit", "1", id);
+	
+				if (revise) {
+					if (!isFromCancelledDocument) {
+						data["reviseTimekeepingID"] = id;
+						delete data["timekeepingID"];
+					}
 				}
+	
+				let approversID   = data["approversID"], 
+					approversDate = data["approversDate"];
+	
+				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+				let notificationData = false;
+				if (employeeID != sessionID) {
+					notificationData = {
+						moduleID:                109,
+						notificationTitle:       "Timekeeping Module",
+						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+						notificationType:        2,
+						employeeID,
+					};
+				}
+	
+				saveTimekeeping(data, "submit", notificationData, pageContent);
+			} else {
+				showNotification("danger", "Please select correct cut-off");
 			}
-
-			let approversID   = data["approversID"], 
-				approversDate = data["approversDate"];
-
-			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-			let notificationData = false;
-			if (employeeID != sessionID) {
-				notificationData = {
-					moduleID:                109,
-					notificationTitle:       "Timekeeping Module",
-					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-					notificationType:        2,
-					employeeID,
-				};
-			}
-
-			saveTimekeeping(data, "submit", notificationData, pageContent);
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----

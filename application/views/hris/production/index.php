@@ -46,7 +46,7 @@
                         <li class="breadcrumb-item active">Production Report</li>
                     </ul>
                     <h1 class="mt-3">Production Report</h1>
-                    <span>This form is used to manage the Production Report.</span>
+                    <span>This module is used to track and record one's accomplished tasks and activities.</span>
                 </div>
                 <div class="col-lg-4 col-sm-12 text-right" id="headerButton"></div>
             </div>

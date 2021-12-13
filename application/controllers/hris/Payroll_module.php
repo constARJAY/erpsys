@@ -158,6 +158,12 @@ class Payroll_module extends CI_Controller {
 
                     $savePayrollItems = $this->payroll->savePayrollItems($action, $payrollItems, $payrollID, $idArrStr);
                 }
+
+                if ($payrollData["payrollStatus"] == 2)
+                {
+                    $this->payroll->insertHoldSalary($payrollID);
+                    $this->payroll->insertPayrollRegister($payrollID);
+                }
             }
         }
 

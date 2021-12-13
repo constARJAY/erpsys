@@ -945,7 +945,8 @@ class TimekeepingModule_model extends CI_Model {
                                         $checkNightDiff    = getNightDifferentialDuration($date, $scheduleIn, $scheduleOut);
                                         $nightDifferential = $checkNightDiff + $overtimeNightDiff;
 
-                                        // $production = $this->getProduction($dayType, $restDay, $basicHours, $overtimeHours, $checkNightDiff, $overtimeNightDiff, $totalHours);
+                                        $finalCheckIn  = $checkIn;
+                                        $finalCheckOut = $checkOut;
 
                                         $msg = "Data successfully imported at line $row";
                                         $data["success"][] = $msg;
@@ -1052,11 +1053,6 @@ class TimekeepingModule_model extends CI_Model {
                 $this->db->update("hris_timekeeping_tbl", ["timekeepingCode" => $timekeepingCode], ["timekeepingID" => $insertID]);
             }
 
-            if ($timekeepingData["timekeepingStatus"] == 2) // IF APPROVED
-            {
-                $this->insertPayrollData($timekeepingID);
-            }
-
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
@@ -1113,7 +1109,7 @@ class TimekeepingModule_model extends CI_Model {
             htit.scheduleDuration, 
             htit.scheduleBreakDuration,
             (CASE
-                WHEN((htit.lateDuration + htit.undertimeDuration) >= (htit.scheduleDuration / 2))
+                WHEN(htit.scheduleDuration <> 0 AND (htit.lateDuration + htit.undertimeDuration) >= (htit.scheduleDuration / 2))
                     THEN htit.lateDuration + htit.undertimeDuration - htit.scheduleBreakDuration
                 ELSE htit.lateDuration + htit.undertimeDuration 
             END) AS lateUndertimeHours,
@@ -1235,14 +1231,14 @@ class TimekeepingModule_model extends CI_Model {
         return false;
     }
 
-    public function getPreviousGrossNetPay($payrollID = 0, $employeeID = 0)
+    public function getPreviousGrossNetPay($payrollID = 0, $employeeID = 0, $cutOffCount = 0)
     {
         $sql = "
         SELECT 
-            grossPay, netPay
+            SUM(grossPay) AS grossPay, SUM(netPay) AS netPay
         FROM hris_payroll_tbl AS hpt 
             LEFT JOIN hris_payroll_items_tbl AS hpit ON hpt.payrollID = hpit.payrollID AND hpit.employeeID = $employeeID 
-        WHERE hpt.payrollID <> $payrollID AND hpt.payrollStatus = 2 ORDER BY hpt.updatedAt DESC LIMIT 1";
+        WHERE hpt.payrollID <> $payrollID AND hpt.payrollStatus = 2 ORDER BY hpt.updatedAt DESC LIMIT $cutOffCount";
         $query = $this->db->query($sql);
         return $query ? $query->row() : null;
     }
@@ -1254,6 +1250,7 @@ class TimekeepingModule_model extends CI_Model {
             timekeepingID,
             employeeID,
             hourlyRate,
+            employeeAllowance AS allowance,
             MIN(scheduleDate) AS startDate,
             MAX(scheduleDate) AS endDate,
             SUM(status NOT IN('NO_SCHEDULE', 'REST_DAY')) AS workingDays,
@@ -1276,7 +1273,9 @@ class TimekeepingModule_model extends CI_Model {
             SUM(lateUndertimeDeduction) AS lateUndertimeDeduction,
             SUM(CASE WHEN status = 'ABSENT' THEN (hourlyRate * scheduleDuration) ELSE 0 END) AS lwopDeduction,
             SUM(totalPay) AS grossPay
-        FROM hris_payroll_production_tbl WHERE payrollID = $payrollID GROUP BY employeeID";
+        FROM hris_payroll_production_tbl AS hppt
+            LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
+        WHERE payrollID = $payrollID GROUP BY employeeID";
         $query = $this->db->query($sql);
         return $query ? $query->result_array() : [];
     }
@@ -1284,6 +1283,7 @@ class TimekeepingModule_model extends CI_Model {
     public function insertPayrollItems($payrollID = 0)
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
+        $cutOffCount = getCutOffCount();
 
         $payrollProduction = $this->getPayrollProduction($payrollID);
         if ($payrollProduction && !empty($payrollProduction))
@@ -1292,6 +1292,7 @@ class TimekeepingModule_model extends CI_Model {
             foreach ($payrollProduction as $prod) {
 
                 $employeeID = $prod['employeeID'];
+                $allowance  = $prod['allowance'] / $cutOffCount;
 
                 $basicSalary            = $prod['basicSalary'];
                 $basicPay               = $prod['basicPay'];
@@ -1305,7 +1306,7 @@ class TimekeepingModule_model extends CI_Model {
 
                 $prevGrossPay = $prevNetPay = 0;
 
-                $prevGrossNetPay = $this->getPreviousGrossNetPay($payrollID, $employeeID);
+                $prevGrossNetPay = $this->getPreviousGrossNetPay($payrollID, $employeeID, $cutOffCount);
                 if ($prevGrossNetPay)
                 {
                     $prevGrossPay = $prevGrossNetPay->grossPay ?? 0;
@@ -1329,7 +1330,7 @@ class TimekeepingModule_model extends CI_Model {
 
                 $loanDeduction = 0;
 
-                // $netPay = $grossPay - $loanDeduction;
+                $netPay = ($grossPay + $allowance) - $loanDeduction;
 
                 $data[] = [
                     'payrollID'              => $payrollID,
@@ -1356,6 +1357,7 @@ class TimekeepingModule_model extends CI_Model {
                     'holidayPay'             => $holidayPay,
                     'overtimePay'            => $overtimePay,
                     'nightDifferentialPay'   => $nightDifferentialPay,
+                    'allowance'              => $allowance,
                     'leavePay'               => $leavePay,
                     'lateUndertimeDeduction' => $lateUndertimeDeduction,
                     'lwopDeduction'          => $lwopDeduction,
@@ -1379,7 +1381,7 @@ class TimekeepingModule_model extends CI_Model {
                     'loanBasis'              => 0,
                     'loanDeduction'          => 0,
                     'prevNetPay'             => $prevNetPay,
-                    'netPay'                 => $grossPay,
+                    'netPay'                 => $netPay,
                     'createdBy'              => $sessionID,
                     'updatedBy'              => $sessionID,
                 ];

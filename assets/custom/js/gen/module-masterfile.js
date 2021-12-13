@@ -839,13 +839,20 @@ $(document).ready(function() {
         let moduleID = getTableData("gen_module_list_tbl", "", "", "createdAt DESC", "", "LIMIT 1");    
             moduleID = moduleID[0]["moduleID"];
 
-    $.ajax({
-        method: "POST",
-        url: `${base_url}roles_permission/addModuleRolesPermission`,
-        data: {moduleID},
-        dataType: "json",
-        success: function(data) {}
-    })
+        $.ajax({
+            method: "POST",
+            url: `${base_url}roles_permission/addModuleRolesPermission`,
+            data: {moduleID},
+            dataType: "json",
+            success: function(data) {}
+        })
+
+        $.ajax({
+            method: "GET",
+            url: `${base_url}/employee_module/generateFullAccess?id=1`,
+            dataType: "json",
+            success: function(data) {}
+        })
     }
     // ----- END MODULE ROLES PERMISSION -----
 

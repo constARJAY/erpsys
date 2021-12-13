@@ -885,14 +885,16 @@ $(document).ready(function () {
 			updateProjectOptions();
 			if (data) {
 				initInputmaskTime(false);
+				
 				$("#overtimeRequestDate").data("daterangepicker").startDate = moment(overtimeRequestDate, "YYYY-MM-DD");
 				$("#overtimeRequestDate").data("daterangepicker").endDate   = moment(overtimeRequestDate, "YYYY-MM-DD");
+				
 			} else {
 				initInputmaskTime();
 				$("#overtimeRequestDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			}
 
-			$("#overtimeRequestDate").data("daterangepicker").minDate = moment();
+			$("#overtimeRequestDate").data("daterangepicker").minDate = moment().subtract(10, 'days');
 			return html;
 		}, 300);
 	}

@@ -177,20 +177,6 @@ class Timekeeping_module extends CI_Controller {
                         $totalHours            = $item["totalHours"] ?? null;
                         $status                = $item["status"] ?? null;
 
-                        // if ($noInOutID && $noTimeIn != "0000-00-00 00:00:00" && $noTimeOut != "0000-00-00 00:00:00") {
-                        //     if (!$noTimeIn && !$noTimeOut) {
-                        //         // DISREGARD
-                        //     } else if (!$noTimeIn && $noTimeOut) {
-                        //         $lateUndertimeDuration = $this->getLateUndertimeDuration($scheduleIn, $scheduleOut, $scheduleDuration, $scheduleBreakDuration, $checkIn, $noTimeOut);
-                        //     } else if ($noTimeIn && !$noTimeOut) {
-                        //         $lateUndertimeDuration = $this->getLateUndertimeDuration($scheduleIn, $scheduleOut, $scheduleDuration, $scheduleBreakDuration, $noTimeIn, $checkOut);
-                        //     } else {
-                        //         $lateUndertimeDuration = $this->getLateUndertimeDuration($scheduleIn, $scheduleOut, $scheduleDuration, $scheduleBreakDuration, $noTimeIn, $noTimeOut);
-                        //     }
-                        // } else {
-                        //     $lateUndertimeDuration = $this->getLateUndertimeDuration($scheduleIn, $scheduleOut, $scheduleDuration, $scheduleBreakDuration, $checkIn, $checkOut);
-                        // }
-
                         $lateUndertimeDuration = $this->getLateUndertimeDuration($scheduleIn, $scheduleOut, $scheduleDuration, $finalCheckIn, $finalCheckOut);
                         $lateDuration      = $lateUndertimeDuration["lateDuration"] ?? 0;
                         $undertimeDuration = $lateUndertimeDuration["undertimeDuration"] ?? 0;
@@ -340,6 +326,11 @@ class Timekeeping_module extends CI_Controller {
                     }
 
                     $saveTimekeepingProduction = $this->timekeeping->saveTimekeepingProduction($timekeepingID, $timekeepingProduction);
+                }
+
+                if ($timekeepingData["timekeepingStatus"] == 2) // IF APPROVED
+                {
+                    $this->timekeeping->insertPayrollData($timekeepingID);
                 }
             }
         }
@@ -515,6 +506,16 @@ class Timekeeping_module extends CI_Controller {
         echo json_encode($this->timekeeping->searchTimesheet($timekeepingID, $startDate, $endDate, $file));
     }
     // ----- END UPLOAD TIMESHEET -----
+
+
+
+
+
+    // ----- CUTOFF -----
+    public function getCutOff() {
+        echo json_encode(getCutOff());
+    }
+    // ----- END CUTOFF -----
 
 
 }
