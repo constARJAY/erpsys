@@ -7,12 +7,12 @@ class Salary_release extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("hris/SalaryRelease_model", "salaryrelease");
-        isAllowed(96);
+        // isAllowed(96);
     }
 
     public function index()
     {
-        $data["title"] = "Salary Release";
+        $data["title"] = "Salary Release Process";
 
         $this->load->view("template/header",$data);
         $this->load->view("hris/salary_release/index");

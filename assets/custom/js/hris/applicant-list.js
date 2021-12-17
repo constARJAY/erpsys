@@ -102,16 +102,18 @@ $(document).ready(function(){
         let givenAction     = thisEvent.attr("givenaction");
         let action          = givenAction == "application" ? false : true;
         let data            = getApplicantListFormData(givenAction,thisEvent);
-
-        let argData         = {
-            condition:  "update",            // add|update|cancel
-            moduleName: "Applicant List",   // Title
-            msgExt: "",                    // Message Extension,
-            thisEvent,                    // clickButton
-            thisCard: givenAction,       // card content
-            data,                       // REQUIRED TO BE OBJECT   
-        };
-        updateConfirmation(argData,action);
+        let condition       = givenAction == "application" ? validateForm("tableApplication") : true ;
+        if(condition){
+            let argData         = {
+                condition:  "update",            // add|update|cancel
+                moduleName: "Applicant List",   // Title
+                msgExt: "",                    // Message Extension,
+                thisEvent,                    // clickButton
+                thisCard: givenAction,       // card content
+                data,                       // REQUIRED TO BE OBJECT   
+            };
+            updateConfirmation(argData,action);
+        }
     });
     
     // CHANGES
@@ -152,8 +154,8 @@ function initDataTables() {
             { targets: 5,  width: 150 },
             { targets: 6,  width: 280 },
             { targets: 7,  width: 80  },
-            { targets: 8,  width: 100 },
-            { targets: 9,  width: 100 },
+            { targets: 8,  width: 130 },
+            { targets: 9,  width: 130 },
             { targets: 10,  width: 100 },
         ],
     };
@@ -279,7 +281,7 @@ function pageContent(isDetails = true){
                                             { type : "Re-evaluate" }
                                         ];
         getApplicantInterviewerData = getTableData("hris_applicant_interviewer_tbl","",`applicantID = '${getApplicantID}'`);
-        getProfileTableData     = getProfileData(getApplicantID);
+        getProfileTableData         = getProfileData(getApplicantID);
         
         setTimeout(() => {
             preventRefresh(true);
@@ -292,7 +294,7 @@ function pageContent(isDetails = true){
     }else{
         let tableData   = getTableData(`web_applicant_list_tbl AS wall LEFT JOIN hris_designation_tbl AS hdt ON hdt.designationID = wall.applicantDesignationID`,
                                         `wall.*, designationName, CONCAT(wall.applicantLastname,', ',wall.applicantFirstname,' ',wall.applicantMiddlename) as fullname`,
-                                        ``);
+                                        `applicantDesignationID != '0' `);
         pageContentHtml = ` 
                             <div class="col-lg-12 p-0">
                                 <div class="card">
@@ -321,10 +323,10 @@ function pageContent(isDetails = true){
 function tableContent(data = false){
     let tableDataRow = ``;
     data.map(value=>{
-        let applicantAddress    = `${value.applicantUnit} ${value.applicantBuilding}, 
-                                        ${value.applicantStreet}, ${value.applicantSubdivision},
-                                        ${value.applicantBarangay}, ${value.applicantCity},
-                                        ${value.applicantRegion}, ${value.applicantZipCode},
+        let applicantAddress    = `${capitalizeString(value.applicantUnit)} ${capitalizeString(value.applicantBuilding)}, 
+                                        ${capitalizeString(value.applicantStreet)}, ${capitalizeString(value.applicantSubdivision)},
+                                        ${capitalizeString(value.applicantBarangay)}, ${capitalizeString(value.applicantCity)},
+                                        ${capitalizeString(value.applicantRegion)}, ${value.applicantZipCode}
                                     `;
         let progressionFlag      = 0;
         let progressionTableData = getTableData(`hris_applicant_interviewer_tbl`,``,`applicantID = '${value.applicantID}'`);
@@ -337,7 +339,7 @@ function tableContent(data = false){
         if(progressionFlag){
             applicantInterviewerProgression = progressionTableData[parseInt(progressionFlag) - 1].applicantInterviewerProgression;
             personInCharge                  = progressionTableData[parseInt(progressionFlag) - 1].personInCharge;
-            applicantUpdatedAt              = progressionTableData[parseInt(progressionFlag) - 1].personInCharge;
+            applicantUpdatedAt              = progressionTableData[parseInt(progressionFlag) - 1].updatedAt;
             applicantInterviewerStatus      = progressionTableData[parseInt(progressionFlag) - 1].applicantInterviewerStatus;
         }
 
@@ -352,7 +354,7 @@ function tableContent(data = false){
                             <td>${value.applicantResume}</td>
                             <td class="text-center">${applicantInterviewerProgression}</td>
                             <td class="text-center">${personInCharge}</td>
-                            <td class="text-center">${applicantUpdatedAt}</td>
+                            <td class="text-left">${moment(applicantUpdatedAt).format("MMMM DD, YYYY")}</td>
                             <td class="text-center">${applicantInterviewerStatus}</td>
                         </tr>`;
     }); 
@@ -360,9 +362,9 @@ function tableContent(data = false){
                 <table class="table table-bordered table-striped table-hover" id="tableMyForms">
                     <thead>
                         <tr style="white-space: nowrap">
-                            <th>Applicant Code.</th>
+                            <th>Applicant Code</th>
                             <th>Full Name </th>
-                            <th>Position/s Applying for	</th>
+                            <th>Applied Position</th>
                             <th>Address</th>
                             <th>Contact No.</th>
                             <th>Email Address</th>
@@ -482,17 +484,20 @@ function updateAttr(){
         $(this).find("[name=personInCharge]").attr("id", `personInCharge${i}`);
         $(this).find("[name=dateTime]").attr("id", `dateTime${i}`);
         $(this).find("[name=applicationStatus]").attr("id", `applicationStatus${i}`);
+        let thisDateTime = $(`#dateTime${i}`).val();
+            $(`#dateTime${i}`).daterangepicker({
+                singleDatePicker: true,
+                timePicker: true,
+                showDropdowns: true,
+                autoApply: true,
+                locale: {
+                    format: 'MMMM DD, YYYY hh:mm:ss A'
+                },
+            });
+        $(`#dateTime${i}`).val(thisDateTime);
     });
 
-    $(`[name=dateTime]`).daterangepicker({
-        singleDatePicker: true,
-        timePicker: true,
-        showDropdowns: true,
-        autoApply: true,
-        locale: {
-            format: 'MMMM DD, YYYY hh:mm:ss A'
-        },
-    });
+    
 
     $(".table-row-interview").each(function(i){
         $(this).find("[name=interviewerNote]").attr("id",`interviewerNote${i}`);
@@ -554,12 +559,25 @@ function updateSelect(){
 
         let html = `
                          <div class="profile-image mb-0 text-center"> 
-                            <img class="img-fluid rounded p-0 mt-3" src="${base_url}/assets/images/profile-images/${applicantProfile}" alt=""> 
+                            <img class="img-fluid rounded p-0 mt-3" src="${base_url}/assets/upload-files/profile-images/${applicantProfile}" alt=""> 
                         </div>
                         
                         <div class="body">
+                        
                             <h5 class="card-title m-0">${applicantLastname}, ${applicantFirstname} ${applicantMiddlename}</h5>
-                            <span><a href="${base_url}assets/upload-files/resumes/${applicantResume}" download title="">${applicantResume}</a></span>
+                            
+                            <div class="resume my-2" id="displayResume" style="display:block; font-size: 12px; border: 1px solid black; border-radius: 5px; background: #d1ffe0; padding: 2px 10px;">
+                                <div class="d-flex justify-content-start align-items-center p-0">
+                                    <a class="filename" title="${applicantResume}" style="display: block;
+                                        color: black;
+                                        width: 90%;
+                                        overflow: hidden;
+                                        white-space: nowrap;
+                                        text-overflow: ellipsis;" href="${base_url}assets/upload-files/resumes/${applicantResume}" target="_blank">
+                                        ${applicantResume}
+                                    </a>
+                                </div>
+                            </div>
                         </div>
 
                         <ul class="list-group list-group-flush">
@@ -577,7 +595,7 @@ function updateSelect(){
                             </li>
                             <li class="list-group-item">
                                 <small class="text-muted">Birthdate:</small>
-                                <p class="mb-0">${applicantBirthday}</p>
+                                <p class="mb-0">${moment(applicantBirthday).format("MMMM DD, YYYY")}</p>
                             </li>
                         </ul>
 
@@ -645,106 +663,108 @@ function updateSelect(){
             applicantMothersAge     = "-",
             applicantSpouseAge      = "-",
             applicantSpouseName     = "-",
-            applicantDesignationID  = "-",
+            applicantDesignationID  = "",
         } = data[0];
-        let applicantAddress = `${applicantUnit} ${applicantBuilding}, 
-                                ${applicantStreet}, ${applicantSubdivision},
-                                ${applicantBarangay}, ${applicantCity},
-                                ${applicantRegion}, ${applicantZipCode},
+        let designationName        = getTableData("hris_designation_tbl","designationName", `designationID = '${applicantDesignationID}' `);
+        let applicantAddress = `${capitalizeString(applicantUnit)} ${capitalizeString(applicantBuilding)}, 
+                                ${capitalizeString(applicantStreet)}, ${capitalizeString(applicantSubdivision)},
+                                ${capitalizeString(applicantBarangay)}, ${capitalizeString(applicantCity)},
+                                ${capitalizeString(applicantRegion)}, ${applicantZipCode}
                               `;
+        let applicantBirthdaySplit  = applicantBirthday.split("-");
+        let birthYear               = applicantBirthdaySplit[0];
+        let thisYear                = moment().format("YYYY");
+        let age                     = parseInt(thisYear) - parseInt(birthYear);
 
         let html = `
             <div class="tab-pane active" id="tab-basic-information"> <!-- START DIV OF tab-basic-information -->
 
                 <div class="card">
-                    <div class="header">
-                        <h2>Basic Information</h2>
-                    </div>
                     <div class="body">
                         <div class="row clearfix">
                             <div class="col-lg-4 col-md-12">
                                 <div class="form-group">
-                                    <label class="font-weight-normal">First Name</label>                                                
+                                    <label class="font-weight-bold">First Name</label>                                                
                                     <div class="border-bottom w-100">${applicantFirstname}</div>
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-12">
                                 <div class="form-group">  
-                                    <label class="font-weight-normal">Middle Name</label>                                              
+                                    <label class="font-weight-bold">Middle Name</label>                                              
                                     <div class="border-bottom w-100">${applicantMiddlename||"-"}</div>
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-12">
                                 <div class="form-group">   
-                                    <label class="font-weight-normal">Last Name</label>                                             
+                                    <label class="font-weight-bold">Last Name</label>                                             
                                     <div class="border-bottom w-100">${applicantLastname}</div>
                                 </div>
                             </div>
 
                             <div class="col-lg-3 col-md-12">
                                 <div class="form-group">
-                                    <label class="font-weight-normal">Birth Date</label>                                                
-                                    <div class="border-bottom w-100">${applicantBirthday}</div>
+                                    <label class="font-weight-bold">Birth Date</label>                                                
+                                    <div class="border-bottom w-100">${moment(applicantBirthday).format("MMMM DD, YYYY")}</div>
                                 </div>
                             </div>
                             <div class="col-lg-3 col-md-12">
                                 <div class="form-group">     
-                                    <label class="font-weight-normal">Birth Place</label>                                                 
+                                    <label class="font-weight-bold">Birth Place</label>                                                 
                                     <div class="border-bottom w-100">${applicantBirthPlace}</div>
                                 </div>
                             </div>
                             <div class="col-lg-3 col-md-12">
-                                <div class="form-group">     
-                                    <label class="font-weight-normal">Age</label>                                                 
-                                    <div class="border-bottom w-100">${applicantBirthday}</div>
+                                <div class="form-group">    
+                                    <label class="font-weight-bold">Age</label>                                                 
+                                    <div class="border-bottom w-100">${age}</div>
                                 </div>
                             </div>
                             <div class="col-lg-3 col-md-12">
                                 <div class="form-group">     
-                                    <label class="font-weight-normal">Gender</label>                                                 
+                                    <label class="font-weight-bold">Gender</label>                                                 
                                     <div class="border-bottom w-100">${applicantGender}</div>
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-12">
                                 <div class="form-group">     
-                                    <label class="font-weight-normal">Position/s Applying for</label>                                                 
-                                    <div class="border-bottom w-100">${applicantDesignationID}</div>
+                                    <label class="font-weight-bold">Applied Position</label>                                                 
+                                    <div class="border-bottom w-100">${designationName ? designationName[0].designationName : "-"}</div>
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-12">
                                 <div class="form-group">  
-                                    <label class="font-weight-normal">Citizenship</label>                                             
+                                    <label class="font-weight-bold">Citizenship</label>                                             
                                     <div class="border-bottom w-100">${applicantCitizenship}</div>
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-12">
                                 <div class="form-group">  
-                                    <label class="font-weight-normal">Civil Status</label>                                             
+                                    <label class="font-weight-bold">Civil Status</label>                                             
                                     <div class="border-bottom w-100">${applicantCivilStatus}</div>
                                 </div>
                             </div>
                             <div class="col-lg-12 col-md-12">
                                 <div class="form-group">  
-                                    <label class="font-weight-normal">Address</label>                                             
+                                    <label class="font-weight-bold">Address</label>                                             
                                     <div class="border-bottom w-100">${applicantAddress}</div>
                                 </div>
                             </div>
 
                             <div class="col-lg-4 col-md-12">
                                 <div class="form-group">
-                                    <label class="font-weight-normal">Religion</label>                                                
+                                    <label class="font-weight-bold">Religion</label>                                                
                                     <div class="border-bottom w-100">${applicantReligion}</div>
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-12">
                                 <div class="form-group">  
-                                    <label class="font-weight-normal">Contact Person</label>                                              
+                                    <label class="font-weight-bold">Contact Person</label>                                              
                                     <div class="border-bottom w-100">${applicantContactPerson}</div>
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-12">
                                 <div class="form-group">   
-                                    <label class="font-weight-normal">Contact No.</label>                                             
+                                    <label class="font-weight-bold">Contact No.</label>                                             
                                     <div class="border-bottom w-100">${applicantContactNumber}</div>
                                 </div>
                             </div>
@@ -761,37 +781,37 @@ function updateSelect(){
                         <div class="row clearfix">
                             <div class="col-lg-10 col-md-12">
                                 <div class="form-group">
-                                    <label class="font-weight-normal">Father's Name</label>                                                
-                                    <div class="border-bottom w-100">${applicantFathersName}</div>
+                                    <label class="font-weight-bold">Father's Name</label>                                                
+                                    <div class="border-bottom w-100">${applicantFathersName || "-"}</div>
                                 </div>
                             </div>
                             <div class="col-lg-2 col-md-12">
                                 <div class="form-group">
-                                    <label class="font-weight-normal">Age</label>                                                
-                                    <div class="border-bottom w-100">${applicantFathersAge}</div>
+                                    <label class="font-weight-bold">Age</label>                                                
+                                    <div class="border-bottom w-100">${applicantFathersAge == "0" ? "-" : applicantFathersAge}</div>
                                 </div>
                             </div>
                             <div class="col-lg-10 col-md-12">
                                 <div class="form-group">
-                                    <label class="font-weight-normal">Mother's Name</label>                                                
-                                    <div class="border-bottom w-100">${applicantMothersName}</div>
+                                    <label class="font-weight-bold">Mother's Name</label>                                                
+                                    <div class="border-bottom w-100">${applicantMothersName || "-"}</div>
                                 </div>
                             </div>
                             <div class="col-lg-2 col-md-12">
                                 <div class="form-group">
-                                    <label class="font-weight-normal">Age</label>                                                
-                                    <div class="border-bottom w-100">${applicantMothersAge}</div>
+                                    <label class="font-weight-bold">Age</label>                                                
+                                    <div class="border-bottom w-100">${applicantMothersAge == "0" ? "-" : applicantMothersAge}</div>
                                 </div>
                             </div>
                             <div class="col-lg-10 col-md-12">
                                 <div class="form-group">
-                                    <label class="font-weight-normal">Spouse Name</label>                                                
+                                    <label class="font-weight-bold">Spouse Name</label>                                                
                                     <div class="border-bottom w-100">${applicantSpouseName || "-"}</div>
                                 </div>
                             </div>
                             <div class="col-lg-2 col-md-12">
                                 <div class="form-group">
-                                    <label class="font-weight-normal">Age</label>                                                
+                                    <label class="font-weight-bold">Age</label>                                                
                                     <div class="border-bottom w-100">${applicantSpouseName ? applicantSpouseAge : "-"}</div>
                                 </div>
                             </div>
@@ -814,23 +834,14 @@ function updateSelect(){
 
     function getDependentInformation(data = false){
         let html = `
-                         <div class="col-lg-6 col-md-12">
-                            <div class="form-group">
-                                <label class="font-weight-normal">Name</label>                                                
-                                <div class="border-bottom w-100">-</div>
-                            </div>
+                         <div class="col-lg-4 col-md-12">
+                           
                         </div>
-                        <div class="col-lg-3 col-md-12">
-                            <div class="form-group">
-                                <label class="font-weight-normal">Relationship</label>                                                
-                                <div class="border-bottom w-100">-</div>
-                            </div>
+                        <div class="col-lg-4 col-md-12">
+                            <img src="${base_url}/assets/modal/no-data.gif">
                         </div>
-                        <div class="col-lg-3 col-md-12">
-                            <div class="form-group">
-                                <label class="font-weight-normal">Birthday</label>                                                
-                                <div class="border-bottom w-100">-</div>
-                            </div>
+                        <div class="col-lg-4 col-md-12">
+                         
                         </div>
                 `;
         if(data["dependent"]){
@@ -839,19 +850,19 @@ function updateSelect(){
                 html += `
                     <div class="col-lg-6 col-md-12">
                         <div class="form-group">
-                            <label class="font-weight-normal">Name</label>                                                
+                            <label class="font-weight-bold">Name</label>                                                
                             <div class="border-bottom w-100">${value.dependentName}</div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-12">
                         <div class="form-group">
-                            <label class="font-weight-normal">Relationship</label>                                                
+                            <label class="font-weight-bold">Relationship</label>                                                
                             <div class="border-bottom w-100">${value.relationship}</div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-12">
                         <div class="form-group">
-                            <label class="font-weight-normal">Birthday</label>                                                
+                            <label class="font-weight-bold">Birthday</label>                                                
                             <div class="border-bottom w-100">${value.birthday}</div>
                         </div>
                     </div>`;
@@ -877,51 +888,51 @@ function updateSelect(){
                     <div class="row clearfix">
                         <div class="col-lg-10 col-md-12">
                             <div class="form-group">
-                                <label class="font-weight-normal">Professional Regulation Commission ID (PRC ID)</label>                                                
+                                <label class="font-weight-bold">Professional Regulation Commission ID (PRC ID)</label>                                                
                                 <div class="border-bottom w-100">${applicationPRC || "-"}</div>
                             </div>
                         </div>
                         <div class="col-lg-2 col-md-12">
                             <div class="form-group">
-                                <label class="font-weight-normal">EXP Date</label>                                                
+                                <label class="font-weight-bold">Expiration Date</label>                                                
                                 <div class="border-bottom w-100">${applicationPRCExpDate || "-"}</div>
                             </div>
                         </div>
 
                         <div class="col-lg-3 col-md-12">
                             <div class="form-group">
-                                <label class="font-weight-normal">Social Security System ID (SSS ID)</label>                                                
+                                <label class="font-weight-bold">SSS No.</label>                                                
                                 <div class="border-bottom w-100">${applicantSSS || "-"}</div>
                             </div>
                         </div>
 
                         <div class="col-lg-3 col-md-12">
                             <div class="form-group">
-                                <label class="font-weight-normal">Tax Identification No. (TIN)</label>                                                
+                                <label class="font-weight-bold">Tax Identification No. (TIN)</label>                                                
                                 <div class="border-bottom w-100">${applicantTIN || "-"}</div>
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-12">
                             <div class="form-group">
-                                <label class="font-weight-normal">Philippine Identification Card</label>                                                
+                                <label class="font-weight-bold">Philippine Identification Card</label>                                                
                                 <div class="border-bottom w-100">${applicantPHIL || "-"}</div>
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-12">
                             <div class="form-group">
-                                <label class="font-weight-normal">NHMF</label>                                                
+                                <label class="font-weight-bold">NHMF</label>                                                
                                 <div class="border-bottom w-100">${applicantNHNF || "-"}</div>
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-12">
                             <div class="form-group">
-                                <label class="font-weight-normal">Pag-IBIG ID</label>                                                
+                                <label class="font-weight-bold">Pag-IBIG ID</label>                                                
                                 <div class="border-bottom w-100">${applicantPagibig || "-"}</div>
                             </div>
                         </div>
                         <div class="col-lg-9 col-md-12">
                             <div class="form-group">
-                                <label class="font-weight-normal">Philippine Health Insurance  Corporation ID (PhilHealth ID)</label>                                                
+                                <label class="font-weight-bold">PhilHealth ID</label>                                                
                                 <div class="border-bottom w-100">${applicantPhilHealth || "-"}</div>
                             </div>
                         </div>
@@ -973,66 +984,7 @@ function updateSelect(){
                             ${tabActivity}
                         </div>
 
-                        <div class="col-lg-6 col-md-12 row">
-                            <div class="col-lg-12 col-md-12">
-                                <div class="form-group">
-                                    <label class="font-weight-normal">How Did You Hear About This Position?</label>                                                
-                                    <div class="border-bottom w-100">Sample text here....</div>
-                                </div>
-                                <div class="d-flex justify-content align-items">
-                                    <div class="form-group pr-1 w-50">
-                                        <label class="font-weight-normal">Desired start date</label>                                                
-                                        <div class="border-bottom w-100">Sample text here....</div>
-                                    </div>
-                                    <div class="form-group pl-1 w-50">
-                                        <label class="font-weight-normal">Desired salary</label>                                                
-                                        <div class="border-bottom w-100 text-right">Sample text here....</div>
-                                    </div>
-                                </div>
-                                <!-- 
-                                Have you ever been dismissed from any Job?
-                                Reason/s
-
-                                Have you ever been convicted/ involved in any crime?
-                                Reason/s
-
-                                Are you willing to relocate? 
-
-                                Can you drive?
-                                Driver’s license No
-                                Expiration -->
-                                <div class="other-employment-information">
-                                    <div class="form-group">
-                                        <label class="font-weight-normal"><i class="fa fa-check text-success" aria-hidden="true"></i> Have you ever been dismissed from any Job?</label>                                                
-                                        <div class="border-bottom w-100">Sample text here....</div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="font-weight-normal"><i class="fa fa-times text-danger" aria-hidden="true"></i> Have you ever been convicted/ involved in any crime?</label>                                                
-                                        <div class="border-bottom w-100">Sample text here....</div>
-                                    </div>
-
-                                    <div class="form-group m-0">
-                                        <label class="font-weight-normal"><i class="fa fa-times text-danger" aria-hidden="true"></i> Are you willing to relocate?</label>
-                                    </div>
-
-                                    <div class="form-group m-0">
-                                        <label class="font-weight-normal"><i class="fa fa-check text-success" aria-hidden="true"></i> Can you drive?</label>
-                                    </div>
-                                    <div class="d-flex justify-content align-items">
-                                        <div class="form-group pr-1 w-75">
-                                            <label class="font-weight-normal">Driver’s license No.</label>                                                
-                                            <div class="border-bottom w-100">Sample text here....</div>
-                                        </div>
-                                        <div class="form-group pl-1 w-25">
-                                            <label class="font-weight-normal">Expiration</label>                                                
-                                            <div class="border-bottom w-100">Sample text here....</div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
+                        ${questionaire(false)}
                     </div>
                 </div>
             </div> <!-- END DIV OF tab-employment-history -->
@@ -1043,29 +995,35 @@ function updateSelect(){
 
     function getOrganizationJoined(data = false){
         let orgTableDataRow = `
-                                <div class="col-lg-12 col-md-12">
-                                   <h2>No organization found.</h2>
+                                <div class="col-lg-4 col-md-0">
+                           
+                                </div>
+                                <div class="col-lg-4 col-md-12">
+                                    <img src="${base_url}/assets/modal/no-data.gif">
+                                </div>
+                                <div class="col-lg-4 col-md-0">
+                                
                                 </div>
                                 `;
-        if(data["organization"]){
+        if(data["organization"].length > 0){
             orgTableDataRow = ``;
             data["organization"].map(value=>{
                 orgTableDataRow += `
                                     <div class="col-lg-4 col-md-12">
                                         <div class="form-group">
-                                            <label class="font-weight-normal">Date</label>                                                
+                                            <label class="font-weight-bold">Date</label>                                                
                                             <div class="border-bottom w-100">${value.organizationJoinDate || "-" }</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-4 col-md-12">
                                         <div class="form-group">
-                                            <label class="font-weight-normal">Name of Organization</label>                                                
+                                            <label class="font-weight-bold">Name of Organization</label>                                                
                                             <div class="border-bottom w-100">${value.organizationName || "-" }</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-4 col-md-12">
                                         <div class="form-group">
-                                            <label class="font-weight-normal">Position</label>                                                
+                                            <label class="font-weight-bold">Position</label>                                                
                                             <div class="border-bottom w-100">${value.organizationPosition || "-" }</div>
                                         </div>
                                     </div>`;
@@ -1085,29 +1043,35 @@ function updateSelect(){
 
     function getExamTaken(data = false){
         let examTableDataRow =  `
-                                <div class="col-lg-12 col-md-12">
-                                   <h2>No examination found.</h2>
+                                <div class="col-lg-4 col-md-0">
+                           
+                                </div>
+                                <div class="col-lg-4 col-md-12">
+                                    <img src="${base_url}/assets/modal/no-data.gif">
+                                </div>
+                                <div class="col-lg-4 col-md-0">
+                                
                                 </div>
                                 `;
-        if(data["exam"]){
+        if(data["exam"].length > 0){
             examTableDataRow = ``;
             data["exam"].map(value=>{
                 examTableDataRow += `
                                         <div class="col-lg-4 col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-normal">Date</label>                                                
+                                                <label class="font-weight-bold">Date</label>                                                
                                                 <div class="border-bottom w-100">${value.examTakenDate}</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-4 col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-normal">Exam Taken</label>                                                
+                                                <label class="font-weight-bold">Exam Taken</label>                                                
                                                 <div class="border-bottom w-100">${value.examTakenDescription}</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-4 col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-normal">Result</label>                                                
+                                                <label class="font-weight-bold">Result</label>                                                
                                                 <div class="border-bottom w-100">${value.examTakenResult}</div>
                                             </div>
                                         </div>
@@ -1127,28 +1091,34 @@ function updateSelect(){
     }
 
     function getSeminars(data = false){
-        let seminarTableDataRow = ` <div class="col-lg-12 col-md-12">
-                                        <h2>No Seminar found.</h2>
+        let seminarTableDataRow = ` <div class="col-lg-4 col-md-0">
+                           
+                                    </div>
+                                    <div class="col-lg-4 col-md-12">
+                                        <img src="${base_url}/assets/modal/no-data.gif">
+                                    </div>
+                                    <div class="col-lg-4 col-md-0">
+                                    
                                     </div>`;
-        if(data["seminar"]){
+        if(data["seminar"].length > 0){
             seminarTableDataRow = ``;
             data["seminar"].map(value=>{
                 seminarTableDataRow += `
                                         <div class="col-lg-4 col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-normal">Date</label>                                                
+                                                <label class="font-weight-bold">Date</label>                                                
                                                 <div class="border-bottom w-100">${value.seminarTakenDate}</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-4 col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-normal">Seminar</label>                                                
+                                                <label class="font-weight-bold">Seminar</label>                                                
                                                 <div class="border-bottom w-100">${value.seminarTakenDescription}</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-4 col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-normal">Position</label>                                                
+                                                <label class="font-weight-bold">Position</label>                                                
                                                 <div class="border-bottom w-100">${value.seminarTakenPosition}</div>
                                             </div>
                                         </div>`;
@@ -1176,25 +1146,25 @@ function updateSelect(){
                 charRefTableDataRow += `
                                         <div class="col-lg-3 col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-normal">Name</label>                                                
+                                                <label class="font-weight-bold">Name</label>                                                
                                                 <div class="border-bottom w-100">${value.characterReferenceName}</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-3 col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-normal">Position</label>                                                
+                                                <label class="font-weight-bold">Position</label>                                                
                                                 <div class="border-bottom w-100">${value.characterReferencePosition}</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-3 col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-normal">Company</label>                                                
+                                                <label class="font-weight-bold">Company</label>                                                
                                                 <div class="border-bottom w-100">${value.characterReferenceCompany}</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-3 col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-normal">Contact Number</label>                                                
+                                                <label class="font-weight-bold">Contact Number</label>                                                
                                                 <div class="border-bottom w-100">${value.characterReferenceNumber}</div>
                                             </div>
                                         </div> `;
@@ -1278,13 +1248,13 @@ function updateSelect(){
                 <tr class="table-row-application" style="white-space: nowrap">
                     <td class="text-center"><input type="checkbox" class="check_row" tabtype="application"></td>
                     <td>
-                        <select class="form-control validate select2 w-100" tabtype="application"
+                        <select class="form-control validate select2 w-100" tabtype="application" required
                             name="progression">
                             ${getProgressionOption(applicantInterviewerProgression)}
                         </select>
                     </td>
                     <td>
-                        <select class="form-control validate select2 w-100" tabtype="application"
+                        <select class="form-control validate select2 w-100" tabtype="application" required
                             name="personInCharge">
                             ${getPersonInChargeOption(employeeID)}
                         </select>
@@ -1295,6 +1265,7 @@ function updateSelect(){
                             class = "form-control daterange-target-date-time text-center"
                             name = "dateTime"
                             id="dateTime" 
+                            required
                             value = "${applicantInterviewerDateTime || moment().format("MMMM DD, YYYY hh:mm:ss A")}">
                     </td>
                     <td>
@@ -1320,29 +1291,33 @@ function getCardInterview(){
 }
 
 function getInfo_InterviewTab(){
+    let tableData = getTableData( `web_applicant_job_tbl AS appJob
+                                                       INNER JOIN hris_job_posting_tbl as postJob ON postJob.jobID = appJob.jobID
+                                                       LEFT JOIN pms_personnel_requisition_tbl AS pprt ON postJob.requisitionID = pprt.requisitionID
+                                                       LEFT JOIN hris_employee_list_tbl AS helt ON helt.employeeID = pprt.personnelReportByID`, 
+                                    `	pprt.requisitionID AS requisitionID , CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) as reportBy, personnelDateNeeded, pprt.createdAt AS createdAt`, 
+                                    `applicantID = ${getApplicantID}` );
+            
       let html = `
                     <div class="card">
-                        <div class="header">
-                            <h2>Basic Information</h2>
-                        </div>
                         <div class="body">
                             <div class="row clearfix">
                                 <div class="col-lg-4 col-md-12">
                                     <div class="form-group">
-                                        <label class="font-weight-normal">PRF Number</label>                                                
-                                        <div class="border-bottom w-100">Sample text here....</div>
+                                        <label class="font-weight-bold">PRF Number</label>                                                
+                                        <div class="border-bottom w-100">${getFormCode("PRF",tableData[0].createdAt,tableData[0].requisitionID)}</div>
                                     </div>
                                 </div>
                                 <div class="col-lg-4 col-md-12">
                                     <div class="form-group">  
-                                        <label class="font-weight-normal">Date Required</label>                                              
-                                        <div class="border-bottom w-100">Sample text here....</div>
+                                        <label class="font-weight-bold">Date Required</label>                                              
+                                        <div class="border-bottom w-100">${moment(tableData[0].personnelDateNeeded).format("MMMM DD, YYYY")}</div>
                                     </div>
                                 </div>
                                 <div class="col-lg-4 col-md-12">
                                     <div class="form-group">   
-                                        <label class="font-weight-normal">Requesting Manager</label>                                             
-                                        <div class="border-bottom w-100">Sample text here....</div>
+                                        <label class="font-weight-bold">Requesting Manager</label>                                             
+                                        <div class="border-bottom w-100">${tableData[0].reportBy}</div>
                                     </div>
                                 </div>
                             </div>  
@@ -1359,43 +1334,41 @@ function getLevelInterviewer(){
     getApplicantInterviewerData.map((value,index)=>{
         let row         = value;
         let isDisabled  = sessionID == row.employeeID ? "" : "disabled";   
-        let hasUpdate   = sessionID == row.employeeID ? `<button type="button" class="btn btn-submit px-5 p-2 btnUpdate" givenaction="interview" tableid="${row.applicantInterviewerID}">
+        let hasUpdate   = sessionID == row.employeeID ? `<button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="interview" tableid="${row.applicantInterviewerID}">
                                                             <i class="fas fa-save"></i> Update</button>`:``;
         html += `
                     <div class="card">
-                        <div class="header">
-                            <h2>${row.applicantInterviewerProgression}</h2>
-                        </div>
+                        <h2 class="text-danger font-weight-bold p-2">${row.applicantInterviewerProgression}</h2>
                         <div class="body">
                             <div class="row clearfix table-row-interview" tableid="${row.applicantInterviewerID}">
                                 <div class="col-lg-6 col-md-12">
                                     <div class="form-group">
-                                        <label class="font-weight-normal">Interviewer</label>   
+                                        <label class="font-weight-bold">Interviewer</label>   
                                         <input type="text" class="form-control" disabled value="${row.personInCharge}" placeholder="Username">
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-12">
                                     <div class="form-group">
-                                        <label class="font-weight-normal">Status</label>                                                
+                                        <label class="font-weight-bold">Status</label>                                                
                                         <select class="form-control validate select2 w-100" tabtype="interview"
-                                            name="applicationStatus"  ${isDisabled}>
+                                            name="applicationStatus"  ${row.applicantInterviewerNote ? "disabled" : isDisabled}>
                                             ${getApplicationStatusOption(row.applicantInterviewerStatus)}
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-lg-12 col-md-12">
                                     <div class="form-group">
-                                        <label class="font-weight-normal">Notes</label>                                                
+                                        <label class="font-weight-bold">Notes</label>                                                
                                         <textarea rows="2" class="form-control no-resize" 
                                             tabtype="interview"
                                             name="interviewerNote"
-                                            placeholder="Please type what you want..." ${isDisabled}>${row.applicantInterviewerNote || ""}</textarea>
+                                            placeholder="Please type what you want..." ${row.applicantInterviewerNote ? "disabled" : isDisabled}>${row.applicantInterviewerNote || ""}</textarea>
                                     </div>
                                 </div>
                                 
                             </div>
                             <div class="text-right">
-                                ${hasUpdate}
+                                ${row.applicantInterviewerNote ? "":hasUpdate}
                             </div>
                         </div>
                     </div>
@@ -1555,23 +1528,31 @@ const updateConfirmation = ( argData = false, isUpdate = false) => {
 				}).done(function() {
                     let html;
 					if(returnCondition){
-                        if(thisCard == "application"){  
-                            getApplicantInterviewerData = returnCardArray;
-                            html = getCardApplication(returnCardArray);
-                        }else{
-                            html = "";
-                        }
+                        // if(thisCard == "application"){  
+                        //     getApplicantInterviewerData = returnCardArray;
+                        //     html = getCardApplication(returnCardArray);
+                        // }else{
+                        //     html = "";
+                        // }
 
                         if(thisEvent){
                             thisEvent.prop("disabled", false);
                             buttonIcon.removeClass("zmdi zmdi-rotate-right zmdi-hc-spin zmdi-hc-lg").addClass("fas fa-save");
                         }else{
-                            $("#applicant_details_content").html(html);
+                            // $("#applicant_details_content").html(html);
                         }
+                        $("#tableApplication").find(".no-error").each(function(){
+                            $(this).removeClass("no-error");
+                        });
+
+                        $("#tableApplication").find(".validated").each(function(){
+                            $(this).removeClass("is-valid");
+                        });
+                        
                         setTimeout(() => {
-                            updateAttr();
-                            initDataTables();
-                            initAll();
+                            // updateAttr();
+                            // initDataTables();
+                            // initAll();
                         }, 500);   
                     }  
 				});
@@ -1636,3 +1617,80 @@ function getFormCode(str = null, date = null, id = 0) {
 	return null;
 }
 // ----- END GET FORM CODE -----
+
+
+function capitalizeString(string = false){
+    let html = "";
+    if(string){
+        let thisString = string.toLowerCase();
+        html = thisString.charAt(0).toUpperCase() + thisString.slice(1);
+    }
+    return html;
+}
+
+function questionaire(param = false){
+    let html = ``
+    if(param){
+            html += `<div class="col-lg-6 col-md-12 row">
+            <div class="col-lg-12 col-md-12">
+                <div class="form-group">
+                    <label class="font-weight-bold">How Did You Hear About This Position?</label>                                                
+                    <div class="border-bottom w-100">Sample text here....</div>
+                </div>
+                <div class="d-flex justify-content align-items">
+                    <div class="form-group pr-1 w-50">
+                        <label class="font-weight-bold">Desired start date</label>                                                
+                        <div class="border-bottom w-100">Sample text here....</div>
+                    </div>
+                    <div class="form-group pl-1 w-50">
+                        <label class="font-weight-bold">Desired salary</label>                                                
+                        <div class="border-bottom w-100 text-right">Sample text here....</div>
+                    </div>
+                </div>
+                <!-- 
+                Have you ever been dismissed from any Job?
+                Reason/s
+
+                Have you ever been convicted/ involved in any crime?
+                Reason/s
+
+                Are you willing to relocate? 
+
+                Can you drive?
+                Drivers license No
+                Expiration -->
+                <div class="other-employment-information">
+                    <div class="form-group">
+                        <label class="font-weight-bold"><i class="fa fa-check text-success" aria-hidden="true"></i> Have you ever been dismissed from any Job?</label>                                                
+                        <div class="border-bottom w-100">Sample text here....</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold"><i class="fa fa-times text-danger" aria-hidden="true"></i> Have you ever been convicted/ involved in any crime?</label>                                                
+                        <div class="border-bottom w-100">Sample text here....</div>
+                    </div>
+
+                    <div class="form-group m-0">
+                        <label class="font-weight-bold"><i class="fa fa-times text-danger" aria-hidden="true"></i> Are you willing to relocate?</label>
+                    </div>
+
+                    <div class="form-group m-0">
+                        <label class="font-weight-bold"><i class="fa fa-check text-success" aria-hidden="true"></i> Can you drive?</label>
+                    </div>
+                    <div class="d-flex justify-content align-items">
+                        <div class="form-group pr-1 w-75">
+                            <label class="font-weight-bold">Driver’s license No.</label>                                                
+                            <div class="border-bottom w-100">Sample text here....</div>
+                        </div>
+                        <div class="form-group pl-1 w-25">
+                            <label class="font-weight-bold">Expiration</label>                                                
+                            <div class="border-bottom w-100">Sample text here....</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>`;
+    }
+    return html;
+}

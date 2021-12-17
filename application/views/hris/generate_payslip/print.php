@@ -1,183 +1,507 @@
+<?php
+
+    $companyName = $companyAddress = $companyContact = "";
+    $companyLogo = "default.png";
+
+    if ($company) {
+        $companyName    = $company->companyName ?? "";
+        $companyLogo    = $company->companyLogo ?? "";
+        $companyAddress = ($company->companyUnitNo ?? "") ." ". ($company->companyBuildingNo ?? "") ." ". ($company->companyStreetName ?? "") ." ". ($company->companySubdivisionName ?? "") ." ". ($company->companyBarangay ?? "") ." ". ($company->companyCity ?? "") ." ". ($company->companyProvince ?? "") ." ". ($company->companyRegion ?? "") ." ". ($company->companyZipcode ?? "") ." ". ($company->companyCountry ?? "");
+        $companyContact = ($company->companyTelephone ?? "") ." ". ($company->companyMobile ?? "");
+    }
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?></title>
+    <title>PRINT PAYSLIP</title>
 
-    <link rel="stylesheet" href="<?=base_url('assets/plugins/bootstrap/css/bootstrap.min.css')?>">
+    <!-- <link rel="stylesheet" href="<?=base_url('assets/plugins/bootstrap/css/bootstrap.min.css')?>"> -->
 
-    <style>
-        .label {
-            background: black !important;
-            font-weight: bold;
-        }
-
-        .ans {
-            font-size: .9rem;
-            color: black;
-        }
-    </style>
+    <link rel="stylesheet" href="<?= base_url('assets/custom/css/hris/generate-payslip-print.css') ?>">
 </head> 
 <body>
-    <div class="row">
 
-        <?php if ($payslip && !empty($payslip)) : ?>
-        <?php foreach($payslip as $pay) : ?>
-        
-            <div class="col-12 border" style="height: 50vh;">
-                <table class="table table-bordered text-wrap" style="vertical-align: middle;">
-                    <thead>
-                        <tr class="py-0">
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- ----- HEADER ----- -->
-                        <tr class="py-0">
-                            <th class="label">Employee Code</th>
-                            <td colspan="2" class="ans text-wrap">EMP-21-00001</td>
-                            <th class="label">Pay Period</th>
-                            <td colspan="2" class="ans text-wrap">November 01, 2021 - November 15, 2021</td>
-                            <th class="label">Employee Status</th>
-                            <td colspan="2" class="ans text-wrap">Active</td> 
-                        </tr>
-                        <tr class="py-0">
-                            <th class="label">Employee Name</th>
-                            <td colspan="2" class="ans text-wrap">Arjay P. Diangzon</td>
-                            <th class="label">Pay Out</th>
-                            <td colspan="2" class="ans text-wrap">November 18, 2021</td>
-                            <th class="label">Department</th>
-                            <td colspan="2" class="ans text-wrap">
-                                <div>Operations</div>
-                                <small>Junior Developer</small>
-                            </td> 
-                        </tr>
-                        <!-- ----- HEADER ----- -->
-                        <tr class="py-0">
-                            <th colspan="2" class="label">SSS No.</th>
-                            <td colspan="2" class="ans">123-123-123</td>
-                            <th colspan="2" class="label">PhilHealth No.</th>
-                            <td colspan="3" class="ans">123-1234-123</td>
-                        </tr>
-                        <tr class="py-0">
-                            <th colspan="2" class="label">Pagibig No.</th>
-                            <td colspan="2" class="ans">123-412-123</td>
-                            <th colspan="2" class="label">TIN</th>
-                            <td colspan="3" class="ans" colspan="2">123-123-123-123</td>
-                        </tr>
-                        <tr class="py-0">
-                            <th class="text-center" colspan="3">EARNINGS</th>
-                            <th class="text-center" colspan="3">DEDUCTIONS</th>
-                            <th class="text-center" colspan="3">BALANCE</th>
-                        </tr>
-                        <tr class="py-0">
-                            <!-- ----- EARNINGS ----- -->
-                            <th>Category</th>
-                            <th>Hours</th>
-                            <th>Amount</th>
-                            <!-- ----- END EARNINGS ----- -->
 
-                            <!-- ----- DEDUCTION ----- -->
-                            <th colspan="2">Category</th>
-                            <th>Amount</th>
-                            <!-- ----- END DEDUCTION ----- -->
+    <div class="container">
 
-                            <!-- ----- BALANCE ----- -->
-                            <th colspan="2">Category</th>
-                            <th>Amount</th>
-                            <!-- ----- END BALANCE ----- -->
+        <!--
+        <div class="card w-100 line-break">
+            <div class="card-header">
+                <div class="card-title">
+                    <div class="company">BlackCoders</div>
+                    <div class="address">1701 Antel Global Corp. Barangay San Antonio Pasig City</div>
+                    <div class="contact">(23) 234-1234-23</div>
+                </div>
+                <img src="<?= base_url('assets/images/BC-BLACK.png') ?>" alt="Logo">
+            </div>
+
+            <div class="card-body">
+                <div class="table-parent">
+                    <table class="table-header">
+                        <tr>
+                            <td>
+                                <div>
+                                    <b>Employee Name: </b>
+                                    <div>EMP-21-00001 - Charles Vincent Verdadero</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>Department: </b>
+                                    <div>Operations - Junior Developer II</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>Pay Period: </b>
+                                    <div>November 06, 2021 - November 20, 2021</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>Pay Out: </b>
+                                    <div>November 30, 2021</div>
+                                </div>
+                            </td>
                         </tr>
-                        <tr class="py-0">
-                            <!-- ----- EARNINGS ----- -->
-                            <td>Basic Pay</td>
-                            <td></td>
-                            <td></td>
-                            <!-- ----- END EARNINGS ----- -->
-
-                            <!-- ----- DEDUCTION ----- -->
-                            <td colspan="2"></td>
-                            <td></td>
-                            <!-- ----- END DEDUCTION ----- -->
-
-                            <!-- ----- BALANCE ----- -->
-                            <td colspan="2"></td>
-                            <td></td>
-                            <!-- ----- END BALANCE ----- -->
+                        <tr>
+                            <td>
+                                <div>
+                                    <b>SSS Number: </b> 
+                                    <div>123-1234-123</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>PhilHealth Number: </b> 
+                                    <div>123-1234-123</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>Pag-IBIG Number: </b> 
+                                    <div>123-1234-123</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>TIN: </b> 
+                                    <div>123-1234-123</div>
+                                </div>
+                            </td>
                         </tr>
-                        <tr class="py-0">
-                            <!-- ----- EARNINGS ----- -->
-                            <th colspan="2">GROSS PAY</th>
-                            <th>P 15,210.10</th>
-                            <!-- ----- END EARNINGS ----- -->
-
-                            <!-- ----- DEDUCTION ----- -->
-                            <th colspan="2">TOTAL DEDUCTION</th>
-                            <th>P 15,210.10</th>
-                            <!-- ----- END DEDUCTION ----- -->
-
-                            <!-- ----- BALANCE ----- -->
-                            <th colspan="2">TOTAL DEDUCTION</th>
-                            <th>P 15,210.10</th>
-                            <!-- ----- END BALANCE ----- -->
+                    </table>
+                </div>
+                
+                <div class="d-flex" style="margin-top: 3px">
+                    <table class="table-body">
+                        <tr class="text-center">
+                            <th colspan="2">EARNINGS</th>
                         </tr>
-                        <tr class="py-0">
-                            <th colspan="2">Leave Type</th>
+                        <tr>
+                            <th class="text-left">Basic Pay</th>
+                            <td class="text-right">15,234.23</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Holiday Pay</th>
+                            <td class="text-right">15,234.23</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Overtime</th>
+                            <td class="text-right">15,234.23</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Night Differential</th>
+                            <td class="text-right">15,234.23</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Paid Leave</th>
+                            <td class="text-right">15,203.23</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Allowance</th>
+                            <td class="text-right">15,234.23</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">TOTAL EARNINGS</th>
+                            <td class="text-right">15,234.23</td>
+                        </tr>
+                    </table>
+                    <table class="table-body">
+                        <tr class="text-center">
+                            <th colspan="2">DEDUCTION</th>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Late/Undertime</th>
+                            <td class="text-right">1,234.43</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">LWOP</th>
+                            <td class="text-right">1,234.43</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">SSS</th>
+                            <td class="text-right">1,234.43</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">PhilHealth</th>
+                            <td class="text-right">1,234.43</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Pag-IBIG</th>
+                            <td class="text-right">1,234.43</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">With-holding Tax</th>
+                            <td class="text-right">1,234.43</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">TOTAL DEDUCTION</th>
+                            <td class="text-right">15,234.23</td>
+                        </tr>
+                    </table>
+                    <table class="table-body">
+                        <tr class="text-center">
+                            <th colspan="2">BALANCE</th>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Car Loan</th>
+                            <td class="text-right">1,234.43</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">TOTAL BALANCE</th>
+                            <td class="text-right">15,234.23</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="d-flex" style="margin-top: 3px">
+                    <table class="table-footer text-center">
+                        <tr>
+                            <th>Leave Type</th>
                             <th>Quantity</th>
                             <th>Used</th>
                             <th>Remaining</th>
-                            <th colspan="2">HOURLY RATE</th>
-                            <th colspan="2">P 12,102</th>
                         </tr>
-                        <tr class="py-0">
-                            <th colspan="2">Sick Leave</th>
-                            <th>5</th>
-                            <th>1</th>
-                            <th>4</th>
-                            <th colspan="2">BASIC RATE</th>
-                            <th colspan="2">P 12,102</th>
+                        <tr>
+                            <td>Sick Leave</td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>4</td>
                         </tr>
-                        <tr class="py-0">
-                            <th colspan="2">Vacation Leave</th>
-                            <th>6</th>
-                            <th>3</th>
-                            <th>3</th>
-                            <th colspan="2">NET PAY</th>
-                            <th colspan="2">P 12,102</th>
+                        <tr>
+                            <td>Vaction Leave</td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>4</td>
                         </tr>
-                    </tbody>
-                    <tfoot>
-                        <tr class="py-0">
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
-                            <th style="width: 11%"></th>
+                    </table>
+                    <table class="table-footer">
+                        <tr>
+                            <th class="text-left">BASIC PAY</th>
+                            <td class="text-right font-weight-bold">15,200.43</td>
                         </tr>
-                    </tfoot>
-                </table>
+                        <tr>
+                            <th class="text-left">GROSS PAY</th>
+                            <td class="text-right font-weight-bold">15,200.43</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">NET PAY</th>
+                            <td class="text-right font-weight-bold netpay">15,200.43</td>
+                        </tr>
+                    </table>
+                </div>
+
             </div>
 
+            <div class="line-break"></div>
+        </div>
+        -->
+
+        <?php if($payslip && !empty($payslip)): ?>
+        <?php foreach($payslip as $index => $pay): ?>
+        <?php
+            $employeeCode           = $pay["employeeCode"] ?? "-";
+            $employeeName           = $pay["fullname"] ?? "-";
+            $departmentName         = $pay["departmentName"] ?? "-";
+            $designationName        = $pay["designationName"] ?? "-";
+            $payPeriod              = $pay["payPeriod"] ?? "-";
+            $payOut                 = $pay["payOut"] ?? "-";
+            $employeeSSS            = $pay["employeeSSS"] ?? "-";
+            $employeePhilHealth     = $pay["employeePhilHealth"] ?? "-";
+            $employeePagibig        = $pay["employeePagibig"] ?? "-";
+            $employeeTIN            = $pay["employeeTIN"] ?? "-";
+            $basicPay               = $pay["basicPay"] ?? "0";
+            $holidayPay             = $pay["holidayPay"] ?? "0";
+            $overtimePay            = $pay["overtimePay"] ?? "0";
+            $nightDifferentialPay   = $pay["nightDifferentialPay"] ?? "0";
+            $allowance              = $pay["allowance"] ?? "0";
+            $leavePay               = $pay["leavePay"] ?? "0";
+            $totalEarning           = $pay["totalEarning"] ?? "0";
+            $lateUndertimeDeduction = $pay["lateUndertimeDeduction"] ?? "0";
+            $lwopDeduction          = $pay["lwopDeduction"] ?? "0";
+            $sssDeduction           = $pay["sssDeduction"] ?? "0";
+            $phicDeduction          = $pay["phicDeduction"] ?? "0";
+            $hdmfDeduction          = $pay["hdmfDeduction"] ?? "0";
+            $taxDeduction           = $pay["withHoldingDeduction"] ?? "0";
+            $totalDeduction         = $pay["totalDeduction"] ?? "0";
+            $basicSalary            = $pay["basicSalary"] ?? "0";
+            $grossPay               = $pay["grossPay"] ?? "0";
+            $netPay                 = $pay["netPay"] ?? "0";
+            $slTotal                = $pay["slTotal"] ?? "0";
+            $slUsed                 = $pay["slUsed"] ?? "0";
+            $slRemaining            = $pay["slRemaining"] ?? "0";
+            $vlTotal                = $pay["vlTotal"] ?? "0";
+            $vlUsed                 = $pay["vlUsed"] ?? "0";
+            $vlRemaining            = $pay["vlRemaining"] ?? "0";
+        ?>
+        <div class="card w-100 <?= (($index+1) != count($payslip) && ((($index+1) % 2) == 1) ? 'line-break' : '') ?>">
+            <div class="card-header">
+                <div class="card-title">
+                    <div class="company"><?= $companyName ?></div>
+                    <div class="address" style="font-size: .7rem;"><?= $companyAddress ?></div>
+                    <div class="contact" style="font-size: .8rem;"><?= $companyContact ?></div>
+                </div>
+                <img src="<?= base_url('assets/images/' . $companyLogo) ?>" alt="Logo">
+            </div>
+
+            <div class="card-body">
+                <!-- -----HEADER ----- -->
+                <div class="table-parent">
+                    <table class="table-header">
+                        <tr>
+                            <td>
+                                <div>
+                                    <b>Employee Name: </b>
+                                    <div><?= $employeeCode.' - '.$employeeName ?></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>Department: </b>
+                                    <div><?= $departmentName.' - '.$designationName ?></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>Pay Period: </b>
+                                    <div><?= $payPeriod ?></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>Pay Out: </b>
+                                    <div><?= $payOut ?></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <b>SSS Number: </b> 
+                                    <div><?= $employeeSSS ?></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>PhilHealth Number: </b> 
+                                    <div><?= $employeePhilHealth ?></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>Pag-IBIG Number: </b> 
+                                    <div><?= $employeePagibig ?></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <b>TIN: </b> 
+                                    <div><?= $employeeTIN ?></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- -----END HEADER ----- -->
+
+                <!-- ----- BODY ----- -->
+                <div class="d-flex" style="margin-top: 10px">
+                    <table class="table-body">
+                        <tr class="text-center">
+                            <th colspan="2">EARNINGS</th>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Basic Pay</th>
+                            <td class="text-right"><?= formatAmount($basicSalary, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Holiday Pay</th>
+                            <td class="text-right"><?= formatAmount($holidayPay, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Overtime</th>
+                            <td class="text-right"><?= formatAmount($overtimePay, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Night Differential</th>
+                            <td class="text-right"><?= formatAmount($nightDifferentialPay, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Paid Leave</th>
+                            <td class="text-right"><?= formatAmount($leavePay, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Allowance</th>
+                            <td class="text-right"><?= formatAmount($allowance, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">TOTAL EARNINGS</th>
+                            <td class="text-right"><?= formatAmount($totalEarning, true) ?></td>
+                        </tr>
+                    </table>
+                    <table class="table-body">
+                        <tr class="text-center">
+                            <th colspan="2">DEDUCTION</th>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Late/Undertime</th>
+                            <td class="text-right"><?= formatAmount($lateUndertimeDeduction, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">LWOP</th>
+                            <td class="text-right"><?= formatAmount($lwopDeduction, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">SSS</th>
+                            <td class="text-right"><?= formatAmount($sssDeduction, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">PhilHealth</th>
+                            <td class="text-right"><?= formatAmount($phicDeduction, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Pag-IBIG</th>
+                            <td class="text-right"><?= formatAmount($hdmfDeduction, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Withholding Tax</th>
+                            <td class="text-right"><?= formatAmount($taxDeduction, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">TOTAL DEDUCTION</th>
+                            <td class="text-right"><?= formatAmount($totalDeduction, true) ?></td>
+                        </tr>
+                    </table>
+                    <table class="table-body">
+                        <tr class="text-center">
+                            <th colspan="2">BALANCE</th>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">&nbsp;</th>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">TOTAL BALANCE</th>
+                            <td class="text-right"><?= formatAmount(0, true) ?></td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- ----- BODY ----- -->
+
+                <!-- ----- FOOTER ----- -->
+                <div class="d-flex" style="margin-top: 10px">
+                    <table class="table-footer text-center">
+                        <tr>
+                            <th>Leave Type</th>
+                            <th>Quantity</th>
+                            <th>Used</th>
+                            <th>Remaining</th>
+                        </tr>
+                        <tr>
+                            <td>Sick Leave</td>
+                            <td><?= $slTotal ?></td>
+                            <td><?= $slUsed ?></td>
+                            <td><?= $slRemaining ?></td>
+                        </tr>
+                        <tr>
+                            <td>Vaction Leave</td>
+                            <td><?= $vlTotal ?></td>
+                            <td><?= $vlUsed ?></td>
+                            <td><?= $vlRemaining ?></td>
+                        </tr>
+                    </table>
+                    <table class="table-footer">
+                        <tr>
+                            <th class="text-left">BASIC SALARY</th>
+                            <td class="text-right font-weight-bold"><?= formatAmount($basicSalary, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">GROSS PAY</th>
+                            <td class="text-right font-weight-bold"><?= formatAmount($grossPay, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">NET PAY</th>
+                            <td class="text-right font-weight-bold netpay"><?= formatAmount($netPay, true) ?></td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- ----- END FOOTER ----- -->
+            </div>
+        </div>
         <?php endforeach; ?>
         <?php endif; ?>
-
     </div>
 
     <script>
-        window.print();    
+        window.addEventListener('DOMContentLoaded', function() {
+            window.print();    
+        })
     </script>
 </body>
 </html>

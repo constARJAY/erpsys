@@ -253,8 +253,8 @@ function headerTabContent(display = true) {
             <div class="row clearfix appendHeader">
                 <div class="col-12">
                     <ul class="nav nav-tabs">
-                        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">Employee Management</a></li>
-                        <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">Recruitment Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">Employee Management</a></li>
+                        <li class="nav-item"><a class="nav-link " data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">Recruitment Dashboard</a></li>
                     </ul>
                 </div>
             </div>`;
@@ -391,7 +391,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-xl-6 col-lg-12">
                             <div class="card" style="box-shadow:none !important;">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO OF EMPLOYEE (DEPARTMENT)</h2>
+                                    <h2 class="font-weight-bold text-white">NO. OF EMPLOYEE (DEPARTMENT)</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-basic-employee"></div>
@@ -402,7 +402,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-xl-3 col-lg-6">
                             <div class="card">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO OF EMPLOYEE (GENDER)</h2>
+                                    <h2 class="font-weight-bold text-white">NO. OF EMPLOYEE (GENDER)</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-employee-gender"></div>
@@ -425,18 +425,17 @@ let html = `        <div class="row clearfix row-deck">
                                             eventCalendarName,
                                             eventDate
                                         } = event;
-                                        html+=`<div class="row mt-1">
-                                                    <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2">
-                                                        <div class="square rounded bg-secondary" style="
-                                                                                padding: 10px;
-                                                                                width: min-content;
-                                                                            "><small class="text-white font-weight-bolder m-0">${(moment(eventDate).format('MMM')).toUpperCase()}<h1
-                                                                    class="text-white font-weight-bolder">${moment(eventDate).format('DD')}</h1></small></div>
-                                                    </div>
-                                                    <div class="col-sm-10 col-md-10 col-lg-10 col-xl-10">
-                                                        <h6 class="font-weight-bolder ">${eventCalendarName}</h6>
-                                                    </div>
-                                                </div>`;
+
+                                            html+=`<div class="container card"  style="box-shadow:none !important;">
+                                                <div class=" text-center mb-2 d-flex">
+                                                    <div class=" square rounded bg-secondary" style="
+                                                                            padding: 10px;
+                                                                            width: min-content;
+                                                                        "><small class="text-white font-weight-bolder m-0">${(moment(eventDate).format('MMM')).toUpperCase()}
+                                                                        <h1 class="text-white font-weight-bolder">${moment(eventDate).format('DD')}</h1></small></div>
+                                                                        <h6 class="font-weight-bolder p-0 pl-1 pt-3" style="width: fit-content;">${eventCalendarName}</h6>
+                                                </div>
+                                            </div>`;
                                     })
                                 }else{
                                     html +=`<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
@@ -460,7 +459,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-xl-6 col-lg-12">
                             <div class="card" style="box-shadow:none !important;">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO OF RESIGNED EMPLOYEE</h2>
+                                    <h2 class="font-weight-bold text-white">NO. OF RESIGNED EMPLOYEE</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-basic-employeeResign"></div>
@@ -471,7 +470,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-xl-6 col-lg-12">
                             <div class="card" style="box-shadow:none !important;">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO OF EMPLOYEE (HIRED VS LEFT)</h2>
+                                    <h2 class="font-weight-bold text-white">NO. OF EMPLOYEE (HIRED VS LEFT)</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-employee-HiredAndLeft"></div>
@@ -510,6 +509,7 @@ function noOfEmployeeChart(){
     var listColorDepartment =[];
 
     var seriesData = [];
+
     
     getListEmployeeData.map((employeeList,index)=>{
         let obj ={};
@@ -522,8 +522,9 @@ function noOfEmployeeChart(){
         
         listColorDepartment[index] = ("#"+randomColor);
         listDepartment[index] =departmentName; 
+        listEmployee[index] = employee;
 
-        obj["name"] = departmentName;
+        obj['name'] =departmentName;
         obj["data"] = [employee];
 
         seriesData.push(obj);
@@ -532,46 +533,88 @@ function noOfEmployeeChart(){
     })
 
 
+    // console.log(seriesData)
+
+
+    // var options = {
+    //     chart: {
+    //         height: 300,
+    //         type: 'bar',
+    //     },
+    //     colors: listColorDepartment,
+    //     plotOptions: {
+    //         bar: {
+    //             horizontal: false,
+    //             columnWidth: '20%',
+    //             endingShape: 'flat'	
+    //         },
+    //     },
+    //     dataLabels: {
+    //         enabled: false,
+    //     },
+    //     stroke: {
+    //         show: true,
+    //         width: 2,
+    //         colors: ['transparent']
+    //     },
+    //     series: seriesData,
+    //     xaxis: {
+    //         categories: listDepartment,
+    //     },
+    //     yaxis: {
+    //         title: {
+    //             text: 'Department Record/s'
+    //         }
+    //     },
+    //     fill: {
+    //         opacity: 1
+
+    //     },
+    //     tooltip: {
+    //         y: {
+    //             formatter: function (val) {
+    //                 return  val + " employee/s"
+    //             }
+    //         }
+    //     }
+    // }
+
     var options = {
         chart: {
-            height: 300,
+            height: 350,
             type: 'bar',
+            toolbar: {
+                show: false,
+            },
         },
         colors: listColorDepartment,
+        grid: {
+            yaxis: {
+                lines: {
+                    show: false,
+                }
+            },
+            padding: {
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0
+            },
+        },
         plotOptions: {
             bar: {
-                horizontal: false,
-                columnWidth: '20%',
-                endingShape: 'flat'	
-            },
+                horizontal: true,
+            }
         },
         dataLabels: {
             enabled: false
         },
-        stroke: {
-            show: true,
-            width: 2,
-            colors: ['transparent']
-        },
+        // series: [{
+        //     data: listEmployee
+        // }],
         series:seriesData,
         xaxis: {
-            categories: listDepartment,
-        },
-        yaxis: {
-            title: {
-                text: 'Department Record/s'
-            }
-        },
-        fill: {
-            opacity: 1
-
-        },
-        tooltip: {
-            y: {
-                formatter: function (val) {
-                    return  val + " employee/s"
-                }
-            }
+            categories: [''],
         }
     }
 
@@ -647,7 +690,7 @@ function noOfEmployeeResignChart(){
         },
         series:seriesData,
         xaxis: {
-            categories: listDepartment,
+            categories: [''],
         },
         yaxis: {
             title: {
@@ -666,6 +709,45 @@ function noOfEmployeeResignChart(){
             }
         }
     }
+
+    // var options = {
+    //     chart: {
+    //         height: 350,
+    //         type: 'bar',
+    //         toolbar: {
+    //             show: false,
+    //         },
+    //     },
+    //     colors: listColorDepartment,
+    //     grid: {
+    //         yaxis: {
+    //             lines: {
+    //                 show: false,
+    //             }
+    //         },
+    //         padding: {
+    //             top: 0,
+    //             right: 0,
+    //             bottom: 0,
+    //             left: 0
+    //         },
+    //     },
+    //     plotOptions: {
+    //         bar: {
+    //             horizontal: true,
+    //         }
+    //     },
+    //     dataLabels: {
+    //         enabled: false
+    //     },
+    //     // series: [{
+    //     //     data: listEmployee
+    //     // }],
+    //     series:seriesData,
+    //     xaxis: {
+    //         categories: [''],
+    //     }
+    // }
 
     var chart = new ApexCharts(
         document.querySelector("#apex-basic-employeeResign"),
@@ -924,7 +1006,7 @@ function noOfApplicantChart(){
     const getNumPosition = getTableData(`web_applicant_list_tbl AS applicant`,
     `COUNT(applicantID) AS applicant, 
     (SELECT designationName FROM hris_designation_tbl WHERE designationID = applicantDesignationID) AS designationName`,
-    `applicantStatus =0`,
+    `applicantStatus =0 AND (applicantDesignationID != 0 AND applicantDesignationID IS NOT NULL)`,
     ``,
     `applicantDesignationID`);
 
@@ -932,7 +1014,9 @@ function noOfApplicantChart(){
     // -- GET THE LENGTH OF DATA HAS APPLICANT NUMBER----//
         var totalApplicantPosition = 0;
         for (var i = 0; i < getNumPosition.length; i++) {
+            if(getNumPosition[i].designationName != null){
             totalApplicantPosition += getNumPosition[i].applicant << 0;
+            }
         }
     // -- GET THE LENGTH OF DATA HAS APPLICANT NUMBER----//
 
@@ -1032,8 +1116,9 @@ function myFormsContent() {
     interviewer.applicantInterviewerProgression,
     (SELECT designationName FROM hris_designation_tbl WHERE designationID = applicantDesignationID ) AS designationName,
     IFNULL(interviewer.applicantInterviewerStatus,"Pending") as applicantStatus`, 
-    ` interviewer.applicantInterviewerStatus !="" OR interviewer.applicantInterviewerStatus  IS NULL`,
-    `interviewer.createdAt OR interviewer.updatedAt ASC`);
+    ` interviewer.applicantInterviewerStatus !="" OR interviewer.applicantInterviewerStatus  IS NULL 
+    GROUP BY applicant.applicantID ASC
+ORDER BY interviewer.updatedAt ASC  `);
 
 
 
@@ -1042,7 +1127,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-lg-4 col-md-4 col-sm-6">
                             <div class="card top_widget">
                                 <div class="body">
-                                    <div class="icon"><i class="fas fa-book-open"></i> </div>
+                                    <div class="icon"><i class="far fa-user-plus"></i> </div>
                                     <div class="content">
                                         <div class="text mb-2 text-uppercase">Vacant Position</div>
                                         <h4 class="number mb-0">${countVacancyPosition[0].vacancy || 0}</h4>
@@ -1053,7 +1138,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-lg-4 col-md-4 col-sm-6">
                             <div class="card top_widget">
                                 <div class="body">
-                                    <div class="icon"><i class="fas fa-user-clock"></i> </div>
+                                    <div class="icon"><i class="far fa-file-search"></i> </div>
                                     <div class="content">
                                         <div class="text mb-2 text-uppercase">Applicants</div>
                                         <h4 class="number mb-0">${countPendingApplicants[0].pendingApplicants || 0}</h4>
@@ -1064,7 +1149,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-lg-4 col-md-4 col-sm-6">
                             <div class="card top_widget">
                                 <div class="body">
-                                    <div class="icon"><i class="fas fa-stopwatch"></i> </div>
+                                    <div class="icon"><i class="fas fa-users-class"></i> </div>
                                     <div class="content">
                                         <div class="text mb-2 text-uppercase">Currently Onboarding</div>
                                         <h4 class="number mb-0">${countPendingOvertmine[0].pendingovertime || 0 }</h4>
@@ -2339,11 +2424,11 @@ function pageContent(isForm = false, data = false, readOnly = false, isRevise = 
         preventRefresh(false);
         let html = `
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
+            <div role="tabpanel" class="tab-pane active" id="forApprovalTab" aria-expanded="false">
                 <div class="" id="tableForApprovalParent">
                 </div>
             </div>
-            <div role="tabpanel" class="tab-pane active" id="myFormsTab" aria-expanded="false">
+            <div role="tabpanel" class="tab-pane " id="myFormsTab" aria-expanded="false">
                 <div class="" id="tableMyFormsParent">
                 </div>
             </div>
@@ -2353,7 +2438,8 @@ function pageContent(isForm = false, data = false, readOnly = false, isRevise = 
 
         // headerButton(true, "Add Check Voucher");
         headerTabContent();
-        myFormsContent();
+        forApprovalContent();
+        // myFormsContent();
         updateURL();
     } else {
         // headerButton(false, "", isRevise, isFromCancelledDocument);

@@ -91,18 +91,18 @@ class Leave_request extends CI_Controller {
         $reason    =   $this->input->post("reason");
 
 
-        $explode = explode(";", $reason);
-        $newDescription = '';
-        $getLength = count($explode) ; 
-        for($loop = 0; $loop<count($explode);$loop++){
+        // $explode = explode(";", $reason);
+        $newDescription =  $reason;
+        // $getLength = count($explode) ; 
+        // for($loop = 0; $loop<count($explode);$loop++){
 
-            if($loop == $getLength -1){
-                $newDescription .= $explode[$loop];
-            }else{
-                $newDescription .= $explode[$loop]."<br>";
-            }
+        //     if($loop == $getLength -1){
+        //         $newDescription .= $explode[$loop];
+        //     }else{
+        //         $newDescription .= $explode[$loop]."<br>";
+        //     }
             
-        }
+        // }
 
 
         $paidStatusBadge ='';
@@ -168,7 +168,7 @@ class Leave_request extends CI_Controller {
         foreach($getProductionRecord as $key => $value){
 
             // ---- CHECK AND SAVED IN PAYROLL ADJUSTMENT -----//
-            $isApprovedTimekeeping = $this->checkTimeKeeping($startDate,$endDate);
+            $isApprovedTimekeeping = $this->leaverequest->checkTimeKeeping($startDate,$endDate);
 
             if($isApprovedTimekeeping > 0){
                 $dataPayroll = [

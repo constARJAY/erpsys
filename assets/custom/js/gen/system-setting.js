@@ -29,7 +29,7 @@ $(document).ready(function(){
         
         let modalBody           =   `<form id="system_setting_form">${modalBodyContent}</form>`;
         let modalFooterContent  =   `<button class="btn btn-save px-5 p-2" id="btnUpdate" givenaction="${thisAction}" settingid="${encryptString("1")}"><i class="fas fa-save"></i>&nbsp; Update</button>
-                                    <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i>&nbsp;Cancel</button>`;
+                                    <button class="btn btn-cancel btnCancel px-5 p-2" givenaction="${thisAction}"><i class="fas fa-ban"></i>&nbsp;Cancel</button>`;
         $(".modal_content_header").text(`UPDATE ${modalHeader}`);
         $("#modal_content_body").html(modalBody);
         $("#modal_content_footer").html(modalFooterContent);
@@ -64,15 +64,30 @@ $(document).ready(function(){
             data["whereFilter"]              =  "systemSettingID ="+systemSettingID;
             data["tableName"]                =  "gen_system_setting_tbl";
             data["feedback"]                 =  feedback;
-            sweetAlertConfirmation("update", "System Setting","modal_content", null , data, true, pageContent);
+            sweetAlertConfirmation("update", feedback,"modal_content", null , data, true, pageContent);
         }
         
     });
     
     $(document).on("click",".btnCancel", function(){
+        let feedback;
+        switch ($(this).attr("givenaction")) {
+            case "cuttoff":
+                    feedback = "Cutoff";
+                break;
+            case "pettycash":
+                feedback = "Petty Cash";
+                break;
+            case "clientfund":
+                feedback = "Client Fund";
+                break;    
+            default:
+                feedback = "Approval";
+                break;
+        }
         let condition = isFormEmpty("system_setting_form");
         if(!condition){ 
-            sweetAlertConfirmation("cancel", "System Setting","modal_content");
+            sweetAlertConfirmation("cancel", feedback,"modal_content");
         }else{
             $("#modal_content").modal("hide");
         }
@@ -91,7 +106,7 @@ $(document).ready(function(){
                         <div class="col-md-12 col-sm-12">
                             <div class="form-group">
                                 <label for="minimumToApprove" >Minimum Days to Approve <code>*</code></label>
-                                <input type="text" class="form-control validate" min="1" max="31 name="minimumToApprove" id="minimumToApprove" 
+                                <input type="text" class="form-control number validate" min="1" max="10" maxlength="2" name="minimumToApprove" id="minimumToApprove" 
                                     data-allowcharacters="[0-9]" value="${minimumToApprove}" required>
                                 <div class="invalid-feedback d-block" id="invalid-minimumToApprove"></div>
                             </div>
@@ -99,7 +114,7 @@ $(document).ready(function(){
                         <div class="col-md-12 col-sm-12">
                             <div class="form-group">
                                 <label for="">Maximum Days to Approve <code>*</code></label>
-                                <input type="text" class="form-control validate" min="1" max="31" name="maximumToApprove" id="maximumToApprove" 
+                                <input type="text" class="form-control number validate" min="0" max="10"  maxlength="2" name="maximumToApprove" id="maximumToApprove" 
                                     data-allowcharacters="[0-9]" value="${maximumToApprove}" required >
                                 <div class="invalid-feedback d-block" id="invalid-maximumToApprove"></div>
                             </div>
@@ -115,20 +130,25 @@ $(document).ready(function(){
             let endDate      = `${value.toLowerCase()}CutOffDateEnd`;
             let payout       = `${value.toLowerCase()}CutOffPayOut`;
             
-            html += `
+            if(index < 2){
+                html += `
                     <div class="row"> 
+                        <div class="col-md-12 col-sm-12 bg-black py-2 ${index == 0 ? "mb-3" : "my-3"}">
+                            <h5>${index == 0 ? "First" : "Second"} Cutoff</h5>
+                        </div>
+
                         <div class="col-md-6 col-sm-12">
                             <div class="form-group">
-                                <label for="${startDate}" >Cut off Start <code>*</code></label>
-                                <input type="text" class="form-control validate" min="1" max="31 name="${startDate}" id="${startDate}" 
+                                <label for="${startDate}" >Start of Cutoff <code>*</code></label>
+                                <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${startDate}" id="${startDate}" 
                                     data-allowcharacters="[0-9]" value="${systemSettingData[0][startDate] || "" }" ${index < 2 ? "required" : ""}>
                                 <div class="invalid-feedback d-block" id="invalid-${startDate}"></div>
                             </div>
                         </div>
                         <div class="col-md-6 col-sm-12">
                             <div class="form-group">
-                                <label for="${endDate}" >Cut off End <code>*</code></label>
-                                <input type="text" class="form-control validate" min="1" max="31 name="${endDate}" id="${endDate}" 
+                                <label for="${endDate}" >End of Cutoff <code>*</code></label>
+                                <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${endDate}" id="${endDate}" 
                                     data-allowcharacters="[0-9]" value="${systemSettingData[0][endDate] || "" }" ${index < 2 ? "required" : ""}>
                                 <div class="invalid-feedback d-block" id="invalid-${endDate}"></div>
                             </div>
@@ -136,12 +156,13 @@ $(document).ready(function(){
                         <div class="col-md-12 col-sm-12">
                             <div class="form-group">
                                 <label for="${payout}">Payout Date <code>*</code></label>
-                                <input type="text" class="form-control validate" min="1" max="31" name="${payout}" id="${payout}" 
+                                <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${payout}" id="${payout}" 
                                     data-allowcharacters="[0-9]" value="${systemSettingData[0][payout] || ""}" ${index < 2 ? "required" : ""} >
                                 <div class="invalid-feedback d-block" id="invalid-${payout}"></div>
                             </div>
                         </div>
                     </div>`;
+            }
         });
         return html;
     }
@@ -152,10 +173,15 @@ $(document).ready(function(){
                     <div class="row"> 
                         <div class="col-md-12 col-sm-12">
                             <div class="form-group">
-                                <label for="${systemSettingData[0]["pettyCashReplenishmentLimit"]}" >Minimum Days to Approve <code>*</code></label>
-                                <input type="text" class="form-control validate input-quantity" min="1" max="31 name="${systemSettingData[0]["pettyCashReplenishmentLimit"]}" id="${systemSettingData[0]["pettyCashReplenishmentLimit"]}" 
-                                    data-allowcharacters="[0-9]" value="${systemSettingData[0]["pettyCashReplenishmentLimit"]}" required>
-                                <div class="invalid-feedback d-block" id="invalid-${systemSettingData[0]["pettyCashReplenishmentLimit"]}"></div>
+                                <label for="pettyCashReplenishmentLimit" >Replenishment Limit <code>*</code></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₱</span>
+                                    </div>
+                                    <input type="text" class="form-control text-right input-quantity" min="1" max="999999" maxlength="10" name="pettyCashReplenishmentLimit" id="pettyCashReplenishmentLimit" 
+                                        data-allowcharacters="[0-9]" value="${systemSettingData[0]["pettyCashReplenishmentLimit"]||"0.00"}" required>
+                                    <div class="invalid-feedback d-block" id="invalid-pettyCashReplenishmentLimit"></div>
+                                </div>
                             </div>
                         </div>
                     </div>`;
@@ -167,10 +193,15 @@ $(document).ready(function(){
                     <div class="row"> 
                         <div class="col-md-12 col-sm-12">
                             <div class="form-group">
-                                <label for="${systemSettingData[0]["clientFundReplenishmentLimit	"]}" >Minimum Days to Approve <code>*</code></label>
-                                <input type="text" class="form-control validate input-quantity" min="1" max="31 name="${systemSettingData[0]["clientFundReplenishmentLimit	"]}" id="${systemSettingData[0]["clientFundReplenishmentLimit	"]}" 
-                                    data-allowcharacters="[0-9]" value="${systemSettingData[0]["clientFundReplenishmentLimit"]}" required>
-                                <div class="invalid-feedback d-block" id="invalid-${systemSettingData[0]["clientFundReplenishmentLimit	"]}"></div>
+                                <label for="clientFundReplenishmentLimit" >Replenishment Limit <code>*</code></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₱</span>
+                                    </div>
+                                    <input type="text" class="form-control input-quantity" min="1" max="999999" maxlength="10" name="clientFundReplenishmentLimit" id="clientFundReplenishmentLimit" 
+                                        data-allowcharacters="[0-9]" value="${systemSettingData[0]["clientFundReplenishmentLimit"]||"0.00"}" required>
+                                    <div class="invalid-feedback d-block" id="invalid-clientFundReplenishmentLimit"></div>
+                                </div>
                             </div>
                         </div>
                     </div>`;
@@ -211,18 +242,19 @@ $(document).ready(function(){
         });
 
         $(".cut-off-row").html(cutOffRow);
-
+        let pettyCash                   = tableData.pettyCashReplenishmentLimit ? (tableData.pettyCashReplenishmentLimit.replaceAll(",","") || tableData.pettyCashReplenishmentLimit) : 0;
         let pettyCashReplenishmentRow   = `
                                             <div class="col-lg-12 col-12">
                                                 <label for="">Replenishment Limit</label>
-                                                <p> <span>${formatAmount(tableData.pettyCashReplenishmentLimit, true)}</span> </p>
+                                                <p> <span>${formatAmount(parseFloat(pettyCash||0), true)}</span> </p>
                                             </div>`;
         $(".petty-cash-replenishment-row").html(pettyCashReplenishmentRow);
 
+        let clientFund                  = tableData.clientFundReplenishmentLimit ? (tableData.clientFundReplenishmentLimit.replaceAll(",","")|| tableData.clientFundReplenishmentLimit) : 0;
         let clientFundReplenishmentRow  = `
                                             <div class="col-lg-12 col-12">
                                                 <label for="">Replenishment Limit</label>
-                                                <p> <span>${formatAmount(tableData.clientFundReplenishmentLimit, true)}</span> </p>
+                                                <p> <span>${formatAmount(parseFloat( clientFund), true)}</span> </p>
                                             </div>`;
         $(".client-fund-replenishment-row").html(clientFundReplenishmentRow);
 

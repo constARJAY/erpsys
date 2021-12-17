@@ -203,7 +203,7 @@ class TimekeepingModule_model extends CI_Model {
 
                 $timeIn        = $result->overtimeRequestTimeIn;
                 $timeOut       = $result->overtimeRequestTimeOut;
-                $breakDuration = 0; // Must have
+                $breakDuration = $result->overtimeRequestBreak; // Must have
 
                 $reference = getFormCode("OTR", $createdAt, $id);
                 $in        = "$date $timeIn";
@@ -244,7 +244,8 @@ class TimekeepingModule_model extends CI_Model {
             FROM hris_leave_request_tbl 
             WHERE employeeID = $employeeID 
                 AND '$date' BETWEEN leaveRequestDateFrom AND leaveRequestDateTo 
-                AND leaveRequestStatus = 2";
+                AND leaveRequestStatus = 2
+                AND leaveStatus = 1";
             $query  = $this->db->query($sql);
             $result = $query ? $query->row() : false;
             if ($result) {
@@ -300,7 +301,7 @@ class TimekeepingModule_model extends CI_Model {
 
         $sql    = "SELECT IF('$checkIn' > '$averageDate', 'FALSE', 'TRUE') AS isHalfDay";
         $query  = $this->db->query($sql);
-        $result = $query->row();
+        $result = $query->row()->isHalfDay;
         return $result == "FALSE";
     }
 
@@ -351,20 +352,20 @@ class TimekeepingModule_model extends CI_Model {
          */
 
         // ORDINARY DAY
-        $odBrHours  = $odOrHours  = $odNrHours  = 0; // BASIC
-        $odBrrHours = $odOrrHours = $odNrrHours = 0; // REST DAY
+        $odBrHours  = $odOrHours  = $odNrHours  = $odOrNrHours  = 0; // BASIC
+        $odBrrHours = $odOrrHours = $odNrrHours = $odOrNrrHours = 0; // REST DAY
 
         // SPECIAL DAY
-        $sdBrHours  = $sdOrHours  = $sdNrHours  = 0; // BASIC
-        $sdBrrHours = $sdOrrHours = $sdNrrHours = 0; // REST DAY
+        $sdBrHours  = $sdOrHours  = $sdNrHours  = $sdOrNrHours  = 0; // BASIC
+        $sdBrrHours = $sdOrrHours = $sdNrrHours = $sdOrNrrHours = 0; // REST DAY
 
         // REGULAR HOLIDAY
-        $rhBrHours  = $rhOrHours  = $rhNrHours  = 0; // BASIC
-        $rhBrrHours = $rhOrrHours = $rhNrrHours = 0; // REST DAY
+        $rhBrHours  = $rhOrHours  = $rhNrHours  = $rhOrNrHours  = 0; // BASIC
+        $rhBrrHours = $rhOrrHours = $rhNrrHours = $rhOrNrrHours = 0; // REST DAY
 
         // DOUBLE HOLIDAY
-        $dhBrHours  = $dhOrHours  = $dhNrHours  = 0; // BASIC
-        $dhBrrHours = $dhOrrHours = $dhNrrHours = 0; // REST DAY
+        $dhBrHours  = $dhOrHours  = $dhNrHours  = $dhOrNrHours  = 0; // BASIC
+        $dhBrrHours = $dhOrrHours = $dhNrrHours = $dhOrNrrHours = 0; // REST DAY
 
 
         if ($dayType && $timeArray && !empty($timeArray)) 
@@ -379,16 +380,18 @@ class TimekeepingModule_model extends CI_Model {
                 $duration = $time["duration"] ?? 0;
 
                 $regularDuration = $overtimeDuration = 0;
-                $nightDifferentialDuration = getNightDifferentialDuration($date, $timeIn, $timeOut, $break);
+                $basicNightDiff = $otNightDiff = 0;
 
                 if ($type == "production")
                 {
                     $regularDuration = getDuration($timeIn, $timeOut, $break);
+                    $basicNightDiff  = getNightDifferentialDuration($date, $timeIn, $timeOut, $break);
                 }
                 
                 if ($type == "overtime")
                 {
                     $overtimeDuration = getDuration($timeIn, $timeOut, $break);
+                    $otNightDiff      = getNightDifferentialDuration($date, $timeIn, $timeOut, $break);
                 }
 
                 if ($type == "leave")
@@ -396,66 +399,74 @@ class TimekeepingModule_model extends CI_Model {
                     $regularDuration = $duration;
                 }
 
-                $totalDuration = $regularDuration + $overtimeDuration;
+                // $totalDuration = $regularDuration + $overtimeDuration;
 
                 if ($dayType == "special holiday" || $dayType == "special working holiday" || $dayType == "special non-working holiday" && $type != "leave") // SD - SPECIAL DAY
                 {
                     if (!$restDay) 
                     {
-                        $sdBrHours += $totalDuration;
-                        $sdOrHours += $overtimeDuration;
-                        $sdNrHours += $nightDifferentialDuration;
+                        $sdBrHours   += $regularDuration;
+                        $sdOrHours   += $overtimeDuration;
+                        $sdNrHours   += $basicNightDiff;
+                        $sdOrNrHours += $otNightDiff;
                     } 
                     else 
                     {
-                        $sdBrrHours += $totalDuration;
-                        $sdOrrHours += $overtimeDuration;
-                        $sdNrrHours += $nightDifferentialDuration;
+                        $sdBrrHours  += $regularDuration;
+                        $sdOrrHours  += $overtimeDuration;
+                        $sdNrrHours  += $basicNightDiff;
+                        $sdOrNrHours += $otNightDiff;
                     }
                 } 
                 else if ($dayType == "regular holiday" && $type != "leave") // RH - REGULAR HOLIDAY
                 {
                     if (!$restDay) 
                     {
-                        $rhBrHours += $totalDuration;
-                        $rhOrHours += $overtimeDuration;
-                        $rhNrHours += $nightDifferentialDuration;
+                        $rhBrHours   += $regularDuration;
+                        $rhOrHours   += $overtimeDuration;
+                        $rhNrHours   += $basicNightDiff;
+                        $rhOrNrHours += $otNightDiff;
                     } 
                     else 
                     {
-                        $rhBrrHours += $totalDuration;
-                        $rhOrrHours += $overtimeDuration;
-                        $rhNrrHours += $nightDifferentialDuration;
+                        $rhBrrHours  += $regularDuration;
+                        $rhOrrHours  += $overtimeDuration;
+                        $rhNrrHours  += $basicNightDiff;
+                        $rhOrNrHours += $otNightDiff;
                     }
                 } 
                 else if ($dayType == "double holiday" && $type != "leave") // DH - DOUBLE HOLIDAY
                 {
                     if (!$restDay) 
                     {
-                        $dhBrHours += $totalDuration;
-                        $dhOrHours += $overtimeDuration;
-                        $dhNrHours += $nightDifferentialDuration;
+                        $dhBrHours   += $regularDuration;
+                        $dhOrHours   += $overtimeDuration;
+                        $dhNrHours   += $basicNightDiff;
+                        $dhOrNrHours += $otNightDiff;
                     } 
                     else 
                     {
-                        $dhBrrHours += $totalDuration;
-                        $dhOrrHours += $overtimeDuration;
-                        $dhNrrHours += $nightDifferentialDuration;
+                        $dhBrrHours  += $regularDuration;
+                        $dhOrrHours  += $overtimeDuration;
+                        $dhNrrHours  += $basicNightDiff;
+                        $dhOrNrHours += $otNightDiff;
                     }
                 } 
                 else // OD - ORDINARY DAY
                 {
                     if (!$restDay || $type == "leave") 
                     {
-                        $odBrHours += $totalDuration;
-                        $odOrHours += $overtimeDuration;
-                        $odNrHours += $nightDifferentialDuration;
+                        $odBrHours   += $regularDuration;
+                        $odOrHours   += $overtimeDuration;
+                        $odNrHours   += $basicNightDiff;
+                        $odOrNrHours += $otNightDiff;
                     } 
                     else 
                     {
-                        $odBrrHours += $totalDuration;
-                        $odOrrHours += $overtimeDuration;
-                        $odNrrHours += $nightDifferentialDuration;
+                        $odBrrHours   += $regularDuration;
+                        $odOrrHours   += $overtimeDuration;
+                        $odNrrHours   += $basicNightDiff;
+                        $odOrNrrHours += $otNightDiff;
                     }
                 }
             }
@@ -463,30 +474,38 @@ class TimekeepingModule_model extends CI_Model {
         }
 
         return [
-            "odBrHours"  => $odBrHours,
-            "odOrHours"  => $odOrHours,
-            "odNrHours"  => $odNrHours,
-            "odBrrHours" => $odBrrHours,
-            "odOrrHours" => $odOrrHours,
-            "odNrrHours" => $odNrrHours,
-            "sdBrHours"  => $sdBrHours,
-            "sdOrHours"  => $sdOrHours,
-            "sdNrHours"  => $sdNrHours,
-            "sdBrrHours" => $sdBrrHours,
-            "sdOrrHours" => $sdOrrHours,
-            "sdNrrHours" => $sdNrrHours,
-            "rhBrHours"  => $rhBrHours,
-            "rhOrHours"  => $rhOrHours,
-            "rhNrHours"  => $rhNrHours,
-            "rhBrrHours" => $rhBrrHours,
-            "rhOrrHours" => $rhOrrHours,
-            "rhNrrHours" => $rhNrrHours,
-            "dhBrHours"  => $dhBrHours,
-            "dhOrHours"  => $dhOrHours,
-            "dhNrHours"  => $dhNrHours,
-            "dhBrrHours" => $dhBrrHours,
-            "dhOrrHours" => $dhOrrHours,
-            "dhNrrHours" => $dhNrrHours,
+            "odBrHours"    => $odBrHours,
+            "odOrHours"    => $odOrHours,
+            "odNrHours"    => $odNrHours,
+            "odBrrHours"   => $odBrrHours,
+            "odOrrHours"   => $odOrrHours,
+            "odNrrHours"   => $odNrrHours,
+            "sdBrHours"    => $sdBrHours,
+            "sdOrHours"    => $sdOrHours,
+            "sdNrHours"    => $sdNrHours,
+            "sdBrrHours"   => $sdBrrHours,
+            "sdOrrHours"   => $sdOrrHours,
+            "sdNrrHours"   => $sdNrrHours,
+            "rhBrHours"    => $rhBrHours,
+            "rhOrHours"    => $rhOrHours,
+            "rhNrHours"    => $rhNrHours,
+            "rhBrrHours"   => $rhBrrHours,
+            "rhOrrHours"   => $rhOrrHours,
+            "rhNrrHours"   => $rhNrrHours,
+            "dhBrHours"    => $dhBrHours,
+            "dhOrHours"    => $dhOrHours,
+            "dhNrHours"    => $dhNrHours,
+            "dhBrrHours"   => $dhBrrHours,
+            "dhOrrHours"   => $dhOrrHours,
+            "dhNrrHours"   => $dhNrrHours,
+            "odOrNrHours"  => $odOrNrHours,
+            "odOrNrrHours" => $odOrNrrHours,
+            "sdOrNrHours"  => $sdOrNrHours,
+            "sdOrNrrHours" => $sdOrNrrHours,
+            "rhOrNrHours"  => $rhOrNrHours,
+            "rhOrNrrHours" => $rhOrNrrHours,
+            "dhOrNrHours"  => $dhOrNrHours,
+            "dhOrNrrHours" => $dhOrNrrHours,
         ];
     }
 
@@ -624,6 +643,10 @@ class TimekeepingModule_model extends CI_Model {
                     $leaveReference        = "";
                     $isMorningLeave        = true;
                     $restDay               = false;
+                    $status                = "";
+                    $checkNightDiff        = "";
+                    $overtimeNightDiff     = 0;
+                    $nightDifferential     = 0;
 
                     $finalCheckIn = $finalCheckOut = "";
 
@@ -690,7 +713,7 @@ class TimekeepingModule_model extends CI_Model {
                             $createdAt             = $timekeepingItem->createdAt;             
                             $updatedAt             = $timekeepingItem->updatedAt; 
 
-                            $checkNightDiff    = getNightDifferentialDuration($date, $checkIn, $checkOut);
+                            $checkNightDiff    = getNightDifferentialDuration($date, $finalCheckIn, $finalCheckOut);
                             $overtimeNightDiff = getNightDifferentialDuration($date, $overtimeIn, $overtimeOut);
                             $nightDifferential = $checkNightDiff + $overtimeNightDiff;
 
@@ -700,7 +723,7 @@ class TimekeepingModule_model extends CI_Model {
                     else 
                     {
                         $attendance = $this->getEmployeeAttendance($employeeID, $date);
-                    
+
                         $status = "NO_SCHEDULE";
                         if ($attendance) 
                         {
@@ -821,7 +844,7 @@ class TimekeepingModule_model extends CI_Model {
                                 $leaveDuration   = $leaveRequest["duration"];
                                 $leaveWorkingDay = $leaveRequest["workingday"];
 
-                                $isMorningLeave = $this->isMorningLeave($scheduleIn, $scheduleOut, $scheduleBreakDuration, $checkIn); // CHECK IF THE FIRST HALF OF DAY IS ON LEAVE
+                                $isMorningLeave = $this->isMorningLeave($scheduleIn, $scheduleOut, $scheduleBreakDuration, $finalCheckIn); // CHECK IF THE FIRST HALF OF DAY IS ON LEAVE
                             }
     
                             if ($status == "ABSENT") 
@@ -854,23 +877,27 @@ class TimekeepingModule_model extends CI_Model {
                                     if ($isMorningLeave)
                                     {
                                         $checkDuration = getProductionDuration($averageDate, $scheduleOut, 0, $finalCheckIn, $finalCheckOut);
+                                        $leaveOut = $averageDate;
                                     }
                                     else
                                     {
                                         $checkDuration = getProductionDuration($scheduleIn, $averageDate, 0, $finalCheckIn, $finalCheckOut);
+                                        $leaveIn = $finalCheckIn;
                                     }
 
-                                    $tempScheduleDuration = $scheduleDuration / 2;
-                                    if ($checkDuration > $tempScheduleDuration)
-                                    {
-                                        $basicHours = $tempScheduleDuration + $leaveDuration;
-                                    }
-                                    else
-                                    {
-                                        $basicHours = $checkDuration + $leaveDuration;
-                                    }
-
-                                    $checkDuration = $basicHours;
+                                    // $tempScheduleDuration = $scheduleDuration / 2;
+                                    // if ($checkDuration > $tempScheduleDuration)
+                                    // {
+                                    //     $basicHours = $tempScheduleDuration + $leaveDuration;
+                                    // }
+                                    // else
+                                    // {
+                                    //     $basicHours = $checkDuration + $leaveDuration;
+                                    // }
+                                    
+                                    // echo "$isMorningLeave | $finalCheckIn - $finalCheckOut = $basicHours | $leaveDuration<br><br>";
+                                    // $checkDuration = $basicHours;
+                                    $basicHours = $checkDuration + $leaveDuration;
                                 }
                                 else // Whole Day
                                 {
@@ -887,7 +914,7 @@ class TimekeepingModule_model extends CI_Model {
                             $totalHours    = $basicHours + $overtimeHours;                        
                         }
     
-                        $checkNightDiff    = getNightDifferentialDuration($date, $checkIn, $checkOut);
+                        $checkNightDiff    = getNightDifferentialDuration($date, $finalCheckIn, $finalCheckOut);
                         $overtimeNightDiff = getNightDifferentialDuration($date, $overtimeIn, $overtimeOut);
                         $nightDifferential = $checkNightDiff + $overtimeNightDiff;
 
@@ -918,38 +945,47 @@ class TimekeepingModule_model extends CI_Model {
                                     
                                     if ($schedule == $date && $fCheckIn && $fCheckOut)
                                     {
-                                        $checkIn  = $fCheckIn;
-                                        $checkOut = $fCheckOut;
-
-                                        $noTimeIn         = "";
-                                        $noTimeOut        = "";
-                                        $noInOutID        = "";
-                                        $noInOutReference = "";
-
-                                        // ----- ***** DEPENDENCIES ***** -----
-                                        $restDay = $status == "REST_DAY" || $status == "NO_SCHEDULE";
-                                        $dayType = $this->getDayType($date);
-                                        // ----- ***** END DEPENDENCIES ***** -----
-
-                                        $status = "COMPLETE";
-
-                                        $scheduleIn  = $restDay ? $checkIn : $scheduleIn;
-                                        $scheduleOut = $restDay ? $checkOut : $scheduleOut;
-                                        $scheduleBreakDuration = $restDay ? $fCheckBreakDuration : $scheduleBreakDuration;
-        
-                                        $checkDuration = getProductionDuration($scheduleIn, $scheduleOut, $scheduleBreakDuration, $checkIn, $checkOut, true);
-
-                                        $basicHours = $checkDuration > 0 ? $checkDuration : 0;
-                                        $totalHours = $basicHours + $overtimeHours; 
-                                        
-                                        $checkNightDiff    = getNightDifferentialDuration($date, $scheduleIn, $scheduleOut);
-                                        $nightDifferential = $checkNightDiff + $overtimeNightDiff;
-
-                                        $finalCheckIn  = $checkIn;
-                                        $finalCheckOut = $checkOut;
-
-                                        $msg = "Data successfully imported at line $row";
-                                        $data["success"][] = $msg;
+                                        if ($scheduleDuration > 0)
+                                        {
+                                            $checkIn  = $fCheckIn;
+                                            $checkOut = $fCheckOut;
+    
+                                            $noTimeIn         = "";
+                                            $noTimeOut        = "";
+                                            $noInOutID        = "";
+                                            $noInOutReference = "";
+    
+                                            // ----- ***** DEPENDENCIES ***** -----
+                                            $restDay = $status == "REST_DAY" || $status == "NO_SCHEDULE";
+                                            $dayType = $this->getDayType($date);
+                                            // ----- ***** END DEPENDENCIES ***** -----
+    
+                                            $status = "COMPLETE";
+    
+                                            $scheduleIn  = $restDay ? $checkIn : $scheduleIn;
+                                            $scheduleOut = $restDay ? $checkOut : $scheduleOut;
+                                            $scheduleBreakDuration = $restDay ? $fCheckBreakDuration : $scheduleBreakDuration;
+            
+                                            $checkDuration = getProductionDuration($scheduleIn, $scheduleOut, $scheduleBreakDuration, $checkIn, $checkOut, true);
+    
+                                            $basicHours = $checkDuration > 0 ? $checkDuration : 0;
+                                            $totalHours = $basicHours + $overtimeHours; 
+                                            
+                                            $nightDiffBreak = $restDay ? $fCheckBreakDuration : $scheduleBreakDuration;
+                                            $checkNightDiff    = getNightDifferentialDuration($date, $checkIn, $checkOut, $nightDiffBreak);
+                                            $nightDifferential = $checkNightDiff + $overtimeNightDiff;
+    
+                                            $finalCheckIn  = $checkIn;
+                                            $finalCheckOut = $checkOut;
+    
+                                            $msg = "Data successfully imported at line $row";
+                                            $data["success"][] = $msg;
+                                        }
+                                        else
+                                        {
+                                            $error = "Warning|There is a value ignored at line $row";
+                                            $data["errors"][] = $error;
+                                        }
                                     }
                                 }
                             }
@@ -963,7 +999,7 @@ class TimekeepingModule_model extends CI_Model {
                     if ($status == "REST_DAY" || $status == "NO_SCHEDULE") {
                         $totalRestDay += 1;
                     } 
-                    if ($totalHours > 0 || $status == "COMPLETE") {
+                    if ($scheduleDuration > 0 || $status == "COMPLETE") {
                         $totalNoDays += 1;
                     }
 
@@ -1049,7 +1085,7 @@ class TimekeepingModule_model extends CI_Model {
 
             if ($action == "insert")
             {
-                $timekeepingCode = getFormCode("TK", date("Y-m-d"), $insertID);
+                $timekeepingCode = getFormCode("TMK", date("Y-m-d"), $insertID);
                 $this->db->update("hris_timekeeping_tbl", ["timekeepingCode" => $timekeepingCode], ["timekeepingID" => $insertID]);
             }
 
@@ -1108,6 +1144,10 @@ class TimekeepingModule_model extends CI_Model {
             htit.timekeepingItemStatus AS status, 
             htit.scheduleDuration, 
             htit.scheduleBreakDuration,
+            htpt.dayType,
+            htit.checkDuration,
+            htit.leaveDuration,
+            (htit.leaveDuration * htit.hourlyRate) AS leavePay,
             (CASE
                 WHEN(htit.scheduleDuration <> 0 AND (htit.lateDuration + htit.undertimeDuration) >= (htit.scheduleDuration / 2))
                     THEN htit.lateDuration + htit.undertimeDuration - htit.scheduleBreakDuration
@@ -1141,6 +1181,8 @@ class TimekeepingModule_model extends CI_Model {
                 $status             = $item['status'] ?? "NO SCHEDULE";
                 $isLeave            = $status == "COMPLETE_LEAVE";
                 $lateUndertimeHours = $item["lateUndertimeHours"];
+                $leaveHours         = $item['leaveDuration'];
+                $leavePay           = $item["leavePay"];
 
                 // BASIC HOURS
                 $odBrHours  = $item['odBrHours'];
@@ -1152,7 +1194,8 @@ class TimekeepingModule_model extends CI_Model {
                 $dhBrHours  = $item['dhBrHours'];
                 $dhBrrHours = $item['dhBrrHours'];
 
-                $basicHours = $odBrHours + $odBrrHours + $sdBrHours + $sdBrrHours + $rhBrHours + $rhBrrHours + $dhBrHours + $dhBrrHours;
+                // $basicHours = $odBrHours + $odBrrHours + $sdBrHours + $sdBrrHours + $rhBrHours + $rhBrrHours + $dhBrHours + $dhBrrHours;
+                $basicHours = $item['checkDuration'];
 
                 // OVERTIME HOURS
                 $odOrHours  = $item['odOrHours'];
@@ -1175,21 +1218,42 @@ class TimekeepingModule_model extends CI_Model {
                 $rhNrrHours = $item['rhNrrHours'];
                 $dhNrHours  = $item['dhNrHours'];
                 $dhNrrHours = $item['dhNrrHours'];
+
+                // OVERTIME NIGHT DIFFERENTIAL HOURS 
+                $odOrNrHours  = $item['odOrNrHours'];
+                $odOrNrrHours = $item['odOrNrrHours'];
+                $sdOrNrHours  = $item['sdOrNrHours'];
+                $sdOrNrrHours = $item['sdOrNrrHours'];
+                $rhOrNrHours  = $item['rhOrNrHours'];
+                $rhOrNrrHours = $item['rhOrNrrHours'];
+                $dhOrNrHours  = $item['dhOrNrHours'];
+                $dhOrNrrHours = $item['dhOrNrrHours'];
                 
                 $nightDiffHours = $odNrHours + $odNrrHours + $sdNrHours + $sdNrrHours + $rhNrHours + $rhNrrHours + $dhNrHours + $dhNrrHours;
+                $overtimeNightDifferentialHours = $odOrNrHours + $odOrNrrHours + $sdOrNrHours + $sdOrNrrHours + $rhOrNrHours + $rhOrNrrHours + $dhOrNrHours + $dhOrNrrHours;
 
                 $rate = getPayrollDayRate($dayType, $restDay, $isLeave);
                 $basicRate     = $rate["basicRate"];
                 $overtimeRate  = $rate["overtimeRate"];
                 $nightDiffRate = $rate["nightDiffRate"];
 
-                $schedulePay = $hourlyRate * $scheduleDuration * $basicRate;
+                $schedulePay = $hourlyRate * $scheduleDuration * 1;
 
-                $salary = getPayrollDaySalary($hourlyRate, $basicHours, $overtimeHours, $nightDiffHours, $dayType, $restDay, $isLeave);
+                $salary = getPayrollDaySalary($hourlyRate, $basicHours, $overtimeHours, $nightDiffHours, $overtimeNightDifferentialHours, $dayType, $restDay, $isLeave);
                 $basicPay     = $salary["basicPay"];
                 $overtimePay  = $salary["overtimePay"];
                 $nightDiffPay = $salary["nightDiffPay"];
-                $totalPay     = $salary["totalPay"];
+                $totalPay     = $salary["totalPay"] + $leavePay;
+
+                // REFLECT HOLIDAY PAY
+                $isHoliday = $dayType != "ordinary day";
+                $holidayPay = 0;
+                if ($isHoliday && $basicPay > 0) 
+                {
+                    $productionPay = $hourlyRate * $basicHours;
+                    $holidayPay    = $basicPay - $productionPay;
+                    $basicPay      = $basicPay - $holidayPay;
+                }
 
                 $lateUndertimeDeduction = $hourlyRate * $lateUndertimeHours * $basicRate;
 
@@ -1205,13 +1269,17 @@ class TimekeepingModule_model extends CI_Model {
                     'restDay'                => $restDay,
                     'status'                 => $status,
                     'basicHours'             => $basicHours,
+                    'leaveHours'             => $leaveHours,
                     'overtimeHours'          => $overtimeHours,
-                    'lateUndertimeHours'     => $lateUndertimeHours,
                     'nightDifferentialHours' => $nightDiffHours,
+                    'overtimeNightDifferentialHours' => $nightDiffHours,
+                    'lateUndertimeHours'     => $lateUndertimeHours,
                     'basicRate'              => $basicRate,
                     'overtimeRate'           => $overtimeRate,
                     'nightDifferentialRate'  => $nightDiffRate,
                     'basicPay'               => $basicPay,
+                    'holidayPay'             => $holidayPay,
+                    'leavePay'               => $leavePay,
                     'overtimePay'            => $overtimePay,
                     'nightDifferentialPay'   => $nightDiffPay,
                     'lateUndertimeDeduction' => $lateUndertimeDeduction,
@@ -1235,10 +1303,12 @@ class TimekeepingModule_model extends CI_Model {
     {
         $sql = "
         SELECT 
-            SUM(grossPay) AS grossPay, SUM(netPay) AS netPay
-        FROM hris_payroll_tbl AS hpt 
-            LEFT JOIN hris_payroll_items_tbl AS hpit ON hpt.payrollID = hpit.payrollID AND hpit.employeeID = $employeeID 
-        WHERE hpt.payrollID <> $payrollID AND hpt.payrollStatus = 2 ORDER BY hpt.updatedAt DESC LIMIT $cutOffCount";
+            SUM(grossPay) AS grossPay,
+            SUM(netPay) AS netPay
+        FROM (SELECT * FROM hris_payroll_items_tbl AS hpit
+        WHERE hpit.employeeID = $employeeID AND hpit.payrollID <> $payrollID
+        ORDER BY hpit.updatedAt, hpit.payrollID DESC
+        LIMIT $cutOffCount) AS summary";
         $query = $this->db->query($sql);
         return $query ? $query->row() : null;
     }
@@ -1247,6 +1317,7 @@ class TimekeepingModule_model extends CI_Model {
     {
         $sql = "
         SELECT 
+            employeeBasicSalary,
             timekeepingID,
             employeeID,
             hourlyRate,
@@ -1265,13 +1336,13 @@ class TimekeepingModule_model extends CI_Model {
             SUM(lateUndertimeHours) AS lateUndertimeHours,
             SUM(CASE WHEN STATUS = 'ABSENT' THEN scheduleDuration ELSE 0 END) AS lwopHours,
             SUM(hourlyRate * scheduleDuration) AS basicSalary,
-            SUM(CASE WHEN dayType = 'ordinary day' THEN basicPay ELSE 0 END) AS basicPay,
-            SUM(CASE WHEN dayType <> 'ordinary day' THEN basicPay ELSE 0 END) AS holidayPay,
+            SUM(CASE WHEN dayType = 'ordinary day' AND basicPay THEN basicPay ELSE 0 END) AS basicPay,
+            SUM(CASE WHEN dayType <> 'ordinary day' AND holidayPay THEN holidayPay ELSE 0 END) AS holidayPay,
             SUM(overtimePay) AS overtimePay,
             SUM(nightDifferentialPay) AS nightDifferentialPay,
-            SUM(CASE WHEN status = 'COMPLETE_LEAVE' THEN totalPay ELSE 0 END) AS leavePay,
+            SUM(leavePay) AS leavePay,
             SUM(lateUndertimeDeduction) AS lateUndertimeDeduction,
-            SUM(CASE WHEN status = 'ABSENT' THEN (hourlyRate * scheduleDuration) ELSE 0 END) AS lwopDeduction,
+            SUM(CASE WHEN status = 'ABSENT' THEN (schedulePay) ELSE 0 END) AS lwopDeduction,
             SUM(totalPay) AS grossPay
         FROM hris_payroll_production_tbl AS hppt
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
@@ -1280,7 +1351,7 @@ class TimekeepingModule_model extends CI_Model {
         return $query ? $query->result_array() : [];
     }
 
-    public function insertPayrollItems($payrollID = 0)
+    public function insertPayrollItems($payrollID = 0, $cutoff = 0)
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
         $cutOffCount = getCutOffCount();
@@ -1294,7 +1365,11 @@ class TimekeepingModule_model extends CI_Model {
                 $employeeID = $prod['employeeID'];
                 $allowance  = $prod['allowance'] / $cutOffCount;
 
-                $basicSalary            = $prod['basicSalary'];
+                $monthlyRate            = $prod['employeeBasicSalary'];
+                $workingDays            = $prod['workingDays'];
+                $hourlyRate             = $prod['hourlyRate'];
+                $basicSalary            = $monthlyRate / $cutOffCount;
+
                 $basicPay               = $prod['basicPay'];
                 $holidayPay             = $prod['holidayPay'];
                 $overtimePay            = $prod['overtimePay'];
@@ -1302,7 +1377,14 @@ class TimekeepingModule_model extends CI_Model {
                 $leavePay               = $prod['leavePay'];
                 $lateUndertimeDeduction = $prod['lateUndertimeDeduction'];
                 $lwopDeduction          = $prod['lwopDeduction'];
-                $grossPay               = $prod['grossPay'];
+                $lwopDeduction          = $lwopDeduction > $basicSalary ? $basicSalary : $lwopDeduction;
+
+                $loan = getEmployeeLoan($employeeID, $cutoff);
+                $loanBasis       = $loan['total'] ?? 0;
+                $ammortizationID = $loan['ammortizationID'] ?? '';
+                $ammortizationAmount = $loan['ammortizationAmount'] ?? '';
+
+                $grossPay = ($basicSalary + $holidayPay + $overtimePay + $nightDifferentialPay + $leavePay) - ($lateUndertimeDeduction + $lwopDeduction);
 
                 $prevGrossPay = $prevNetPay = 0;
 
@@ -1328,20 +1410,18 @@ class TimekeepingModule_model extends CI_Model {
                 $withHoldingDeduction = $govermentContribution['withHoldingDeduction'] ?? 0;
                 $totalDeduction       = $govermentContribution['totalDeduction'] ?? 0;
 
-                $loanDeduction = 0;
-
                 $netPay = ($grossPay + $allowance) - $loanDeduction;
 
                 $data[] = [
                     'payrollID'              => $payrollID,
                     'timekeepingID'          => $prod['timekeepingID'],
                     'employeeID'             => $employeeID,
-                    'hourlyRate'             => $prod['hourlyRate'],
+                    'hourlyRate'             => $hourlyRate,
                     'holdSalary'             => 0,
                     'deductMandates'         => 0,
                     'startDate'              => $prod['startDate'],
                     'endDate'                => $prod['endDate'],
-                    'workingDays'            => $prod['workingDays'],
+                    'workingDays'            => $workingDays,
                     'holidays'               => $prod['holidays'],
                     'lwopDays'               => $prod['lwopDays'],
                     'paidLeaveDays'          => $prod['paidLeaveDays'],
@@ -1378,8 +1458,10 @@ class TimekeepingModule_model extends CI_Model {
                     'withHoldingBasis'       => 0,
                     'withHoldingDeduction'   => 0,
                     'totalDeduction'         => 0,
-                    'loanBasis'              => 0,
+                    'loanBasis'              => $loanBasis,
                     'loanDeduction'          => 0,
+                    'ammortizationID'        => $ammortizationID,
+                    'ammortizationAmount'    => $ammortizationAmount,
                     'prevNetPay'             => $prevNetPay,
                     'netPay'                 => $netPay,
                     'createdBy'              => $sessionID,
@@ -1410,6 +1492,7 @@ class TimekeepingModule_model extends CI_Model {
                     'timekeepingCode'  => $timekeepingData->timekeepingCode,
                     'payrollStartDate' => $timekeepingData->timekeepingStartDate,
                     'payrollEndDate'   => $timekeepingData->timekeepingEndDate,
+                    'cutOff'           => $timekeepingData->cutOff,
                     'employeeID'       => 0,
                     'payrollStatus'    => 0,
                     'createdBy'        => $sessionID,
@@ -1418,11 +1501,11 @@ class TimekeepingModule_model extends CI_Model {
                 $query = $this->db->insert("hris_payroll_tbl", $data);
                 $payrollID = $this->db->insert_id();
 
-                $payrollCode = getFormCode("PAY", date("Y-m-d"), $payrollID);
+                $payrollCode = getFormCode("PRL", date("Y-m-d"), $payrollID);
                 $this->db->update("hris_payroll_tbl", ["payrollCode" => $payrollCode], ["payrollID" => $payrollID]);
     
                 $insertPayrollProduction = $this->insertPayrollProduction($timekeepingID, $payrollID);
-                $insertPayrollItems      = $this->insertPayrollItems($payrollID);
+                $insertPayrollItems      = $this->insertPayrollItems($payrollID, $timekeepingData->cutOff);
                 
                 return $query ? true : false;
             }
@@ -1431,6 +1514,19 @@ class TimekeepingModule_model extends CI_Model {
         return false;
     }
     // ----- ********** END SAVE PAYROLL DATA ********** -----
+
+
+
+
+
+    // ----- ********** REPORTS ********** -----
+    public function getCompanyProfile()
+    {
+        $sql   = "SELECT * FROM gen_company_profile_tbl LIMIT 1";
+        $query = $this->db->query($sql);
+        return $query ? $query->row() : null;
+    }
+    // ----- ********** END REPORTS ********** -----
 
 }
 

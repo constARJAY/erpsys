@@ -6,12 +6,12 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-users-cog"></i> &nbsp;HR Modules</li>
-                        <li class="breadcrumb-item active">Back Pay</li>
+                        <li class="breadcrumb-item active">Back Pay Process</li>
                     </ul>
-                    <h1 class="mt-3">Back Pay</h1>
-                    <span>This module is used to manage the releasing of back pay.</span>
+                    <h1 class="mt-3">Back Pay Process</h1>
+                    <span>This module is used to generate and monitor the backpay of each employee that are already resigned on the company.</span>
                 </div>
-                <?php if(isCreateAllowed(96)){ ?>
+                <?php if(isCreateAllowed(95)){ ?>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
                 <?php  } ?>
             </div>

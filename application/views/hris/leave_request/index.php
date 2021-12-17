@@ -10,7 +10,7 @@
                         <li class="breadcrumb-item active">Leave Request</li>
                     </ul>
                     <h1 class="mt-3">Leave Request</h1>
-                    <span>This form is used to manage the Leave request.</span>
+                    <span>This form is used to manage the leave request.</span>
                 </div>
                 <div class="col-lg-4 col-sm-12 text-right" id="headerButton"></div>
             </div>

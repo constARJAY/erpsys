@@ -967,20 +967,25 @@ function myFormsContent() {
 
     const pendingPettyCash = getTableData(`fms_petty_cash_request_tbl`,
     ` COUNT(pettyCashRequestID) AS pendingPettyCash`,
-    `pettyCashRequestStatus = 0`);
+    `pettyCashRequestStatus = 1`);
 
     const pendingClientFund = getTableData(`fms_client_fund_request_tbl`,
     `COUNT(clientFundRequestID) as pendingClientFund`,
-    `clientFundRequestStatus = 0`);
+    `clientFundRequestStatus = 1`);
 
     const pendingCollection = getTableData(`fms_collection_tbl`,
     `COUNT(collectionID) AS pendingCollection`,
-    `collectionStatus =0`);
+    `collectionStatus =1`);
+
+    const pendingBillMaterial = getTableData(`pms_bill_material_tbl`,
+    `COUNT(billMaterialID) AS pendingBillMaterial`,
+    `billMaterialStatus =1`);
 
     const pettyCashRequestDataLastRow = getTableData(`fms_petty_cash_request_tbl AS fpcrt JOIN fms_liquidation_tbl USING(pettyCashRequestID)`,
     `fpcrt.*, fms_liquidation_tbl.liquidationID`,
     `pettyCashRequestStatus = 2 `,`fpcrt.pettyCashRequestID DESC LIMIT 1`);
 
+    const totalBudget = 10000.00;
     let overAllTotal = 0, overAllBalance = 0;
     pettyCashRequestDataLastRow.map((item) => {
         let {
@@ -996,7 +1001,6 @@ function myFormsContent() {
             overAllTotal    += tempTotal, 
             overAllBalance  = parseFloat(totalBudget) - parseFloat(overAllTotal); 
         
-        html += ` <span><h4 class="font-weight-bolder" >Remaining Balance: <label  class="font-weight-bolder" style="color:#dc3450;" >${formatAmount(overAllBalance,true)}</label></h4></span>`;
         
     });
 
@@ -1068,11 +1072,23 @@ let html = `        <div class="row clearfix row-deck">
                                     <div class="icon"><i class="fas fa-funnel-dollar"></i> </div>
                                     <div class="content">
                                         <div class="text mb-2 text-uppercase">CLIENT FUND BALANCE</div>
-                                        <h4 class="number mb-0">${formatAmount(pendingClientFund[0].pendingClientFund || 0, true)}</h4>
+                                        <h4 class="number mb-0">${formatAmount(0, true)}</h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-lg-4 col-md-6 col-sm-12">
+                        <div class="card top_widget">
+                            <div class="body">
+                                <div class="icon"><i class="fas fa-file-invoice"></i> </div>
+                                <div class="content">
+                                    <div class="text mb-2 text-uppercase">PENDING BILL OF MATERIAL</div>
+                                    <h4 class="number mb-0">${pendingBillMaterial[0].pendingBillMaterial || 0}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                        
                     </div>`;
 

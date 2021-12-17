@@ -167,12 +167,12 @@ function initDataTables() {
                 { targets: 0,  width: 100 },
                 { targets: 1,  width: 250 },
                 { targets: 2,  width: 120 },
-                { targets: 3,  width: 250 },
-                { targets: 4,  width: 150 },
-                { targets: 5,  width: 250 },
+                // { targets: 3,  width: 250 },
+                { targets: 3,  width: 150 },
+                { targets: 4,  width: 250 },
+                { targets: 5,  width: 80  },
                 { targets: 6,  width: 80  },
-                { targets: 7,  width: 80  },
-                { targets: 8,  width: 220 },
+                { targets: 7,  width: 220 },
             ],
         });
 
@@ -189,12 +189,12 @@ function initDataTables() {
                 { targets: 0,  width: 100 },
                 { targets: 1,  width: 250 },
                 { targets: 2,  width: 120 },
-                { targets: 3,  width: 250 },
-                { targets: 4,  width: 150 },
-                { targets: 5,  width: 250 },
+                // { targets: 3,  width: 250 },
+                { targets: 3,  width: 150 },
+                { targets: 4,  width: 250 },
+                { targets: 5,  width: 80  },
                 { targets: 6,  width: 80  },
-                { targets: 7,  width: 80  },
-                { targets: 8,  width: 220 },
+                { targets: 7,  width: 220 },
             ],
         });
 
@@ -310,9 +310,8 @@ function forApprovalContent() {
         <thead>
             <tr style="white-space: nowrap">
                 <th>Document No.</th>
-                <th>Date From - To Period</th>
+                <th>13th Month Pay Range</th>
                 <th>Prepared By</th>
-                <th>Description</th>
                 <th>Current Approver</th>
                 <th>Date</th>
                 <th>Status</th>
@@ -365,7 +364,6 @@ function forApprovalContent() {
             <td>${monthCode || "-"}</td>
             <td>${dateRange}</td>
             <td>${fullname}</td>
-            <td>${monthDescription || "-"}</td>
             <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, monthStatus, true))}
                 </td>
@@ -411,7 +409,7 @@ function myFormsContent() {
         <thead>
             <tr style="white-space: nowrap">
                 <th>Document No.</th>
-                <th>Date From - To Period</th>
+                <th>13th Month Pay Range</th>
                 <th>Prepared By</th>
                 <th>Description</th>
                 <th>Current Approver</th>
@@ -1045,7 +1043,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
             <div class="body">
                 <small class="text-small text-muted font-weight-bold">Revised Document No.</small>
                 <h6 class="mt-0 text-danger font-weight-bold">
-                    ${getFormCode("TMK", createdAt, reviseDocumentNo)}
+                    ${getFormCode("TMP", createdAt, reviseDocumentNo)}
                 </h6>      
             </div>
         </div>
@@ -1126,7 +1124,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
         <div class="col-md-4 col-sm-12">
             <div class="form-group">
-                <label>Employee Name</label>
+                <label>Prepared By</label>
                 <input type="text" class="form-control" disabled value="${employeeFullname}">
             </div>
         </div>
@@ -1470,7 +1468,7 @@ $(document).on("click", "#btnBack", function () {
     const isFromCancelledDocument = $(this).attr("cancel") == "true";
     const revise     = $(this).attr("revise") == "true";
     const employeeID = $(this).attr("employeeID");
-    const feedback   = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback   = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
     const status     = $(this).attr("status");
 
     if (status != "false" && status != 0) {
@@ -1524,7 +1522,7 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
         const id       = $(this).attr("monthID");
         const isFromCancelledDocument = $(this).attr("cancel") == "true";
         const revise   = $(this).attr("revise") == "true";
-        const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+        const feedback = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
         const action   = revise && "insert" || (id && feedback ? "update" : "insert");
         const data     = getInventoryReceivingData(action, "save", "0", id);
         // data["monthStatus"] = 0;
@@ -1651,7 +1649,7 @@ $(document).on("click", "#btnCancelForm", function () {
 // ----- APPROVE DOCUMENT -----
 $(document).on("click", "#btnApprove", function () {
     const id       = decryptString($(this).attr("monthID"));
-    const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
     let tableData  = getTableData("hris_13month_tbl", "", "monthID = " + id);
 
     if (tableData) {
@@ -1704,7 +1702,7 @@ $(document).on("click", "#btnApprove", function () {
 $(document).on("click", "#btnReject", function () {
 
     const id       = $(this).attr("monthID");
-    const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
 
     $("#modal_inventory_receiving_content").html(preloader);
     $("#modal_inventory_receiving .page-title").text("DENY 13th Month");
@@ -1736,7 +1734,7 @@ $(document).on("click", "#btnReject", function () {
 
 $(document).on("click", "#btnRejectConfirmation", function () {
     const id       = decryptString($(this).attr("monthID"));
-    const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
 
     const validate = validateForm("modal_inventory_receiving");
     if (validate) {
@@ -1783,7 +1781,7 @@ $(document).on("click", "#btnRejectConfirmation", function () {
 // ----- DROP DOCUMENT -----
 $(document).on("click", "#btnDrop", function() {
     const monthID = decryptString($(this).attr("monthID"));
-    const feedback          = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback          = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
 
     const id = decryptString($(this).attr("monthID"));
     let data = new FormData;
@@ -1798,7 +1796,7 @@ $(document).on("click", "#btnDrop", function() {
 $(document).on("click", "#btnRelease", function() {
     const monthID = decryptString($(this).attr("monthID"));
    
-    const feedback          = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback          = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
 
     const id = decryptString($(this).attr("monthID"));
     let data = new FormData;
@@ -1963,19 +1961,19 @@ if (data) {
 
                     let swalTitle;
                     if (method == "submit") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} submitted successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} submitted successfully!`;
                     } else if (method == "save") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} saved successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} saved successfully!`;
                     } else if (method == "cancelform") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} cancelled successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} cancelled successfully!`;
                     } else if (method == "approve") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} approved successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} approved successfully!`;
                     } else if (method == "deny") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} denied successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} denied successfully!`;
                     } else if (method == "drop") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} dropped successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} dropped successfully!`;
                     }	else if (method == "release") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} release successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} release successfully!`;
                     }	
                     
     

@@ -217,9 +217,13 @@ $(document).ready(function(){
         let {
             companyProfileID        =   "",
             companyName             =   "Blackcoders Group Incorporated",
-            companyIncorpation      =   new Date(),
+            companyIncorpation      =   "",
             companyBusinessType     =   "",
+            companyCompanyType      =   "",
             companyTIN              =   "",
+            companySSS              =   "",
+            companyPhilHealth       =   "",
+            companyPagIbig          =   "",
             companyUnitNo           =   "",
             companyBuildingNo       =   "",
             companyStreetName       =   "",
@@ -240,7 +244,9 @@ $(document).ready(function(){
             updatedBy               =   "",
             updatedAt               =   "",
         } = tableData[0] || false;              
+
         
+
         let button  =  isSave ?  ` <button  class="btn btn-save px-5 p-2 w-100" id="btnSave" companyid="${companyProfileID ? encryptString(companyProfileID) : `false`}" type="button"><i class="fas fa-save"></i> Save </button>` 
                             : ` <button class="btn btn-save px-5 p-2 w-100 btnUpdate"  type="button"><i class="fas fa-save"></i> Update </button>`; 
         let html    = `
@@ -250,7 +256,7 @@ $(document).ready(function(){
                 
                 <div class="col-lg-12">
                     <div class="form-group">
-                        <label for="">Company Name</label>
+                        <label for="">Company Name ${isSave ? `<code>*</code>` : ``}</label>
                         <input type="text" class="form-control validate" name="companyName" id="companyName" value="${companyName || ""}"
                             data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150"  required >
                         <div class="invalid-feedback d-block" id="invalid-companyName"></div>
@@ -265,14 +271,14 @@ $(document).ready(function(){
                             class = "form-control daterange text-left"
                             name = "companyIncorpation"
                             id="companyIncorpation"  
-                            value = "${moment().format("MMMM DD, YYYY")}"  required>
+                            value = "${moment(companyIncorpation||"").format("MMMM DD, YYYY")}"  required>
                         <div class="invalid-feedback d-block" id="invalid-companyIncorpation"></div>
                     </div>
                 </div>
 
                 <div class="col-lg-4">
                     <div class="form-group">
-                        <label for="companyBusinessType">Business Type</label>
+                        <label for="companyBusinessType">Business Type ${isSave ? `<code>*</code>` : ``}</label>
                         <select class="form-control validate select2 w-100" name="companyBusinessType" id="companyBusinessType" required>
                             ${getBusinessType(companyBusinessType)}
                         </select>
@@ -282,7 +288,17 @@ $(document).ready(function(){
 
                 <div class="col-lg-4">
                     <div class="form-group">
-                        <label>Tax Identification Number (TIN) </label>
+                        <label for="companyCompanyType">Company Type ${isSave ? `<code>*</code>` : ``}</label>
+                        <select class="form-control validate select2 w-100" name="companyCompanyType" id="companyCompanyType" required>
+                            ${getCompanyType(companyCompanyType)}
+                        </select>
+                        <div class="invalid-feedback d-block" id="invalid-companyCompanyType"></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-12 ">
+                    <div class="form-group">
+                        <label>Tax Identification No. ${isSave ? `<code>*</code>` : ``}</label>
                             <input 
                                 type="text" 
                                 class="form-control inputmask" 
@@ -297,6 +313,50 @@ $(document).ready(function(){
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-companyTIN"></div>
                     </div>
+                </div>
+                <div class="col-lg-3 col-sm-12 form-group">
+                    <label>Social Security System ID (SSS ID)</label>
+                    <input type="text"
+                        class="form-control inputmask"
+                        mask="99-9999999-9"
+                        maxlength="12"
+                        minlength="12"
+                        data-allowcharacters="[0-9]"
+                        name="companySSS"
+                        id="companySSS"
+                        value="${companySSS}"
+                        autocomplete="off">
+                    <div class="d-block invalid-feedback"></div>
+                </div>
+
+                <div class="col-lg-3 col-sm-12 form-group">
+                    <label>PhilHealth ID</label>
+                    <input type="text"
+                        class="form-control inputmask"
+                        mask="99-999999999-9"
+                        data-allowcharacters="[0-9]"
+                        maxlength="14"
+                        minlength="14"
+                        name="companyPhilHealth"
+                        id="companyPhilHealth"
+                        value="${companyPhilHealth}"
+                        autocomplete="off">
+                    <div class="d-block invalid-feedback"></div>
+                </div>
+
+                <div class="col-lg-3 col-sm-12 form-group">
+                    <label>Pag-IBIG ID</label>
+                    <input type="text"
+                        class="form-control inputmask"
+                        mask="9999-9999-9999"
+                        maxlength="14"
+                        minlength="14"
+                        data-allowcharacters="[0-9]"
+                        name="companyPagIbig"
+                        id="companyPagIbig"
+                        value="${companyPagIbig}"
+                        autocomplete="off">
+                    <div class="d-block invalid-feedback"></div>
                 </div>
                 
                 <div class="col-lg-1">
@@ -317,7 +377,7 @@ $(document).ready(function(){
                 
                 <div class="col-lg-2">
                     <div class="form-group">
-                        <label>Building/House Number <code>*</code></label>
+                        <label>Building/House Number </label>
                         <input class="form-control validate"
                             data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  
                             minlength="2" 
@@ -365,7 +425,7 @@ $(document).ready(function(){
 
                 <div class="col-lg-3">
                     <div class="form-group">
-                        <label>Country <code>*</code></label>
+                        <label>Country ${isSave ? `<code>*</code>` : ``}</label>
                         <input class="form-control validate"
                             data-allowcharacters="[a-z][A-Z][ ]" 
                             id="companyCountry" 
@@ -382,8 +442,8 @@ $(document).ready(function(){
 
                 <div class="col-lg-3">
                     <div class="form-group">
-                        <label>Region <code>*</code></label>
-                        <select class="form-control show-tick select2 validate" name="companyRegion" id="companyRegion" style="width: 100%">
+                        <label>Region ${isSave ? `<code>*</code>` : ``}</label>
+                        <select class="form-control show-tick select2 validate" name="companyRegion" id="companyRegion" style="width: 100%" required>
                             <option value="" selected>Select Region</option>
                             ${getRegionOptions(companyRegion)} 
                         </select>
@@ -393,8 +453,8 @@ $(document).ready(function(){
 
                 <div class="col-lg-3">
                     <div class="form-group">
-                        <label>Province <code>*</code></label>
-                        <select class=" form-control show-tick select2 validate" name="companyProvince" id="companyProvince" style="width: 100%">
+                        <label>Province ${isSave ? `<code>*</code>` : ``}</label>
+                        <select class=" form-control show-tick select2 validate" name="companyProvince" id="companyProvince" style="width: 100%" required>
                             <option value="" selected>Select Province</option>
                             ${getProvinceOptions(companyProvince, companyRegion)} 
                         </select>
@@ -404,8 +464,8 @@ $(document).ready(function(){
 
                 <div class="col-3">
                     <div class="form-group">
-                        <label>City/Municipality <code>*</code></label>
-                        <select class=" form-control show-tick select2" id="companyCity" name="companyCity" style="width: 100%">
+                        <label>City/Municipality ${isSave ? `<code>*</code>` : ``}</label>
+                        <select class=" form-control show-tick select2" id="companyCity" name="companyCity" style="width: 100%" required>
                             <option value="" selected>Select City/Municipality</option>
                             ${getMunicipalityOptions(companyCity, companyRegion, companyProvince)} 
                         </select> 
@@ -415,8 +475,8 @@ $(document).ready(function(){
 
                 <div class="col-lg-2">
                     <div class="form-group">
-                        <label>Barangay <code>*</code></label>
-                        <select class=" form-control show-tick select2 validate" name="companyBarangay" id="companyBarangay" style="width: 100%">
+                        <label>Barangay ${isSave ? `<code>*</code>` : ``}</label>
+                        <select class=" form-control show-tick select2 validate" name="companyBarangay" id="companyBarangay" style="width: 100%" required>
                             <option value="" selected>Select Barangay</option>
                             ${getBarangayOptions(companyBarangay, companyRegion, companyProvince, companyCity)} 
                         </select>
@@ -426,7 +486,7 @@ $(document).ready(function(){
 
                 <div class="col-lg-1">
                     <div class="form-group">
-                        <label>Zip Code </label>
+                        <label>Zip Code ${isSave ? `<code>*</code>` : ``}</label>
                         <input class="form-control validate"
                             data-allowcharacters="[0-9]" id="companyZipcode" name="companyZipcode" minlength="4" autocomplete="off"
                             maxlength="4" value="${companyZipcode}" type="text">
@@ -437,7 +497,7 @@ $(document).ready(function(){
 
                 <div class="col-lg-4">
                     <div class="form-group">
-                        <label>Email Address </label>
+                        <label>Email Address ${isSave ? `<code>*</code>` : ``}</label>
                         <input 
                             type="email" 
                             class="form-control validate" 
@@ -470,7 +530,7 @@ $(document).ready(function(){
                 </div>
                 <div class="col-lg-4">
                     <div class="form-group">
-                        <label>Mobile No. <code>*</code></label>
+                        <label>Mobile No. ${isSave ? `<code>*</code>` : ``}</label>
                             <input 
                             type="text" 
                             class="form-control inputmask" 
@@ -478,10 +538,10 @@ $(document).ready(function(){
                             id="companyMobile" 
                             data-allowcharacters="[0-9]" 
                             mask="0\\999-999-9999" 
-                            minlength="14" 
-                            maxlength="14"
+                            minlength="13" 
+                            maxlength="13"
                             value="${companyMobile||""}"
-                            autocomplete="off"
+                            autocomplete="off" required
                             >
                         <div class="invalid-feedback d-block" id="invalid-companyMobile"></div>
                     </div>
@@ -491,8 +551,9 @@ $(document).ready(function(){
 
                 <div class="col-lg-6">
                     <div class="form-group">
-                        <label for="">Company Website</label>
+                        <label for="">Company Website  ${isSave ? `<code>*</code>` : ``}</label>
                         <input type="text" class="form-control validate" name="companyWebsite" id="companyWebsite" 
+                        
                             data-allowcharacters="[a-z][A-Z][0-9][_][.][/][:]" minlength="2" maxlength="150" value="${companyWebsite||""}" >
                         <div class="invalid-feedback d-block" id="invalid-companyWebsite"></div>
                     </div>
@@ -500,12 +561,13 @@ $(document).ready(function(){
 
                 <div class="col-lg-6">
                     <div class="form-group">
-                        <label>Comapany Logo</label>
+                        <label>Company Logo ${isSave ? `<code>*</code>` : ``}</label>
                         <input type="file"
                             class="form-control validate"
                             name="companyLogo|company-logo"
-                            id="companyLogo" required
-                            file="${companyLogo}">
+                            id="companyLogo" ${companyLogo ? "" : "required"}
+                            file="${companyLogo}"
+                            accept="image/*">
                         <div class="invalid-feedback d-block" id="invalid-companyLogo"></div>
                         <div id="displayImage" style="${companyLogo?'display:block;':'display:none;'} font-size: 12px; border: 1px solid black; border-radius: 5px; background: #d1ffe0; padding: 2px 10px;">${displayImage(companyLogo)}</div>
                     </div>
@@ -527,6 +589,7 @@ $(document).ready(function(){
                 $("#page_content").html(html);
                 disabledForm("page_content", !isSave); 
                 initAll();
+                $(".btnRemoveFile").attr("issave", isSave ? true : false);
         }, 500);
     }
 
@@ -591,11 +654,13 @@ $(document).ready(function(){
 
     // ----- REMOVE FILE -----
     $(document).on("click", `.btnRemoveFile`, function() {
-        $parent = $(this).closest(".form-group");
+        if($(this).attr("issave")){
+            $parent = $(this).closest(".form-group");
 
-        $parent.find(`[type="file"]`).val("");
-        $parent.find(`[type="file"]`).removeAttr("file");
-        $parent.find(".displayfile").children().remove();
+            $parent.find(`[type="file"]`).val("");
+            $parent.find(`[type="file"]`).removeAttr("file");
+            $parent.find("#displayImage").remove();
+        }
     })
     // ----- END REMOVE FILE -----
     
@@ -632,9 +697,21 @@ $(document).ready(function(){
                     ];
         let html = `<option disabled ${!companyBusinessType && "selected"}>Select business type</option>`;
         array.map((value,index)=>{
-            html += `<option ${index === companyBusinessType && "selected"} value="${index}">${value}</option>`;
+            html += `<option ${value == companyBusinessType && "selected"} value="${value}">${value}</option>`;
         });
         return html;
     }
 
+    function getCompanyType(companyCompanyType = false){
+        let array = [
+            "Goverment",
+            "Private"];
+        let html = `<option disabled ${!companyCompanyType && "selected"}>Select company type</option>`;
+        array.map(value=>{
+            html += `<option ${value == companyCompanyType && "selected"} value="${value}">${value}</option>`;
+        })
+        return html;
+    }
+
 });
+

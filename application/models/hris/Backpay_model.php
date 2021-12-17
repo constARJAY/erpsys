@@ -22,6 +22,12 @@ class Backpay_model extends CI_Model {
     
             if ($query) {
                 $insertID = $action == "insert" ? $this->db->insert_id() : $id;
+
+                if($action =="insert"){
+                    $backPayCode = "BPY-".date("y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
+                    $updateArr = ["backPayCode"=> $backPayCode ];
+                    $this->db->update("hris_back_pay_tbl", $updateArr, ["backPayID" => $insertID]);
+                }
                 return "true|Successfully submitted|$insertID|".date("Y-m-d");
             }
         }else{

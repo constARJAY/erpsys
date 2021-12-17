@@ -189,11 +189,11 @@ function initDataTables() {
             sorting: [],
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 120 },
+                { targets: 0,  width: 200 },
                 { targets: 1,  width: 200 },
                 { targets: 2,  width: 200 },
-                { targets: 3,  width: 50 },
-                { targets: 4,  width: 150 }
+                { targets: 3,  width: 200 },
+                { targets: 4,  width: 200 }
             ],
         });
 
@@ -207,10 +207,12 @@ function initDataTables() {
         sorting: [],
         scrollCollapse: true,
         columnDefs: [
-            { targets: 0,  width: 180 },
-            { targets: 1,  width: 180 },
-            { targets: 2,  width: 180 },
-            { targets: 3,  width: 200 },
+            { targets: 0,  width: 200 },
+            { targets: 1,  width: 200 },
+            { targets: 2,  width: 200 },
+            { targets: 3,  width: 80 },
+            { targets: 4,  width: 80 },
+            { targets: 5,  width: 300 },
         ],
     });
 
@@ -298,22 +300,36 @@ function tableContent(data = false) {
         data.map(stock => {
             const {
                 assetID,
+                barcode,
                 assetCode,
                 assetName,
+                brand,
                 classificationName,
+                categoryName,
                 uom,
-                barcode,
-                assetQuantity,
-            } = stock;
+                stockIN,
+                borrowedQuantity,
+                returned,
+                reOrderLevel,
+                reservedItem,
+                disposed,
+                transferquantity,
+                Available,
+                Total_Quantity,
+                totalequipmentBorrowing,
+                materiaWithdrawalQuantity,
 
-            if(assetQuantity > 0){
+            } = stock;
+            // var itemTotalQuantity    =  parseFloat(data["item"][i].stockIN) - (parseFloat(data["item"][i].materiaWithdrawalQuantity + data["item"][i].totalStockOut));
+             var assetTotalQty = parseFloat(stockIN) - (parseFloat(totalequipmentBorrowing) + parseFloat(materiaWithdrawalQuantity) + parseFloat(disposed) );
+            if(assetTotalQty > 0){
                 tbodyHTML += `
                 <tr assetID="${assetID}">
                     <td>${assetCode || "-"}</td>
                     <td>${assetName || "-"}</td>
                     <td>${classificationName || "-"}</td>
                     <td>${uom || "-"}</td>
-                    <td>${formatAmount(assetQuantity || 0)}</td>
+                    <td>${formatAmount(assetTotalQty || 0)}</td>
                     <td>${barcode || "-"}</td>
                     
                 </tr>`;
@@ -355,20 +371,159 @@ function tableContent(data = false) {
 
  // ----- GET RESERVATION DATA -----
  function getReservationData(inventoryStorageID = 0) {
-     const result = getTableData(`ims_inventory_storage_tbl AS storage
-     LEFT JOIN  ims_stock_in_assets_tbl AS stock 
-     ON storage.inventoryStorageID = stock.inventoryStorageID`,
-    `stock.assetID,
-    stock.assetCode,
-    stock.assetName,
-    stock.classificationName,
-    stock.uom,
-    stock.barcode,
-    CASE 
-    WHEN IFNULL(SUM(quantity),0) > (SELECT reOrderLevel FROM ims_inventory_asset_tbl WHERE assetID = stock.assetID) THEN IFNULL(SUM(quantity),0)-(SELECT reOrderLevel FROM ims_inventory_asset_tbl WHERE assetID = stock.assetID)
-    ELSE 0 
-    END AS assetQuantity`,
-    `stock.inventoryStorageID = ${inventoryStorageID}`);
+
+    const result = getTableData(`(
+        SELECT i.barcode, i.assetID, i.assetCode , brand, i.assetName, classificationName, categoryName, uom,stockIN,
+        ROUND(equipmentBorrowing,2) AS equipmentBorrowing,Transferred,
+
+        -- ROUND(IF((SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID),
+        --     (SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID),0) -  returnQuantity,2) AS returnQuantity, 
+        
+
+        ROUND(IF((SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID),
+            IFNULL(
+            IF((SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID) >  returnQuantity,
+            (SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID) -  returnQuantity,
+            returnQuantity - (SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID)),0),returnQuantity - 0) ,2) AS returnQuantity, 
+            
+        ROUND(disposed,2) as disposed,
+        reservedAsset, 
+        
+        CASE WHEN equipmentBorrowing <>0 THEN (IF((reservedAsset - equipmentBorrowing)<0,0,reservedAsset - equipmentBorrowing))
+        ELSE reservedAsset END reserved,
+        
+        ROUND(materiaWithdrawalQuantity  - returnQuantity,2)  AS materiaWithdrawalQuantity,
+        
+
+        IFNULL(iii.reOrderLevel,0) AS reOrderLevel,
+        
+        (IFNULL(equipmentBorrowing,2) - IFNULL(materiaWithdrawalQuantity,2)) totalequipmentBorrowing,
+
+        (stockIN - IFNULL(reOrderLevel,0) - materiaWithdrawalQuantity - returnQuantity - disposed - IF(equipmentBorrowing = 0,reservedAsset, IF(equipmentBorrowing = reservedAsset,equipmentBorrowing,reservedAsset - equipmentBorrowing))) AS available
+
+        FROM
+        (
+        SELECT barcode, assetID, assetCode, brand, assetName, classificationName,categoryName,uom,
+        IFNULL(SUM(stockIN),0) AS stockIN,IFNULL(SUM(equipmentBorrowing),0) AS equipmentBorrowing,
+        sum(Transferred) AS Transferred,
+         SUM(returnQuantity) AS returnQuantity,
+        IFNULL(SUM(disposed),0) AS disposed,IFNULL(SUM(reservedAsset),0) AS reservedAsset, IFNULL(SUM(materiaWithdrawalQuantity),0) AS materiaWithdrawalQuantity
+        FROM
+        (
+            SELECT 
+            sii.barcode,sii.assetID, 			sii.assetCode, 		sii.brand,		sii.assetName,
+            sii.classificationName, sii.categoryName,	sii.uom,  
+            SUM(sii.quantityForStockin) AS stockIN, -- Stock In Quantity
+            0 AS equipmentBorrowing,
+            0 AS returnQuantity,
+            0 AS Transferred,
+            '0.00'  AS disposed,
+            0 AS reservedAsset,
+            0 AS materiaWithdrawalQuantity
+            FROM  ims_stock_in_assets_tbl AS sii
+            WHERE (sii.inventoryReceivingID <>0 OR sii.materialUsageID <>0)   AND  sii.stockOutDate = '0000-00-00' AND sii.stockInDate IS NOT NULL AND sii.inventoryStorageID = ${inventoryStorageID}
+            GROUP BY sii.assetID
+            -- Get Stock In Quantity in  Stock In Assets Table
+            UNION ALL
+
+            SELECT 
+            sii.barcode, sii.assetID, 			sii.assetCode, 		sii.brand,		sii.assetName,
+            sii.classificationName, sii.categoryName,	sii.uom,  
+            0 AS stockIN,
+            sum(quantity) AS equipmentBorrowing, -- Equipment Borrowing Request Quantity
+            0 AS returnQuantity,
+            0 AS Transferred,
+            '0.00'  AS disposed,
+            0 AS reservedAsset,
+            0 AS materiaWithdrawalQuantity
+            FROM  ims_stock_in_assets_tbl AS sii
+            WHERE sii.equipmentBorrowingID <>0  AND  sii.stockOutDate IS NOT NULL AND sii.inventoryStorageID = ${inventoryStorageID}
+            GROUP BY sii.assetID
+            -- Get Equipment Borrowing Request Quantity in Stock In Assets Table
+            UNION ALL
+
+
+            SELECT 
+            "" AS barcode,sii.itemID as assetID, 			sii.itemCode as assetCode, 		sii.Brand as brand,		sii.itemName as assetName,
+            sii.classificationName, sii.categoryName,	sii.uom,  
+            0 AS stockIN,
+            0 AS equipmentBorrowing,
+            SUM(borrowedQuantity) AS returnQuantity, -- Return Quantity 
+            0 AS Transferred,
+            '0.00'  AS disposed,
+            0 AS reservedAsset,
+            0 AS materiaWithdrawalQuantity
+            FROM  ims_inventory_request_details_tbl AS sii
+            LEFT JOIN ims_return_item_tbl AS returnHeader 
+            ON  returnHeader.returnItemID = sii.returnItemID
+            WHERE sii.returnItemID <>0   AND
+            returnHeader.returnItemStatus = 2
+            GROUP BY sii.returnItemID
+            -- Get Return Quantity in Stock In Assets Table
+            UNION ALL
+
+            SELECT 
+            "" AS barcode,idd.assetID, 			idd.assetCode, 		idd.brand,		idd.assetName,
+            idd.assetClassification as classificationName, idd.assetCategory as categoryName,	idd.unitOfMeasurement AS uom,  
+            0 AS stockIN,
+            0 AS equipmentBorrowing,
+            0 returnQuantity,
+            0 AS Transferred,
+            SUM(quantity)  AS disposed, -- Disposed Quantity
+            0 AS reservedAsset,
+            0 AS materiaWithdrawalQuantity
+            FROM  ims_inventory_disposal_details_tbl AS idd
+            LEFT JOIN ims_inventory_disposal_tbl AS  id ON idd.disposalID = id.disposalID
+            WHERE  id.disposalStatus =2  
+            GROUP BY idd.assetID
+            -- Get Disposed Quantity in  Inventory Disposal Details Table
+            UNION ALL
+
+            SELECT "" AS barcode, sii.assetID, 		assetCode AS assetCode, 	assetBrandName AS  brand,	assetBrandName AS assetName,
+            assetClassification AS classificationName, 	assetCategory as categoryName,	assetCategory AS  uom,  
+            0 AS stockIN,
+            0 AS equipmentBorrowing,
+            0 AS returnQuantity,
+            0 AS Transferred,
+            '0.00'  AS disposed,
+            SUM(sii.requestQuantity) AS reservedAsset, -- Reserved Asset
+            0 AS materiaWithdrawalQuantity
+            FROM  ims_request_assets_tbl AS sii
+            LEFT JOIN ims_inventory_validation_tbl AS iiv ON sii.inventoryValidationID = iiv.inventoryValidationID
+            WHERE  sii.inventoryValidationID IS NOT NULL AND bidRecapID IS NULL AND iiv.inventoryValidationStatus = 2 AND reservedAsset IS NOT NULL
+            GROUP BY sii.assetID
+            -- Get Reserved Asset in Request Asset Table 
+            UNION ALL
+
+            SELECT 
+            "" AS barcode, mww.assetID, 0 AS assetCode, 0 AS brand, 0 AS assetName,
+            0 AS classificationName, 0 AS categoryName,
+            0 AS uom,  0 AS stockIN,
+            0 AS equipmentBorrowing,
+            0 AS returnQuantity,
+            0 AS Transferred,
+            '0.00'  AS disposed,
+            0 AS reservedAsset,
+            SUM(mww.received) AS materiaWithdrawalQuantity  -- Withdrawn Quantity
+            FROM  ims_material_withdrawal_tbl AS mw
+            LEFT JOIN ims_material_withdrawal_asset_tbl AS mww ON mw.materialWithdrawalID = mww.materialWithdrawalID 
+            WHERE  mw.inventoryAssetStatus = 9 AND mww.assetID IS NOT NULL
+            GROUP BY mww.assetID
+            -- Get Withdrawn Quantity in Material Withdrawal Table 
+        ) w
+        WHERE w.assetCode IS NOT NULL
+        GROUP BY assetID
+        )i
+        LEFT JOIN ims_inventory_asset_tbl AS iii ON i.assetID = iii.assetID
+       
+        GROUP BY i.assetID
+        )l GROUP BY assetID`,
+
+        `barcode,assetID, assetCode, brand, assetName, classificationName, categoryName, uom, totalequipmentBorrowing,
+        stockIN,equipmentBorrowing, ROUND(Transferred,2) AS Transferred, returnQuantity, ROUND(disposed,2) AS disposed, reservedAsset,reserved,materiaWithdrawalQuantity,IF(ROUND(available,2) <0,0,ROUND(available,2))  AS available,
+        ROUND(reOrderLevel,2) AS reOrderLevel, ROUND((available+ IFNULL(reOrderLevel,0) + reservedAsset),2) AS totalQuantity`
+        );
+
 
     return result;
 }
@@ -1261,7 +1416,7 @@ let html = `        <div class="row clearfix row-deck">
                                     <div class="icon"><i class="fas fa-inventory"></i> </div>
                                     <div class="content">
                                         <div class="text mb-2 text-uppercase">PENDING STOCK IN</div>
-                                        <h4 class="number mb-0">${formatAmount(countStockIn || 0)}</h4>
+                                        <h4 class="number mb-0">${countStockIn || 0}</h4>
                                     </div>
                                 </div>
                             </div>
@@ -1303,7 +1458,7 @@ let html = `        <div class="row clearfix row-deck">
                                 
                                     
                                 
-                                <div class="card-body table table-responsive ">
+                                <div class="card-body table">
                                     <table class="table table-bordered table-striped" id="tableReservedItems">
                                         <thead>
                                             <tr style="white-space: nowrap">
@@ -1350,11 +1505,11 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6">
                             <div class="card">
                                     <div class="card-header w-100 bg-primary text-white text-left">
-                                        <h6 class="font-weight-bold">TOTAL NO OF ASSET</h6>
+                                        <h6 class="font-weight-bold">TOTAL NO. OF ASSET</h6>
                                     </div>
 
                                 
-                                <div class="card-body table table-responsive ">
+                                <div class="card-body table">
 
                                 <div id="filterContent">
                                     ${filteringOptions()}

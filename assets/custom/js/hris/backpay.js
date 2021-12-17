@@ -165,14 +165,14 @@ function initDataTables() {
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0,  width: 100 },
-                { targets: 1,  width: 150 },
-                { targets: 2,  width: 120 },
-                { targets: 3,  width: 250 },
-                { targets: 4,  width: 150 },
-                { targets: 5,  width: 250 },
+                { targets: 1,  width: 300 },
+                { targets: 2,  width: 300 },
+                { targets: 3,  width: 300 },
+                { targets: 4,  width: 200 },
+                { targets: 5,  width: 300 },
                 { targets: 6,  width: 80  },
                 { targets: 7,  width: 80  },
-                { targets: 8,  width: 220 },
+                { targets: 8,  width: 300 },
             ],
         });
 
@@ -187,14 +187,14 @@ function initDataTables() {
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0,  width: 100 },
-                { targets: 1,  width: 150 },
-                { targets: 2,  width: 120 },
-                { targets: 3,  width: 250 },
-                { targets: 4,  width: 150 },
-                { targets: 5,  width: 250 },
+                { targets: 1,  width: 300 },
+                { targets: 2,  width: 300 },
+                { targets: 3,  width: 300 },
+                { targets: 4,  width: 200 },
+                { targets: 5,  width: 300 },
                 { targets: 6,  width: 80  },
                 { targets: 7,  width: 80  },
-                { targets: 8,  width: 220 },
+                { targets: 8,  width: 300 },
             ],
         });
 
@@ -327,8 +327,7 @@ function forApprovalContent() {
 
         backPayApprovalData.map((item) => {
         let {
-            fullname,
-            backpayfullname,
+          
             backPayID,
             backPayCode,
             backPayDescription,
@@ -339,7 +338,9 @@ function forApprovalContent() {
             approversStatus,
             backPayRemarks,
             submittedAt,
-            createdAt
+            createdAt,
+            employeeID,
+            backPayEmployeeID
         } = item;
 
         let remarks       = backPayRemarks ? backPayRemarks : "-";
@@ -363,8 +364,12 @@ function forApprovalContent() {
             html += `
             <tr class="${btnClass}" id="${encryptString(backPayID)}">
                 <td>${backPayCode}</td>
-                <td>${backpayfullname}</td>
-                <td>${fullname}</td>
+                <td><div>${employeeBackPayFullname}</div>
+                <small>${employeeBackPayDepartment} | ${employeeBackPayDesignation}</small>
+                </td>
+                <td><div>${employeePerparedFullname}</div>
+                <small>${employeeDepartment} | ${employeeDesignation}</small>
+                </td>
                 <td>${backPayDescription || "-"}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, backPayStatus, true))}
@@ -427,7 +432,7 @@ function myFormsContent() {
 
     backPayData.map((item) => {
         let {
-            fullname,
+            
             backpayfullname,
             backPayID,
             backPayCode,
@@ -439,7 +444,9 @@ function myFormsContent() {
             approversStatus,
             backPayRemarks,
             submittedAt,
-            createdAt
+            createdAt,
+            employeeID,
+            backPayEmployeeID
         } = item;
         let remarks       = backPayRemarks ? backPayRemarks : "-";
         let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
@@ -448,6 +455,21 @@ function myFormsContent() {
         if (dateApproved !== "-") {
             dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
         }
+
+            // ----- GET EMPLOYEE DATA -----
+    let {
+        fullname:    employeePerparedFullname    = "",
+        department:  employeeDepartment  = "",
+        designation: employeeDesignation = "",
+    } = employeeData(item ? employeeID : sessionID);
+
+
+    let {
+        fullname:    employeeBackPayFullname    = "",
+        department:  employeeBackPayDepartment  = "",
+        designation: employeeBackPayDesignation = "",
+    } = employeeData(item ? backPayEmployeeID : 0);
+
 
         let button = backPayStatus != 0 ? `
         <button class="btn btn-view w-100 btnView" id="${encryptString(backPayID)}"><i class="fas fa-eye"></i> View</button>` : `
@@ -461,8 +483,12 @@ function myFormsContent() {
         html += `
         <tr class="${btnClass}" id="${encryptString(backPayID)}">
             <td>${backPayCode || "-"}</td>
-            <td>${backpayfullname}</td>
-            <td>${fullname}</td>
+            <td><div>${employeeBackPayFullname}</div>
+            <small>${employeeBackPayDepartment} | ${employeeBackPayDesignation}</small>
+            </td>
+            <td><div>${employeePerparedFullname}</div>
+            <small>${employeeDepartment} | ${employeeDesignation}</small>
+            </td>
             <td>${backPayDescription || "-"}</td>
             <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, backPayStatus, true))}
@@ -495,7 +521,7 @@ function computeTotalAmount(){
     var tmpTotalAmount = 0;
 
     $(`[name="backPayAmount"]`).each(function(){
-        var tmpAmountRow = $(this).val().replaceAll(",","");
+        var tmpAmountRow = $(this).text() ? $(this).text().replaceAll("₱","").replaceAll(",","") : $(this).val().replaceAll("₱","").replaceAll(",","");
         tmpTotalAmount += parseFloat(tmpAmountRow) || 0;
 
         $(".computecredit").text(formatAmount(tmpTotalAmount,true));
@@ -718,7 +744,7 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
                                 <div name="otherReference">${salaryReleaseCode || "-"}</div>
                             </td>
                             <td>
-                            <div class="amount text-right" name="backPayAmount">${formatAmount(amount)}</div>
+                            <div class=" text-right" name="backPayAmount">${formatAmount(amount,true)}</div>
                             </td>
                         </tr>`;
                 }
@@ -731,7 +757,7 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
                                 <div name="otherReference">${monthCode || "-"}</div>
                             </td>
                             <td>
-                            <div class="amount text-right" name="backPayAmount">${formatAmount(amount)}</div>
+                            <div class=" text-right" name="backPayAmount">${formatAmount(amount,true)}</div>
                             </td>
                         </tr>`;
                 }
@@ -744,7 +770,7 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
                                 <div name="otherReference">${ otherReference || "-"}</div>
                             </td>
                             <td>
-                            <div class="amount text-right" name="backPayAmount">${formatAmount(amount)}</div>
+                            <div class=" text-right" name="backPayAmount">${formatAmount(amount,true)}</div>
                             </td>
                         </tr>`;
                 }
@@ -760,7 +786,7 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
                                 <div name="otherReference">${salaryReleaseCode || "-"}</div>
                             </td>
                             <td>
-                            <div class="amount text-right" name="backPayAmount">${formatAmount(amount)}</div>
+                            <div class=" text-right" name="backPayAmount">${formatAmount(amount,true)}</div>
                             </td>
                         </tr>`;
                 }
@@ -773,7 +799,7 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
                                 <div name="otherReference">${monthCode || "-"}</div>
                             </td>
                             <td>
-                            <div class="amount text-right" name="backPayAmount">${formatAmount(amount)}</div>
+                            <div class=" text-right" name="backPayAmount">${formatAmount(amount,true)}</div>
                             </td>
                         </tr>`;
                 }
@@ -804,7 +830,7 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
                                     max="999999" 
                                     minlength="1" 
                                     maxlength="20"
-                                    value="${formatAmount(amount)}"
+                                    value="${formatAmount(amount,true)}"
                                     required>
                             </div>
                             <div class="d-block invalid-feedback" id="invalid-backPayAmount"></div>
@@ -825,36 +851,39 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
         //     <td colspan="3">No data available in table</td>
         // </tr>`
 
-        othersContent += `
-        <tr class="itemTableRow" backPayID="${backPayID}" salaryReleaseID="0" monthID="0" othersAmountStatus="1">
-            <td><small><button class="btn btn-primary btn-sm btnDeleteRow"><i class="fas fa-minus"></i></button></small></td>
-            <td>
-               <div class="form-group mb-0">
-                    <input 
-                    class="form-control validate" 
-                    name="otherReference" 
-                    id="otherReference" 
-                    data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
-                    required>
-                    <div class="d-block invalid-feedback" id="invalid-otherReference"></div>
+        if (!readOnly) {
+
+            othersContent += `
+            <tr class="itemTableRow" backPayID="${backPayID}" salaryReleaseID="0" monthID="0" othersAmountStatus="1">
+                <td><small><button class="btn btn-primary btn-sm btnDeleteRow"><i class="fas fa-minus"></i></button></small></td>
+                <td>
+                <div class="form-group mb-0">
+                        <input 
+                        class="form-control validate" 
+                        name="otherReference" 
+                        id="otherReference" 
+                        data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                        required>
+                        <div class="d-block invalid-feedback" id="invalid-otherReference"></div>
+                    </div>
+                </td>
+                <td>
+                <div class="form-group  mb-0">
+                    <input type="text" 
+                        class="form-control amount text-right" 
+                        name="backPayAmount"
+                        id="backPayAmount"
+                        min="0.01" 
+                        max="999999" 
+                        minlength="1" 
+                        maxlength="20"
+                        required>
                 </div>
-            </td>
-            <td>
-            <div class="form-group  mb-0">
-                <input type="text" 
-                    class="form-control amount text-right" 
-                    name="backPayAmount"
-                    id="backPayAmount"
-                    min="0.01" 
-                    max="999999" 
-                    minlength="1" 
-                    maxlength="20"
-                    required>
+                <div class="d-block invalid-feedback" id="invalid-backPayAmount"></div>
             </div>
-            <div class="d-block invalid-feedback" id="invalid-backPayAmount"></div>
-        </div>
-            </td>
-        </tr>`;
+                </td>
+            </tr>`;
+        }
     }
 
     return [salaryContent,monthProcessContent,othersContent];
@@ -941,7 +970,7 @@ $(document).on("click", ".btnDeleteRow", function(){
 
 // ---- KEY UP FOR TOTAL AMOUNT ---//
 $(document).on("keyup",`[name="backPayAmount"]`,function(){
-    console.log("1")
+    
     computeTotalAmount();
 })
 // ---- KEY UP FOR TOTAL AMOUNT ---//
@@ -1853,7 +1882,8 @@ function getApproversStatus(approversID, approversStatus, approversDate) {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-const title = "Back Pay";
+const title = "BACKPAY PROCESS";
+const releaseTitle = "EMPLOYEE BACKPAY";
 let swalText, swalImg;
 
 $("#modal_inventory_receiving").text().length > 0 && $("#modal_inventory_receiving").modal("hide");
@@ -1871,12 +1901,12 @@ switch (method) {
         break;
     case "approve":
         swalTitle = `APPROVE ${title.toUpperCase()}`;
-        swalText  = "Are you sure to approve this document?";
+        swalText  = "Are you sure to approve this processing of backpay?";
         swalImg   = `${base_url}assets/modal/approve.svg`;
         break;
     case "deny":
         swalTitle = `DENY ${title.toUpperCase()}`;
-        swalText  = "Are you sure to deny this document?";
+        swalText  = "Are you sure to deny this processing of backpay?";
         swalImg   = `${base_url}assets/modal/reject.svg`;
         break;
     case "cancelform":
@@ -1890,8 +1920,8 @@ switch (method) {
         swalImg   = `${base_url}assets/modal/drop.svg`;
         break;
     case "release":
-        swalTitle = `RELEASE ${title.toUpperCase()}`;
-        swalText  = "Are you sure to release this document?";
+        swalTitle = `RELEASE ${releaseTitle.toUpperCase()}`;
+        swalText  = "Are you sure that you want to release this employee's backpay?";
         swalImg   = `${base_url}assets/modal/approve.svg`;
         break;
     default:

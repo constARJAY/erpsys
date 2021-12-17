@@ -1,0 +1,117 @@
+body {
+    font-size: 14px;
+}
+
+.container {
+    padding: 0 .5rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.font-weight-bold {
+    font-weight: bold;
+}
+
+/* .line-break {
+    height: 3px;
+    border-top: 1px dotted grey;
+} */
+
+/* ----- CARD ----- */
+.card {
+    height: 42vh;
+    padding: 4vh 0;
+}
+
+.card.line-break {
+    border-bottom: 1px dotted grey;
+}
+
+.card .card-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 0 8px;
+    position: relative;
+}
+
+.card .card-header img {
+    width: 200px;
+    height: 40px;
+}
+
+.card .card-header .card-title {
+    text-align: center;
+}
+
+.card .card-header .card-title .address {
+    font-size: .7rem;
+}
+
+.card .card-header .card-title .contact {
+    font-size: .75rem;
+}
+
+.card .card-header .card-title .title {
+    font-size: 0.9rem;
+    margin-top: 15px;
+}
+
+.card .card-header .document-number {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #dc3450;
+    font-size: 1.15rem;
+    font-weight: bolder;
+}
+/* ----- END CARD ----- */
+
+
+/* ----- TABLE ----- */
+.table-parent {
+    margin-top: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .5rem;
+    white-space: wrap;
+}
+
+table tr th,
+table tr td {
+    border: 1px solid grey;
+    padding: 2px;
+}
+
+table thead tr th {
+    /* height: 80px; */
+}
+/* ----- END TABLE ----- */
+
+
+
+@media print {
+    @page {
+        size:  auto; 
+        margin: 0; 
+        size: landscape;
+    }
+}

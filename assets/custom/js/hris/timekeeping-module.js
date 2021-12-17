@@ -373,7 +373,7 @@ $(document).ready(function() {
             if (isImCurrentApprover(approversID, approversDate, timekeepingStatus) || isAlreadyApproved(approversID, approversDate)) {
                 html += `
                 <tr class="${btnClass}" id="${encryptString(timekeepingID )}">
-                    <td>${getFormCode("TK", createdAt, timekeepingID )}</td>
+                    <td>${getFormCode("TMK", createdAt, timekeepingID )}</td>
                     <td>${fullname}</td>
                     <td>${timekeepingDate}</td>
                     <td>
@@ -472,7 +472,7 @@ $(document).ready(function() {
 
 			html += `
 			<tr class="${btnClass}" id="${encryptString(timekeepingID )}">
-                <td>${getFormCode("TK", createdAt, timekeepingID )}</td>
+                <td>${getFormCode("TMK", createdAt, timekeepingID )}</td>
                 <td>${fullname}</td>
                 <td>${timekeepingDate}</td>
                 <td>
@@ -520,7 +520,7 @@ $(document).ready(function() {
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						timekeepingID="${encryptString(timekeepingID)}"
-						code="${getFormCode("TK", createdAt, timekeepingID)}"
+						code="${getFormCode("TMK", createdAt, timekeepingID)}"
 						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
@@ -532,7 +532,7 @@ $(document).ready(function() {
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							timekeepingID="${encryptString(timekeepingID)}"
-							code="${getFormCode("TK", createdAt, timekeepingID)}"
+							code="${getFormCode("TMK", createdAt, timekeepingID)}"
 							revise="${isRevise}"
 							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -543,7 +543,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							timekeepingID="${encryptString(timekeepingID)}"
-							code="${getFormCode("TK", createdAt, timekeepingID)}"
+							code="${getFormCode("TMK", createdAt, timekeepingID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -558,7 +558,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							timekeepingID="${encryptString(timekeepingID)}"
-							code="${getFormCode("TK", createdAt, timekeepingID)}"
+							code="${getFormCode("TMK", createdAt, timekeepingID)}"
 							status="${timekeepingStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -571,7 +571,7 @@ $(document).ready(function() {
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
 						timekeepingID="${encryptString(timekeepingID)}"
-						code="${getFormCode("TK", createdAt, timekeepingID)}"
+						code="${getFormCode("TMK", createdAt, timekeepingID)}"
 						status="${timekeepingStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
@@ -584,7 +584,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							timekeepingID="${encryptString(timekeepingID)}"
-							code="${getFormCode("TK", createdAt, timekeepingID)}"
+							code="${getFormCode("TMK", createdAt, timekeepingID)}"
 							status="${timekeepingStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
@@ -597,7 +597,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							timekeepingID="${encryptString(timekeepingID)}"
-							code="${getFormCode("TK", createdAt, timekeepingID)}"
+							code="${getFormCode("TMK", createdAt, timekeepingID)}"
 							status="${timekeepingStatus}"
 							cancel="true"><i class="fas fa-clone"></i>
 							Revise
@@ -612,14 +612,14 @@ $(document).ready(function() {
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							timekeepingID="${encryptString(timekeepingID)}"
-							code="${getFormCode("TK", createdAt, timekeepingID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("TMK", createdAt, timekeepingID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							timekeepingID="${encryptString(timekeepingID)}"
-							code="${getFormCode("TK", createdAt, timekeepingID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("TMK", createdAt, timekeepingID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -1049,7 +1049,8 @@ $(document).ready(function() {
 				attendanceHTML += `
 				<tr employeeID="${encryptString(employeeID)}"
 					fullname="${fullname}"
-					code="${code}">
+					code="${code}"
+					workingDays="${totalNoDays}">
 					<td>
 						<div class="d-flex justify-content-start align-items-center">
 							<img class="rounded-circle" 
@@ -1144,7 +1145,7 @@ $(document).ready(function() {
 								<th class="thSummary">Basic Hours</th>
 								<th class="thSummary">Overtime Hours</th>
 								<th class="thSummary">Rest Day</th>
-								<th class="thSummary">No. of Days</th>
+								<th class="thSummary">No. of Working Days</th>
 							</tr>
 						</thead>
 						<tbody id="tableTimekeepingTbody">
@@ -1192,7 +1193,7 @@ $(document).ready(function() {
 
 
 	// ----- FILTER DISPLAY -----
-	function filterDisplay(timekeepingID, startDate, endDate, timesheetDate) {
+	function filterDisplay(timekeepingID, startDate, endDate, timesheetDate, cutOff) {
 
 		let firstCutOff = 0, secondCutOff = 0, thirdCutOff = 0, fourthCutOff = 0;
 
@@ -1244,8 +1245,11 @@ $(document).ready(function() {
 			cutoffHTML += `
 			<option value="${cutoffID}"
 				start="${start}"
-				end="${end}">${cutoffName}</option>`;
+				end="${end}"
+				${cutoffID == cutOff ? "selected" : ""}>${cutoffName}</option>`;
 		})
+
+		let monthYear = moment(startDate || new Date).format("YYYY-MM");
 
 		let html = `
 		<div class="col-12">
@@ -1259,8 +1263,8 @@ $(document).ready(function() {
 								<div class="row">
 									<div class="col-md-3 col-sm-12 align-self-center text-right">
 										<i><a href="${base_url}assets/format/TimesheetFormat.csv"
-											class="text-warning border-bottom pb-1"
 											target="_blank"
+											class="text-warning border-bottom pb-1"
 											donwload="TimesheetFormat.csv">
 											TimesheetFormat.csv
 										</a></i>
@@ -1294,7 +1298,7 @@ $(document).ready(function() {
 								class="form-control" 
 								name="monthYear"
 								id="monthYear"
-								value="${moment().format("YYYY-MM")}"
+								value="${monthYear}"
 								required>
 							<div class="d-block invalid-feedback" id="invalid-monthYear"></div>
 						</div>
@@ -1305,6 +1309,7 @@ $(document).ready(function() {
 							<select class="form-control select2 validate"
 								id="cutoff"
 								name="cutoff"
+								style="width: 100%"
 								required>
 								<option value="" selected disabled>Select cut-off</option>
 								${cutoffHTML}
@@ -1327,7 +1332,8 @@ $(document).ready(function() {
 						</div>
 					</div>
 					<div class="col-md-3 col-sm-12 text-left">
-						<div class="form-group mb-0 mt-4">
+						<div class="form-group">
+							<label>&nbsp;</label>
 							<button class="btn btn-primary w-100 py-2"
 								id="btnSearch"
 								timekeepingID="${timekeepingID}"
@@ -1355,6 +1361,7 @@ $(document).ready(function() {
 			employeeID            = "",
             timekeepingStartDate  = "",
 			timekeepingEndDate    = "",
+			cutOff                = "",
 			timekeepingReason     = "",
 			timekeepingRemarks    = "",
 			approversID           = "",
@@ -1398,7 +1405,7 @@ $(document).ready(function() {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("TK", createdAt, reviseDocumentNo)}
+						${getFormCode("TMK", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1496,9 +1503,9 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                         minlength="1"
-                        maxlength="200"
+                        maxlength="325"
                         id="timekeepingReason"
                         name="timekeepingReason"
                         required
@@ -1510,7 +1517,7 @@ $(document).ready(function() {
             </div>
 
 			<div class="col-12 row pr-0" id="filterDisplay">
-				${timekeepingStatus == 0 || (timekeepingStatus == 4 && isRevise) ? filterDisplay(timekeepingID, startDate, endDate, timesheetDate) : ""}
+				${timekeepingStatus == 0 || (['3','4'].includes(timekeepingStatus) && isRevise) ? filterDisplay(timekeepingID, startDate, endDate, timesheetDate, cutOff) : ""}
 			</div>
 
             <div class="col-sm-12 mt-3">
@@ -1633,6 +1640,7 @@ $(document).ready(function() {
 		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
 			
 			data["employeeID"] = sessionID;
+			data["cutOff"]     = $(`[name="cutoff"]`).val();;
 			data["timekeepingReason"] = $("[name=timekeepingReason]").val()?.trim();
 			data["timekeepingStartDate"] = $("#btnSearch").attr("start");
 			data["timekeepingEndDate"]   = $("#btnSearch").attr("end");
@@ -1658,7 +1666,8 @@ $(document).ready(function() {
 			}
 
 			$("#tableTimekeeping tbody tr").each(function() {
-				const employeeID = decryptString($(this).attr("employeeID"));
+				const employeeID  = decryptString($(this).attr("employeeID"));
+				const workingDays = $(this).attr("workingDays");
 
 				$("td a.viewAttendance", this).each(function() {
 					const scheduleDate          = $(this).attr("scheduleDate");
@@ -1696,6 +1705,7 @@ $(document).ready(function() {
 
 					let temp = { 
 						employeeID,
+						workingDays,
 						scheduleDate,    
 						scheduleIn,      
 						scheduleOut,     
@@ -1956,7 +1966,7 @@ $(document).ready(function() {
 				<tr>
 					<td class="text-left text-primary  p-1 m-2 font-weight-bold">Regular Hours: </td>
 					<td class="text-right p-1 m-2 " style="font-style: italic">
-						<div>${getTimeFormat(totalHours, leaveDuration, leaveID, leaveReference, "leave")}</div>
+						<div>${getTimeFormat(basicHours, leaveDuration, leaveID, leaveReference, "leave")}</div>
 					</td>
 				</tr>
 				<tr>
@@ -1968,7 +1978,7 @@ $(document).ready(function() {
 				<tr>
 					<td class="text-left  p-1 m-2 font-weight-bold">Night Differential: </td>
 					<td class="text-right p-1 m-2 " style="font-style: italic">
-						<div>${getTimeFormat(nightDifferential)}</div>
+						<div>${totalHours > 0 ? getTimeFormat(nightDifferential) : "-----"}</div>
 					</td>
 				</tr>
 			</tbody>
@@ -2131,7 +2141,8 @@ $(document).ready(function() {
 	$(document).on("change", `[name="timesheetFile"]`, function() {
 		if (this.files && this.files[0]) {
 			const filename = this.files[0].name;
-			const extension = filename.split(".")[1];
+			let extension = filename.split(".");
+				extension = extension[extension.length - 1];
             const filesize = this.files[0].size/1024/1024; // Size in MB
             const filetype = this.files[0].type;
             if (filesize > 10) {
@@ -2184,7 +2195,7 @@ $(document).ready(function() {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("TK", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
@@ -2231,7 +2242,7 @@ $(document).ready(function() {
 		const id       = decryptString($(this).attr("timekeepingID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("TK", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getTimekeepingData(action, "save", "0", id);
 		data["timekeepingStatus"] = 0;
@@ -2257,6 +2268,7 @@ $(document).ready(function() {
 		let monthYear = $(`[name="monthYear"]`).val();
 		let monthYearArr = monthYear.split('-');
 
+		let cutOff      = $(`[name="cutoff"]`).val();
 		let cutOffStart = +$(`[name="cutoff"] option:selected`).attr("start");
 		let cutOffEnd   = +$(`[name="cutoff"] option:selected`).attr("end");
 
@@ -2269,9 +2281,15 @@ $(document).ready(function() {
 			return temp.length == 1 ? `0${num}` : num;
 		}
 
-		let year = monthYearArr[0];
-		let firstMonth  = +monthYearArr[1];
-		let secondMonth = cutOffStart > cutOffEnd ? (firstMonth == 12 ? 1 : firstMonth+1) : firstMonth;
+		let year  = monthYearArr[0];
+		let month = +monthYearArr[1];
+
+		let firstMonth  = month;
+		let secondMonth = cutOffStart > cutOffEnd ? (month == 12 ? 1 : month+1) : month;
+		if (cutOff == 1) {
+			firstMonth  = cutOffStart > cutOffEnd ? (month  - 1) : month;
+			secondMonth = month;
+		}
 
 		let start = `${year}-${transformDate(firstMonth)}-${transformDate(cutOffStart)}`;
 		let end   = `${year}-${transformDate(secondMonth)}-${transformDate(cutOffEnd)}`;
@@ -2335,7 +2353,7 @@ $(document).ready(function() {
 				if (employeeID != sessionID) {
 					notificationData = {
 						moduleID:                109,
-						notificationTitle:       "Timekeeping Module",
+						notificationTitle:       "Timekeeping Process",
 						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 						notificationType:        2,
 						employeeID,
@@ -2366,7 +2384,7 @@ $(document).ready(function() {
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
 		const id       = decryptString($(this).attr("timekeepingID"));
-		const feedback = $(this).attr("code") || getFormCode("TK", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
 		let tableData  = getTableData("hris_timekeeping_tbl", "", "timekeepingID = " + id);
 
 		if (tableData) {
@@ -2387,7 +2405,7 @@ $(document).ready(function() {
 				notificationData = {
 					moduleID:                109,
 					tableID:                 id,
-					notificationTitle:       "Timekeeping Module",
+					notificationTitle:       "Timekeeping Process",
 					notificationDescription: `${feedback}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
@@ -2397,7 +2415,7 @@ $(document).ready(function() {
 				notificationData = {
 					moduleID:                109,
 					tableID:                 id,
-					notificationTitle:       "Timekeeping Module",
+					notificationTitle:       "Timekeeping Process",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
@@ -2415,7 +2433,7 @@ $(document).ready(function() {
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
 		const id       = decryptString($(this).attr("timekeepingID"));
-		const feedback = $(this).attr("code") || getFormCode("TK", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
 
 		$("#modal_timekeeping_module_content").html(preloader);
 		$("#modal_timekeeping_module .page-title").text("DENY TIMEKEEPING");
@@ -2425,7 +2443,7 @@ $(document).ready(function() {
 			<div class="form-group">
 				<label>Remarks <code>*</code></label>
 				<textarea class="form-control validate"
-					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+					data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
 					minlength="2"
 					maxlength="250"
 					id="timekeepingRemarks"
@@ -2447,7 +2465,7 @@ $(document).ready(function() {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("timekeepingID"));
-		const feedback = $(this).attr("code") || getFormCode("TK", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
 
 		const validate = validateForm("modal_timekeeping_module");
 		if (validate) {
@@ -2684,17 +2702,17 @@ $(document).ready(function() {
 	
 								let swalTitle;
 								if (method == "submit") {
-									swalTitle = `${getFormCode("TK", dateCreated, insertedID)} submitted successfully!`;
+									swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} submitted successfully!`;
 								} else if (method == "save") {
-									swalTitle = `${getFormCode("TK", dateCreated, insertedID)} saved successfully!`;
+									swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} saved successfully!`;
 								} else if (method == "cancelform") {
-									swalTitle = `${getFormCode("TK", dateCreated, insertedID)} cancelled successfully!`;
+									swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} cancelled successfully!`;
 								} else if (method == "approve") {
-									swalTitle = `${getFormCode("TK", dateCreated, insertedID)} approved successfully!`;
+									swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} approved successfully!`;
 								} else if (method == "deny") {
-									swalTitle = `${getFormCode("TK", dateCreated, insertedID)} denied successfully!`;
+									swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} denied successfully!`;
 								} else if (method == "drop") {
-									swalTitle = `${getFormCode("TK", dateCreated, insertedID)} dropped successfully!`;
+									swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} dropped successfully!`;
 								}	
 				
 								if (isSuccess == "true") {

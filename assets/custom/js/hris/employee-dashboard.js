@@ -416,10 +416,12 @@ function attendanceChart(startYear = moment().format("YYYY"),endYear = moment().
             let getExistMonth = moment(scheduleDate).format("MMMM");
 
             if(monthList[loop] == getExistMonth ){
-                lateData[loop] =lates; 
+                lateData[loop] = parseFloat(lates) || 0; 
             }
             else{
-                lateData[loop] = 0;
+                if(lateData[loop] == undefined){
+                    lateData[loop] = 0;
+                }
             }
     
         })
@@ -433,10 +435,13 @@ function attendanceChart(startYear = moment().format("YYYY"),endYear = moment().
             let getExistMonth = moment(scheduleDate).format("MMMM");
 
             if(monthList[loop] == getExistMonth ){
-                presentData[loop] =present; 
+                presentData[loop] =parseFloat(present) || 0; 
             }
             else{
+                if(presentData[loop] == undefined){
                 presentData[loop] = 0;
+                    
+                }
             }
     
         })
@@ -450,10 +455,12 @@ function attendanceChart(startYear = moment().format("YYYY"),endYear = moment().
             let getExistMonth = moment(scheduleDate).format("MMMM");
 
             if(monthList[loop] == getExistMonth ){
-                absentData[loop] =absent; 
+                absentData[loop] =parseFloat(absent) || 0; 
             }
             else{
+                if(absentData[loop] == undefined){
                 absentData[loop] = 0;
+                }
             }
     
         })
@@ -524,12 +531,22 @@ function attendanceChart(startYear = moment().format("YYYY"),endYear = moment().
         options
     );
 
-    setTimeout(() => {
-    chart.render();
+    if (chart.ohYeahThisChartHasBeenRendered) {
+        chart.destroy();
+        chart.ohYeahThisChartHasBeenRendered = false;
+    }
+
+    $("#apex-basic-column").html('');
+        setTimeout(() => {
+        chart.render().then(() => chart.ohYeahThisChartHasBeenRendered = true);
+        }, 500);
+
+    // setTimeout(() => {
+    // chart.render();
      
-    }, 300);
+    // }, 300);
     
-    chart.destroy();
+    // chart.destroy();
 
 }
 
@@ -600,40 +617,40 @@ function myFormsContent() {
 
 
     let html = `<div class="row clearfix row-deck">
-    <div class="col-lg-3 col-md-6 col-sm-6">
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
         <div class="card top_widget">
             <div class="body">
                 <div class="icon"><i class="fas fa-book-open"></i> </div>
                 <div class="content">
-                    <div class="text mb-2 text-uppercase">Pending Production Report</div>
+                    <div class="text mb-2 text-uppercase">FOR APPROVAL PRODUCTION REPORT</div>
                     <h4 class="number mb-0">${countPendingReport[0].pendingProduction || 0}</h4>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 col-sm-6">
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
         <div class="card top_widget">
             <div class="body">
                 <div class="icon"><i class="fas fa-user-clock"></i> </div>
                 <div class="content">
-                    <div class="text mb-2 text-uppercase">Pending Leave Request</div>
+                    <div class="text mb-2 text-uppercase">FOR APPROVAL LEAVE REQUEST</div>
                     <h4 class="number mb-0">${countPendingLeave[0].pendingleaves || 0}</h4>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 col-sm-6">
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
         <div class="card top_widget">
             <div class="body">
                 <div class="icon"><i class="fas fa-stopwatch"></i> </div>
                 <div class="content">
-                    <div class="text mb-2 text-uppercase">Pending Overtime Request</div>
+                    <div class="text mb-2 text-uppercase">FOR APPROVAL OVERTIME REQUEST</div>
                     <h4 class="number mb-0">${countPendingOvertmine[0].pendingovertime || 0}</h4>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 col-sm-6">
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
         <div class="card top_widget">
             <div class="body">
                 <div class="icon"><i class="fas fa-briefcase"></i> </div>
@@ -696,18 +713,17 @@ function myFormsContent() {
                         eventCalendarName,
                         eventDate
                     } = event;
-                    html+=`<div class="row mt-1">
-                                <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2">
-                                    <div class="square rounded bg-secondary" style="
-                                                            padding: 10px;
-                                                            width: min-content;
-                                                        "><small class="text-white font-weight-bolder m-0">${(moment(eventDate).format('MMM')).toUpperCase()}<h1
-                                                class="text-white font-weight-bolder">${moment(eventDate).format('DD')}</h1></small></div>
-                                </div>
-                                <div class="col-sm-10 col-md-10 col-lg-10 col-xl-10">
-                                    <h6 class="font-weight-bolder ">${eventCalendarName}</h6>
-                                </div>
-                            </div>`;
+
+                    html+=`<div class="container card"  style="box-shadow:none !important;">
+                                            <div class=" text-center mb-2 d-flex">
+                                                <div class=" square rounded bg-secondary" style="
+                                                                        padding: 10px;
+                                                                        width: min-content;
+                                                                    "><small class="text-white font-weight-bolder m-0">${(moment(eventDate).format('MMM')).toUpperCase()}
+                                                                    <h1 class="text-white font-weight-bolder">${moment(eventDate).format('DD')}</h1></small></div>
+                                                                    <h6 class="font-weight-bolder p-0 pl-1 pt-3" style="width: fit-content;">${eventCalendarName}</h6>
+                                            </div>
+                                        </div>`;
                 })
             }else{
                 html +=`<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
@@ -742,21 +758,19 @@ function myFormsContent() {
                         taskStatus,
                         projectMilestoneName,
                     } = task;
-                     html +=`<div class="row mt-1">
-                     <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2">
-                         <div class="square rounded bg-secondary" style="
-                                                 padding: 10px;
-                                                 width: min-content;
-                                             "><small class="text-white font-weight-bolder m-0">${(moment(taskStartDate).format('MMM')).toUpperCase()}<h1
-                                     class="text-white font-weight-bolder">${moment(taskStartDate).format('DD')}</h1></small></div>
-                     </div>
-                     <div class="col-sm-10 col-md-10 col-lg-10 col-xl-10">
-                         <div>
-                             <h6 class="font-weight-bolder ">${projectMilestoneName}</h6>
-                         </div>
-                         <small>${phaseCode} | ${taskName}</small>
-                     </div>
-                 </div>`;
+                 
+
+                 html+=`<div class="container card"  style="box-shadow:none !important;">
+                            <div class=" text-center mb-2 d-flex">
+                                <div class=" square rounded bg-secondary" style="
+                                                        padding: 10px;
+                                                        width: min-content;
+                                                    "><small class="text-white font-weight-bolder m-0">${(moment(taskStartDate).format('MMM')).toUpperCase()}
+                                                    <h1 class="text-white font-weight-bolder">${moment(taskStartDate).format('DD')}</h1></small></div>
+                                                    <h6 class="font-weight-bolder p-0 pl-1 pt-3" style="width: fit-content;"> <small class="float-left ml-1">${phaseCode} | ${taskName}</small><br>${projectMilestoneName}</h6>
+
+                            </div>
+                        </div>`;
                  })
     
                  subTask.map((subTask) =>{
@@ -768,21 +782,18 @@ function myFormsContent() {
                         subTaskStatus,
                         projectMilestoneName,
                     } = subTask;
-                     html +=`<div class="row mt-1">
-                     <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2">
-                         <div class="square rounded bg-secondary" style="
-                                                 padding: 10px;
-                                                 width: min-content;
-                                             "><small class="text-white font-weight-bolder m-0">${(moment(subTaskStartDates).format('MMM')).toUpperCase()}<h1
-                                     class="text-white font-weight-bolder">${moment(subTaskStartDates).format('DD')}</h1></small></div>
-                     </div>
-                     <div class="col-sm-10 col-md-10 col-lg-10 col-xl-10">
-                         <div>
-                             <h6 class="font-weight-bolder ">${projectMilestoneName}</h6>
-                         </div>
-                         <small>${phaseCode} | ${subTaskName}</small>
-                     </div>
-                 </div>`;
+
+                 html+=`<div class="container card"  style="box-shadow:none !important;">
+                            <div class=" text-center mb-2 d-flex">
+                                <div class=" square rounded bg-secondary" style="
+                                                        padding: 10px;
+                                                        width: min-content;
+                                                    "><small class="text-white font-weight-bolder m-0">${(moment(subTaskStartDates).format('MMM')).toUpperCase()}
+                                                    <h1 class="text-white font-weight-bolder">${moment(subTaskStartDates).format('DD')}</h1></small></div>
+                                                    <h6 class="font-weight-bolder p-0 pl-1 pt-3" style="width: fit-content;">${projectMilestoneName}</h6>
+                                                    <small>${phaseCode} | ${subTaskName}</small>
+                            </div>
+                        </div>`;
                  })
              }else{
 

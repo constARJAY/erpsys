@@ -55,7 +55,7 @@ $(document).ready(function() {
 	}
 
 	function initCustomAmount(element = null, displayPrefix = false) {
-		let elem = getElement(element, ".custom-amount");
+		let elem = getElement(element, ".amount");
 		$(elem).inputmask({
 			alias: "currency",
 			prefix: displayPrefix ? "₱ " : "",
@@ -665,7 +665,7 @@ $(document).ready(function() {
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						payrollAdjustmentID="${encryptString(payrollAdjustmentID)}"
-						code="${getFormCode("PA", createdAt, payrollAdjustmentID)}"
+						code="${getFormCode("PRA", createdAt, payrollAdjustmentID)}"
 						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
@@ -677,7 +677,7 @@ $(document).ready(function() {
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							payrollAdjustmentID="${encryptString(payrollAdjustmentID)}"
-							code="${getFormCode("PA", createdAt, payrollAdjustmentID)}"
+							code="${getFormCode("PRA", createdAt, payrollAdjustmentID)}"
 							revise="${isRevise}"
 							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -688,7 +688,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							payrollAdjustmentID="${encryptString(payrollAdjustmentID)}"
-							code="${getFormCode("PA", createdAt, payrollAdjustmentID)}"
+							code="${getFormCode("PRA", createdAt, payrollAdjustmentID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -703,7 +703,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							payrollAdjustmentID="${encryptString(payrollAdjustmentID)}"
-							code="${getFormCode("PA", createdAt, payrollAdjustmentID)}"
+							code="${getFormCode("PRA", createdAt, payrollAdjustmentID)}"
 							status="${payrollAdjustmentStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -716,7 +716,7 @@ $(document).ready(function() {
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
 						payrollAdjustmentID="${encryptString(payrollAdjustmentID)}"
-						code="${getFormCode("PA", createdAt, payrollAdjustmentID)}"
+						code="${getFormCode("PRA", createdAt, payrollAdjustmentID)}"
 						status="${payrollAdjustmentStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
@@ -730,7 +730,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							payrollAdjustmentID="${encryptString(payrollAdjustmentID)}"
-							code="${getFormCode("PA", createdAt, payrollAdjustmentID)}"
+							code="${getFormCode("PRA", createdAt, payrollAdjustmentID)}"
 							status="${payrollAdjustmentStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
@@ -764,7 +764,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							payrollAdjustmentID="${encryptString(payrollAdjustmentID)}"
-							code="${getFormCode("PA", createdAt, payrollAdjustmentID)}"
+							code="${getFormCode("PRA", createdAt, payrollAdjustmentID)}"
 							status="${payrollAdjustmentStatus}"
 							cancel="true"><i class="fas fa-clone"></i>
 							Revise
@@ -779,14 +779,14 @@ $(document).ready(function() {
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							payrollAdjustmentID="${encryptString(payrollAdjustmentID)}"
-							code="${getFormCode("PA", createdAt, payrollAdjustmentID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("PRA", createdAt, payrollAdjustmentID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							payrollAdjustmentID="${encryptString(payrollAdjustmentID)}"
-							code="${getFormCode("PA", createdAt, payrollAdjustmentID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("PRA", createdAt, payrollAdjustmentID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -816,6 +816,7 @@ $(document).ready(function() {
 		GLOBAL_ADJUSTMENT_ITEMS.map(item => {
 			let {
 				employeeID,
+				employeeCode,
 				fullname,
 				payrollAdjustmentItemID,
 				holidayPay           = 0,
@@ -834,6 +835,7 @@ $(document).ready(function() {
 
 			html += `
 			<option value="${employeeID}"
+				employeeCode="${employeeCode}"
 				payrollAdjustmentItemID="${payrollAdjustmentItemID}"
 				holidayPay           = "${holidayPay}",
 				overtimePay          = "${overtimePay}",
@@ -919,11 +921,14 @@ $(document).ready(function() {
 				</td>
 				<td style="z-index: 2;">
 					<div class="form-group mb-0">
-						<select class="form-control select2"
-							name="employeeID">
+						<select class="form-control validate select2"
+							name="employeeID"
+							required>
 							<option selected disabled>Select employee</option>
 							${getEmployeeListOptions(employeeID)}
 						</select>
+						<small class="employeeCode"></small>
+						<div class="d-block invalid-feedback"></div>
 					</div>
 				</td>
 				<td style="z-index: 1;">
@@ -946,29 +951,44 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="holidayAdjustment"
+								value="${formatAmount(holidayAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="holidayAdjustment"
-							value="${formatAmount(holidayAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="holidayRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${holidayRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="holidayRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${holidayRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
 					<div class="input-group">
@@ -990,29 +1010,41 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="overtimeAdjustment"
+								value="${formatAmount(overtimeAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="overtimeAdjustment"
-							value="${formatAmount(overtimeAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="overtimeRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${overtimeRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="overtimeRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${overtimeRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
 					<div class="input-group">
@@ -1034,29 +1066,41 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="nightDifferentialAdjustment"
+								value="${formatAmount(nightDifferentialAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="nightDifferentialAdjustment"
-							value="${formatAmount(nightDifferentialAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="nightDifferentialRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${nightDifferentialRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="nightDifferentialRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${nightDifferentialRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
 					<div class="input-group">
@@ -1078,29 +1122,41 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="allowanceAdjustment"
+								value="${formatAmount(allowanceAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="allowanceAdjustment"
-							value="${formatAmount(allowanceAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="allowanceRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${allowanceRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="allowanceRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${allowanceRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
 					<div class="input-group">
@@ -1122,29 +1178,41 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="lateUndertimeAdjustment"
+								value="${formatAmount(lateUndertimeAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="lateUndertimeAdjustment"
-							value="${formatAmount(lateUndertimeAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="lateUndertimeRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${lateUndertimeRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="lateUndertimeRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${lateUndertimeRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
 					<div class="input-group">
@@ -1166,29 +1234,40 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
-						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="lwopAdjustment"
-							value="${formatAmount(lwopAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="lwopAdjustment"
+								value="${formatAmount(lwopAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
 					</div>
-					<textarea class="form-control"
-						name="lwopRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${lwopRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="lwopRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${lwopRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
 					<div class="input-group">
@@ -1210,29 +1289,41 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="sssAdjustment"
+								value="${formatAmount(sssAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="sssAdjustment"
-							value="${formatAmount(sssAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="sssRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${sssRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="sssRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${sssRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
 					<div class="input-group">
@@ -1254,29 +1345,41 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="phicAdjustment"
+								value="${formatAmount(phicAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="phicAdjustment"
-							value="${formatAmount(phicAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="phicRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${phicRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="phicRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${phicRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
 					<div class="input-group">
@@ -1298,29 +1401,41 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="hdmfAdjustment"
+								value="${formatAmount(hdmfAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="hdmfAdjustment"
-							value="${formatAmount(hdmfAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="hdmfRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${hdmfRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="hdmfRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${hdmfRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
 					<div class="input-group">
@@ -1342,29 +1457,41 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="withHoldingAdjustment"
+								value="${formatAmount(withHoldingAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="withHoldingAdjustment"
-							value="${formatAmount(withHoldingAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="withHoldingRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${withHoldingRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="withHoldingRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${withHoldingRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
 					<div class="input-group">
@@ -1386,54 +1513,78 @@ $(document).ready(function() {
 							</span>
 						</div>
 					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="loanAdjustment"
+								value="${formatAmount(loanAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="loanAdjustment"
-							value="${formatAmount(loanAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="loanRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${loanRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="loanRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${loanRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 				<td style="z-index: 1;">
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input type="text" 
+								class="form-control text-right amount"
+								allow-minus="true"
+								min="-99000"
+								max="99000" 
+								name="otherAdjustment"
+								value="${formatAmount(otherAdjustment)}">
+							<div class="input-group-append">
+								<span class="input-group-text">
+									<i class="fal fa-info-circle" 
+										style="color:#007bff;" 
+										data-toggle="tooltip" 
+										title="Adjustment" 
+										data-original-title="Adjustment"></i>
+								</span>
+							</div>
 						</div>
-						<input type="text" 
-							class="form-control text-right custom-amount" 
-							name="otherAdjustment"
-							value="${formatAmount(otherAdjustment)}">
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Adjustment" 
-									data-original-title="Adjustment"></i>
-							</span>
-						</div>
+						<div class="d-block invalid-feedback"></div>
 					</div>
-					<textarea class="form-control"
-						name="otherRemarks"
-						rows="3"
-						placeholder="Notes..."
-						style="resize: none;">${otherRemarks || ""}</textarea>
+					<div class="form-group mb-0">
+						<textarea class="form-control validate"
+							minlength="2"
+							maxlength="725"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							name="otherRemarks"
+							rows="3"
+							placeholder="Notes..."
+							style="resize: none;">${otherRemarks || ""}</textarea>
+						<div class="d-block invalid-feedback"></div>
+					</div>
 				</td>
 			</tr>`;
 		} else {
@@ -1858,7 +2009,7 @@ $(document).ready(function() {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("PA", createdAt, reviseDocumentNo)}
+						${getFormCode("PRA", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1970,9 +2121,9 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
-                        minlength="1"
-                        maxlength="200"
+                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                        minlength="2"
+                        maxlength="325"
                         id="payrollAdjustmentReason"
                         name="payrollAdjustmentReason"
                         required
@@ -2236,6 +2387,7 @@ $(document).ready(function() {
 				.map(item => {
 					let {
 						employeeID,
+						employeeCode,
 						fullname,
 						payrollAdjustmentItemID,
 						holidayPay           = 0,
@@ -2254,6 +2406,7 @@ $(document).ready(function() {
 
 					html += `
 					<option value="${employeeID}"
+						employeeCode="${employeeCode}"
 						payrollAdjustmentItemID = "${payrollAdjustmentItemID}"
 						holidayPay           = "${holidayPay}"
 						overtimePay          = "${overtimePay}"
@@ -2339,7 +2492,7 @@ $(document).ready(function() {
 		$(`#tablePayrollAdjustment tbody`).append(row);
 		updateTableAdjustment();
 		updateEmployeeOptions();
-		$(`#tablePayrollAdjustment tbody tr:last .custom-amount`).each(function() {
+		$(`#tablePayrollAdjustment tbody tr:last .amount`).each(function() {
 			let elementID = `#${this.id}`;
 			initCustomAmount(elementID);
 		});
@@ -2405,7 +2558,7 @@ $(document).ready(function() {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("PA", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("PRA", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
@@ -2471,7 +2624,7 @@ $(document).ready(function() {
 		const id       = decryptString($(this).attr("payrollAdjustmentID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("PA", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PRA", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getPayrollAdjustmentData(action, "save", "0", id);
 		data["payrollAdjustmentStatus"] = 0;
@@ -2496,6 +2649,7 @@ $(document).ready(function() {
 	$(document).on("change", `[name="employeeID"]`, function() {
 		$parent = $(this).closest("tr");
 
+		let employeeCode         = $(`option:selected`, this).attr("employeeCode");
 		let holidayPay           = $(`option:selected`, this).attr("holidayPay");
 		let overtimePay          = $(`option:selected`, this).attr("overtimePay");
 		let nightDifferentialPay = $(`option:selected`, this).attr("nightDifferentialPay");
@@ -2509,6 +2663,7 @@ $(document).ready(function() {
 		let loanPay              = $(`option:selected`, this).attr("loanPay");
 		let otherPay             = $(`option:selected`, this).attr("otherPay");
 
+		$parent.find(`.employeeCode`).text(employeeCode || "-");
 		$parent.find(`[name="holidayPay"]`).val(formatAmount(holidayPay));
 		$parent.find(`[name="overtimePay"]`).val(formatAmount(overtimePay));
 		$parent.find(`[name="nightDifferentialPay"]`).val(formatAmount(nightDifferentialPay));
@@ -2631,7 +2786,7 @@ $(document).ready(function() {
 							let insertedID  = result[2];
 							let dateCreated = result[3];
 
-							let code = getFormCode("PA", dateCreated, insertedID);
+							let code = getFormCode("PRA", dateCreated, insertedID);
 
 							if (isSuccess == "true") {
 								$("#loader").hide();
@@ -2711,7 +2866,7 @@ $(document).ready(function() {
 	// ----- BUTTON APPROVE -----
 	$(document).on("click", "#btnApprove", function () {
 		const id       = decryptString($(this).attr("payrollAdjustmentID"));
-		const feedback = $(this).attr("code") || getFormCode("PA", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PRA", dateToday(), id);
 		let tableData  = getTableData("hris_payroll_adjustment_tbl", "", "payrollAdjustmentID = " + id);
 
 		if (tableData) {
@@ -2760,7 +2915,7 @@ $(document).ready(function() {
 	// ----- BUTTON REJECT -----
 	$(document).on("click", "#btnReject", function () {
 		const id       = decryptString($(this).attr("payrollAdjustmentID"));
-		const feedback = $(this).attr("code") || getFormCode("PA", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PRA", dateToday(), id);
 
 		$("#modal_payroll_adjustment_content").html(preloader);
 		$("#modal_payroll_adjustment .page-title").text("DENY PAYROLL ADJUSTMENT");
@@ -2792,7 +2947,7 @@ $(document).ready(function() {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("payrollAdjustmentID"));
-		const feedback = $(this).attr("code") || getFormCode("PA", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PRA", dateToday(), id);
 
 		const validate = validateForm("modal_payroll_adjustment");
 		if (validate) {
@@ -2914,17 +3069,17 @@ $(document).ready(function() {
 	
 								let swalTitle;
 								if (method == "submit") {
-									swalTitle = `${getFormCode("PA", dateCreated, insertedID)} submitted successfully!`;
+									swalTitle = `${getFormCode("PRA", dateCreated, insertedID)} submitted successfully!`;
 								} else if (method == "save") {
-									swalTitle = `${getFormCode("PA", dateCreated, insertedID)} saved successfully!`;
+									swalTitle = `${getFormCode("PRA", dateCreated, insertedID)} saved successfully!`;
 								} else if (method == "cancelform") {
-									swalTitle = `${getFormCode("PA", dateCreated, insertedID)} cancelled successfully!`;
+									swalTitle = `${getFormCode("PRA", dateCreated, insertedID)} cancelled successfully!`;
 								} else if (method == "approve") {
-									swalTitle = `${getFormCode("PA", dateCreated, insertedID)} approved successfully!`;
+									swalTitle = `${getFormCode("PRA", dateCreated, insertedID)} approved successfully!`;
 								} else if (method == "deny") {
-									swalTitle = `${getFormCode("PA", dateCreated, insertedID)} denied successfully!`;
+									swalTitle = `${getFormCode("PRA", dateCreated, insertedID)} denied successfully!`;
 								} else if (method == "drop") {
-									swalTitle = `${getFormCode("PA", dateCreated, insertedID)} dropped successfully!`;
+									swalTitle = `${getFormCode("PRA", dateCreated, insertedID)} dropped successfully!`;
 								}	
 				
 								if (isSuccess == "true") {

@@ -19,7 +19,7 @@
         {
         $CI             =& get_instance();
         $sessionID      = $CI->session->has_userdata('adminSessionID') ? $CI->session->userdata('adminSessionID') : 0;
-        $userQuery      = $CI->db->query("SELECT CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) AS fullname FROM hris_employee_list_tbl");
+        $userQuery      = $CI->db->query("SELECT CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) AS fullname FROM hris_employee_list_tbl WHERE employeeID = '$sessionID'");
         $userResult     = $userQuery->result_array();
         $fullname       = $userResult[0]["fullname"];
         $auditColumn    = null;

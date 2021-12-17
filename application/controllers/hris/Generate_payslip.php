@@ -42,9 +42,9 @@ class Generate_payslip extends CI_Controller {
 
         $data = [
             'title'   => 'PRINT PAYSLIP',
+            'company' => $this->generatepayslip->getCompanyProfile(),
             'payslip' => $this->generatepayslip->getEmployeePayslip($payrollID, $idStr),
         ];
-
         return $this->load->view('hris/generate_payslip/print', $data);
     }
 

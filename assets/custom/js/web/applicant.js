@@ -17,8 +17,6 @@ $(document).ready(function() {
             //     `applicantID = ${applicantID}`
             // );
             const applicantData = getProfileData(applicantID);
-                
-
             $("#table_content").html(applicantDisplay(applicantData, applicantID));
             updateTableItems();
             initDashboardDataTables();
@@ -33,71 +31,77 @@ $(document).ready(function() {
                 },
                 maxDate: moment(new Date).format("MMMM DD, YYYY"),
             }
+
             initDateRangePicker("#applicantBirthday", disabledFutureDates);
 
-            if(applicantID){
-                $(`[name=applicantDependentBirthday]`).daterangepicker({
-								singleDatePicker: true,
-								showDropdowns: true,
-								autoApply: true,
-								maxDate: moment(new Date).format("MMMM DD, YYYY"),
-								locale: {
-									format: 'MMMM DD, YYYY'
-								},
-				});
+            // if(applicantID){
+            //     $(`[name=applicantDependentBirthday]`).daterangepicker({
+			// 					singleDatePicker: true,
+			// 					showDropdowns: true,
+			// 					autoApply: true,
+			// 					maxDate: moment(new Date).format("MMMM DD, YYYY"),
+			// 					locale: {
+			// 						format: 'MMMM DD, YYYY'
+			// 					},
+			// 	});
 
-                $(`[name=employmentHistoryFromTo]`).daterangepicker({
-                    singleDatePicker: false,
-                    showDropdowns: true,
-                    autoApply: true,
-                    maxDate: moment(new Date).format("MMMM DD, YYYY"),
-                    locale: {
-                        format: 'MMMM DD, YYYY'
-                    },
-                });
+            //     $(`[name=employmentHistoryFromTo]`).daterangepicker({
+            //         singleDatePicker: false,
+            //         showDropdowns: true,
+            //         autoApply: true,
+            //         maxDate: moment(new Date).format("MMMM DD, YYYY"),
+            //         locale: {
+            //             format: 'MMMM DD, YYYY'
+            //         },
+            //     });
 
-                $(`[name=educationalAttainmentSchoolYear]`).daterangepicker({
-                    singleDatePicker: false,
-                    showDropdowns: true,
-                    autoApply: true,
-                    maxDate: moment(new Date).format("YYYY"),
-                    locale: {
-                        format: 'YYYY'
-                    },
-                });
+            //     $(`[name=educationalAttainmentSchoolYear]`).daterangepicker({
+            //         singleDatePicker: false,
+            //         showDropdowns: true,
+            //         autoApply: true,
+            //         maxDate: moment(new Date).format("YYYY"),
+            //         locale: {
+            //             format: 'YYYY'
+            //         },
+            //     });
+                // $(`[name=organizationJoinedFromTo]`).each(function(){
+                //     let thisTableID = $(this).attr("id");
+                //     let thisValue   = $(this).val();
+                //     $(`#${thisTableID}`).daterangepicker({
+                //         singleDatePicker: false,
+                //         showDropdowns: true,
+                //         autoApply: true,
+                //         maxDate: moment(new Date).format("YYYY"),
+                //         locale: {
+                //             format: 'YYYY'
+                //         },
+                //     });
+                //     $(this).val(thisValue);
+                // });
+                    
 
-                $(`[name=organizationJoinedFromTo]`).daterangepicker({
-                    singleDatePicker: false,
-                    showDropdowns: true,
-                    autoApply: true,
-                    maxDate: moment(new Date).format("YYYY"),
-                    locale: {
-                        format: 'YYYY'
-                    },
-                });
+            //     $(`[name=examTakenDate]`).daterangepicker({
+            //         singleDatePicker: false,
+            //         showDropdowns: true,
+            //         autoApply: true,
+            //         maxDate: moment(new Date).format("MMMM DD, YYYY"),
+            //         locale: {
+            //             format: 'MMMM DD, YYYY'
+            //         },
+            //     });
 
-                $(`[name=examTakenDate]`).daterangepicker({
-                    singleDatePicker: false,
-                    showDropdowns: true,
-                    autoApply: true,
-                    maxDate: moment(new Date).format("MMMM DD, YYYY"),
-                    locale: {
-                        format: 'MMMM DD, YYYY'
-                    },
-                });
+            //     $(`[name=seminarTakenDate]`).daterangepicker({
+            //         singleDatePicker: false,
+            //         showDropdowns: true,
+            //         autoApply: true,
+            //         maxDate: moment(new Date).format("MMMM DD, YYYY"),
+            //         locale: {
+            //             format: 'YYYY'
+            //         },
+            //     });
 
-                $(`[name=seminarTakenDate]`).daterangepicker({
-                    singleDatePicker: false,
-                    showDropdowns: true,
-                    autoApply: true,
-                    maxDate: moment(new Date).format("MMMM DD, YYYY"),
-                    locale: {
-                        format: 'YYYY'
-                    },
-                });
-
-                initAmount();
-            }
+            //     initAmount();
+            // }
 
 
 
@@ -362,7 +366,18 @@ $(document).ready(function() {
             }else if(sidebarID=="appliedjob"){
                 const appliedJobsData = getTableData( `web_applicant_job_tbl AS appJob
                                                        INNER JOIN hris_job_posting_tbl as postJob ON postJob.jobID = appJob.jobID
-                                                      `, `*, DATE_FORMAT(dateApplied, "%M %d, %Y %H:%i:%S") AS 'dateApplied'`, `applicantID = ${applicantID}` );
+                                                       LEFT JOIN pms_personnel_requisition_tbl AS pprt ON postJob.requisitionID = pprt.requisitionID
+                                                      `, 
+                                                      `*, 
+                                                        DATE_FORMAT(dateApplied, "%M %d, %Y %H:%i:%S") AS 'dateApplied', 
+                                                            (SELECT designationName FROM hris_designation_tbl WHERE designationID = pprt.designationID ) AS jobTitle, 
+                                                                CASE
+                                                                    WHEN personnelOption = '1' THEN 'Permanent'
+                                                                    WHEN personnelOption = '2' THEN 'Non-Permanent'
+                                                                    WHEN personnelOption = '3' THEN 'Other Justifications'
+                                                                END as jobType,
+                                                            salaryPackage as salaryRange`, 
+                                                        `applicantID = ${applicantID}` );
               
                 $("#table_content").html(appliedJobsTab(appliedJobsData));
                 initAppliedDataTables();
@@ -1023,8 +1038,8 @@ $(document).ready(function() {
                         <label>Email Address <code>*</code></label>
                         <input type="email"
                             class="form-control validate"
-                            data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][@][_]"
-                            minlength="2"
+                            data-allowcharacters="[a-z][A-Z][0-9][[.][,][-][()]['][/][@][_]]"
+                            minlength="5"
                             maxlength="100"
                             name="applicantEmail"
                             id="applicantEmail"
@@ -1179,7 +1194,7 @@ $(document).ready(function() {
             </div>
             
             <div class="form-group col-md-3 col-sm-12">
-                <label>Subdivision Name <code>*</code></label> 
+                <label>Subdivision Name</label> 
                 <input type="text"
                     class="form-control validate"
                     name="applicantSubdivision"
@@ -1188,7 +1203,6 @@ $(document).ready(function() {
                     minlength="2"
                     maxlength="75"
                     autocomplete="off"
-                    required
                     value="${applicantSubdivision || ""}">
                 <div class="invalid-feedback d-block" id="invalid-applicantSubdivision"></div>
             </div>
@@ -1449,7 +1463,7 @@ $(document).ready(function() {
                                 </th>
                                 <th>Name</th>
                                 <th>Relationship</th>
-                                <th>Birthday</th>
+                                <th>Birthdate</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1512,8 +1526,8 @@ $(document).ready(function() {
                             class="form-control inputmask"
                             mask="999-999-9"
                             data-allowcharacters="[0-9]"
-                            minlength="7"
-                            maxlength="7"
+                            minlength="9"
+                            maxlength="9"
                             name="applicantPRC"
                             id="applicantPRC"
                             value="${applicationPRC}"
@@ -1532,9 +1546,24 @@ $(document).ready(function() {
                             autocomplete="off">
                         <div class="d-block invalid-feedback"></div>
                     </div>
+                    
+                    <div class="col-md-4 col-sm-12 form-group">
+                        <label>SSS No.</label>
+                        <input type="text"
+                            class="form-control inputmask"
+                            mask="99-9999999-9"
+                            maxlength="12"
+                            minlength="12"
+                            data-allowcharacters="[0-9]"
+                            name="applicantSSS"
+                            id="applicantSSS"
+                            value="${applicantSSS}"
+                            autocomplete="off">
+                        <div class="d-block invalid-feedback"></div>
+                    </div>
 
                     <div class="col-md-4 col-sm-12  form-group">
-                        <label>Tax Identification No. (TIN)</label>
+                        <label>Tax Identification No.</label>
                         <input type="text"
                             class="form-control inputmask"
                             maxlength="11"
@@ -1548,31 +1577,29 @@ $(document).ready(function() {
                         <div class="d-block invalid-feedback"></div>
                     </div>
 
-                    <div class="col-md-4 col-sm-12 form-group">
-                        <label>Social Security System ID (SSS ID)</label>
+                    <div class="col-md-4 col-sm-12  form-group">
+                        <label>Philippine Identification Card</label>
                         <input type="text"
-                            class="form-control inputmask"
-                            mask="99-9999999-9"
-                            maxlength="12"
-                            minlength="12"
-                            data-allowcharacters="[0-9]"
-                            name="applicantSSS"
-                            id="applicantSSS"
-                            value="${applicantSSS}"
+                            class="form-control validate"
+                            data-allowcharacters="[0-9][P][S][N][-]"
+                            placeholder="PSN-0000-0000000-0"
+                            maxlength="18"
+                            minlength="18"
+                            name="applicantPHIL"
+                            id="applicantPHIL"
+                            value="${applicantPHIL|| ""}"
                             autocomplete="off">
                         <div class="d-block invalid-feedback"></div>
                     </div>
+
                     <div class="col-md-4 col-sm-12 form-group">
-                        <label>Philippine Health Insurance Corporation ID (PhilHealth ID)</label>
+                        <label>NHMF</label>
                         <input type="text"
-                            class="form-control inputmask"
-                            mask="99-999999999-9"
-                            data-allowcharacters="[0-9]"
-                            maxlength="13"
-                            minlength="13"
-                            name="applicantPhilHealth"
-                            id="applicantPhilHealth"
-                            value="${applicantPhilHealth}"
+                            class="form-control validate"
+                            data-allowcharacters="[0-9][-]"
+                            name="applicantNHNF"
+                            id="applicantNHNF"
+                            value="${applicantNHNF || ""}"
                             autocomplete="off">
                         <div class="d-block invalid-feedback"></div>
                     </div>
@@ -1591,33 +1618,22 @@ $(document).ready(function() {
                             autocomplete="off">
                         <div class="d-block invalid-feedback"></div>
                     </div>
-                    
-                    <div class="col-md-4 col-sm-12  form-group">
-                        <label>Philippine Identification Card</label>
+
+                    <div class="col-md-4 col-sm-12 form-group">
+                        <label>PhilHealth ID</label>
                         <input type="text"
-                            class="form-control validate"
-                            data-allowcharacters="[0-9][P][S][N][-]"
-                            placeholder="PSN-0000-0000000-0"
-                            maxlength="18"
-                            minlength="18"
-                            name="applicantPHIL"
-                            id="applicantPHIL"
-                            value="${applicantPHIL}"
+                            class="form-control inputmask"
+                            mask="99-999999999-9"
+                            data-allowcharacters="[0-9]"
+                            maxlength="14"
+                            minlength="14"
+                            name="applicantPhilHealth"
+                            id="applicantPhilHealth"
+                            value="${applicantPhilHealth}"
                             autocomplete="off">
                         <div class="d-block invalid-feedback"></div>
                     </div>
 
-                    <div class="col-md-4 col-sm-12 form-group">
-                        <label>National Home Mortgage Finance Corporation (NHMF)</label>
-                        <input type="text"
-                            class="form-control validate"
-                            data-allowcharacters="[0-9][-]"
-                            name="applicantNHNF"
-                            id="applicantNHNF"
-                            value="${applicantNHNF}"
-                            autocomplete="off">
-                        <div class="d-block invalid-feedback"></div>
-                    </div>
                 </div>
             </div>
             
@@ -1751,8 +1767,8 @@ $(document).ready(function() {
                             class="form-control validate"
                             name="applicantUsername"
                             id="applicantUsername"
-                            data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][@][_][ ]"
-                            minlength="2"
+                            data-allowcharacters="[a-z][A-Z][0-9][-][_]"
+                            minlength="5"
                             maxlength="75"
                             required
                             title="Username"
@@ -1772,8 +1788,8 @@ $(document).ready(function() {
                             class="form-control validate"
                             name="applicantPassword"
                             id="applicantPassword"
-                            data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][@][_][ ]"
-                            minlength="2"
+                            data-allowcharacters="[a-z][A-Z][0-9][-][_]"
+                            minlength="5"
                             maxlength="75"
                             required
                             value="${applicantPassword}">
@@ -1797,8 +1813,8 @@ $(document).ready(function() {
                             class="form-control"
                             name="applicantConfirmPassword"
                             id="applicantConfirmPassword"
-                            data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][@][_][ ]"
-                            minlength="2"
+                            data-allowcharacters="[a-z][A-Z][0-9][-][_]"
+                            minlength="5"
                             maxlength="75"
                             required
                             value="${applicantPassword}">
@@ -1851,7 +1867,7 @@ $(document).ready(function() {
                                 <th>School Year <code>*</code></th>
                                 <th>Name of School <code>*</code></th>
                                 <th>Course <code>*</code></th>
-                                <th>Extracurricular Activities <code>*</code></th>
+                                <th>Extracurricular Activities</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1891,7 +1907,7 @@ $(document).ready(function() {
         if(data && data.length != "0"){
             tableRow = "";
             data.map((organizationData, index)=>{
-                tableRow += getTableRow("tableOrganizationJoinedTab", organizationData);
+                tableRow += getTableRow("tableOrganizationJoinedTab", organizationData,index);
             });
         }
         
@@ -2279,7 +2295,7 @@ $(document).ready(function() {
             <button class="btn btn-save px-5 p-2" 
                 id="btnUpdate" 
                 style="margin:auto; width:250px;">
-                <i class="fas fa-save"></i> Save Changes
+                <i class="fas fa-save"></i> Update
             </button>` : `
             <button class="btn btn-save px-5 p-2" 
                 id="btnSave"   
@@ -2369,8 +2385,8 @@ $(document).ready(function() {
                                 <input type="text" 
                                     tabindex="1" 
                                     class="form-control login-input validate" 
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][@][_][ ]"
-                                    minlength="2"
+                                    data-allowcharacters="[a-z][A-Z][0-9][-][_]"
+                                    minlength="5"
                                     maxlength="75"
                                     id="applicantUsername" 
                                     name="applicantUsername"
@@ -2387,7 +2403,7 @@ $(document).ready(function() {
                                     tabindex="1" 
                                     class="form-control login-input validate" 
                                     data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][@][_]"
-                                    minlength="2"
+                                    minlength="5"
                                     maxlength="100"
                                     id="applicantEmail"
                                     name="applicantEmail"
@@ -2404,7 +2420,7 @@ $(document).ready(function() {
                                 <input type="password" 
                                     tabindex="2" 
                                     class="form-control login-input validate" 
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][@][_][ ]"
+                                    data-allowcharacters="[a-z][A-Z][0-9][-][_]"
                                     minlength="2"
                                     maxlength="75"
                                     id="applicantPassword"
@@ -2459,12 +2475,12 @@ $(document).ready(function() {
         data.map((applied, index) => {
             var statusText = '', statusBadge = '';
             // 0 = PENDING
-        // 1 = FOR REVIEW
-        // 2 = WAITLISTED
-        // 3 = CANCELLED
-        // 4 = PASSED
-        // 5 = FAILED
-        // 6 = RE-EVALUATE
+            // 1 = FOR REVIEW
+            // 2 = WAITLISTED
+            // 3 = CANCELLED
+            // 4 = PASSED
+            // 5 = FAILED
+            // 6 = RE-EVALUATE
 
                  if(applied.appJobStatus==0){ statusText='PENDING'; statusBadge='warning'}
             else if(applied.appJobStatus==1){ statusText='FOR REVIEW'; statusBadge='info'}
@@ -2542,7 +2558,7 @@ $(document).ready(function() {
 
 
     // ----- GET TABLE ROW -----
-    function getTableRow(table = "", data = false) {
+    function getTableRow(table = "", data = false, index = 0) {
         let html = "";
         if (table) {
             switch(table) {
@@ -2685,15 +2701,20 @@ $(document).ready(function() {
                         </td>
                         <td>
                             <div class="form-group mb-0">
-                                <input type="text"
-                                    class="form-control amount"
-                                    name="employmentHistorySalary"
-                                    data-allowcharacters="[a-z][A-Z][0-9][_][-]['][,][()][ ]"
-                                    minlength="2"
-                                    maxlength="50"
-                                    autocomplete="off"
-                                    value="${historySalary || ''}">
-                                <div class="d-block invalid-feedback"></div>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₱</span>
+                                    </div>
+                                        <input type="text" class="form-control amount" min="1" max="99999999" 
+                                            data-allowcharacters="[0-9][.]" placeholder="0.00" 
+                                            required="" autocomplete="off" 
+                                            minlength="2"
+                                            maxlength="50" 
+                                            name="employmentHistorySalary" 
+                                            value="${historySalary || ''}" style="text-align: right;">
+                                    <div class="invalid-feedback d-block" id="invalid-feedback"></div>
+
+                                </div>
                             </div>
                         </td>
                     </tr>`;
@@ -2734,9 +2755,9 @@ $(document).ready(function() {
                                     name="educationalAttainmentSchoolName"
                                     data-allowcharacters="[a-z][A-Z][0-9][_][-]['][,][()][ ]"
                                     minlength="2"
-                                    maxlength="50"
+                                    maxlength="100"
                                     autocomplete="off"
-                                    value="${schoolName || "" }">
+                                    value="${schoolName || "" }" required>
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2747,9 +2768,9 @@ $(document).ready(function() {
                                     name="educationalAttainmentCourse"
                                     data-allowcharacters="[a-z][A-Z][0-9][-]['][,][ ][()]"
                                     minlength="2"
-                                    maxlength="50"
+                                    maxlength="100"
                                     autocomplete="off"
-                                    value="${applicantCourse || ""}">
+                                    value="${applicantCourse || ""}" required>
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2784,9 +2805,10 @@ $(document).ready(function() {
                         </td>
                         <td>
                             <div class="form-group mb-0">
-                                <input type="text"
-                                    class="form-control validate"
+                                <input type="button"
+                                    class="form-control validate text-left"
                                     name="organizationJoinedFromTo"
+                                    id="organizationJoinedFromTo${index}"
                                     data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
                                     minlength="2"
                                     maxlength="50"
@@ -2800,6 +2822,7 @@ $(document).ready(function() {
                                 <input type="text"
                                     class="form-control validate"
                                     name="organizationJoinedName"
+                                    id="organizationJoinedName${index}"
                                     data-allowcharacters="[a-z][A-Z][0-9][_][-]['][,][()][ ]"
                                     minlength="2"
                                     maxlength="50"
@@ -2813,6 +2836,7 @@ $(document).ready(function() {
                                 <input type="text"
                                     class="form-control validate"
                                     name="organizationJoinedPosition"
+                                    id="organizationJoinedPosition${index}"
                                     data-allowcharacters="[a-z][A-Z][0-9][_][-]['][,][()][ ]"
                                     minlength="2"
                                     maxlength="50"
@@ -2895,8 +2919,8 @@ $(document).ready(function() {
                         </td>
                         <td>
                             <div class="form-group mb-0">
-                                <input type="text"
-                                    class="form-control validate"
+                                <input type="button"
+                                    class="form-control validate text-left"
                                     name="seminarTakenDate"
                                     data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
                                     minlength="2"
@@ -2957,7 +2981,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="${characterReferenceName || ""}">
+                                    value="${characterReferenceName || ""}" required>
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2970,7 +2994,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="${characterReferencePosition || ""}">
+                                    value="${characterReferencePosition || ""}" required>
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2983,7 +3007,7 @@ $(document).ready(function() {
                                     minlength="2"
                                     maxlength="50"
                                     autocomplete="off"
-                                    value="${characterReferenceCompany || "" }">
+                                    value="${characterReferenceCompany || "" }" required>
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -2998,7 +3022,7 @@ $(document).ready(function() {
                                     maxlength="13"
                                     name="characterReferenceContactNo"
                                     autocomplete="off" 
-                                    value="${characterReferenceNumber || "" }">
+                                    value="${characterReferenceNumber || "" }" required>
                                 <div class="d-block invalid-feedback"></div>
                             </div>
                         </td>
@@ -3137,7 +3161,39 @@ $(document).ready(function() {
             });
 
 
-            $(`[name=organizationJoinedFromTo]`).daterangepicker({
+            $(`[name=organizationJoinedFromTo]`).each(function(){
+                let thisTableID = $(this).attr("id");
+                let thisValue   = $(this).val();
+                $(`#${thisTableID}`).daterangepicker({
+                    singleDatePicker: false,
+                    showDropdowns: true,
+                    autoApply: true,
+                    maxDate: moment(new Date).format("YYYY"),
+                    locale: {
+                        format: 'YYYY'
+                    },
+                });
+                $(this).val(thisValue ? thisValue : `${moment().format("YYYY")} - ${moment().format("YYYY")}`);
+            });
+               
+            // let organizationDate = $(`[name=organizationJoinedFromTo]`).val();
+            // $(`[name=organizationJoinedFromTo]`).daterangepicker({
+            //     singleDatePicker: false,
+            //     showDropdowns: true,
+            //     autoApply: true,
+                
+            //     maxDate: moment(new Date).format("YYYY"),
+            //     locale: {
+            //         format: 'YYYY'
+            //     },
+            // });
+            // $(`[name=organizationJoinedFromTo]`).val(organizationDate);
+
+           
+
+            let seminarTakenDate = $(`[name=seminarTakenDate]`).val();
+
+            $(`[name=seminarTakenDate]`).daterangepicker({
                 singleDatePicker: false,
                 showDropdowns: true,
                 autoApply: true,
@@ -3147,15 +3203,8 @@ $(document).ready(function() {
                 },
             });
 
-            $(`[name=seminarTakenDate]`).daterangepicker({
-                singleDatePicker: false,
-                showDropdowns: true,
-                autoApply: true,
-                maxDate: moment(new Date).format("MMMM DD, YYYY"),
-                locale: {
-                    format: 'YYYY'
-                },
-            });
+            $(`[name=seminarTakenDate]`).val(seminarTakenDate);
+
 
             $(".table-row-employment-history").each(function(){
                 let lastSalary_field = $(this).find("[name=employmentHistorySalary]");
@@ -3176,6 +3225,22 @@ $(document).ready(function() {
                 "tableCharacterReferenceTab"
             ];
             tableArr.map(tbl => updateTableItems(tbl));
+
+            // $(`[name=organizationJoinedFromTo]`).each(function(){
+            //     let thisTableID = $(this).attr("id");
+            //     let thisValue   = $(this).val();
+            //     $(`#${thisTableID}`).daterangepicker({
+            //         singleDatePicker: false,
+            //         showDropdowns: true,
+            //         autoApply: true,
+            //         maxDate: moment(new Date).format("YYYY"),
+            //         locale: {
+            //             format: 'YYYY'
+            //         },
+            //     });
+            //     $(this).val(thisValue ? thisValue : `${moment().format("YYYY")} - ${moment().format("YYYY")}`);
+            // });
+
         }
     }
     // ----- END UPDATE TABLE ITEMS -----
@@ -3253,6 +3318,7 @@ $(document).ready(function() {
             $(`#${table} tr.no-data`).remove();
             $(`#${table} tbody`).append(row);
             updateTableItems(table);
+            initAll();
         }
         // initDashboardDataTables();
     })
@@ -3370,7 +3436,7 @@ $(document).ready(function() {
             formData.append(`employment[${i}][employmentHistoryAddress]`,       $(this).find(`[name=employmentHistoryAddress]`).val() );
             formData.append(`employment[${i}][employmentHistoryPosition]`,      $(this).find(`[name=employmentHistoryPosition]`).val() );
             formData.append(`employment[${i}][employmentHistoryReason]`,        $(this).find(`[name=employmentHistoryReason]`).val() );
-            formData.append(`employment[${i}][employmentHistorySalary]`,        $(this).find(`[name=employmentHistorySalary]`).val() );
+            formData.append(`employment[${i}][employmentHistorySalary]`,        $(this).find(`[name=employmentHistorySalary]`).val().replaceAll(",","") || $(this).find(`[name=employmentHistorySalary]`).val()  );
 
         });
 
@@ -3557,7 +3623,8 @@ $(document).ready(function() {
                                 if (isSuccess=="true" && method=="add") {
                                     window.location.replace(`${base_url}web/applicant/registration_success`);
                                 }else if(isSuccess=="true" && method=="edit"){
-                                    $("#profile").click();
+                                    // $("#profile").click();
+                                    callback &&  callback();
                                 }else{
                                     $("#loader").hide();
                                     $("[name=applicantEmail]").addClass("is-invalid");

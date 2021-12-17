@@ -48,6 +48,18 @@ class ApprovalSetup_model extends CI_Model {
         return $returnData;
     }
 
+    public function updateUndefined(){
+        $undefinedID = [];
+        $sql    = "SELECT approvalID, userAccountID FROM gen_approval_setup_tbl WHERE userAccountID = 'undefined'";
+        $query  = $this->db->query($sql);
+        foreach ($query->result_array() as $key => $value) {
+            array_push($undefinedID, $value["approvalID"]);
+        }
+        $undefinedIDString = join(", ", $undefinedID);
+         
+        $updateSql = "UPDATE gen_approval_setup_tbl SET userAccountID = '0' WHERE approvalID IN ($undefinedIDString)";
+    }
+
 }
 
 /* End of file ApprovalSetup_model.php */

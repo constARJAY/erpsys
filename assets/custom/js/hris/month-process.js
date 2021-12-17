@@ -167,12 +167,12 @@ function initDataTables() {
                 { targets: 0,  width: 100 },
                 { targets: 1,  width: 250 },
                 { targets: 2,  width: 120 },
-                { targets: 3,  width: 250 },
-                { targets: 4,  width: 150 },
-                { targets: 5,  width: 250 },
+                // { targets: 3,  width: 250 },
+                { targets: 3,  width: 150 },
+                { targets: 4,  width: 250 },
+                { targets: 5,  width: 80  },
                 { targets: 6,  width: 80  },
-                { targets: 7,  width: 80  },
-                { targets: 8,  width: 220 },
+                { targets: 7,  width: 220 },
             ],
         });
 
@@ -189,12 +189,12 @@ function initDataTables() {
                 { targets: 0,  width: 100 },
                 { targets: 1,  width: 250 },
                 { targets: 2,  width: 120 },
-                { targets: 3,  width: 250 },
-                { targets: 4,  width: 150 },
-                { targets: 5,  width: 250 },
+                // { targets: 3,  width: 250 },
+                { targets: 3,  width: 150 },
+                { targets: 4,  width: 250 },
+                { targets: 5,  width: 80  },
                 { targets: 6,  width: 80  },
-                { targets: 7,  width: 80  },
-                { targets: 8,  width: 220 },
+                { targets: 7,  width: 220 },
             ],
         });
 
@@ -212,12 +212,13 @@ function initDataTables() {
             info: false,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 50 },
-                { targets: 1,  width: 200 },
-                { targets: 2,  width: 150 },
+                { targets: 0,  width: 10 },
+                { targets: 1,  width: 50 },
+                { targets: 2,  width: 200 },
                 { targets: 3,  width: 150 },
                 { targets: 4,  width: 150 },
-                { targets: 5,  width: 10 },
+                { targets: 5,  width: 150 },
+                
 
             ],
         });
@@ -234,12 +235,13 @@ function initDataTables() {
             scrollCollapse: true,
             sorting: false,
             columnDefs: [
-                { targets: 0,  width: 50 },
-                { targets: 1,  width: 200 },
-                { targets: 2,  width: 150 },
+                { targets: 0,  width: 10 },
+                { targets: 1,  width: 50 },
+                { targets: 2,  width: 200 },
                 { targets: 3,  width: 150 },
                 { targets: 4,  width: 150 },
-                { targets: 5,  width: 10 },
+                { targets: 5,  width: 150 },
+                
               
     
             ],
@@ -310,9 +312,9 @@ function forApprovalContent() {
         <thead>
             <tr style="white-space: nowrap">
                 <th>Document No.</th>
-                <th>Date From - To Period</th>
+                <th>13th Month Pay Range</th>
                 <th>Prepared By</th>
-                <th>Description</th>
+               
                 <th>Current Approver</th>
                 <th>Date</th>
                 <th>Status</th>
@@ -365,7 +367,6 @@ function forApprovalContent() {
             <td>${monthCode || "-"}</td>
             <td>${dateRange}</td>
             <td>${fullname}</td>
-            <td>${monthDescription || "-"}</td>
             <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, monthStatus, true))}
                 </td>
@@ -411,9 +412,8 @@ function myFormsContent() {
         <thead>
             <tr style="white-space: nowrap">
                 <th>Document No.</th>
-                <th>Date From - To Period</th>
+                <th>13th Month Pay Range</th>
                 <th>Prepared By</th>
-                <th>Description</th>
                 <th>Current Approver</th>
                 <th>Date</th>
                 <th>Status</th>
@@ -464,7 +464,6 @@ function myFormsContent() {
             <td>${monthCode || "-"}</td>
             <td>${dateRange}</td>
             <td>${fullname}</td>
-            <td>${monthDescription || "-"}</td>
             <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, monthStatus, true))}
                 </td>
@@ -478,6 +477,7 @@ function myFormsContent() {
             <td>${remarks}</td>
         </tr>`;
     });
+
 
     html += `
         </tbody>
@@ -641,8 +641,8 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 // ----- UPDATE TABLE ROWS -----
 function updateTableRows(){
     $(".itemTableRow").each(function(i){
-        // // CHECKBOX
-        // $("td .action .checkboxassetrow", this).attr("id", `checkboxassetrow${i}`);
+        // CHECKBOX
+        $("td .action .checkboxholdrow", this).attr("id", `checkboxholdrow${i}`);
 
         // INPUTS ID's
         let monthID = 0;
@@ -807,7 +807,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
 					
 			}else{
                 grossPayListData += payrollData.map(payroll => {
-                    totalGrossPayAmount += payroll.grossPay || 0;
+                    totalGrossPayAmount = parseFloat(payroll.grossPay) || 0;
                     return getSerialNumber(payroll, readOnly,monthID,totalGrossPayAmount);
                 }).join("");
 			}
@@ -818,7 +818,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                                 </div>`;
 
             if( monthTotalPayAmount =="" || monthTotalPayAmount ==0){
-                monthTotalPayAmount =(totalGrossPayAmount /(numOfMonths * 2));
+                monthTotalPayAmount =parseFloat(totalGrossPayAmount /(numOfMonths * 2)) || 0;
                 // monthTotalPayAmount = 100;
             }
             
@@ -841,6 +841,11 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
 
               
                 html +=` <tr class="text-center itemTableRow" monthID="${monthID}">
+                <td>
+                <div>
+                  ${statusRowBadge}
+                </div>
+              </td> 
                 <td> <div name="monthemployeeID">${employeeCode || "-"}</div> </td>
                 <td class="text-left">
                     <div>${fullname || "-"}</div>
@@ -858,11 +863,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                     </div>
                 </td>
                 <td class="text-right" name="monthTotalPayAmount">${formatAmount(monthTotalPayAmount || 0,true)}</td> 
-                <td>
-                  <div>
-                    ${statusRowBadge}
-                  </div>
-                </td> 
+              
             </tr>`;
 
                 
@@ -870,6 +871,11 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
             } else {
    
         html +=` <tr class="text-center itemTableRow" monthID="${monthID}" employeeID="${employeeID}">
+                    <td class="text-center">
+                        <div class="action">
+                            <input type="checkbox" class="checkboxrow monthHoldStatus" name="monthHoldStatus" ${ monthHoldStatus == 0 ? "checked" : ""}>
+                        </div>
+                    </td> 
                     <td> <div name="monthemployeeID">${employeeCode || "-"}</div> </td>
                     <td class="text-left">
                         <div>${fullname || "-"}</div>
@@ -887,11 +893,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                         </div>
                     </td>
                     <td class="text-right" name="monthTotalPayAmount">${formatAmount(monthTotalPayAmount,true)}</td> 
-                    <td class="text-center">
-                        <div class="action">
-                            <input type="checkbox" class="checkboxrow monthHoldStatus" name="monthHoldStatus" ${ monthHoldStatus == 0 ? "checked" : ""}> <label> OnHold</label>
-                        </div>
-                    </td> 
+                    
                 </tr>`;
 
                 }
@@ -913,33 +915,59 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
 // ---- GET ALL EMPLOYEE HAS PAYROLL IN RANGE OF DECLARED ----//
 $(document).on("click","#generatePeriod",function(){
 
-    $(".purchaseOrderItemsBody").html(preloader);
-    let getDateRangeVal = $("#setDatePeriod").val();
-    let split = getDateRangeVal.split("-");
+    Swal.fire({
+        title: 'GENERATE 13TH MONTH REPORT',
+    text: "Are you sure that you want to generate the 13th month report?",
+        imageUrl: `${base_url}assets/modal/add.svg`,
+        imageWidth: 200,
+        imageHeight: 200,
+        imageAlt: 'Custom image',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#1A1A1A',
+        confirmButtonText: 'Generate',
+        allowOutsideClick: false
+      }).then((result) => {
+        if (result.isConfirmed) {
+           
+            $(".purchaseOrderItemsBody").html(preloader);
+            let getDateRangeVal = $("#setDatePeriod").val();
+            let split = getDateRangeVal.split("-");
 
-    let getDateFrom = moment(split[0]).format("YYYY-MM-DD");
-    let getDateFromYear = moment(split[0]).format("YYYY");
-    let getDateFromMonth = moment(split[0]).format("MM");
-    let getDateFromDay = moment(split[0]).format("DD");
+            let getDateFrom = moment(split[0]).format("YYYY-MM-DD");
+            let getDateFromYear = moment(split[0]).format("YYYY");
+            let getDateFromMonth = moment(split[0]).format("MM");
+            let getDateFromDay = moment(split[0]).format("DD");
 
-    let getDateTo = moment(split[1]).format("YYYY-MM-DD");
-    let getDateToYear = moment(split[1]).format("YYYY");
-    let getDateToMonth = moment(split[1]).format("MM");
-    let getDateToDay = moment(split[1]).format("DD");
+            let getDateTo = moment(split[1]).format("YYYY-MM-DD");
+            let getDateToYear = moment(split[1]).format("YYYY");
+            let getDateToMonth = moment(split[1]).format("MM");
+            let getDateToDay = moment(split[1]).format("DD");
 
-    let start = moment([getDateFromYear, getDateFromMonth, getDateFromDay]);
-    let end = moment([getDateToYear, getDateToMonth, getDateToDay]);
-    let numOfMonths =  Math.abs(start.diff(end-1, 'months'));
+            let start = moment([getDateFromYear, getDateFromMonth, getDateFromDay]);
+            let end = moment([getDateToYear, getDateToMonth, getDateToDay]);
+            let numOfMonths =  Math.abs(start.diff(end-1, 'months'));
 
-    let generateData =  getItemsRow("", false,numOfMonths,getDateFrom,getDateTo);
+            let generateData =  getItemsRow("", false,numOfMonths,getDateFrom,getDateTo);
 
-    $(".displayDateRange").text(getDateRangeVal);
+            $(".displayDateRange").text(getDateRangeVal);
+            
+            setTimeout(() => {
+                $(".purchaseOrderItemsBody").html(generateData); 
+                updateTableRows();
+            
+            }, 300);
+
+        Swal.fire({
+            icon: 'success',
+            title:  `13th Month report generated successfully!`,
+            showConfirmButton: false,
+            timer: 800
+          })
+        }
+    });
+
     
-    setTimeout(() => {
-        $(".purchaseOrderItemsBody").html(generateData); 
-        updateTableRows();
-    
-    }, 300);
 
 })
 // ---- GET ALL EMPLOYEE HAS PAYROLL IN RANGE OF DECLARED ----//
@@ -982,6 +1010,19 @@ $(document).on("click","#generatePeriod",function(){
     
     //  ----- DATE RANGE PERIOD ----//
 
+    // ----- CHECK ALL -----
+    $(document).on("change", ".checkboxall", function() {
+        // let parentTable  =   $(this).closest(".itemTableRow");
+        // let checkBoxCount = parentTable.find(".checkboxholdrow").length;
+        // let getAssetID = $(this).attr("assetID");
+        // const getIndex = $(this).attr("index");
+        // const isChecked = $(this).prop("checked");
+       
+        $(".purchaseOrderItemsBody .checkboxholdrow").each(function(i, obj) {
+            $(this).prop("checked", isChecked);
+        });
+   
+    });
 
 // ----- FORM CONTENT -----
 function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
@@ -1031,7 +1072,9 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
     let disabled = readOnly ? "disabled" : "";
     let addBtn = readOnly ? "" : `<small><button class="btn btn-secondary btn-sm btnAddRow" monthID="${monthID}"><i class="fas fa-plus"></i></button></small>`;
 
-	
+	let checkboxHoldStatus = !disabled ? `<th class="text-center"><div class="action">
+					<input type="checkbox" class="checkboxall" project="true"> Hold
+				</div></th>` : `Hold`;
 
     // let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
 
@@ -1047,7 +1090,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
             <div class="body">
                 <small class="text-small text-muted font-weight-bold">Revised Document No.</small>
                 <h6 class="mt-0 text-danger font-weight-bold">
-                    ${getFormCode("TMK", createdAt, reviseDocumentNo)}
+                    ${getFormCode("TMP", createdAt, reviseDocumentNo)}
                 </h6>      
             </div>
         </div>
@@ -1128,7 +1171,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
         <div class="col-md-4 col-sm-12">
             <div class="form-group">
-                <label>Employee Name</label>
+                <label>Prepared By</label>
                 <input type="text" class="form-control" disabled value="${employeeFullname}">
             </div>
         </div>
@@ -1196,19 +1239,20 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
                 <div class"card">
                     <div class="card-header bg-primary text-white text-center">
-                        <h6 class="font-weight-bold displayDateRange">${moment().format("MMMM DD, YYYY")+" - "+ moment().format("MMMM DD, YYYY")}</h6>
+                        <h6 class="font-weight-bold displayDateRange">${moment(monthDateStart).format("MMMM DD, YYYY")+" - "+ moment(monthDateEnd).format("MMMM DD, YYYY")}</h6>
                     </div>
 
                     <div class="card-body">
                     <table class="table table-striped" id="${tableInventoryReceivingItems}">
                     <thead>
                         <tr style="white-space: nowrap">
+                            ${checkboxHoldStatus}
                             <th>Employee Code</th>
                             <th>Employee Name</th>
                             <th>Basic Salary</th>
                             <th>Gross Pay</th>
                             <th>Total 13th Month</th>
-                            <th>Status</th>
+                           
                         </tr>
                     </thead>
                     <tbody class="purchaseOrderItemsBody">
@@ -1488,7 +1532,7 @@ $(document).on("click", "#btnBack", function () {
     const isFromCancelledDocument = $(this).attr("cancel") == "true";
     const revise     = $(this).attr("revise") == "true";
     const employeeID = $(this).attr("employeeID");
-    const feedback   = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback   = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
     const status     = $(this).attr("status");
 
     if (status != "false" && status != 0) {
@@ -1542,7 +1586,7 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
         const id       = $(this).attr("monthID");
         const isFromCancelledDocument = $(this).attr("cancel") == "true";
         const revise   = $(this).attr("revise") == "true";
-        const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+        const feedback = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
         const action   = revise && "insert" || (id && feedback ? "update" : "insert");
         const data     = getInventoryReceivingData(action, "save", "0", id);
         // data["monthStatus"] = 0;
@@ -1669,7 +1713,7 @@ $(document).on("click", "#btnCancelForm", function () {
 // ----- APPROVE DOCUMENT -----
 $(document).on("click", "#btnApprove", function () {
     const id       = decryptString($(this).attr("monthID"));
-    const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
     let tableData  = getTableData("hris_13month_tbl", "", "monthID = " + id);
 
     if (tableData) {
@@ -1722,7 +1766,7 @@ $(document).on("click", "#btnApprove", function () {
 $(document).on("click", "#btnReject", function () {
 
     const id       = $(this).attr("monthID");
-    const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
 
     $("#modal_inventory_receiving_content").html(preloader);
     $("#modal_inventory_receiving .page-title").text("DENY 13th Month");
@@ -1754,7 +1798,7 @@ $(document).on("click", "#btnReject", function () {
 
 $(document).on("click", "#btnRejectConfirmation", function () {
     const id       = decryptString($(this).attr("monthID"));
-    const feedback = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
 
     const validate = validateForm("modal_inventory_receiving");
     if (validate) {
@@ -1801,7 +1845,7 @@ $(document).on("click", "#btnRejectConfirmation", function () {
 // ----- DROP DOCUMENT -----
 $(document).on("click", "#btnDrop", function() {
     const monthID = decryptString($(this).attr("monthID"));
-    const feedback          = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback          = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
 
     const id = decryptString($(this).attr("monthID"));
     let data = new FormData;
@@ -1816,7 +1860,7 @@ $(document).on("click", "#btnDrop", function() {
 $(document).on("click", "#btnRelease", function() {
     const monthID = decryptString($(this).attr("monthID"));
    
-    const feedback          = $(this).attr("code") || getFormCode("TMK", dateToday(), id);
+    const feedback          = $(this).attr("code") || getFormCode("TMP", dateToday(), id);
 
     const id = decryptString($(this).attr("monthID"));
     let data = new FormData;
@@ -1887,7 +1931,7 @@ function getApproversStatus(approversID, approversStatus, approversDate) {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-const title = "13th Month";
+const title = "13TH MONTH PROCESS";
 let swalText, swalImg;
 
 $("#modal_inventory_receiving").text().length > 0 && $("#modal_inventory_receiving").modal("hide");
@@ -1895,42 +1939,42 @@ $("#modal_inventory_receiving").text().length > 0 && $("#modal_inventory_receivi
 switch (method) {
     case "save":
         swalTitle = `SAVE ${title.toUpperCase()}`;
-        swalText  = "Are you sure to save this document?";
+        swalText  = "Are you sure to save this 13th month process?";
         swalImg   = `${base_url}assets/modal/draft.svg`;
         break;
     case "submit":
         swalTitle = `SUBMIT ${title.toUpperCase()}`;
-        swalText  = "Are you sure to submit this document?";
+        swalText  = "Are you sure to submit this 13th month process?";
         swalImg   = `${base_url}assets/modal/add.svg`;
         break;
     case "approve":
         swalTitle = `APPROVE ${title.toUpperCase()}`;
-        swalText  = "Are you sure to approve this document?";
+        swalText  = "Are you sure to approve this processing of 13th month?";
         swalImg   = `${base_url}assets/modal/approve.svg`;
         break;
     case "deny":
         swalTitle = `DENY ${title.toUpperCase()}`;
-        swalText  = "Are you sure to deny this document?";
+        swalText  = "Are you sure to deny this processing of 13th month?";
         swalImg   = `${base_url}assets/modal/reject.svg`;
         break;
     case "cancelform":
         swalTitle = `CANCEL ${title.toUpperCase()}`;
-        swalText  = "Are you sure to cancel this document?";
+        swalText  = "Are you sure to cancel this 13th month process?";
         swalImg   = `${base_url}assets/modal/cancel.svg`;
         break;
     case "drop":
         swalTitle = `DROP ${title.toUpperCase()}`;
-        swalText  = "Are you sure to drop this document?";
+        swalText  = "Are you sure to drop this 13th month process?";
         swalImg   = `${base_url}assets/modal/drop.svg`;
         break;
     case "release":
         swalTitle = `RELEASE ${title.toUpperCase()}`;
-        swalText  = "Are you sure to release this document?";
+        swalText  = "Are you sure to release this 13th month process?";
         swalImg   = `${base_url}assets/modal/approve.svg`;
         break;
     default:
         swalTitle = `CANCEL ${title.toUpperCase()}`;
-        swalText  = "Are you sure that you want to cancel this process?";
+        swalText  = "Are you sure that you want to cancel this 13th month process?";
         swalImg   = `${base_url}assets/modal/cancel.svg`;
         break;
 }
@@ -1981,19 +2025,19 @@ if (data) {
 
                     let swalTitle;
                     if (method == "submit") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} submitted successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} submitted successfully!`;
                     } else if (method == "save") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} saved successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} saved successfully!`;
                     } else if (method == "cancelform") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} cancelled successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} cancelled successfully!`;
                     } else if (method == "approve") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} approved successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} approved successfully!`;
                     } else if (method == "deny") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} denied successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} denied successfully!`;
                     } else if (method == "drop") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} dropped successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} dropped successfully!`;
                     }	else if (method == "release") {
-                        swalTitle = `${getFormCode("TMK", dateCreated, insertedID)} release successfully!`;
+                        swalTitle = `${getFormCode("TMP", dateCreated, insertedID)} release successfully!`;
                     }	
                     
     

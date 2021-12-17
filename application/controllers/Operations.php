@@ -241,4 +241,11 @@ class Operations extends CI_Controller {
         echo json_encode($this->operations->unionData($unionData));
     }
 
+    public function premiumPaymentReport(){
+        
+        // $type   = $this->input->post("type");
+        $result = $this->operations->premiumPaymentReport();    
+        echo json_encode($result);
+    }
+
 }

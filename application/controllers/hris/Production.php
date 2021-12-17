@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
+date_default_timezone_set('Asia/Manila');
 class Production extends CI_Controller {
 
     public function __construct()
@@ -8,7 +8,7 @@ class Production extends CI_Controller {
         parent::__construct();
         $this->load->model("hris/Production_model", "production");
         $this->load->model("hris/LeaveRequest_model", "leaverequest");
-        isAllowed(143);
+        // isAllowed(143);
     }
 
     public function index()
@@ -72,6 +72,7 @@ class Production extends CI_Controller {
         $dateSchedule  = $this->input->post("getDateSchedule");
         $dateStart  = $this->input->post("dateStart");
         $dateEnd  = $this->input->post("dateEnd");
+        $approversID = $this->input->post("apprversID");
 
         $listDateRange  = $this->input->post("listDateRange");
         $listDayRange  = $this->input->post("listDayRange");
@@ -90,7 +91,8 @@ class Production extends CI_Controller {
                 'dateStart'             => $dateStart,
                 'dateEnd'               => $dateEnd,
                 'createdBy'             => $employeeID,
-                'createdAt'             => date('Y-m-d h:i:s')
+                'createdAt'             => date('Y-m-d h:i:s'),
+                'approversID'           => $approversID
             ];
         }
 
@@ -334,7 +336,7 @@ class Production extends CI_Controller {
         $getClientName  = $this->input->post("getClientName");
         $getProjectID   = $this->input->post("getProjectID");
         $getProjectName = $this->input->post("getProjectName");
-        $getStatus  = $this->input->post("getStatus");
+        // $getStatus  = $this->input->post("getStatus");
         $getDescription = $this->input->post("getDescription");
         $getManHours    = $this->input->post("getManHours");
         $createdBy  = $this->input->post("createdBy");
@@ -359,7 +361,7 @@ class Production extends CI_Controller {
                 'activityClient' => $getClientID,
                 'activityClientName' => $getClientName,
                 'activityDescription' => $getDescription,
-                'activityStatus' => $getStatus,
+                // 'activityStatus' => $getStatus,
                 'activityHours' => $getManHours,
                 'createdBy' => $createdBy,
                 'createdAt' => date('Y-m-d h:i:s')
@@ -379,7 +381,7 @@ class Production extends CI_Controller {
                 'activityClient' => $getClientID,
                 'activityClientName' => $getClientName,
                 'activityDescription' => $getDescription,
-                'activityStatus' => $getStatus,
+                // 'activityStatus' => $getStatus,
                 'activityHours' => $getManHours,
                 'createdBy' => $createdBy,
                 'createdAt' => date('Y-m-d h:i:s')

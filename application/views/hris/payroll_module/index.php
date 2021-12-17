@@ -42,9 +42,9 @@
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-money-check"></i> &nbsp;Payroll Modules</li>
-						<li class="breadcrumb-item active">Payroll Module</li>
+						<li class="breadcrumb-item active">Payroll Process</li>
 					</ul>
-					<h1 class="mt-3">Payroll Module</h1>
+					<h1 class="mt-3">Payroll Process</h1>
 					<span>This module is used to generate and monitor the payroll process.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">

@@ -12,7 +12,7 @@ class Backpay extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Back Pay";
+        $data["title"] = "Back Pay Process";
 
         $this->load->view("template/header",$data);
         $this->load->view("hris/backpay/index");

@@ -12,7 +12,7 @@ class Settings extends CI_Controller {
 
     public function index(){
         // $data["title"] = "Login | ".$this->db->getTableData("company_setup_tbl", "companyName", "", "");
-        $data["title"]              = "System Setting";
+        $data["title"]              = "System Settings";
         // $data["module_list"]        = $this->operations->getTableData("gen_module_list_tbl", "", "moduleApprover != 0");
         $this->load->view("template/header", $data);
         $this->load->view("gen/system_setting/index", $data);

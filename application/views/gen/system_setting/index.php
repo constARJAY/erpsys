@@ -24,10 +24,10 @@
 
                            <div class="col-lg-12 col-12">
                                 <div class="card" style="box-shadow:none !important">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div class="card-header d-flex justify-content-between align-items-center bg-black">
                                         <h5>Approval</h5>
                                         
-                                        <button type="button" class="btn btn-submit px-5 p-2 btnUpdate" givenaction="approval"><i class="fas fa-save"></i> Update</button>
+                                        <button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="approval"><i class="fas fa-save"></i> Update</button>
                                     </div>
                                     <div class="body">
                                         <div class="row clear-fix approval-row">
@@ -48,9 +48,9 @@
 
                             <div class="col-lg-12 col-12">
                                 <div class="card" style="box-shadow:none !important">
-                                    <div class="card-header  d-flex justify-content-between align-items-center">
+                                    <div class="card-header  d-flex justify-content-between align-items-center bg-black">
                                         <h5>Cut off</h5>
-                                        <button type="button" class="btn btn-submit px-5 p-2 btnUpdate" givenaction="cuttoff"><i class="fas fa-save"></i> Update</button>
+                                        <button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="cuttoff"><i class="fas fa-save"></i> Update</button>
                                     </div>
                                     <div class="body">
                                         <div class="row clear-fix cut-off-row">
@@ -62,15 +62,15 @@
 
                            <div class="col-lg-12 col-12">
                                 <div class="card" style="box-shadow:none !important">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div class="card-header d-flex justify-content-between align-items-center bg-black">
                                         <h5>Petty Cash</h5>
-                                        <button type="button" class="btn btn-submit px-5 p-2 btnUpdate" givenaction="pettycash"><i class="fas fa-save"></i> Update</button>
+                                        <button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="pettycash"><i class="fas fa-save"></i> Update</button>
                                     </div>
                                     <div class="body">
                                         <div class="row clear-fix petty-cash-replenishment-row">
-                                            <div class="col-lg-12 col-12">
+                                             <div class="col-lg-12 col-12">
                                                 <label for="">Replenishment Limit</label>
-                                                <p> <span>3 Day/s</span> </p>
+                                                <p>₱ 0.00</p>
                                             </div>
                                         </div>
                                     </div>
@@ -79,17 +79,18 @@
 
                            <div class="col-lg-12 col-12">
                                 <div class="card" style="box-shadow:none !important">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div class="card-header d-flex justify-content-between align-items-center bg-black">
                                         <h5>Client Fund</h5>
                                         
-                                        <button type="button" class="btn btn-submit px-5 p-2 btnUpdate" givenaction="clientfund"><i class="fas fa-save"></i> Update</button>
+                                        <button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="clientfund"><i class="fas fa-save"></i> Update</button>
                                     </div>
                                     <div class="body">
                                         <div class="row clear-fix client-fund-replenishment-row">
                                             <div class="col-lg-12 col-12">
                                                 <label for="">Replenishment Limit</label>
-                                                <p> <span>3 Day/s</span> </p>
+                                                <p>₱ 0.00</p>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>

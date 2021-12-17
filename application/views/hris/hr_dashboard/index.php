@@ -21,16 +21,13 @@
 				</div>
 			</div>
 		</div>
+	</div>
 
-		<div class="container">
-			<div class="row clearfix row-deck mx-1">
-				<div class="card col-12">
-					<div class="card-body" id="page_content">	<!--- start --->
-					
 
-						
-					</div> 	<!--- end --->
-				</div>
+	<div class="container">
+		<div class="row clearfix row-deck mx-1">
+			<div class="card col-12">
+				<div class="card-body" id="page_content"></div>
 			</div>
 		</div>
 	</div>

@@ -12,6 +12,12 @@ $(document).ready(function(){
         let moduleID    = $("#select2-modules").val();
         let html        = getDescriptionTable(moduleID, action);
         $("#description_div").html(html);
+        $(".action-list").find("h6").removeClass("color-active");
+        $(".action-list").removeClass("module-active");
+        
+        $(this).find("h6").addClass("color-active");
+        $(this).addClass("module-active");
+        
         initDataTables();
     });
 });
@@ -19,8 +25,8 @@ $(document).ready(function(){
 
 // FUNCTION FOR CALLING THE AFTER THE UPDATE
 function select2_modules(moduleID = null){
-    let tableData   = getTableData("gen_module_list_tbl", "", "moduleApprover = '0' AND moduleID > '3' AND moduleID != '144' ");
-    let option        = `<option value="" ${!moduleID ? "selected" : ""} disabled>Select Module</option>`;
+    let tableData       = getTableData("gen_module_list_tbl", "", "moduleApprover = '0' AND moduleID > '3' AND moduleID != '144' ");
+    let option          = `<option value="" ${!moduleID ? "selected" : ""} disabled>Select Module</option>`;
     tableData.map((value,index)=>{
         option += `<option value="${value.moduleID}" 
                         isform="${value.moduleApprover != "0" ? "true" : "false"}"
@@ -130,7 +136,7 @@ function getDescriptionTable(moduleID, action){
     $("#description_div").html(preloader);
     let html = ``;
     let tableID     = "descriptionTable_add";
-    let tableData   = getTableData(`gen_audit_tbl`, "", `moduleID ='${moduleID}'`);
+    let tableData   = getTableData(`gen_audit_tbl`, "", `moduleID ='${moduleID}'`, `createdAt DESC`);
     if(action =="insert" || action == "update"){
         
         let tableRow  = "";
@@ -140,83 +146,83 @@ function getDescriptionTable(moduleID, action){
             tableRow    += `<td>${moment(value.createdAt).format(`MMMM DD, YYYY hh:mm:ss A`)}</td>
                             <td>${value.auditDescription}</td>
                            `;
-            if(auditColumn){
-                tableID     = "descriptionTable_update";
-                tableRow += "<td>";
-                        let oldData = value["auditOldData"].split("|")
-                        tableRow += `<table class="table table-bordered table-striped table-hover">
-                                        <thead>
-                                            <tr>`;
-                                                auditColumn.map((column,colIndex)=>{
-                                                    tableRow += `
-                                                                    <th>${column}</th>
-                                                                `;
-                                                });
-                        tableRow +=         `</tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>`;
+            // if(auditColumn){
+            //     tableID     = "descriptionTable_update";
+            //     tableRow += "<td>";
+            //             let oldData = value["auditOldData"].split("|")
+            //             tableRow += `<table class="table table-bordered table-striped table-hover">
+            //                             <thead>
+            //                                 <tr>`;
+            //                                     auditColumn.map((column,colIndex)=>{
+            //                                         tableRow += `
+            //                                                         <th>${column}</th>
+            //                                                     `;
+            //                                     });
+            //             tableRow +=         `</tr>
+            //                             </thead>
+            //                             <tbody>
+            //                                 <tr>`;
                                             
-                                                auditColumn.map((column,colIndex)=>{
-                                                    let columnData = "";
-                                                    switch (oldData[colIndex]) {
-                                                        case "0":
-                                                                columnData = "Inactive";
-                                                            break;
-                                                        case "1":
-                                                                columnData = "Active";
-                                                            break;  
-                                                        default:
-                                                                columnData = oldData[colIndex];
-                                                            break;
-                                                    } 
-                                                    tableRow += `
-                                                                    <td>${columnData}</td>
-                                                                `;
-                                                });        
-                        tableRow +=         `</tr>
-                                        </tbody>
-                                    </table>`;
-                tableRow += "</td>";
+            //                                     auditColumn.map((column,colIndex)=>{
+            //                                         let columnData = "";
+            //                                         switch (oldData[colIndex]) {
+            //                                             case "0":
+            //                                                     columnData = "Inactive";
+            //                                                 break;
+            //                                             case "1":
+            //                                                     columnData = "Active";
+            //                                                 break;  
+            //                                             default:
+            //                                                     columnData = oldData[colIndex];
+            //                                                 break;
+            //                                         } 
+            //                                         tableRow += `
+            //                                                         <td>${columnData}</td>
+            //                                                     `;
+            //                                     });        
+            //             tableRow +=         `</tr>
+            //                             </tbody>
+            //                         </table>`;
+            //     tableRow += "</td>";
 
-                tableRow += "<td>";
-                        let newData = value["auditNewData"].split("|");
+            //     tableRow += "<td>";
+            //             let newData = value["auditNewData"].split("|");
                         
-                        tableRow += `<table class="table table-bordered table-striped table-hover">
-                                        <thead>
-                                            <tr>`;
-                                                auditColumn.map((column,colIndex)=>{
-                                                    tableRow += `
-                                                                    <th>${column}</th>
-                                                                `;
-                                                });
-                        tableRow +=         `</tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>`;
-                                                auditColumn.map((column,colIndex)=>{
-                                                    let columnData = "";
-                                                    switch (newData[colIndex]) {
-                                                        case "0":
-                                                                columnData = "Inactive";
-                                                            break;
-                                                        case "1":
-                                                                columnData = "Active";
-                                                            break;  
-                                                        default:
-                                                                columnData = newData[colIndex];
-                                                            break;
-                                                    } 
+            //             tableRow += `<table class="table table-bordered table-striped table-hover">
+            //                             <thead>
+            //                                 <tr>`;
+            //                                     auditColumn.map((column,colIndex)=>{
+            //                                         tableRow += `
+            //                                                         <th>${column}</th>
+            //                                                     `;
+            //                                     });
+            //             tableRow +=         `</tr>
+            //                             </thead>
+            //                             <tbody>
+            //                                 <tr>`;
+            //                                     auditColumn.map((column,colIndex)=>{
+            //                                         let columnData = "";
+            //                                         switch (newData[colIndex]) {
+            //                                             case "0":
+            //                                                     columnData = "Inactive";
+            //                                                 break;
+            //                                             case "1":
+            //                                                     columnData = "Active";
+            //                                                 break;  
+            //                                             default:
+            //                                                     columnData = newData[colIndex];
+            //                                                 break;
+            //                                         } 
 
-                                                    tableRow += `
-                                                                    <td>${columnData}</td>
-                                                                `;
-                                                });        
-                        tableRow +=         `</tr>
-                                        </tbody>
-                                    </table>`;
-                tableRow += "</td>";
-            } 
+            //                                         tableRow += `
+            //                                                         <td>${columnData}</td>
+            //                                                     `;
+            //                                     });        
+            //             tableRow +=         `</tr>
+            //                             </tbody>
+            //                         </table>`;
+            //     tableRow += "</td>";
+            // } 
             tableRow    += `<td>${value.accountablePerson}</td>`;
             tableRow    += `</tr>`;
         });
@@ -228,7 +234,6 @@ function getDescriptionTable(moduleID, action){
                                 <tr>
                                     <th>Date and Time</th>
                                     <th>Description</th>
-                                    ${action=="update" ? "<th>Original Data</th><th>Replace Data</th>":""}
                                     <th>Accountable Person</th>
                                 </tr>
                             </thead>
@@ -253,19 +258,18 @@ function initDataTables() {
     }
     
     var table = $("#descriptionTable_add").css({"min-width": "100%"}).removeAttr('width').DataTable(
-        // {
-        //     proccessing:    false,
-        //     serverSide:     false,
-        //     scrollX:        true,
-        //     scrollCollapse: true,
-        //     lengthMenu: [ 50, 75, 100, 150],
-        //     columnDefs: [
-        //         { targets: 0, width:  80 },
-        //         { targets: 1, width: "25%" },
-        //         { targets: 3, width: "15%" },
-        //         { targets: 4, width:  80 }
-        //     ],
-        // }
+        {
+            // proccessing:    false,
+            // serverSide:     false,
+            sorting:        false,
+            scrollX:        true,
+            scrollCollapse: true,
+            lengthMenu: [ 50, 75, 100, 150],
+            columnDefs: [
+                { targets: 0, width:  250 },
+                { targets: 2, width:  150 }
+            ],
+        }
     );
 
     if ($.fn.DataTable.isDataTable('#descriptionTable_update')){
@@ -274,17 +278,15 @@ function initDataTables() {
     
     var table = $("#descriptionTable_update").css({"min-width": "100%"}).removeAttr('width').DataTable(
         {
-            proccessing:    false,
-            serverSide:     false,
+            // proccessing:    false,
+            // serverSide:     false,
             scrollX:        true,
+            sorting:        false,
             scrollCollapse: true,
             lengthMenu: [ 50, 75, 100, 150],
             columnDefs: [
-                { targets: 0, width:  150 },
-                { targets: 1, width:  150 },
-                { targets: 2, width:  200 },
-                { targets: 3, width:  200 },
-                { targets: 4, width:  150 }
+                { targets: 0, width:  250 },
+                { targets: 2, width:  150 }
             ],
         }
     );

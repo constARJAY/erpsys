@@ -59,9 +59,9 @@
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-money-check"></i> &nbsp;Payroll Modules</li>
-						<li class="breadcrumb-item active">Timekeeping Module</li>
+						<li class="breadcrumb-item active">Timekeeping Process</li>
 					</ul>
-					<h1 class="mt-3">Timekeeping Module</h1>
+					<h1 class="mt-3">Timekeeping Process</h1>
 					<span>This module is used to monitor and view the attendance activity for each employee.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">

@@ -52,6 +52,7 @@
                                             maxlength="75"
                                             required
                                             tabindex="1"
+                                            placeholder="New Password"
                                             style="background-image: none;">
                                     <div class="invalid-feedback text-left d-block" id="invalid-applicantPassword"></div>
                                 </div>
@@ -70,6 +71,7 @@
                                             maxlength="75"
                                             required
                                             tabindex="2"
+                                            placeholder="Confirm Password"
                                             style="background-image: none;">
                                     <div class="invalid-feedback text-left d-block" id="invalid-applicantConfirmPassword"></div>
                                 </div>

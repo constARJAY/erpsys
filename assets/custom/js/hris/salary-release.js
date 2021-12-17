@@ -390,9 +390,9 @@ function myFormsContent() {
         isrt.monthDetailsID,
         CASE
         WHEN isrt.payrollID = 0 THEN isrt.monthCode
-        WHEN isrt.payrollID != 0 THEN CONCAT('PAY-',LPAD(isrt.payrollID,3,'0')) 
+        WHEN isrt.payrollID != 0 THEN CONCAT('PRL',LPAD(isrt.payrollID,3,'0')) 
         END AS referenceCode,
-        concat('SRL-',SUBSTR(isrt.createdAt,3,2),'-',LPAD(isrt.salaryReleaseID,5,'0')) AS salaryReleaseCode`,
+        concat('SLR-',SUBSTR(isrt.createdAt,3,2),'-',LPAD(isrt.salaryReleaseID,5,'0')) AS salaryReleaseCode`,
         ``,
         `FIELD(isrt.payrollHoldStatus, 0, 9)`
     );
@@ -414,7 +414,7 @@ function myFormsContent() {
 
     inventoryReceivingData.map((item) => {
         let {
-            fullname,
+         
             salaryReleaseID,
             salaryReleaseCode,
             payrollID,
@@ -436,6 +436,14 @@ function myFormsContent() {
         //     dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
         // }
 
+           // ----- GET EMPLOYEE DATA -----
+            let {
+                fullname:    employeeFullname    = "",
+                department:  employeeDepartment  = "",
+                designation: employeeDesignation = "",
+            } = employeeData(item ? employeeID : sessionID);
+            // ----- END GET EMPLOYEE DATA -----
+
         
 
         let isResigned = employeeStatus == 0 ? `<button class="btn btn-danger  w-100" disabled><i class="fas fa-hand-holding-usd"></i> On Backpay Only</button>`: 
@@ -449,7 +457,8 @@ function myFormsContent() {
         html += `
         <tr class="" id="${encryptString(salaryReleaseID)}">
             <td>${salaryReleaseCode || "-"}</td>
-            <td>${fullname}</td>
+            <td> <div>${employeeFullname}</div>
+            <span><small>${employeeDepartment} | ${employeeDesignation}</small></span></td>
             <td>${referenceCode}</td>
             <td class="text-right">${formatAmount(netPay || "0",true)}</td>
             <td>${dateReleased != "Invalid date" ? dateReleased : "-"}</td>
@@ -1893,17 +1902,17 @@ $(document).on("click", ".btnRelease", function () {
     
                         let swalTitle;
                         if (method == "submit") {
-                            swalTitle = `${getFormCode("SRL", dateCreated, insertedID)} released successfully!`;
+                            swalTitle = `${getFormCode("SLR", dateCreated, insertedID)} released successfully!`;
                         } else if (method == "save") {
-                            swalTitle = `${getFormCode("SRL", dateCreated, insertedID)} saved successfully!`;
+                            swalTitle = `${getFormCode("SLR", dateCreated, insertedID)} saved successfully!`;
                         } else if (method == "cancelform") {
-                            swalTitle = `${getFormCode("SRL", dateCreated, insertedID)} cancelled successfully!`;
+                            swalTitle = `${getFormCode("SLR", dateCreated, insertedID)} cancelled successfully!`;
                         } else if (method == "approve") {
-                            swalTitle = `${getFormCode("SRL", dateCreated, insertedID)} approved successfully!`;
+                            swalTitle = `${getFormCode("SLR", dateCreated, insertedID)} approved successfully!`;
                         } else if (method == "deny") {
-                            swalTitle = `${getFormCode("SRL", dateCreated, insertedID)} denied successfully!`;
+                            swalTitle = `${getFormCode("SLR", dateCreated, insertedID)} denied successfully!`;
                         } else if (method == "drop") {
-                            swalTitle = `${getFormCode("SRL", dateCreated, insertedID)} dropped successfully!`;
+                            swalTitle = `${getFormCode("SLR", dateCreated, insertedID)} dropped successfully!`;
                         }	
         
                         if (isSuccess == "true") {
@@ -1984,9 +1993,9 @@ $(document).on("click", "#btnLog", function () {
         `isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,employeeStatus,
         CASE
         WHEN isrt.payrollID = 0 THEN monthCode
-        WHEN isrt.payrollID =! 0 THEN CONCAT('PAY-',LPAD(isrt.payrollID,3,'0')) 
+        WHEN isrt.payrollID =! 0 THEN CONCAT('PRL',LPAD(isrt.payrollID,3,'0')) 
         END AS referenceCode,
-        concat('SRL-',SUBSTR(isrt.createdAt,3,2),'-',LPAD(isrt.salaryReleaseID,5,'0')) AS salaryReleaseCode`,
+        concat('SLR-',SUBSTR(isrt.createdAt,3,2),'-',LPAD(isrt.salaryReleaseID,5,'0')) AS salaryReleaseCode`,
         ``,
         `salaryReleaseLogID DESC`
     );
@@ -2443,7 +2452,8 @@ $(document).on("click", ".nav-link", function () {
 
 // // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-const title = "Salary Release";
+const title = "SALARY RELEASE PROCESS";
+const releaseTitle = "EMPLOYEE SALARY";
 let swalText, swalImg;
 
 $("#modal_inventory_receiving").text().length > 0 && $("#modal_inventory_receiving").modal("hide");
@@ -2456,17 +2466,17 @@ switch (method) {
         break;
     case "submit":
         swalTitle = `${title.toUpperCase()}`;
-        swalText  = "Are you sure to release this document?";
+        swalText  = "Are you sure to submit this document?";
         swalImg   = `${base_url}assets/modal/add.svg`;
         break;
     case "approve":
         swalTitle = `APPROVE ${title.toUpperCase()}`;
-        swalText  = "Are you sure to approve this document?";
+        swalText  = "Are you sure to approve this processing of salary release?";
         swalImg   = `${base_url}assets/modal/approve.svg`;
         break;
     case "deny":
         swalTitle = `DENY ${title.toUpperCase()}`;
-        swalText  = "Are you sure to deny this document?";
+        swalText  = "Are you sure to deny this processing of salary release?";
         swalImg   = `${base_url}assets/modal/reject.svg`;
         break;
     case "cancelform":
@@ -2478,6 +2488,11 @@ switch (method) {
         swalTitle = `DROP ${title.toUpperCase()}`;
         swalText  = "Are you sure to drop this document?";
         swalImg   = `${base_url}assets/modal/drop.svg`;
+        break;
+    case "release":
+        swalTitle = `RELEASE ${releaseTitle.toUpperCase()}`;
+        swalText  = "Are you sure that you want to release this employee's salary?";
+        swalImg   = `${base_url}assets/modal/approve.svg`;
         break;
     default:
         swalTitle = `CANCEL ${title.toUpperCase()}`;

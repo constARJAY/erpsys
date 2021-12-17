@@ -1,6 +1,6 @@
 <style>
 
-	/* tr.odd td.dtfc-fixed-left, tr.odd td.dtfc-fixed-right {
+	tr.odd td.dtfc-fixed-left, tr.odd td.dtfc-fixed-right {
 		background: #f2f2f2;
 		border-left: 1px solid rgb(222 226 230);
 		border-right: 1px solid rgb(222 226 230);
@@ -24,7 +24,7 @@
 
 	table.dataTable thead th, table.dataTable thead td {
 		border-bottom: none;
-	} */
+	}
 
 	.tooltip-inner {
 		max-width: 591px !important;
@@ -47,6 +47,7 @@
 					<h1 class="mt-3">Payroll Register</h1>
 					<span>This module is used to generate and process the payroll register.</span>
 				</div>
+				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton"></div>
 			</div>
 		</div>
 	</div>

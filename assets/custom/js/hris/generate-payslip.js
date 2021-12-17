@@ -22,10 +22,10 @@ $(document).ready(function () {
                 sorting:        [],
                 scrollCollapse: true,
                 paging:         false,
-                searching:      false,
                 sorting:        false,
                 info:           false,
                 bSort:          false,
+                bStateSave:     true,
 				columnDefs: [
 					{ targets: 0, width: "50px"  },
 					{ targets: 1, width: "50%"   },
@@ -60,10 +60,12 @@ $(document).ready(function () {
             GLOBAL_FILTERING.map(item => {
                 let {
                     payrollID,
-                    payrollCode
+                    payrollCode,
+                    payrollPeriod
                 } = item;
 
-                payrollNoOptions += `<option value="${payrollID}">${payrollCode}</option>`;
+                payrollNoOptions += `
+                <option value="${payrollID}">${payrollCode} (${payrollPeriod})</option>`;
             })
         }
 
@@ -101,8 +103,9 @@ $(document).ready(function () {
                     </select>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-6 text-left align-self-end">
+            <div class="col-md-3 col-sm-6 text-left">
                 <div class="form-group">
+                    <label>&nbsp;</label>
                     <button class="btn btn-primary w-100 py-2"
                         id="btnSearch"><i class="fas fa-search"></i> Search</button>
                 </div>
@@ -137,7 +140,7 @@ $(document).ready(function () {
         if (tableDisplayData && Array.isArray(tableDisplayData) && tableDisplayData.length > 0) {
             tableDisplayData.map(item => {
                 let {
-                    payrollItemID,
+                    payslipID,
                     employeeID,
                     fullname,
                     employeeCode,
@@ -149,7 +152,7 @@ $(document).ready(function () {
                 tbodyHTML += `
                 <tr>
                     <td class="text-center">
-                        <input type="checkbox" name="checkRow" employeeID="${employeeID}" payrollItemID="${payrollItemID}">
+                        <input type="checkbox" name="checkRow" employeeID="${employeeID}" payslipID="${payslipID}">
                     </td>
                     <td>
                         <div>${fullname || "-"}</div>
@@ -337,13 +340,13 @@ $(document).ready(function () {
     // ----- BUTTON PRINT -----
     $(document).on("click", "#btnPrint", function() {
         let payrollID = $(this).attr("payrollID");
-        let employeeIDArr = [], payrollItemIDArr = [];
+        let employeeIDArr = [], payslipIDArr = [];
         $(`[name="checkRow"]:checked`).each(function() {
             employeeIDArr.push($(this).attr("employeeID"))
-            payrollItemIDArr.push($(this).attr("payrollItemID"))
+            payslipIDArr.push($(this).attr("payslipID"))
         });
-        let employeeIDStr    = employeeIDArr.join(", ");
-        let payrollItemIDStr = payrollItemIDArr.join(", ");
+        let employeeIDStr = employeeIDArr.join(", ");
+        let payslipIDStr  = payslipIDArr.join(", ");
         
         $.ajax({
             method: "POST",
@@ -351,7 +354,7 @@ $(document).ready(function () {
 			data: {
 				payrollID,
                 idStr:      employeeIDStr,
-                payrollStr: payrollItemIDStr
+                payrollStr: payslipIDStr
 			},
 			success: function (data) {
 				let left = ($(window).width() / 2) - (900 / 2),
@@ -363,7 +366,17 @@ $(document).ready(function () {
 				mywindow.document.close();
 				mywindow.focus();
 			}
-		})
+		}).done(function() {
+            let payrollID     = $(`[name="payrollNo"]`).val();
+            let departmentID  = $(`[name="department"]`).val();
+            let designationID = $(`[name="designation"]`).val();
+            $('#table_content').html(preloader);
+            setTimeout(() => {
+                let html = getTableDisplay(payrollID, departmentID, designationID);
+                $('#table_content').html(html);
+                initDataTables();
+            }, 100);
+        });
     })
     // ----- END BUTTON PRINT -----
 

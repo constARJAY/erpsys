@@ -3,7 +3,7 @@ $(document).ready(function () {
 
 
 	// ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("production");
+	const moduleApprover = getModuleApprover(143);
 	// ----- END MODULE APPROVER -----
 
 
@@ -94,7 +94,7 @@ $(document).ready(function () {
 		
 
 		clientElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Client</option>`;
+			let html = `<option selected disabled>Please select a client</option>`;
 			// let tmpClientList = [clientList];
 			html += clientList.filter(client => !clientIDArr.includes(client.clientID) || client.clientID == clientIDArr[index]).map(client => {
 				return `
@@ -121,7 +121,7 @@ $(document).ready(function () {
 		}) 
 
 		projectElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Project</option>`;
+			let html = `<option selected >Please select a project</option>`;
 			// let itemList = [...inventoryStorageList];
 			html += projectList.map(project => {
 				return `
@@ -144,7 +144,7 @@ $(document).ready(function () {
 			html = `
 		<option 
 			value       = "0"
-			${id == "0" && "selected"}>Select Client</option>`;
+			${id == "0" && "selected"}>Please select a client</option>`;
 		html += clientList.map(client => {
 
 			return `
@@ -162,7 +162,7 @@ $(document).ready(function () {
 	// ---- GET PROJECT LIST ----//
 	function getprojectList(id = null, display = true, clientID = null) {
 	
-		let html   = `<option selected disabled>Select Project</option>`;
+		let html   = `<option selected>Please select a project</option>`;
 
 		let projectIDArr = []; // 0 IS THE DEFAULT VALUE
 		$(`[name=activityProject]`).each(function(i, obj) {
@@ -172,16 +172,7 @@ $(document).ready(function () {
 		
 		html += projectList.map(project => {
 				
-			if( clientID == null){
-				// return ``;
 
-				return `
-				<option 
-					value        = "${project.projectListID}" 
-					${project.projectListID == id && "selected"}>
-					${project.projectListName}
-				</option>`;
-			}else{
 				if(project.clientID == clientID ){
 					return `
 					<option 
@@ -190,7 +181,7 @@ $(document).ready(function () {
 						${project.projectListName}
 					</option>`;
 				}
-			}
+			
 				
 			
 		})
@@ -401,13 +392,33 @@ $(document).ready(function () {
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: 180 },
+					{ targets: 0, width: 150},
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 150 },
 					{ targets: 3, width: 50  },
-					{ targets: 4, width: 50  },
+					{ targets: 4, width: 200  },
 				],
 				dom: 'lBfrtip',
+				buttons: [
+					{
+						extend: 'excelHtml5',
+						exportOptions: {
+							columns: [ 0, 1, 2, 3, 4 ]
+						}
+					},
+					{
+						extend: 'pdfHtml5',
+						exportOptions: {
+							columns: [ 0, 1, 2, 3, 4 ]
+						}
+					},
+					{
+						extend: 'print',
+						exportOptions: {
+							columns: [ 0, 1, 2, 3, 4 ]
+						}
+					}
+				]
 			});
 
 		var table = $("#tableMyForms")
@@ -485,7 +496,7 @@ $(document).ready(function () {
 					{ targets: 6, width: 300  },
 					{ targets: 7, width: 300  },
 					{ targets: 8, width: 300  },
-					{ targets: 9, width: 150  },
+					// { targets: 9, width: 150  },
 
 				],
 				// dom: 'Bfrtip',
@@ -515,10 +526,10 @@ $(document).ready(function () {
 					{ targets: 5, width: 250  },
 					{ targets: 6, width: 270  },
 					{ targets: 7, width: 250  },
-					{ targets: 8, width: 50  },
+					// { targets: 8, width: 50  },
 
 				],
-				dom: 'Bfrtip',
+				// dom: 'Bfrtip',
 			
 			});
 	}
@@ -584,12 +595,12 @@ $(document).ready(function () {
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
 					<tr style="white-space: nowrap">
-					<th>Production Schedule</th>
+					<th>Production Dates</th>
 					<th>Current Approver</th>
 					<th>Current Approver</th>
 					<th>Status</th>
 					<th>Remarks</th>
-					<th>Action</th>
+					
                 </tr>
             </thead>
             <tbody>`;
@@ -614,12 +625,9 @@ $(document).ready(function () {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(productionID)}"><i class="fas fa-eye"></i> View</button>`;
-
 			if (isImCurrentApprover(approversID, approversDate, productionStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="btnView"  id="${encryptString(productionID)}" code="${productionCode}">
 					<td>
 						<div>${productionSchedule}</div>
 						<small>${productionCode}</small>
@@ -632,17 +640,6 @@ $(document).ready(function () {
 						${getStatusStyle(productionStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td>
-				<!-- Default dropright button -->
-					<div class="btn-group  w-100">
-					<button type="button" class="btn btn-danger text-white font-weight-800 dropdown-toggle " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						Action
-					</button>
-					<div class="dropdown-menu">
-					<a class="dropdown-item btnView"  id="${encryptString(productionID)}" code="${productionCode}" href="javascript:void(0);"><i class="fas fa-eye"></i> View</a>
-					</div>
-					</div>
-				</td>
 				</tr>`;
 			}
 		});
@@ -868,7 +865,8 @@ $(document).ready(function () {
 			}
 		}
 
-		html += `<div class="alert alert-danger alert-dismissible fade show w-100 mb-4" role="alert">
+		if(msg){
+			html += `<div class="alert alert-danger alert-dismissible fade show w-100 mb-4" role="alert">
 					<div class="pb-2">
 						<span class="font-weight-bold text-danger"><i class="fas fa-exclamation-circle"></i> ERROR: A problem has been occured while submitting your data.</span>
 					</div>
@@ -880,6 +878,9 @@ $(document).ready(function () {
 					</button>
 				</div>`;
 
+		}
+
+		
 		$("#notice_content").html(html);
 		$(`#notice_content`).fadeIn(500);
 
@@ -912,7 +913,7 @@ $(document).ready(function () {
 		<hr style="width:100%;">
             <thead>
                 <tr style="white-space: nowrap">
-                    <th>Production Schedule</th>
+                    <th>Production Dates</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -1065,7 +1066,7 @@ $(document).ready(function () {
 		for( var loop1 = 0;loop1<getInputDateRange.length;loop1++){
 			if(mergeArrayAdd.includes(moment(getInputDateRange[loop1]).format("YYYY-MM-DD"))){
 
-				showNotification("danger", "In date range some already declared!");
+				showNotification("danger", "A date on the production already exists!");
 				return false;
 			}
 
@@ -1079,7 +1080,8 @@ $(document).ready(function () {
             dateEnd:       		getdateEnd,
 			listDateRange: 		getInputDateRange,
 			listDayRange: 		getInputDayRange,
-			action: 			action
+			action: 			action,
+			apprversID : 		moduleApprover ? moduleApprover : sessionID
         };
 
 		
@@ -1118,9 +1120,9 @@ $(document).ready(function () {
 		
 						let swalTitle;
 						if (action == "add") {
-							swalTitle = `${getFormCode("PRD", dateCreated, insertedID)} created successfully!`;
+							swalTitle = `${getFormCode("PDN", dateCreated, insertedID)} created successfully!`;
 						} else if (action == "update") {
-							swalTitle = `${getFormCode("PRD", dateCreated, insertedID)} updated successfully!`;
+							swalTitle = `${getFormCode("PDN", dateCreated, insertedID)} updated successfully!`;
 						}
 		
 						if (isSuccess == "true") {
@@ -1188,7 +1190,7 @@ $(document).ready(function () {
 			var getClientName = $parent.find(`[name="activityClient"] option:selected`).text();
 			var getProjectID = $parent.find(`[name="activityProject"] option:selected`).val();
 			var getProjectName = $parent.find(`[name="activityProject"] option:selected`).text();
-			var getStatus = $parent.find(`[name="activityStatus"] option:selected`).val();
+			// var getStatus = $parent.find(`[name="activityStatus"] option:selected`).val();
 			var getDescription = $parent.find(`[name="activityDescription"]`).val()?.trim();
 			var getManHours = $parent.find(`[name="activityManHours"]`).text();
 			var createdBy = sessionID;
@@ -1202,12 +1204,14 @@ $(document).ready(function () {
 				getTimeStartPeriod		:	getTimeStartPeriod,
 				getTimeEndPeriod		:	getTimeEndPeriod,
 				getLocation				:	getLocation,
-				getClass				:	(getClass=='Select Class' ? '' : getClass),
+				getClass				:	(getClass=='Please select a category' ? 'N/A' : getClass),
 				getClientID				:	getClientID,
-				getClientName			:	(getClientName=='Select Client' ? '' : getClientName),
+				getClientName			:	(getClientName=='Please select a client' ? 'N/A' : getClientName),
+				// getClientName			:	getClientName,
 				getProjectID			:	getProjectID,
-				getProjectName			:	(getProjectName=='Select Project' ? '' : getProjectName),
-				getStatus				:	(getStatus=='Select Status' ? '' : getStatus),
+				// getProjectName			:	(getProjectName=='Select Project' ? '' : getProjectName),
+				getProjectName			:	(getProjectName=='Please select a project' ? 'N/A' : getProjectName),
+				// getStatus				:	(getStatus=='Select Status' ? '' : getStatus),
 				getDescription			:	getDescription,
 				getManHours				:	getManHours,
 				createdBy				:	createdBy,
@@ -1302,7 +1306,7 @@ $(document).ready(function () {
 
 		setTimeout(() => {
 			$("#activityTableBody").html(html);
-			$(".activityHeader").text(`VIEW ACTIVITIES: ${moment(getDateEntries).format("MMMM DD, YYYY")} (${getDayEntries})`)
+			$(".activityHeader").text(`VIEW ACTIVITIES: ${getDayEntries}, ${moment(getDateEntries).format("MMMM DD, YYYY")}`)
 			updateTableItems();
 			initSelect2();
 		}, 500);
@@ -1408,8 +1412,8 @@ $(document).ready(function () {
 
 
 		Swal.fire({
-            title: 'UPDATE DATE',
-        text: "Are you sure want to update this date?",
+            title: 'UPDATE PRODUCTION DATE',
+        html: `Are you sure that you really want to update the date range of the selected production?<br><br><div><b class="text-danger">Note: All entries on the previous dates will be removed if all of the dates are changed into new dates.</div>`,
             imageUrl: `${base_url}assets/modal/update.svg`,
             imageWidth: 200,
             imageHeight: 200,
@@ -1489,12 +1493,13 @@ $(document).ready(function () {
 	// ----- EVENT FOR TIME PERIOD OF MAN HOURS USED -----//
 	$(document).on("change",`[name="timePeriodStart"],[name="timePeriodEnd"]`,function(){
 		$parent = $(this).closest("tr");
-		var dayEntries = String($(".activityHeader").text().split("-").slice(-1)).replaceAll(" ","") || "";
+		var dayEntries = $(".activityHeader").text().split(" ");
+		var dayEntriesCheck = dayEntries.length > 0 ? dayEntries[2] : "";
 		var getTimeStart = $parent.find(`[name="timePeriodStart"]`).val() || "0:00";
 		var getTimeEnd = $parent.find(`[name="timePeriodEnd"]`).val() || "0:00";
 		let computeHours = 0;
 
-		computeHours = timeDiffer(getTimeStart, getTimeEnd,dayEntries) || "0:00";
+		computeHours = timeDiffer(getTimeStart, getTimeEnd,dayEntriesCheck) || "0:00";
 
 		if(getTimeStart != "0:00" && getTimeEnd != "0:00"){
 			$parent.find(`[name="activityManHours"]`).text(computeHours);
@@ -1549,22 +1554,34 @@ $(document).ready(function () {
 					// 	class="btn px-5 py-2" 
 					// 	id="btnSubmit" 
 					// 	productionID="${encryptString(productionID)}"
-					// 	code="${getFormCode("PRD", createdAt, productionID)}"
+					// 	code="${getFormCode("PDN", createdAt, productionID)}"
 					// 	revise="${isRevise}"
 					// 	cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 					// 	Submit
 					// </button>`;
 
 					if (isRevise) {
+						// button += `
+						// <button type="button" 
+						// 	class="btn btn-cancel btnCancel px-5 p-2" 
+						// 	id="btnCancel"
+						// 	productionID="${encryptString(productionID)}"
+						// 	code="${getFormCode("PDN", createdAt, productionID)}"
+						// 	revise="${isRevise}"
+						// 	cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+						// 	Cancel
+						// </button>`;
+
 						button += `
-						<button type="button" 
-							class="btn btn-cancel btnCancel px-5 p-2" 
-							id="btnCancel"
+						<button
+						type="button"
+							class="btn btn-submit px-5 py-2" 
+							id="btnSubmit" 
 							productionID="${encryptString(productionID)}"
-							code="${getFormCode("PRD", createdAt, productionID)}"
+							code="${getFormCode("PDN", createdAt, productionID)}"
 							revise="${isRevise}"
-							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
-							Cancel
+							cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
+							Send
 						</button>`;
 					} else {
 						// button += `
@@ -1572,7 +1589,7 @@ $(document).ready(function () {
 						// 	class="btn btn-cancel px-5 p-2"
 						// 	id="btnCancelForm" 
 						// 	productionID="${encryptString(productionID)}"
-						// 	code="${getFormCode("PRD", createdAt, productionID)}"
+						// 	code="${getFormCode("PDN", createdAt, productionID)}"
 						// 	revise=${isRevise}><i class="fas fa-ban"></i> 
 						// 	Cancel
 						// </button>`;
@@ -1585,7 +1602,7 @@ $(document).ready(function () {
 							class="btn btn-cancel  px-5 p-2"
 							id="btnCancelForm" 
 							productionID="${encryptString(productionID)}"
-							code="${getFormCode("PRD", createdAt, productionID)}"
+							code="${getFormCode("PDN", createdAt, productionID)}"
 							status="${productionStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -1597,7 +1614,7 @@ $(document).ready(function () {
 					// 	class="btn btn-cancel px-5 p-2"
 					// 	id="btnDrop" 
 					// 	productionID="${encryptString(productionID)}"
-					// 	code="${getFormCode("PRD", createdAt, productionID)}"
+					// 	code="${getFormCode("PDN", createdAt, productionID)}"
 					// 	status="${productionStatus}"><i class="fas fa-ban"></i> 
 					// 	Drop
 					// </button>`;
@@ -1609,8 +1626,9 @@ $(document).ready(function () {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							productionID="${encryptString(productionID)}"
-							code="${getFormCode("PRD", createdAt, productionID)}"
-							status="${productionStatus}"><i class="fas fa-clone"></i>
+							code="${getFormCode("PDN", createdAt, productionID)}"
+							status="${productionStatus}"
+							cancel ="true"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
@@ -1622,7 +1640,7 @@ $(document).ready(function () {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							productionID="${encryptString(productionID)}"
-							code="${getFormCode("PRD", createdAt, productionID)}"
+							code="${getFormCode("PDN", createdAt, productionID)}"
 							status="${productionStatus}"
 							cancel="true"><i class="fas fa-clone"></i>
 							Revise
@@ -1634,17 +1652,17 @@ $(document).ready(function () {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn px-5 py-2" 
+							class="btn btn-submit px-5 py-2" 
 							id="btnApprove" 
 							productionID="${encryptString(productionID)}"
-							code="${getFormCode("PRD", createdAt, productionID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("PDN", createdAt, productionID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel px-5 py-2"
 							id="btnReject" 
 							productionID="${encryptString(productionID)}"
-							code="${getFormCode("PRD", createdAt, productionID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("PDN", createdAt, productionID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -1653,7 +1671,7 @@ $(document).ready(function () {
 		} else {
 			button = `
 			<button 
-				class="btn px-5 py-2" 
+				class="btn btn-submit px-5 py-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
@@ -1976,47 +1994,48 @@ $(document).ready(function () {
 				<td>
                     <small>${ activityDescription ||""} </small>
                 </td>
-				<td>
-                    <small>${statusBadgeRow || "-"} </small>
-                </td>
 				
-              
+				
             </tr>`;
+
+			// <td>
+            //         <small>${statusBadgeRow || "-"} </small>
+            //     </td>
         } else {
 
-			if(productionStatus != 0){
-				html += `
-				<tr>
-					<td>
-						${"-"}
-					</td>
-					<td>
-						${"-"}
-					</td>
-					<td>
-						${"-"}
-					</td>
-					<td>
-						${"-"}
-					</td>
-					<td>
-						${"-"}
-					</td>
-					<td>
-						${"-"}
-					</td>
-					<td>
-						${"-"}
-					</td>
-					<td>
-						${"-"}
-					</td>
-					<td>
-						${"-"}
-					</td>
+			// if(productionStatus != 0){
+				// html += `
+				// <tr>
+				// 	<td>
+				// 		${"-"}
+				// 	</td>
+				// 	<td>
+				// 		${"-"}
+				// 	</td>
+				// 	<td>
+				// 		${"-"}
+				// 	</td>
+				// 	<td>
+				// 		${"-"}
+				// 	</td>
+				// 	<td>
+				// 		${"-"}
+				// 	</td>
+				// 	<td>
+				// 		${"-"}
+				// 	</td>
+				// 	<td>
+				// 		${"-"}
+				// 	</td>
+				// 	<td>
+				// 		${"-"}
+				// 	</td>
+					
 				  
-				</tr>`;
-			}else{
+				// </tr>`;
+
+
+			// }else{
 				html += `
 				<tr>
 					 <td class="text-center">
@@ -2050,7 +2069,16 @@ $(document).ready(function () {
 	
 					<td>
 						<div class="form-group mb-0 activityLocationParent">
-						${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityLocation != "null" ? activityLocation  : ""}` : `<input type="text" class="form-control text-center autoSaved" name="activityLocation" id="activityLocation0" value="${activityLocation}" >
+						${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityLocation != "null" ? activityLocation  : ""}` 
+						: `<input type="text" 
+						class="form-control text-center autoSaved validate" 
+						name="activityLocation" 
+						id="activityLocation0" 
+						placeholder="N/A"
+						data-allowcharacters="[a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][[][]][ ]"
+                        minlength="1"
+                        maxlength="75"
+						value="${activityLocation}" >
 						<div class="d-block invalid-feedback"></div>`}
 							
 						</div>
@@ -2060,15 +2088,12 @@ $(document).ready(function () {
 						<div class="form-group  mb-0 activityClassParent">
 
 						${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityClass || "-" }` : `<select class="form-control validate select2 autoSaved" name="activityClass" id="activityClass0">
-						<option disabled selected>Select Class</option>
+						<option selected>Please select a category</option>
 						<option value="Billable" ${activityClass == "Billable" ? "selected" : ""}>
 							Billable
 						</option>
 						<option value="Non-Billable" ${activityClass == "Non-Billable" ? "selected" : ""}>
 							Non-billable
-						</option>
-						<option value="Pro-Bono" ${activityClass == "Pro-Bono" ? "selected" : ""}>
-							Pro-bono
 						</option>
 					</select>
 					<div class="d-block invalid-feedback"></div>` }
@@ -2091,7 +2116,7 @@ $(document).ready(function () {
 					<td>
 						<div class="form-group  mb-0 activityProjectParent">
 							${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityProjectName || "-"}` : `<select class="form-control validate select2 autoSaved" name="activityProject" id="activityProject0">
-							${getprojectList(activityProject)}
+							${getprojectList(activityProject,true,activityClient)}
 						</select>
 						<div class="d-block invalid-feedback"></div>`}
 							
@@ -2101,35 +2126,36 @@ $(document).ready(function () {
 					<td>
 						<div class="form-group mb-0 activityDescriptionParent">
 							${leaveRequestID != 0 || overtimeRequestID != 0 ? `<small>${ activityDescription ||""}</small>` : `<textarea rows="2" class="form-control validate autoSaved" name="activityDescription" id="activityDescription0"
-							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" minlength="0"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][[][]][ ]" minlength="2"
 							maxlength="325"  >${ activityDescription ||""}</textarea>`}
 							<div class="d-block invalid-feedback"></div>
 						</div>
 					</td>
 	
-					<td>
-						<div class="form-group  mb-0 activityStatusParent">
-
-						${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityStatus || "-"}` : `<select class="form-control validate select2 autoSaved" name="activityStatus"  id="activityStatus0">
-						<option disabled selected>Select Status</option>
-						<option value="Pending" ${activityStatus == "Pending" ? "selected" : ""}>
-							Pending
-						</option>
-						<option value="Done" ${activityStatus == "Done" ? "selected" : ""}>
-							Done
-						</option>
-						<option value="Overdue" ${activityStatus == "Overdue" ? "selected" : ""}>
-							Overdue
-						</option>
-					</select>
-					<div class="d-block invalid-feedback"></div>`}
-							
-						</div>
-					</td>
+					
 	
 					
 				</tr>`;
-			}
+				// <td>
+				// 		<div class="form-group  mb-0 activityStatusParent">
+
+				// 		${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityStatus || "-"}` : `<select class="form-control validate select2 autoSaved" name="activityStatus"  id="activityStatus0">
+				// 		<option disabled selected>Select Status</option>
+				// 		<option value="Pending" ${activityStatus == "Pending" ? "selected" : ""}>
+				// 			Pending
+				// 		</option>
+				// 		<option value="Done" ${activityStatus == "Done" ? "selected" : ""}>
+				// 			Done
+				// 		</option>
+				// 		<option value="Overdue" ${activityStatus == "Overdue" ? "selected" : ""}>
+				// 			Overdue
+				// 		</option>
+				// 	</select>
+				// 	<div class="d-block invalid-feedback"></div>`}
+							
+				// 		</div>
+				// 	</td>
+			// }
       
         }
 		
@@ -2141,8 +2167,8 @@ $(document).ready(function () {
 	function deleteTableRow() {
 		if ($(`.checkboxrow:checked`).length != $(`.checkboxrow`).length) {
 			Swal.fire({
-				title:              "DELETE ROWS",
-				text:               "Are you sure to delete these rows?",
+				title:              "DELETE ROW",
+				text:               "Are you sure that you want to delete the selected row/s?",
 				imageUrl:           `${base_url}assets/modal/delete.svg`,
 				imageWidth:         200,
 				imageHeight:        200,
@@ -2169,7 +2195,7 @@ $(document).ready(function () {
 			});
 			
 		} else {
-			showNotification("danger", "You must have atleast one or more activity.");
+			showNotification("danger", "You must have at least one or more activity.");
 		}
 	}
 	// ----- END DELETE TABLE ROW -----
@@ -2220,7 +2246,7 @@ $(document).ready(function () {
 		// readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("productionID", productionID ? encryptString(productionID) : "");
-		$("#btnBack").attr("code", getFormCode("PRD", moment(createdAt), productionID));
+		$("#btnBack").attr("code", getFormCode("PDN", moment(createdAt), productionID));
 		$("#btnBack").attr("status", productionStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
@@ -2237,7 +2263,7 @@ $(document).ready(function () {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("PRD", createdAt, reviseDocumentNo)}
+						${getFormCode("PDN", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -2330,12 +2356,36 @@ $(document).ready(function () {
                     </div>
                 </div>
             </div>
+
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Prepared By</label>
+                    <input type="text" class="form-control" disabled value="${employeeFullname}">
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" class="form-control" disabled value="${employeeDepartment}">
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" class="form-control" disabled value="${employeeDesignation}">
+                </div>
+            </div>
+
         </div>
+
+		 
 
         <div class="row card-body" id="form_leave_request">
             
 				<div class=" card-body col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 text-left">
-					<h6 class="bg-primary text-light p-3"><strong>ENTRIES</strong></h6>
+					<h6 class="bg-primary text-light p-3"><strong>Production Dates</strong></h6>
 					<div style="height: 510px;overflow-y: scroll;">`;
 
 					
@@ -2365,25 +2415,26 @@ $(document).ready(function () {
 			
 
 			<div class=" card-body col-sm-12 col-md-12 col-lg-10 col-xl-10 p-2 text-left">
-					<h6 class="bg-primary text-light p-3 mb-3"><strong class="activityHeader">VIEW ACTIVITIES: ${moment(entries[0].dateEntries).format("MMMM DD, YYYY")} (${entries[0].dayEntries})</strong></h6>
+					<h6 class="bg-primary text-light p-3 mb-3"><strong class="activityHeader">VIEW ACTIVITIES: ${entries[0].dayEntries}, ${moment(entries[0].dateEntries).format("MMMM DD, YYYY")}</strong></h6>
 					<table class="table table-bordered table-striped table-hover" id="${!readOnly ? "tableForActivity" : "tableForActivity0"}">
 						<thead>
 							<tr style="white-space: nowrap">
 								${tableCheckbox}
-								<th>Time Start Period</th>
-								<th>Time End Period</th>
+								<th>Start Time</th>
+								<th>End Time</th>
 								<th>Hours</th>
 								<th>Location</th>
-								<th>Class</th>
+								<th>Category</th>
 								<th>Client</th>
 								<th>Project</th>
 								<th>Activity</th>
-								<th>Status</th>
 								
 							</tr>
 						</thead>
 						<tbody class="activityTableBody" id="activityTableBody">
 			`;
+			// <th>Status</th>
+
 						let getActivities = getTableData(`hris_production_activity_tbl`,'',`productionEntriesID = ${entries[0].productionEntriesID}`);
 						if(getActivities.length >0){
 							getActivities.map((entry)=>{
@@ -2441,7 +2492,7 @@ $(document).ready(function () {
 			initDataTables();
             initDataTablesForActivity();
 			updateTableItems();
-			updateClientOptions();
+			// updateClientOptions();
 			// updateProjectOptions();
 			initAll();
 			// $('.js-example-basic-multiple'+date_counter).select2({dropdownAutoWidth : true});
@@ -2495,7 +2546,7 @@ $(document).ready(function () {
 		// readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("productionID", productionID ? encryptString(productionID) : "");
-		$("#btnBack").attr("code", getFormCode("PRD", moment(createdAt), productionID));
+		$("#btnBack").attr("code", getFormCode("PDN", moment(createdAt), productionID));
 		$("#btnBack").attr("status", productionStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
@@ -2510,7 +2561,7 @@ $(document).ready(function () {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("PRD", createdAt, reviseDocumentNo)}
+						${getFormCode("PDN", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -2584,30 +2635,51 @@ $(document).ready(function () {
                     </div>
                 </div>
             </div>
+
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Prepared By</label>
+                    <input type="text" class="form-control" disabled value="${employeeFullname}">
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" class="form-control" disabled value="${employeeDepartment}">
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" class="form-control" disabled value="${employeeDesignation}">
+                </div>
+            </div>
         </div>
 
     
             
 		<div class=" card-body col-sm-12 col-md-12 col-lg-12 col-xl-12 p-2 text-left">
 					<hr class="w-100">
-					<h6 class="bg-primary text-light p-3 mb-3"><strong class="activityHeader">Covered Period:  ${productionSchedule}</strong></h6>
+					<h6 class="bg-primary text-light p-3 mb-3"><strong class="activityHeader">Covered Dates:  ${productionSchedule}</strong></h6>
 					<div class="table-responsive">
 						<table class="table table-bordered table-striped" id="tableListActivity">
 							<thead>
 								<tr style="white-space: nowrap">
 								
-									<th>Time Start Period</th>
-									<th>Time End Period</th>
+									<th>Start Time</th>
+									<th>End Time</th>
 									<th>Location</th>
-									<th>Class</th>
-									<th>Client</th>
-									<th>Project</th>
+									<th>Category</th>
+									<th>Client/Project</th>
 									<th>Activity</th>
-									<th>Status</th>
+									
 									<th>Hours</th>
 								</tr>
 							</thead>
 							<tbody class="" id="">`;
+							// <th>Status</th>
 
 						
 							var manHoursTotal = 0;	
@@ -2684,22 +2756,21 @@ $(document).ready(function () {
 											<small> ${activityClass || "-"} </small>
 										</td>
 										<td>
-											<small> ${activityClientName || "-"} </small>
-										</td>
-										<td>
-										<small> ${activityProjectName || "-"}</small>
+											<div> ${activityClientName || "-"} </div>
+											<small> ${activityProjectName || "-"}</small>
 										</td>
 										<td>
 											<small>${ activityDescription ||""} </small>
 										</td>
-										<td>
-											<small>${statusBadgeRow || "-"} </small>
-										</td>
+										
 										<td class="text-center">
 											<small>${formatAmount(activityHours)} </small>
 										</td>
 									
 									</tr>`;
+									// <td>
+									// 		<small>${statusBadgeRow || "-"} </small>
+									// 	</td>
 
 									manHoursSubtotal += parseFloat(activityHours) || 0;
 									manHoursTotal += manHoursSubtotal || 0;
@@ -2709,8 +2780,8 @@ $(document).ready(function () {
 								
 								html += `
 								<tr class="bg-success">
-									<td colspan="8">
-										<small class=" text-light p-3 mb-3"><strong class="activityHeader">${moment(dateEntries).format("MMMM DD, YYYY")} - ${dayEntries}</strong> </small>
+									<td colspan="6">
+										<small class=" text-light p-3 mb-3"><strong class="activityHeader">${dayEntries}, ${moment(dateEntries).format("MMMM DD, YYYY")}</strong> </small>
 									</td>
 									<td class="text-center text-white">
 										<small><strong>${formatAmount(manHoursSubtotal)}</strong></small>
@@ -2802,7 +2873,7 @@ $(document).ready(function () {
 			delete data["tableData"].activityDescription;
 			delete data["tableData"].activityLocation;
 			delete data["tableData"].activityProject;
-			delete data["tableData"].activityStatus;
+			// delete data["tableData"].activityStatus;
 			delete data["tableData"].timePeriodEnd;
 			delete data["tableData"].timePeriodStart;
 			
@@ -2888,9 +2959,9 @@ $(document).ready(function () {
 
 				// let swalTitle;
 				// if (action == "add") {
-				// 	swalTitle = `${getFormCode("PRD", dateCreated, insertedID)} created successfully!`;
+				// 	swalTitle = `${getFormCode("PDN", dateCreated, insertedID)} created successfully!`;
 				// } else if (action == "update") {
-				// 	swalTitle = `${getFormCode("PRD", dateCreated, insertedID)} updated successfully!`;
+				// 	swalTitle = `${getFormCode("PDN", dateCreated, insertedID)} updated successfully!`;
 				// }
 
 				// if (isSuccess == "true") {
@@ -3009,7 +3080,7 @@ $(document).ready(function () {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("PRD", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("PDN", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		// if (status != "false" && status != 0) {
@@ -3020,7 +3091,7 @@ $(document).ready(function () {
 			// 	data["leaveRequestStatus"] = 0;
 			// 	if (!isFromCancelledDocument) {
 			// 		data["reviseLeaveRequestID"] = id;
-			// 		data[`feedback`] = getFormCode("PRD", new Date);
+			// 		data[`feedback`] = getFormCode("PDN", new Date);
 			// 		delete data["leaveRequestID"];
 			// 	} else {
 			// 		delete data["action"];
@@ -3091,7 +3162,7 @@ $(document).ready(function () {
 		
 
 		if (validate) {
-			const feedback = $(this).attr("code") || getFormCode("PRD", dateToday(), id);
+			const feedback = $(this).attr("code") || getFormCode("PDN", dateToday(), id);
 			const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data     = getData(action, 1, "submit", feedback, id);
 
@@ -3099,7 +3170,7 @@ $(document).ready(function () {
 				if (!isFromCancelledDocument) {
 					data[`tableData[reviseProductionID]`] = id;
 					delete data[`tableData[productionID]`];
-					data["feedback"] = getFormCode("PRD", new Date);
+					data["feedback"] = getFormCode("PDN", new Date);
 				} else {
 					data[`whereFilter`] = `productionID = ${id}`;
 				}
@@ -3115,7 +3186,7 @@ $(document).ready(function () {
 			if (employeeID != sessionID) {
 				notificationData = {
 					moduleID:                143,
-					notificationTitle:       "Production Report",
+					notificationTitle:       "Production",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
@@ -3127,7 +3198,7 @@ $(document).ready(function () {
 				formConfirmation(
 					"submit",
 					action,
-					"PRODUCTION REPORT",
+					"PRODUCTION",
 					"",
 					"form_leave_request",
 					data,
@@ -3147,14 +3218,14 @@ $(document).ready(function () {
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
 		const id       = decryptString($(this).attr("productionID"));
-		const feedback = $(this).attr("code") || getFormCode("PRD", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PDN", dateToday(), id);
 		const action   = "update";
 		const data     = getData(action, 4, "cancelform", feedback, id);
 
 		formConfirmation(
 			"cancelform",
 			action,
-			"PRODUCTION REPORT",
+			"PRODUCTION",
 			"",
 			"form_leave_request",
 			data,
@@ -3170,14 +3241,14 @@ $(document).ready(function () {
 		const id       = decryptString($(this).attr("productionID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("PRD", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PDN", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getData(action, 0, "save", feedback);
 		data[`tableData[productionStatus]`] = 0;
 
 		if (revise) {
 			if (!isFromCancelledDocument) {
-				data[`feedback`] = getFormCode("PRD", new Date);
+				data[`feedback`] = getFormCode("PDN", new Date);
 				data[`tableData[reviseProductionStatus]`] = id;
 				data[`whereFilter`] = `productionID = ${id}`;
 				delete data[`tableData[productionID]`];
@@ -3192,7 +3263,7 @@ $(document).ready(function () {
 		formConfirmation(
 			"save",
 			action,
-			"PRODUCTION REPORT",
+			"PRODUCTION",
 			"",
 			"form_leave_request",
 			data,
@@ -3221,7 +3292,7 @@ $(document).ready(function () {
 	$(document).on("click", "#btnApprove", function () {
 		formButtonHTML(this);
 		const id       = decryptString($(this).attr("productionID"));
-		const feedback = $(this).attr("code") || getFormCode("PRD", dateCreated, id);
+		const feedback = $(this).attr("code") || getFormCode("PDN", dateCreated, id);
 		let tableData  = getTableData("hris_production_tbl", "", "productionID = " + id);
 
 		if (tableData) {
@@ -3244,8 +3315,8 @@ $(document).ready(function () {
 				notificationData = {
 					moduleID:                143,
 					tableID:                 id,
-					notificationTitle:       "Production Report",
-					notificationDescription: `${getFormCode("PRD", createdAt, id)}: Your request has been approved.`,
+					notificationTitle:       "Production",
+					notificationDescription: `${getFormCode("PDN", createdAt, id)}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
 				};
@@ -3254,7 +3325,7 @@ $(document).ready(function () {
 				notificationData = {
 					moduleID:                143,
 					tableID:                 id,
-					notificationTitle:       "Production Report",
+					notificationTitle:       "Production",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
@@ -3267,7 +3338,7 @@ $(document).ready(function () {
 				formConfirmation(
 					"approve",
 					"update",
-					"PRODUCTION REPORT",
+					"PRODUCTION",
 					"",
 					"form_leave_request",
 					data,
@@ -3287,13 +3358,11 @@ $(document).ready(function () {
 
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = decryptString($(this).attr("leaveRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("PRD", dateToday(), id);
+		const id       = decryptString($(this).attr("productionID"));
+		const feedback = $(this).attr("code") || getFormCode("PDN", dateToday(), id);
 
 		$("#modal_leave_request_content").html(preloader);
-		$("#modal_leave_request .page-title").text(
-			"DENY PRODUCTION REPORT DOCUMENT"
-		);
+		$("#modal_leave_request .page-title").text("DENY PRODUCTION");
 		$("#modal_leave_request").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -3313,7 +3382,7 @@ $(document).ready(function () {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger px-5 py-2" id="btnRejectConfirmation"
-			leaveRequestID="${encryptString(id)}"
+			productionID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel px-5 py-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -3322,12 +3391,12 @@ $(document).ready(function () {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		formButtonHTML(this);
-		const id       = decryptString($(this).attr("leaveRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("PRD", dateToday(), id);
+		const id       = decryptString($(this).attr("productionID"));
+		const feedback = $(this).attr("code") || getFormCode("PDN", dateToday(), id);
 
 		const validate = validateForm("modal_leave_request");
 		if (validate) {
-			let tableData = getTableData("hris_leave_request_tbl", "", "leaveRequestID = " + id);
+			let tableData = getTableData("hris_production_tbl", "", "productionID = " + id);
 			if (tableData) {
 				let approversID     = tableData[0].approversID;
 				let approversStatus = tableData[0].approversStatus;
@@ -3343,8 +3412,8 @@ $(document).ready(function () {
 				let notificationData = {
 					moduleID:                143,
 					tableID: 				 id,
-					notificationTitle:       "Production Report",
-					notificationDescription: `${getFormCode("PRD", createdAt, id)}: Your request has been denied.`,
+					notificationTitle:       "Production",
+					notificationDescription: `${getFormCode("PDN", createdAt, id)}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
 				};
@@ -3353,7 +3422,7 @@ $(document).ready(function () {
 					formConfirmation(
 						"reject",
 						"update",
-						"PRODUCTION REPORT",
+						"PRODUCTION",
 						"modal_leave_request",
 						"",
 						data,

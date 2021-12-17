@@ -17,7 +17,7 @@ class Timekeeping_module extends CI_Controller {
         $syncEmployee   = $this->employeeattendance->syncEmployeeToBiotime();
         $syncAttendance = $this->employeeattendance->syncEmployeeAttendance();
 
-        $data["title"] = "Timekeeping Module";
+        $data["title"] = "Timekeeping Process";
         $this->load->view("template/header", $data);
         $this->load->view("hris/timekeeping_module/index");
         $this->load->view("template/footer");
@@ -37,7 +37,7 @@ class Timekeeping_module extends CI_Controller {
     public function getLateUndertimeDuration($scheduleIn = "", $scheduleOut = "", $scheduleDuration = 0, $checkIn = "", $checkOut = "")
     {
         $lateDuration = $undertimeDuration = 0;
-        if ($scheduleDuration > 0 && validateDate($scheduleIn) && validateDate($scheduleOut))
+        if ($scheduleDuration > 0 && validateDate($scheduleIn) && validateDate($scheduleOut) && validateDate($checkIn) && validateDate($checkOut))
         {
             if ($checkIn && validateDate($checkIn)) 
             {
@@ -69,6 +69,7 @@ class Timekeeping_module extends CI_Controller {
         $timekeepingReason    = $this->input->post("timekeepingReason") ?? null;
         $timekeepingStartDate = $this->input->post("timekeepingStartDate") ?? null;
         $timekeepingEndDate   = $this->input->post("timekeepingEndDate") ?? null;
+        $cutOff               = $this->input->post("cutOff") ?? null;
         $timekeepingStatus    = $this->input->post("timekeepingStatus") ?? null;
         $approversID          = $this->input->post("approversID") ?? null;
         $approversStatus      = $this->input->post("approversStatus") ?? null;
@@ -86,6 +87,7 @@ class Timekeeping_module extends CI_Controller {
             "timekeepingReason"    => $timekeepingReason,
             "timekeepingStartDate" => $timekeepingStartDate,
             "timekeepingEndDate"   => $timekeepingEndDate,
+            "cutOff"               => $cutOff,
             "timekeepingStatus"    => $timekeepingStatus,
             "approversID"          => $approversID,
             "approversStatus"      => $approversStatus,
@@ -138,12 +140,15 @@ class Timekeeping_module extends CI_Controller {
             if ($result[0] == "true") {
                 $timekeepingID = $result[2];
 
-                if ($items) {
+                if ($items && !empty($items)) {
                     $deleteTimekeeping = $this->timekeeping->deleteTimekeeping($timekeepingID);
+
+                    $cutOffCount = getCutOffCount();
 
                     $timekeepingProduction = [];
                     foreach($items as $item) {
                         $employeeID            = $item["employeeID"] ?? null;
+                        $workingDays           = $item["workingDays"] ?? 0;
                         $scheduleDate          = $item["scheduleDate"] ?? null;
                         $scheduleIn            = $item["scheduleIn"] ?? null;
                         $scheduleOut           = $item["scheduleOut"] ?? null;
@@ -177,9 +182,16 @@ class Timekeeping_module extends CI_Controller {
                         $totalHours            = $item["totalHours"] ?? null;
                         $status                = $item["status"] ?? null;
 
-                        $lateUndertimeDuration = $this->getLateUndertimeDuration($scheduleIn, $scheduleOut, $scheduleDuration, $finalCheckIn, $finalCheckOut);
+                        $averageDate     = $this->timekeeping->getAverageDate($scheduleIn, $scheduleOut, $scheduleBreakDuration);
+                        $isMorningLeave  = $this->timekeeping->isMorningLeave($scheduleIn, $scheduleOut, $scheduleBreakDuration, $checkIn);
+                        $tempScheduleIn  = $isMorningLeave ? $averageDate : $scheduleIn;
+                        $tempScheduleOut = $isMorningLeave ? $scheduleOut : $averageDate;
+
+                        $lateUndertimeDuration = $this->getLateUndertimeDuration($tempScheduleIn, $tempScheduleOut, $scheduleDuration, $finalCheckIn, $finalCheckOut);
                         $lateDuration      = $lateUndertimeDuration["lateDuration"] ?? 0;
+                        $lateDuration      = $lateDuration > $scheduleBreakDuration ? $lateDuration - $scheduleBreakDuration : $lateDuration;
                         $undertimeDuration = $lateUndertimeDuration["undertimeDuration"] ?? 0;
+                        
 
                         $dayType = $this->timekeeping->getDayType($scheduleDate);
 
@@ -201,52 +213,61 @@ class Timekeeping_module extends CI_Controller {
                                 "date"    => $scheduleDate,
                                 "timeIn"  => $overtimeIn,
                                 "timeOut" => $overtimeOut,
-                                "break"   => 0 // Overtime Break
+                                "break"   => $overtimeBreakDuration
                             ]
                         ];
                         if ($leaveID && $leaveID != 0)
                         {
                             $timeArray[] = [
-                                "type"    => "leave",
-                                "date"    => $scheduleDate,
-                                "timeIn"  => $leaveWorkingDay == 0 ? $leaveIn : $scheduleIn,
-                                "timeOut" => $leaveWorkingDay == 0 ? $leaveOut : $scheduleOut,
-                                "break"   => $leaveWorkingDay == 0 ? $tempBreakDuration : $scheduleBreakDuration,
+                                "type"     => "leave",
+                                "date"     => $scheduleDate,
+                                "timeIn"   => $leaveWorkingDay == 0 ? $leaveIn : $scheduleIn,
+                                "timeOut"  => $leaveWorkingDay == 0 ? $leaveOut : $scheduleOut,
+                                "break"    => $leaveWorkingDay == 0 ? $tempBreakDuration : $scheduleBreakDuration,
                                 "duration" => $leaveDuration
                             ];
                         }
 
                         $production = $this->timekeeping->getProduction($dayType, $restDay == '1', $timeArray); // GET PRODUCTION
 
-                        $odBrHours  = $production["odBrHours"]  ?? 0;
-						$odOrHours  = $production["odOrHours"]  ?? 0;
-						$odNrHours  = $production["odNrHours"]  ?? 0;
-						$odBrrHours = $production["odBrrHours"] ?? 0;
-						$odOrrHours = $production["odOrrHours"] ?? 0;
-						$odNrrHours = $production["odNrrHours"] ?? 0;
-						$sdBrHours  = $production["sdBrHours"]  ?? 0;
-						$sdOrHours  = $production["sdOrHours"]  ?? 0;
-						$sdNrHours  = $production["sdNrHours"]  ?? 0;
-						$sdBrrHours = $production["sdBrrHours"] ?? 0;
-						$sdOrrHours = $production["sdOrrHours"] ?? 0;
-						$sdNrrHours = $production["sdNrrHours"] ?? 0;
-						$rhBrHours  = $production["rhBrHours"]  ?? 0;
-						$rhOrHours  = $production["rhOrHours"]  ?? 0;
-						$rhNrHours  = $production["rhNrHours"]  ?? 0;
-						$rhBrrHours = $production["rhBrrHours"] ?? 0;
-						$rhOrrHours = $production["rhOrrHours"] ?? 0;
-						$rhNrrHours = $production["rhNrrHours"] ?? 0;
-						$dhBrHours  = $production["dhBrHours"]  ?? 0;
-						$dhOrHours  = $production["dhOrHours"]  ?? 0;
-						$dhNrHours  = $production["dhNrHours"]  ?? 0;
-						$dhBrrHours = $production["dhBrrHours"] ?? 0;
-						$dhOrrHours = $production["dhOrrHours"] ?? 0;
-						$dhNrrHours = $production["dhNrrHours"] ?? 0;
+                        $odBrHours    = $basicHours > 0 ? $production["odBrHours"]    ?? 0 : 0;
+						$odOrHours    = $basicHours > 0 ? $production["odOrHours"]    ?? 0 : 0;
+						$odNrHours    = $basicHours > 0 ? $production["odNrHours"]    ?? 0 : 0;
+						$odBrrHours   = $basicHours > 0 ? $production["odBrrHours"]   ?? 0 : 0;
+						$odOrrHours   = $basicHours > 0 ? $production["odOrrHours"]   ?? 0 : 0;
+						$odNrrHours   = $basicHours > 0 ? $production["odNrrHours"]   ?? 0 : 0;
+						$sdBrHours    = $basicHours > 0 ? $production["sdBrHours"]    ?? 0 : 0;
+						$sdOrHours    = $basicHours > 0 ? $production["sdOrHours"]    ?? 0 : 0;
+						$sdNrHours    = $basicHours > 0 ? $production["sdNrHours"]    ?? 0 : 0;
+						$sdBrrHours   = $basicHours > 0 ? $production["sdBrrHours"]   ?? 0 : 0;
+						$sdOrrHours   = $basicHours > 0 ? $production["sdOrrHours"]   ?? 0 : 0;
+						$sdNrrHours   = $basicHours > 0 ? $production["sdNrrHours"]   ?? 0 : 0;
+						$rhBrHours    = $basicHours > 0 ? $production["rhBrHours"]    ?? 0 : 0;
+						$rhOrHours    = $basicHours > 0 ? $production["rhOrHours"]    ?? 0 : 0;
+						$rhNrHours    = $basicHours > 0 ? $production["rhNrHours"]    ?? 0 : 0;
+						$rhBrrHours   = $basicHours > 0 ? $production["rhBrrHours"]   ?? 0 : 0;
+						$rhOrrHours   = $basicHours > 0 ? $production["rhOrrHours"]   ?? 0 : 0;
+						$rhNrrHours   = $basicHours > 0 ? $production["rhNrrHours"]   ?? 0 : 0;
+						$dhBrHours    = $basicHours > 0 ? $production["dhBrHours"]    ?? 0 : 0;
+						$dhOrHours    = $basicHours > 0 ? $production["dhOrHours"]    ?? 0 : 0;
+						$dhNrHours    = $basicHours > 0 ? $production["dhNrHours"]    ?? 0 : 0;
+						$dhBrrHours   = $basicHours > 0 ? $production["dhBrrHours"]   ?? 0 : 0;
+						$dhOrrHours   = $basicHours > 0 ? $production["dhOrrHours"]   ?? 0 : 0;
+						$dhNrrHours   = $basicHours > 0 ? $production["dhNrrHours"]   ?? 0 : 0;
+						$odOrNrHours  = $basicHours > 0 ? $production["odOrNrHours"]  ?? 0 : 0;
+						$odOrNrrHours = $basicHours > 0 ? $production["odOrNrrHours"] ?? 0 : 0;
+						$sdOrNrHours  = $basicHours > 0 ? $production["sdOrNrHours"]  ?? 0 : 0;
+						$sdOrNrrHours = $basicHours > 0 ? $production["sdOrNrrHours"] ?? 0 : 0;
+						$rhOrNrHours  = $basicHours > 0 ? $production["rhOrNrHours"]  ?? 0 : 0;
+						$rhOrNrrHours = $basicHours > 0 ? $production["rhOrNrrHours"] ?? 0 : 0;
+						$dhOrNrHours  = $basicHours > 0 ? $production["dhOrNrHours"]  ?? 0 : 0;
+						$dhOrNrrHours = $basicHours > 0 ? $production["dhOrNrrHours"] ?? 0 : 0;
 
                         $timekeepingItem = [
                             "timekeepingID"         => $timekeepingID,
                             "employeeID"            => $employeeID,
-                            "hourlyRate"            => getPayrollHourlyRate($employeeID),
+                            "workingDays"           => $workingDays,
+                            "hourlyRate"            => getPayrollHourlyRate($employeeID, $cutOffCount, $workingDays, $scheduleDuration),
                             "scheduleDate"          => $scheduleDate,
                             "scheduleIn"            => $scheduleIn,
                             "scheduleOut"           => $scheduleOut,
@@ -319,6 +340,14 @@ class Timekeeping_module extends CI_Controller {
                                 "dhBrrHours"        => $dhBrrHours,
                                 "dhOrrHours"        => $dhOrrHours,
                                 "dhNrrHours"        => $dhNrrHours,
+                                "odOrNrHours"       => $odOrNrHours,
+                                "odOrNrrHours"      => $odOrNrrHours,
+                                "sdOrNrHours"       => $sdOrNrHours,
+                                "sdOrNrrHours"      => $sdOrNrrHours,
+                                "rhOrNrHours"       => $rhOrNrHours,
+                                "rhOrNrrHours"      => $rhOrNrrHours,
+                                "dhOrNrHours"       => $dhOrNrHours,
+                                "dhOrNrrHours"      => $dhOrNrrHours,
                             ];
 
                             array_push($timekeepingProduction, $temp);
@@ -516,6 +545,7 @@ class Timekeeping_module extends CI_Controller {
         echo json_encode(getCutOff());
     }
     // ----- END CUTOFF -----
+
 
 
 }

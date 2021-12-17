@@ -16,23 +16,19 @@
 						<li class="breadcrumb-item active">Employee Dashboard</li>
 					</ul>
 					<h1 class="mt-3">Employee Dashboard</h1>
-					<span>Displays useful and informative data for employee's use.</span>
-				</div>
-			</div>
-		</div>
-
-		<div class="container">
-			<div class="row clearfix row-deck mx-1">
-				<div class="card col-12">
-					<div class="card-body" id="page_content">	<!--- start --->
-					
-
-						
-					</div> 	<!--- end --->
+					<span>This module is used to monitor employee dashboard.</span>
 				</div>
 			</div>
 		</div>
 	</div>
+
+
+		<div class="container">
+			<div class="row clearfix row-deck mx-1">
+				<div class="card col-12">
+					<div class="card-body" id="page_content"></div>
+			</div>
+		</div>
 
 
 </div>

@@ -294,8 +294,7 @@ $(document).ready(function () {
 				submittedAt,
 				createdAt,
 			} = schedule;
-			let leaveDateSplit= leaveRequestDate.split(" - ");
-			let leaveDate 	  = leaveDateSplit[0] == leaveDateSplit[1] ? leaveDateSplit[0] : leaveDateSplit[0]+" - "+leaveDateSplit[1];
+			let leaveDate 	  = leaveRequestDate ? moment(leaveRequestDate).format("MMMM DD, YYYY") : "-";
 			let remarks       = leaveRequestRemarks ? leaveRequestRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
@@ -400,8 +399,7 @@ $(document).ready(function () {
 				createdAt,
 			} = item;
 
-			let leaveDateSplit= leaveRequestDate.split(" - ");
-			let leaveDate 	  = leaveDateSplit[0] == leaveDateSplit[1] ? leaveDateSplit[0] : leaveDateSplit[0]+" - "+leaveDateSplit[1];
+			let leaveDate 	  = leaveRequestDate ?  moment(leaveRequestDate).format("MMMM DD, YYYY") : "-"
 			let remarks       = leaveRequestRemarks ? leaveRequestRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
@@ -606,7 +604,7 @@ $(document).ready(function () {
 			leaveCredit      = 0,
 			leaveAccumulated = 0
 		} = data && data[0];
-		console.log(leaveCredit, leaveAccumulated);
+		// console.log(leaveCredit, leaveAccumulated);
 		return Math.floor((+leaveCredit) + (+leaveAccumulated));
 	}
 	// ----- END GET LEAVE CREDIT -----
@@ -669,6 +667,9 @@ $(document).ready(function () {
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
+		const approverList = approversID ? approversID.split("|" ) : 0;
+		const lastApproverID = approversID ?  approverList[approverList.length - 1]  : 0;
+		let paiddisabled = leaveRequestStatus == 1 && lastApproverID == sessionID ? "" : "disabled";
 		let workDayDisabled = leaveWorkingDay == 1 ? "disabled" : "";
 		let button   = formButtons(data, isRevise, isFromCancelledDocument);
 
@@ -795,7 +796,7 @@ $(document).ready(function () {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Status</label>
-                      <select class="form-control select2" id="leaveStatus" name="leaveStatus" ${disabled} required>
+                      <select class="form-control select2" id="leaveStatus" name="leaveStatus" ${paiddisabled} required>
                         <option value="0" ${data && leaveStatus == "0" && "selected"}>Unpaid</option>
  						<option value="1" ${data && leaveStatus == "1" && "selected"}>Paid</option>
  						</select>
@@ -869,7 +870,7 @@ $(document).ready(function () {
                         rows="4"
                         style="resize:none;"
 						${disabled}>${leaveRequestReason}</textarea>
-						<small><mark>Note: ';' to separate multiple activities</mark></small>
+					
                     <div class="d-block invalid-feedback" id="invalid-leaveRequestReason"></div>
                 </div>
             </div>
@@ -901,9 +902,18 @@ $(document).ready(function () {
 				(leaveRequestStatus == 1 || leaveRequestStatus == 2) && uniqueData.push(unique);
 			})
 			$("#page_content").html(html);
+
 			initAll();
 			initDataTables();
             leaveRequestDateRange(leaveRequestDateFrom, leaveRequestDateTo, employeeSchedule, holidayData);
+
+			let getLeaveCredits = getTableData(
+				"hris_employee_leave_tbl",
+				`IFNULL(leaveCredit,0)AS creditLeft`,
+				`leaveID = ${leaveID || 0} AND  employeeID = ${employeeID || sessionID}`
+			);
+
+			leaveRequestStatus == 1 ? $("#leaveRequestRemainingLeave").val(getLeaveCredits[0].creditLeft) : "";
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -928,7 +938,7 @@ $(document).ready(function () {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
-			let html = `
+		let html = `
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
@@ -966,6 +976,8 @@ $(document).ready(function () {
 			$("#timeIn").prop("disabled",false);
 			$("#timeOut").prop("disabled",false);
 
+	
+
 		}else{
 			$("#leaveRequestNumberOfDate").val(numberOfDays);
 
@@ -974,6 +986,8 @@ $(document).ready(function () {
 
 			$("#timeOut").prop("disabled",true);
 			$("#timeOut").val(0);
+
+
 
 		}
 	});	
@@ -1135,7 +1149,9 @@ $(document).ready(function () {
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		formButtonHTML(this);
-		const id           = decryptString($(this).attr("leaveRequestID"));
+		const id           				= decryptString($(this).attr("leaveRequestID"));
+		const leaveID           		= $("#leaveID option:selected").val();
+		const leaveCredit           	= $("#leaveRequestNumberOfDate").val();
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_leave_request");
@@ -1183,9 +1199,14 @@ $(document).ready(function () {
 					true,
 					pageContent,
 					notificationData,
-					this
+					this,
+					data[`tableData[leaveRequestStatus]`] == 2 ? updateEmployeeLeave : false,
+					data[`tableData[leaveRequestStatus]`] == 2 ?  [employeeID, leaveID, leaveCredit,id] : [],
 				);
+			
 			}, 300);
+
+			
 		} else {
 			formButtonHTML(this, false);
 		}
@@ -1255,13 +1276,19 @@ $(document).ready(function () {
 	// ----- UPDATE EMPLOYEE LEAVE -----
 	function updateEmployeeLeave(employeeID = 0, leaveID = 0, leaveCredit = 0,leaveRequestID = 0) {
 		const data = { employeeID, leaveID, leaveCredit };
-		$.ajax({
-			method: "POST",
-			url: `leave_request/updateEmployeeLeave`,
-			data,
-			dataType: "json",
-			success: function(data) {}
-		})
+
+		let getCreditStatus =  $("#leaveStatus option:selected").val();
+
+		if(getCreditStatus === 1){
+			$.ajax({
+				method: "POST",
+				url: `leave_request/updateEmployeeLeave`,
+				data,
+				dataType: "json",
+				success: function(data) {}
+			})
+		}
+	
 
 		generateProductionReport(employeeID,2,leaveRequestID);
 	}
@@ -1541,10 +1568,13 @@ function getLeaveOptions(leaveID  = 0) {
 function leaveRequestDateRange(iStartDate = new Date, iEndDate = new Date, employeeSchedule, holidayData){
 	$("#leaveRequestDate").attr("start", moment(iStartDate).format("YYYY-MM-DD"));
 	$("#leaveRequestDate").attr("end", moment(iEndDate).format("YYYY-MM-DD"));
-	console.log(iStartDate);
+	// console.log(iStartDate);
 
     $('#leaveRequestDate').daterangepicker({
+		singleDatePicker: true,
         "showDropdowns": true,
+		// minDate: moment(),
+		minDate: moment().subtract(7, "days"),
         startDate: moment(iStartDate),
         endDate:   moment(iEndDate),
         autoApply: true,
@@ -1579,12 +1609,13 @@ $(document).on("change","#leaveRequestDate", function(){
     let splitingValue       = thisValue.split("-");
     let fromDate            = new Date(splitingValue[0]); 	
     let toDate              = new Date(splitingValue[1]);
-    let numberOfDays        = Math.round((toDate-fromDate)/(1000*60*60*24)) + 1;
+    let numberOfDays        =  1;
 	var leaveWorkingDay 	= $("#leaveWorkingDay option:selected").val() || 0;
-    var remaining_of_days   = $("#leaveRequestRemainingLeave").val();
+	var leaveType 	= $("#leaveID option:selected").val() || 0;
+    var remaining_of_days   = parseFloat($("#leaveRequestRemainingLeave").val()) || 0;
 	var computeNumOfDays = 0;
 
-	if(leaveWorkingDay == 0){
+	if(leaveWorkingDay === "0"){
 		let countDeductDays  = parseFloat(numberOfDays * .5);
 		computeNumOfDays = parseFloat(numberOfDays) - countDeductDays;
 
@@ -1593,10 +1624,12 @@ $(document).on("change","#leaveRequestDate", function(){
 
 	}
 
-
+	// console.log(computeNumOfDays)
     $("#leaveRequestNumberOfDate").val(computeNumOfDays);
     $("#leaveRequestNumberOfDate").attr("numberOfDays",computeNumOfDays);
-    if(numberOfDays > remaining_of_days){
+
+if(leaveType !=0 ){
+	if(numberOfDays > remaining_of_days){
         $("#leaveRequestNumberOfDate").addClass("is-invalid");
         $("#invalid-leaveRequestNumberOfDate").addClass("is-invalid");
         $("#invalid-leaveRequestNumberOfDate").text("Not enough number of leave!");
@@ -1605,4 +1638,6 @@ $(document).on("change","#leaveRequestDate", function(){
         $("#invalid-leaveRequestNumberOfDate").removeClass("is-invalid");
         $("#invalid-leaveRequestNumberOfDate").text("");
     }
+}
+    
 });

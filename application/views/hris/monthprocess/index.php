@@ -6,10 +6,10 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-users-cog"></i> &nbsp;HR Modules</li>
-                        <li class="breadcrumb-item active">13th Month</li>
+                        <li class="breadcrumb-item active">13th Month Process</li>
                     </ul>
-                    <h1 class="mt-3">13th Month</h1>
-                    <span>This module is used to manage the releasing of 13th month.</span>
+                    <h1 class="mt-3">13th Month Process</h1>
+                    <span>This module is used to generate and monitor the 13th month of each employee.</span>
                 </div>
                 <?php if(isCreateAllowed(96)){ ?>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>

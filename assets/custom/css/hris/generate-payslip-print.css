@@ -1,0 +1,128 @@
+body {
+    font-size: 14px;
+}
+
+.container {
+    padding: 0 .5rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.font-weight-bold {
+    font-weight: bold;
+}
+
+/* .line-break {
+    height: 3px;
+    border-top: 1px dotted grey;
+} */
+
+/* ----- CARD ----- */
+.card {
+    height: 42vh;
+    padding: 4vh 0;
+}
+
+.card.line-break {
+    border-bottom: 1px dotted grey;
+}
+
+.card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px;
+}
+
+.card .card-header img {
+    width: 200px;
+    height: 40px;
+}
+
+.card .card-header .card-title {
+    /* margin-left: 1rem; */
+}
+/* ----- END CARD ----- */
+
+
+/* ----- TABLE ----- */
+.table-parent {
+    margin-top: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+/* ----- END TABLE ----- */
+
+
+/* ----- TABLE HEADER ----- */
+.table-header, .table-header th, .table-header td {
+    border: 1px solid white;
+    padding: 2px;
+    background-color: #dc3450;
+    font-weight: bold;
+    vertical-align: top;
+    white-space: wrap;
+}
+
+.table-header, .table-header th {
+    color: black;
+}
+
+.table-header, .table-header td {
+    color: white;
+}
+
+.table-header tr td div b {
+    font-size: .8rem;
+    /* color: black; */
+    letter-spacing: 1px;
+    font-weight: bolder;
+}
+/* ----- END TABLE HEADER ----- */
+
+
+/* ----- TABLE BODY ----- */
+.table-body, .table-body th, .table-body td {
+    border: 1px solid grey;
+    padding: 2px;
+}
+
+.table-body tr td div b {
+    font-size: .8rem;
+}
+/* ----- END TABLE BODY ----- */
+
+
+/* ----- TABLE FOOTER ----- */
+.table-footer, .table-footer th, .table-footer td {
+    border: 1px solid grey;
+    padding: 2px;
+}
+
+.table-footer tr td div b {
+    font-size: .8rem;
+}
+/* ----- END TABLE FOOTER ----- */
+
+
+@page { 
+    size:  auto; 
+    margin: 0; 
+}

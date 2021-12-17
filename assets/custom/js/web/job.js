@@ -41,7 +41,8 @@ $(document).ready(function() {
                 jobSlot,
                 salaryPackage as salaryRange,
                 jobStatus,
-                jpt.createdAt`,
+                jpt.createdAt,
+                ppr.designationID as designationID`,
                 `jobID=${jobID}`
                 );
             $("#table_content").html(jobInformation(jobData[0]));
@@ -62,6 +63,7 @@ $(document).ready(function() {
         let {
             jobID                   = "",
             jobCode                 = "",
+            designationID           = "",
             jobCompany              = "",
             jobTitle                = "",
             jobDescription          = "",
@@ -101,7 +103,7 @@ $(document).ready(function() {
                                         <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-globe"></i> www.theblackcoders.com</span>
                                         <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-phone"></i> 09279475792</span>
                                         <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-envelope"></i> hr@theblackcoders.com</span>
-                                        ${pending=="0" ? '<button class="btn btn-save pull-right" style="width:160px; line-height:1;" id="btnApply"><i class="fas fa-send"></i> Apply for job</button>' : ''}
+                                        ${pending=="0" ? `<button class="btn btn-save pull-right" style="width:160px; line-height:1;" designationid="${designationID||""}" id="btnApply"><i class="fas fa-send"></i> Apply for job</button>` : ''}
                                     </div>
                                 <hr>
                             </div>
@@ -190,11 +192,13 @@ $(document).ready(function() {
     
     $(document).on("click", "#btnApply", function () {
         const confirmation = getConfirmation("apply");
+        let designationID  = $(this).attr("designationid");
         confirmation.then(res => {
             if (res.isConfirmed) {
                 let data = new FormData();
                 data.append("applicantID",applicantID);
                 data.append("jobID",jobID);
+                data.append("designationID", designationID);
 
                 $("#loader").show();
                 $(".loader p").text('Loading...');

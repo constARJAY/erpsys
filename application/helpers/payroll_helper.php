@@ -1,5 +1,19 @@
 <?php
 
+    function decimalToHours($decimal = '0.00')
+    {
+        $decimal = (float) $decimal;
+
+        $num     = $decimal * 60;
+        $hours   = (string) floor($num / 60);
+        $minutes = (string) floor($num % 60);
+
+        $hourDisplay   = strlen($hours) > 1 ? $hours : "0$hours";
+        $minuteDisplay = strlen($minutes) > 1 ? $minutes : "0$minutes";
+
+        return "$hourDisplay:$minuteDisplay";
+    }
+
 
     // ---------- ********** DURATION ********** ----------
     function getDuration($timeIn = "", $timeOut = "", $breakDuration = 0)
@@ -52,9 +66,10 @@
                 $iOutDiff = getDuration($ndEnd, $timeOut);
 
                 $oTimeIn  = $iInDiff > 0 ? $timeIn : $ndStart;
-                $oTimeOut = $iOutDiff > 0 ? $timeOut : $ndEnd;
+                $oTimeOut = $iOutDiff > 0 ? $ndEnd : $timeOut;
 
                 $duration = getDuration($oTimeIn, $oTimeOut);
+                $duration = $duration > $breakDuration ? ($duration - $breakDuration) : $duration;
             }
         }
         return $duration;
@@ -202,25 +217,25 @@
         if ($dayType == "ordinary day" || $isLeave)
         {
             $basicRate     = !$isRestDay ? 1.00 : 1.30;
-            $overtimeRate  = !$isRestDay ? 1.25 : 1.30;
+            $overtimeRate  = !$isRestDay ? 1.25 : 1.69;
             $nightDiffRate = !$isRestDay ? 0.10 : 0.10;
         }
         else if ($dayType == "special holiday" || $dayType == "special working holiday" || $dayType == "special non-working holiday")
         {
             $basicRate     = !$isRestDay ? 1.30 : 1.50;
-            $overtimeRate  = !$isRestDay ? 1.30 : 1.30;
+            $overtimeRate  = !$isRestDay ? 1.69 : 1.95;
             $nightDiffRate = !$isRestDay ? 0.10 : 0.10;
         }
         else if ($dayType == "regular holiday")
         {
             $basicRate     = !$isRestDay ? 2.00 : 2.60;
-            $overtimeRate  = !$isRestDay ? 1.30 : 1.30;
+            $overtimeRate  = !$isRestDay ? 2.60 : 3.38;
             $nightDiffRate = !$isRestDay ? 0.10 : 0.10;
         }
         else if ($dayType == "double holiday")
         {
             $basicRate     = !$isRestDay ? 3.00 : 3.90;
-            $overtimeRate  = !$isRestDay ? 1.30 : 1.30;
+            $overtimeRate  = !$isRestDay ? 3.90 : 5.07;
             $nightDiffRate = !$isRestDay ? 0.10 : 0.10;
         }
 
@@ -232,7 +247,7 @@
     }
 
 
-    function getPayrollDaySalary($hourlyRate = 0, $basicHours = 0, $overtimeHours = 0, $nightDiffHours = 0, $dayType = "", $isRestDay = false, $isLeave = false)
+    function getPayrollDaySalary($hourlyRate = 0, $basicHours = 0, $overtimeHours = 0, $nightDiffHours = 0, $overtimeNightDiffHours = 0, $dayType = "", $isRestDay = false, $isLeave = false)
     {
         $basicPay = $overtimePay = $nightDiffPay = $totalPay = 0;
 
@@ -244,9 +259,12 @@
             $nightDiffRate = $rate["nightDiffRate"];
 
             $basicPay     = $hourlyRate * $basicHours * $basicRate;
-            $overtimePay  = $hourlyRate * $overtimeHours * $basicRate * $overtimeRate - ($hourlyRate * $overtimeHours);
-            $nightDiffPay = $hourlyRate * $nightDiffHours * $basicRate * $nightDiffRate;
+            $overtimePay  = $hourlyRate * $overtimeRate * $overtimeHours;
+            $nightDiffPay = ($hourlyRate * $nightDiffHours * $basicRate * $nightDiffRate) + ($hourlyRate * $overtimeNightDiffHours * $overtimeRate * $nightDiffRate);
             $totalPay     = $basicPay + $overtimePay + $nightDiffPay;
+
+            // $overtimePay  = $hourlyRate * $overtimeHours * $basicRate * $overtimeRate - ($hourlyRate * $overtimeHours);
+            // $nightDiffPay = $hourlyRate * $nightDiffHours * $basicRate * $nightDiffRate;
         }
 
         return [
@@ -258,13 +276,16 @@
     }
 
 
-    function getPayrollHourlyRate($employeeID = 0)
+    function getPayrollHourlyRate($employeeID = 0, $cutOffCount = 0, $workingDays = 0, $scheduleDuration = 0)
     {
         $CI =& get_instance();
 
-        $sql   = "SELECT employeeHourlyRate AS hourlyRate FROM hris_employee_list_tbl WHERE employeeID = $employeeID";
+        $sql   = "SELECT employeeBasicSalary AS basicSalary FROM hris_employee_list_tbl WHERE employeeID = $employeeID";
         $query = $CI->db->query($sql);
-        return $query ? $query->row()->hourlyRate : 0;
+        $monthlySalary = $query ? $query->row()->basicSalary : 0;
+        $basicSalary   = $cutOffCount > 0 ? $monthlySalary / $cutOffCount : 0;
+        $dailyRate     = $workingDays > 0 ? $basicSalary / $workingDays : 0;
+        return $scheduleDuration > 0 ? $dailyRate / $scheduleDuration : 0;
     }
 
     function getSssDeduction($grossPay = 0)
@@ -450,3 +471,76 @@
 
 
     
+
+    function getEmployeeBasicSalary($employeeID = 0)
+    {
+        $CI =& get_instance();
+        $sql   = "SELECT employeeBasicSalary FROM hris_employee_list_tbl WHERE employeeID = $employeeID";
+        $query = $CI->db->query($sql);
+        return $query ? $query->row()->employeeBasicSalary ?? 0 : 0;
+    }
+
+
+
+
+    // ---------- ********** LOAN ********** ----------
+    function getLoanRequest($employeeID = 0, $cutoff = 0)
+    {
+        $CI =& get_instance();
+        $sql = "
+        SELECT
+            *
+        FROM hris_loan_form_tbl
+        WHERE employeeID = $employeeID
+            AND (loanFormTermPayment = $cutoff OR loanFormTermPayment = 0)
+            AND loanFormStatus = 2";
+        $query = $CI->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    function getLoanAmortization($loanFormID = 0)
+    {
+        $CI =& get_instance();
+        $sql = "
+        SELECT
+            *
+        FROM hris_loan_ammortization_tbl
+        WHERE loanFormID = $loanFormID
+            AND ammortizationStatus = 0
+        ORDER BY dueDate ASC
+        LIMIT 1";
+        $query = $CI->db->query($sql);
+        return $query ? $query->row() : null;
+    }
+
+    function getEmployeeLoan($employeeID = 0, $cutoff = 0)
+    {
+        $total = 0;
+        $ammortizationID     = [];
+        $ammortizationAmount = [];
+
+        $loans = getLoanRequest($employeeID, $cutoff);
+        if ($loans && !empty($loans)) {
+            foreach ($loans as $loan) {
+                $loanFormID = $loan['loanFormID'];
+
+                $ammortization = getLoanAmortization($loanFormID);
+                if ($ammortization) {
+                    $amount = $ammortization->loanAmount ?? 0;
+
+                    $ammortizationID[]     = $ammortization->ammortizationID;
+                    $ammortizationAmount[] = $amount;
+
+                    $total += $amount;
+                }
+            }
+        } 
+
+        return [
+            'employeeID'         => $employeeID,
+            'total'              => $total,
+            'ammortizationID'     => !empty($ammortizationID) ? implode('|', $ammortizationID) : '',
+            'ammortizationAmount' => !empty($ammortizationAmount) ? implode('|', $ammortizationAmount) : '',
+        ];
+    }
+    // ---------- ********** END LOAN ********** ----------

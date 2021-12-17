@@ -13,7 +13,7 @@ class Payroll_module extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Payroll Module";
+        $data["title"] = "Payroll Process";
         $this->load->view("template/header", $data);
         $this->load->view("hris/payroll_module/index");
         $this->load->view("template/footer");
@@ -119,6 +119,7 @@ class Payroll_module extends CI_Controller {
                 $payrollData["revisePayrollCode"] = $payroll->payrollCode;
                 $payrollData["timekeepingID"]     = $payroll->timekeepingID;
                 $payrollData["timekeepingCode"]   = $payroll->timekeepingCode;
+                $payrollData["cutOff"]            = $payroll->cutOff;
             }
         }
 
@@ -163,6 +164,8 @@ class Payroll_module extends CI_Controller {
                 {
                     $this->payroll->insertHoldSalary($payrollID);
                     $this->payroll->insertPayrollRegister($payrollID);
+                    $this->payroll->insertPayrollPayslip($payrollID);
+                    $this->payroll->updateLoanForm($payrollID);
                 }
             }
         }

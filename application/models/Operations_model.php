@@ -132,5 +132,30 @@ class Operations_model extends CI_Model {
         return 0;   
     }
 
+    public function premiumPaymentReport(){
+        $returnData = [];
+        
+        $year = ["2021","2022","2023","2024","2025","2026"];
+
+        for ( $i = 0; $i < count($year) ; $i++) { 
+            $month = ["","January","February","March","April","May","June","July","August","September","October","November","December"];
+            $yearString = $year[$i];
+            for ($j=1; $j < count($month) ; $j++) { 
+                $sql    = "SELECT hpit.*, employeeFirstname, employeeMiddlename, employeeLastname,employeePagibig,employeePhilHealth,employeeSSS FROM hris_payroll_items_tbl AS hpit 
+                                LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)
+                                 WHERE MONTH(endDate) = '$j' AND EXTRACT(YEAR FROM endDate) = '$yearString' ";
+                $query  = $this->db->query($sql);
+                $result = $query->result_array();
+                $tempData = [
+                    "month" => $month[$j]." ".$year[$i],
+                    "data"  => $result
+                ];
+                array_push($returnData, $tempData);
+            }
+        }
+
+        return $returnData;
+
+    }
 }
 

@@ -100,6 +100,7 @@ $(document).ready(function() {
         $('[data-toggle="tooltip"]').tooltip();
 
         const manipulateDataTables = (elementID = "") => {
+			console.log(elementID);
             if (elementID) {
                 if ($.fn.DataTable.isDataTable(elementID)) {
                     $(elementID).DataTable().destroy();
@@ -162,12 +163,9 @@ $(document).ready(function() {
             }
         }
 
-        // ["#tableForApproval", "#tableMyForms", "#tablePayroll"].map(elementID => {
-        //     manipulateDataTables(elementID);
-        // })
-		manipulateDataTables("#tableForApproval");
-		manipulateDataTables("#tableMyForms");
-		manipulateDataTables("#tablePayroll");
+        ["#tableForApproval", "#tableMyForms", "#tablePayroll"].map(elementID => {
+            manipulateDataTables(elementID);
+        })
 	}
 	// ----- END DATATABLES -----
 
@@ -346,7 +344,7 @@ $(document).ready(function() {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableMyForms">
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
@@ -541,7 +539,7 @@ $(document).ready(function() {
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						payrollID="${encryptString(payrollID)}"
-						code="${getFormCode("PAY", createdAt, payrollID)}"
+						code="${getFormCode("PRL", createdAt, payrollID)}"
 						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
@@ -549,22 +547,26 @@ $(document).ready(function() {
 
 					if (isRevise) {
 						button += `
-						<button 
-							class="btn btn-cancel btnCancel px-5 p-2" 
-							id="btnCancel"
+						<button type="button" 
+							class="btn btn-cancel btnBack px-5 p-2" 
+							id="btnBack"
 							payrollID="${encryptString(payrollID)}"
-							code="${getFormCode("PAY", createdAt, payrollID)}"
+							code="${getFormCode("PRL", createdAt, payrollID)}"
 							revise="${isRevise}"
-							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+							cancel="${isFromCancelledDocument}"
+							employeeID="${employeeID}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
 						button += `
-						<button 
-							class="btn btn-cancel px-5 p-2"
-							id="btnCancelForm" 
+						<button type="button" 
+							class="btn btn-cancel px-5 p-2 btnBack"
+							id="btnBack" 
 							payrollID="${encryptString(payrollID)}"
-							code="${getFormCode("PAY", createdAt, payrollID)}"
+							code="${getFormCode("PRL", createdAt, payrollID)}"
+							status="${payrollStatus}"
+							cancel="${isFromCancelledDocument}"
+							employeeID="${employeeID}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -579,7 +581,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							payrollID="${encryptString(payrollID)}"
-							code="${getFormCode("PAY", createdAt, payrollID)}"
+							code="${getFormCode("PRL", createdAt, payrollID)}"
 							status="${payrollStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -592,7 +594,7 @@ $(document).ready(function() {
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
 						payrollID="${encryptString(payrollID)}"
-						code="${getFormCode("PAY", createdAt, payrollID)}"
+						code="${getFormCode("PRL", createdAt, payrollID)}"
 						status="${payrollStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
@@ -605,7 +607,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							payrollID="${encryptString(payrollID)}"
-							code="${getFormCode("PAY", createdAt, payrollID)}"
+							code="${getFormCode("PRL", createdAt, payrollID)}"
 							status="${payrollStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
@@ -633,7 +635,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							payrollID="${encryptString(payrollID)}"
-							code="${getFormCode("PAY", createdAt, payrollID)}"
+							code="${getFormCode("PRL", createdAt, payrollID)}"
 							status="${payrollStatus}"
 							cancel="true"><i class="fas fa-clone"></i>
 							Revise
@@ -648,14 +650,14 @@ $(document).ready(function() {
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							payrollID="${encryptString(payrollID)}"
-							code="${getFormCode("PAY", createdAt, payrollID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("PRL", createdAt, payrollID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							payrollID="${encryptString(payrollID)}"
-							code="${getFormCode("PAY", createdAt, payrollID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("PRL", createdAt, payrollID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -748,6 +750,7 @@ $(document).ready(function() {
 							lateUndertimeAdjustment = 0,
 							lwopDeduction,
 							lwopAdjustment = 0,
+							prevGrossPay = 0,
 							grossPay,
 							sssBasis,
 							sssDeduction,
@@ -771,6 +774,7 @@ $(document).ready(function() {
 							loanBasis,
 							loanAdjustment = 0,
 							loanDeduction,
+							ammortizationID,
 							otherAdjustment = 0,
 							netPay,
                         } = item;
@@ -779,6 +783,7 @@ $(document).ready(function() {
 							payrollItemsHTML += `
 							<tr payrollItemID = "${payrollItemID}"
 								loanBasis     = "${loanBasis}"
+								prevGrossPay  = "${prevGrossPay}"
 								grossPay      = "${grossPay}"
 								employeeID    = "${employeeID}">
 								<td style="z-index: 2;">
@@ -806,7 +811,7 @@ $(document).ready(function() {
 										mandates="parent"
 										${deductMandates == 1 ? "checked" : ""}>
 								</td>
-								<td class="text-right">${formatAmount(basicPay, true)}</td>
+								<td class="text-right">${formatAmount(basicSalary, true)}</td>
 								<td class="text-right">${formatAmount(holidayPay, true)}</td>
 								<td class="text-right
 									${holidayAdjustment && holidayAdjustment != 0 ? holidayAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
@@ -822,6 +827,7 @@ $(document).ready(function() {
 									${nightDifferentialAdjustment && nightDifferentialAdjustment != 0 ? nightDifferentialAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
 									${formatAmount(nightDifferentialAdjustment, true)}
 								</td>
+								<td class="text-right">${formatAmount(leavePay, true)}</td>
 								<td class="text-right">${formatAmount(allowance, true)}</td>
 								<td class="text-right
 									${allowanceAdjustment && allowanceAdjustment != 0 ? allowanceAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
@@ -926,13 +932,18 @@ $(document).ready(function() {
 											disabled>
 									</div>
 								</td>
-								<td class="text-right withHoldingAdjustment">${formatAmount(withHoldingAdjustment, true)}</td>
+								<td class="text-right withHoldingAdjustment
+									${withHoldingAdjustment && withHoldingAdjustment != 0 ? withHoldingAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
+									${formatAmount(withHoldingAdjustment, true)}
+								</td>
 								<td style="z-index: 1;">
 									<div class="input-group">
 										<div class="input-group-prepend">
 											<span class="input-group-text">
 												<input type="checkbox" 
 													name="deductLoan" 
+													mandates="child"
+													loanBasis="${loanBasis}"
 													${loanDeduction > 0 ? "checked" : ""}
 													${grossPay > 0 ? "" : "disabled"}>
 											</span>
@@ -944,8 +955,7 @@ $(document).ready(function() {
 											disabled>
 									</div>
 								</td>
-								<td class="text-right
-									${loanAdjustment && loanAdjustment != 0 ? loanAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
+								<td class="text-right">
 									${formatAmount(loanAdjustment, true)}
 								</td>
 								<td class="text-right
@@ -955,6 +965,8 @@ $(document).ready(function() {
 								<td class="text-right netPay">${formatAmount(netPay, true)}</td>
 							</tr>`;
 						} else {
+							let onHold = holdSalary == 1 ? `<span class="badge badge-warning">ON HOLD</span>` : "";
+
 							payrollItemsHTML += `
 							<tr payrollItemID = "${payrollItemID}"
 								loanBasis     = "${loanBasis}"
@@ -968,68 +980,82 @@ $(document).ready(function() {
 										<div class="ml-3 align-self-center">
 											<div>${fullname}</div>
 											<small>${employeeCode}</small>
+											${onHold}
 										</div>
 									</div>
 								</td>
-								<td class="text-right">${formatAmount(basicPay, true)}</td>
+								<td class="text-right">${formatAmount(basicSalary, true)}</td>
 								<td class="text-right">${formatAmount(holidayPay, true)}</td>
 								<td class="text-right
 									${holidayAdjustment && holidayAdjustment != 0 ? holidayAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(holidayAdjustment, true)}</td>
+									${formatAmount(holidayAdjustment, true)}
+								</td>
 								<td class="text-right">${formatAmount(overtimePay, true)}</td>
 								<td class="text-right
 									${overtimeAdjustment && overtimeAdjustment != 0 ? overtimeAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(overtimeAdjustment, true)}</td>
+									${formatAmount(overtimeAdjustment, true)}
+								</td>
 								<td class="text-right">${formatAmount(nightDifferentialPay, true)}</td>
 								<td class="text-right
 									${nightDifferentialAdjustment && nightDifferentialAdjustment != 0 ? nightDifferentialAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(nightDifferentialAdjustment, true)}</td>
+									${formatAmount(nightDifferentialAdjustment, true)}
+								</td>
+								<td class="text-right">${formatAmount(leavePay, true)}</td>
 								<td class="text-right">${formatAmount(allowance, true)}</td>
 								<td class="text-right
 									${allowanceAdjustment && allowanceAdjustment != 0 ? allowanceAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(allowanceAdjustment, true)}</td>
+									${formatAmount(allowanceAdjustment, true)}
+								</td>
 								<td class="text-right">${formatAmount(lateUndertimeDeduction, true)}</td>
 								<td class="text-right
 									${lateUndertimeAdjustment && lateUndertimeAdjustment != 0 ? lateUndertimeAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(lateUndertimeAdjustment, true)}</td>
+									${formatAmount(lateUndertimeAdjustment, true)}
+								</td>
 								<td class="text-right">${formatAmount(lwopDeduction, true)}</td>
 								<td class="text-right
 									${lwopAdjustment && lwopAdjustment != 0 ? lwopAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(lwopAdjustment, true)}</td>
+									${formatAmount(lwopAdjustment, true)}
+								</td>
 								<td class="text-right">${formatAmount(grossPay, true)}</td>
 								<td class="text-right" style="z-index: 1;">
 									${formatAmount(sssDeduction, true)}
 								</td>
 								<td class="text-right
 									${sssAdjustment && sssAdjustment != 0 ? sssAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(sssAdjustment, true)}</td>
+									${formatAmount(sssAdjustment, true)}
+								</td>
 								<td class="text-right" style="z-index: 1;">
 									${formatAmount(phicDeduction, true)}
 								</td>
 								<td class="text-right
 									${phicAdjustment && phicAdjustment != 0 ? phicAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(phicAdjustment, true)}</td>
+									${formatAmount(phicAdjustment, true)}
+								</td>
 								<td class="text-right" style="z-index: 1;">
 									${formatAmount(hdmfDeduction, true)}
 								</td>
 								<td class="text-right
 									${hdmfAdjustment && hdmfAdjustment != 0 ? hdmfAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(hdmfAdjustment, true)}</td>
+									${formatAmount(hdmfAdjustment, true)}
+								</td>
 								<td class="text-right" style="z-index: 1;">
 									${formatAmount(withHoldingDeduction, true)}
 								</td>
 								<td class="text-right
 									${withHoldingAdjustment && withHoldingAdjustment != 0 ? withHoldingAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(withHoldingAdjustment, true)}</td>
+									${formatAmount(withHoldingAdjustment, true)}
+								</td>
 								<td class="text-right" style="z-index: 1;">
 									${formatAmount(loanDeduction, true)}
 								</td>
 								<td class="text-right
 									${loanAdjustment && loanAdjustment != 0 ? loanAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(loanAdjustment, true)}</td>
+									${formatAmount(loanAdjustment, true)}
+								</td>
 								<td class="text-right
 									${otherAdjustment && otherAdjustment != 0 ? otherAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-									${formatAmount(otherAdjustment, true)}</td>
+									${formatAmount(otherAdjustment, true)}
+								</td>
 								<td class="text-right netPay">${formatAmount(netPay, true)}</td>
 							</tr>`;
 						}
@@ -1049,7 +1075,7 @@ $(document).ready(function() {
 			</div>` : `
 			<div class="d-flex">
 				<h5 class="font-weight-bold text-warning">NOTE:</h5>
-				<span class="text-dark ml-2">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque, iusto!</span>
+				<span class="text-dark ml-2">The payroll adjustment must still undergo an approval before the payroll process to continue.</span>
 			</div>`;
 		}
 
@@ -1080,6 +1106,7 @@ $(document).ready(function() {
 				<th class="thAdjust2">Overtime Adjustment</th>
 				<th class="thAdjust3">Night Differrential</th>
 				<th class="thAdjust4">Night Differrential Adjustment</th>
+				<th class="thPay">Leave Pay</th>
 				<th class="thPay">Allowance</th>
 				<th class="thAdjust3">Allowance Adjustment</th>
 				<th class="thPay">Late/Undertime</th>
@@ -1126,6 +1153,7 @@ $(document).ready(function() {
 				<th class="thAdjust">Overtime Adjustment</th>
 				<th class="thAdjust2">Night Differrential</th>
 				<th class="thAdjust4">Night Differrential Adjustment</th>
+				<th class="thPay">Leave Pay</th>
 				<th class="thPay">Allowance</th>
 				<th class="thAdjust2">Allowance Adjustment</th>
 				<th class="thPay">Late/Undertime</th>
@@ -1229,7 +1257,7 @@ $(document).ready(function() {
 		let disabled = readOnly ? "disabled" : "";
 		let button = adjustment != 1 ? formButtons(data, isRevise, isFromCancelledDocument) : "";
 
-        let timekeepingCode = getFormCode("TK", httCreatedAt, timekeepingID);
+        let timekeepingCode = getFormCode("TKM", httCreatedAt, timekeepingID);
         let timekeepingApproved = getDateApproved(2, httApproversID, httApproversDate);
 
 		let startDate   = moment(payrollStartDate).format("MMMM DD, YYYY");
@@ -1245,7 +1273,7 @@ $(document).ready(function() {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("PAY", createdAt, reviseDocumentNo)}
+						${getFormCode("PRL", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1376,9 +1404,9 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                         minlength="1"
-                        maxlength="200"
+                        maxlength="325"
                         id="payrollReason"
                         name="payrollReason"
                         required
@@ -1502,7 +1530,7 @@ $(document).ready(function() {
 							let insertedID  = result[2];
 							let dateCreated = result[3];
 
-							let code = getFormCode("PA", dateCreated, insertedID);
+							let code = getFormCode("PRA", dateCreated, insertedID);
 
 							if (isSuccess == "true") {
 								$("#loader").hide();
@@ -1512,10 +1540,8 @@ $(document).ready(function() {
 									showConfirmButton: false,
 									timer:             2000,
 								}).then(() => {
-									// let html = payrollAdjustmentDisplay(payrollID, true, false);
-									// $("#createAdjustmentDisplay").html(html);
-									// $("#buttonDisplay").remove();
 									viewDocument(payrollID);
+									window.open(`${base_url}hris/payroll_adjustment?view_id=${encryptString(insertedID)}`, '_blank');
 								})
 							} else {
 								$("#loader").hide();
@@ -1562,7 +1588,6 @@ $(document).ready(function() {
 				hdmfAdjustment = getNonFormattedAmount(hdmfAdjustment);
 
 			nonTaxable = sssDeduction + phicDeduction + hdmfDeduction + sssAdjustment + phicAdjustment + hdmfAdjustment;
-			console.log(sssDeduction, phicDeduction, hdmfDeduction, sssAdjustment, phicAdjustment, hdmfAdjustment, nonTaxable);
 		}
 		return nonTaxable;
 	}
@@ -1572,13 +1597,15 @@ $(document).ready(function() {
 	// ----- UPDATE WITH-HOLDING TAX -----
 	function updateWithHoldingTax($parent = '') {
 		if ($parent) {
-			let grossPay = $parent.attr("grossPay") ?? 0;
+			let prevGrossPay = +$parent.attr("prevGrossPay") ?? 0;
+			let grossPay     = +$parent.attr("grossPay") ?? 0;
+			let totalGrossPay = prevGrossPay + grossPay;
 			let withHoldingTax = 0;
 	
 			const isChecked = $parent.find(`[name="deductWithHolding"]`).prop("checked");
 			if (isChecked) {
 				let nonTaxable = getNonTaxableAmount($parent);
-				let tax = getWithHoldingTax((+grossPay), nonTaxable);
+				let tax = getWithHoldingTax(totalGrossPay, nonTaxable);
 				withHoldingTax = tax.withHoldingTax;
 			}
 	
@@ -1770,6 +1797,20 @@ $(document).ready(function() {
 		updateWithHoldingTax($parent);
 	})
 
+	// ----- CHECK DEDUCT LOAN -----
+	$(document).on("change", `[name="deductLoan"]`, function() {
+		$parent = $(this).closest(`tr`);
+
+		const checked = $(this).prop("checked");
+
+		let deduction = $(this).attr("loanBasis") ?? 0;
+			deduction = checked ? deduction : 0;
+			deduction = formatAmount(deduction, true);
+
+		$parent.find(`[name="loanDeduction"]`).val(deduction);
+	})
+	// ----- END CHECK DEDUCT LOAN -----
+
 	$(document).on("change", `[name="deductWithHolding"]`, function() {
 		$parent = $(this).closest(`tr`);
 
@@ -1790,6 +1831,7 @@ $(document).ready(function() {
 		$parent.find(`[name="deductPhic"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 		$parent.find(`[name="deductHdmf"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 		$parent.find(`[name="deductWithHolding"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+		$parent.find(`[name="deductLoan"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 
 		const deductMandateLength  = $(`[name="deductMandates"]`).length;
 		const deductMandateChecked = $(`[name="deductMandates"]:checked`).length;
@@ -1821,18 +1863,12 @@ $(document).ready(function() {
 	// ----- END CHECK HOLD SALARY -----
 
 
-	// ----- CHECK DEDUCT LOAN -----
-	$(document).on("change", `[name="deductLoan"]`, function() {
-		const deductLoanLength  = $(`[name="deductLoan"]`).length;
-		const deductLoanChecked = $(`[name="deductLoan"]:checked`).length;
-
-		let isChecked = deductLoanLength == deductLoanChecked;
-		$(`[name="checkAllDeductLoan"]`).prop("checked", isChecked);
-	})
-	// ----- END CHECK DEDUCT LOAN -----
-
-
 	// ----- CHECK ALL -----
+	$(document).on("change", `[name="checkAllDeductLoan"]`, function() { // HOLD SALARY
+		const isChecked = $(this).prop("checked");
+		$(`[name="deductLoan"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+	})
+
 	$(document).on("change", `[name="checkAllHoldSalary"]`, function() { // HOLD SALARY
 		const isChecked = $(this).prop("checked");
 		$(`[name="holdSalary"]:not([disabled])`).prop("checked", isChecked).trigger("change");
@@ -1884,7 +1920,7 @@ $(document).ready(function() {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("PAY", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("PRL", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
@@ -1892,7 +1928,7 @@ $(document).ready(function() {
 			if (revise) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getPayrollData(action, "save", "0", id);
-				data["timekeepingStatus"] = 0;
+				data["payrollStatus"] = 0;
 				if (!isFromCancelledDocument) {
 					data["revisePayrollID"] = id;
 					delete data["payrollID"];
@@ -1918,7 +1954,7 @@ $(document).ready(function() {
 		} else {
 			const action = id && feedback ? "update" : "insert";
 			const data   = getPayrollData(action, "save", "0", id);
-			data["timekeepingStatus"] = 0;
+			data["payrollStatus"] = 0;
 
 			savePayroll(data, "save", null, pageContent);
 		}
@@ -1952,7 +1988,7 @@ $(document).ready(function() {
 		const id       = decryptString($(this).attr("payrollID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("PAY", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PRL", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getPayrollData(action, "save", "0", id);
 		data["payrollStatus"] = 0;
@@ -1999,7 +2035,7 @@ $(document).ready(function() {
 			if (employeeID != sessionID) {
 				notificationData = {
 					moduleID:                110,
-					notificationTitle:       "Payroll Module",
+					notificationTitle:       "Payroll Process",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
@@ -2015,7 +2051,7 @@ $(document).ready(function() {
 	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
 		const id       = decryptString($(this).attr("payrollID"));
-		const feedback = $(this).attr("code") || getFormCode("PAY", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PRL", dateToday(), id);
 		let tableData  = getTableData("hris_payroll_tbl", "", "payrollID = " + id);
 
 		if (tableData) {
@@ -2036,7 +2072,7 @@ $(document).ready(function() {
 				notificationData = {
 					moduleID:                110,
 					tableID:                 id,
-					notificationTitle:       "Payroll Module",
+					notificationTitle:       "Payroll Process",
 					notificationDescription: `${feedback}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
@@ -2046,7 +2082,7 @@ $(document).ready(function() {
 				notificationData = {
 					moduleID:                110,
 					tableID:                 id,
-					notificationTitle:       "Payroll Module",
+					notificationTitle:       "Payroll Process",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
@@ -2064,7 +2100,7 @@ $(document).ready(function() {
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
 		const id       = decryptString($(this).attr("payrollID"));
-		const feedback = $(this).attr("code") || getFormCode("PAY", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PRL", dateToday(), id);
 
 		$("#modal_payroll_module_content").html(preloader);
 		$("#modal_payroll_module .page-title").text("DENY PAYROLL");
@@ -2096,7 +2132,7 @@ $(document).ready(function() {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("payrollID"));
-		const feedback = $(this).attr("code") || getFormCode("PAY", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PRL", dateToday(), id);
 
 		const validate = validateForm("modal_payroll_module");
 		if (validate) {
@@ -2177,7 +2213,7 @@ $(document).ready(function() {
 
 	// --------------- DATABASE RELATION ---------------
 	function getConfirmation(method = "submit") {
-		const title = "Payroll";
+		const title = "Payroll Process";
 		let swalText, swalImg;
 
 		$("#modal_payroll_module").text().length > 0 && $("#modal_payroll_module").modal("hide");
@@ -2185,32 +2221,32 @@ $(document).ready(function() {
 		switch (method) {
 			case "save":
 				swalTitle = `SAVE ${title.toUpperCase()}`;
-				swalText  = "Are you sure to save this document?";
+				swalText  = "Do you want to save your changes for this payroll process?";
 				swalImg   = `${base_url}assets/modal/draft.svg`;
 				break;
 			case "submit":
-				swalText  = "Are you sure to submit this document?";
+				swalText  = "Are you sure to submit this payroll process?";
 				swalTitle = `SUBMIT ${title.toUpperCase()}`;
 				swalImg   = `${base_url}assets/modal/add.svg`;
 				break;
 			case "approve":
 				swalTitle = `APPROVE ${title.toUpperCase()}`;
-				swalText  = "Are you sure to approve this document?";
+				swalText  = "Are you sure to approve this payroll process?";
 				swalImg   = `${base_url}assets/modal/approve.svg`;
 				break;
 			case "deny":
 				swalTitle = `DENY ${title.toUpperCase()}`;
-				swalText  = "Are you sure to deny this document?";
+				swalText  = "Are you sure to deny this payroll process?";
 				swalImg   = `${base_url}assets/modal/reject.svg`;
 				break;
 			case "cancelform":
 				swalTitle = `CANCEL ${title.toUpperCase()}`;
-				swalText  = "Are you sure to cancel this document?";
+				swalText  = "Are you sure to cancel this payroll process?";
 				swalImg   = `${base_url}assets/modal/cancel.svg`;
 				break;
 			case "drop":
 				swalTitle = `DROP ${title.toUpperCase()}`;
-				swalText  = "Are you sure to drop this document?";
+				swalText  = "Are you sure to drop this payroll process?";
 				swalImg   = `${base_url}assets/modal/drop.svg`;
 				break;
 			default:
@@ -2261,17 +2297,17 @@ $(document).ready(function() {
 	
 								let swalTitle;
 								if (method == "submit") {
-									swalTitle = `${getFormCode("PAY", dateCreated, insertedID)} submitted successfully!`;
+									swalTitle = `${getFormCode("PRL", dateCreated, insertedID)} submitted successfully!`;
 								} else if (method == "save") {
-									swalTitle = `${getFormCode("PAY", dateCreated, insertedID)} saved successfully!`;
+									swalTitle = `${getFormCode("PRL", dateCreated, insertedID)} saved successfully!`;
 								} else if (method == "cancelform") {
-									swalTitle = `${getFormCode("PAY", dateCreated, insertedID)} cancelled successfully!`;
+									swalTitle = `${getFormCode("PRL", dateCreated, insertedID)} cancelled successfully!`;
 								} else if (method == "approve") {
-									swalTitle = `${getFormCode("PAY", dateCreated, insertedID)} approved successfully!`;
+									swalTitle = `${getFormCode("PRL", dateCreated, insertedID)} approved successfully!`;
 								} else if (method == "deny") {
-									swalTitle = `${getFormCode("PAY", dateCreated, insertedID)} denied successfully!`;
+									swalTitle = `${getFormCode("PRL", dateCreated, insertedID)} denied successfully!`;
 								} else if (method == "drop") {
-									swalTitle = `${getFormCode("PAY", dateCreated, insertedID)} dropped successfully!`;
+									swalTitle = `${getFormCode("PRL", dateCreated, insertedID)} dropped successfully!`;
 								}	
 				
 								if (isSuccess == "true") {

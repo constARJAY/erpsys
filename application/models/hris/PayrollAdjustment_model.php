@@ -163,20 +163,36 @@ class PayrollAdjustment_model extends CI_Model {
         return $query ? $query->row() : null;
     }
 
-    public function getAllPayrollAdjustmentItems($payrollAdjustmentID = 0)
+    public function getAllPayrollAdjustmentItems($payrollAdjustmentID = 0, $employeeIDStr = '')
     {
         if ($payrollAdjustmentID)
         {
+            $others = $employeeIDStr ? "AND hpait.employeeID IN($employeeIDStr)" : "";
+
             $sql = "
             SELECT 
                 hpait.*, 
                 employeeID,
                 CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
                 employeeCode,
-                IF(employeeProfile IS NOT NULL, employeeProfile, 'default.jpg') AS profile
+                IF(employeeProfile IS NOT NULL, employeeProfile, 'default.jpg') AS profile,
+                (IF(basicAdjustment,1,0) 
+                    + IF(holidayAdjustment,1,0) 
+                    + IF(overtimeAdjustment,1,0)
+                    + IF(nightDifferentialAdjustment,1,0)
+                    + IF(allowanceAdjustment,1,0)
+                    + IF(lateUndertimeAdjustment,1,0)
+                    + IF(lwopAdjustment,1,0)
+                    + IF(sssAdjustment,1,0)
+                    + IF(phicAdjustment,1,0)
+                    + IF(hdmfAdjustment,1,0)
+                    + IF(withHoldingAdjustment,1,0)
+                    + IF(loanAdjustment,1,0)
+                    + IF(otherAdjustment,1,0)
+                ) AS rowCount
             FROM hris_payroll_adjustment_items_tbl AS hpait
                 LEFT JOIN hris_employee_list_tbl USING(employeeID)
-            WHERE payrollAdjustmentID = $payrollAdjustmentID";
+            WHERE payrollAdjustmentID = $payrollAdjustmentID $others";
             $query = $this->db->query($sql);
             return $query ? $query->result_array() : [];
         }
@@ -201,7 +217,7 @@ class PayrollAdjustment_model extends CI_Model {
         return [];
     }
 
-    public function getPayrollAdjustmentItems($payrollAdjustmentID = 0)
+    public function getPayrollAdjustmentItems($payrollAdjustmentID = 0, $employeeIDStr = '')
     {
         $header = "";
         $items  = [];
@@ -212,7 +228,7 @@ class PayrollAdjustment_model extends CI_Model {
             $dateFrom  = date("F d, Y", strtotime($payrollAdjustmentData->payrollStartDate));
             $dateTo    = date("F d, Y", strtotime($payrollAdjustmentData->payrollEndDate));
             $header    = strtoupper("$dateFrom - $dateTo");
-            $items     = $this->getAllPayrollAdjustmentItems($payrollAdjustmentID);
+            $items     = $this->getAllPayrollAdjustmentItems($payrollAdjustmentID, $employeeIDStr);
         }
 
         return [
@@ -221,11 +237,11 @@ class PayrollAdjustment_model extends CI_Model {
         ];
     }
 
-    public function getAllPayrollAdjustmentData($payrollAdjustmentID = 0)
+    public function getAllPayrollAdjustmentData($payrollAdjustmentID = 0, $employeeIDStr = '')
     {
         $data = [
             "header" => $this->getPayrollAdjustmentData($payrollAdjustmentID),
-            "body"   => $this->getPayrollAdjustmentItems($payrollAdjustmentID),
+            "body"   => $this->getPayrollAdjustmentItems($payrollAdjustmentID, $employeeIDStr),
         ];
         return $data;
     }
@@ -481,8 +497,10 @@ class PayrollAdjustment_model extends CI_Model {
                 $prevNetPay                         = $item['prevNetPay'] ?? 0;
                 $netPay                             = $item['netPay'] ?? 0;
 
-                $grossPay = $basicPay + $holidayPay + $holidayAdjustment + $overtimePay + $overtimeAdjustment + $nightDifferentialPay + $nightDifferentialAdjustment + $allowance + $allowanceAdjustment + $leavePay;
-                $totalGrossDeduction = $lateUndertimeDeduction + $lateUndertimeAdjustment + $lwopDeduction + $lwopAdjustment; 
+                $tempGrossPay = $basicSalary + $holidayPay + $holidayAdjustment + $overtimePay + $overtimeAdjustment + $nightDifferentialPay + $nightDifferentialAdjustment + $leavePay;
+                $tempGrossDeduction = $lateUndertimeDeduction + $lateUndertimeAdjustment + $lwopDeduction + $lwopAdjustment; 
+                
+                $grossPay = $tempGrossPay - $tempGrossDeduction;
                 $totalGrossPay = $grossPay + $prevGrossPay;
 
                 if ($sssDeduction > 0)
@@ -519,7 +537,7 @@ class PayrollAdjustment_model extends CI_Model {
                     $withHoldingDeduction = $withHolding->withHoldingDeduction ?? 0;
                 }
 
-                $netPay = $grossPay - $totalDeduction;
+                $netPay = (($grossPay + $allowance + $allowanceAdjustment) - ($totalDeduction + $loanDeduction + $loanAdjustment)) + $otherAdjustment;
 
                 $data[] = [
                     'payrollItemID'                      => $payrollItemID,
@@ -668,4 +686,16 @@ class PayrollAdjustment_model extends CI_Model {
     }
     // ----- ********** END UPDATE PAYROLL ITEMS ********** -----
 
+
+
+
+    // ----- ********** REPORTS ********** -----
+    public function getCompanyProfile()
+    {
+        $sql   = "SELECT * FROM gen_company_profile_tbl LIMIT 1";
+        $query = $this->db->query($sql);
+        return $query ? $query->row() : null;
+    }
+    // ----- ********** END REPORTS ********** -----
+    
 }

@@ -363,7 +363,7 @@ function tableContent(data = false) {
     LEFT JOIN pms_timeline_management_tbl AS management
     ON management.timelineBuilderID = taskboard.timelineBuilderID AND management.projectMilestoneID  = taskboard.projectMilestoneID`,
     `taskboard.taskboardID,
-    taskBoard.taskID,
+    taskboard.taskID,
     taskName, 
     taskEndDates,
     taskStatus,
@@ -494,7 +494,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-xl-6 col-lg-12">
                             <div class="card">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO OF EMPLOYEE (DEPARTMENT)</h2>
+                                    <h2 class="font-weight-bold text-white">NO. OF EMPLOYEE (DEPARTMENT)</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-basic-employee"></div>
@@ -505,7 +505,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-xl-3 col-lg-6">
                             <div class="card">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO OF EMPLOYEE (GENDER)</h2>
+                                    <h2 class="font-weight-bold text-white">NO. OF EMPLOYEE (GENDER)</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-employee-gender"></div>
@@ -771,6 +771,7 @@ function noOfEmployeeHiredLeftChart (){
         const projectList = getTableData(`pms_timeline_builder_tbl`,
         `timelineBuilderID,
          projectID,
+         projectCode,
         (SELECT projectListName FROM pms_project_list_tbl WHERE  projectListID = projectID) as projectName`,
         `employeeID = ${sessionID} AND timelineBuilderStatus =2`);
 
@@ -782,8 +783,8 @@ function noOfEmployeeHiredLeftChart (){
         
         let html = "";
         projectList.map(project => {
-            const { timelineBuilderID,projectID, projectName } = project;
-            html += `<option value="${projectID}" timelineBuilderID ="${timelineBuilderID}">${projectName}</option>`
+            const { timelineBuilderID,projectID, projectName, projectCode } = project;
+            html += `<option value="${projectID}" timelineBuilderID ="${timelineBuilderID}">${projectCode +" : "+projectName}</option>`;
         });
         return html;
     }
@@ -792,10 +793,9 @@ function noOfEmployeeHiredLeftChart (){
     // ----- FILTERING OPTIONS -----
     function filteringOptions() {
         let html = `
-        <div class="row">
+        <div class="row mt-2">
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Project Name</label>
                     <select class="form-control select2"
                         name="projectID"
                         style="width: 100%">
@@ -895,7 +895,7 @@ function noOfEmployeeChart(getDepartmentID = 0){
             },
             series:seriesData,
             xaxis: {
-                categories: listDepartment,
+                categories: [''],
             },
             yaxis: {
                 title: {
@@ -920,11 +920,15 @@ function noOfEmployeeChart(getDepartmentID = 0){
             options
         );
 
+        if (chart.ohYeahThisChartHasBeenRendered) {
+            chart.destroy();
+            chart.ohYeahThisChartHasBeenRendered = false;
+        }
+
+        $("#apex-department-list").html('');
         setTimeout(() => {
-        chart.render();
-        
-        }, 300);
-        chart.destroy();
+        chart.render().then(() => chart.ohYeahThisChartHasBeenRendered = true);
+        }, 500);
 
     }else{
         let html =`<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
@@ -1040,17 +1044,26 @@ function noOfEmployeeWorkloadChart(timelineBuilderID = 0){
                 }
             }]
         }
-    
+    $("#apex-employee-workLoad").html('');
        var chart = new ApexCharts(
             document.querySelector("#apex-employee-workLoad"),
             options
         );
+
+
+
+        if (chart.ohYeahThisChartHasBeenRendered) {
+            chart.destroy();
+            chart.ohYeahThisChartHasBeenRendered = false;
+        }
+
         
         setTimeout(() => {
-            chart.render();
+            // chart.render();
+            chart.render().then(() => chart.ohYeahThisChartHasBeenRendered = true);
             
-            }, 300);
-            chart.destroy();
+            }, 500);
+        //     chart.destroy();
     }else{
         let html =`<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
                 <img src="${base_url}assets/modal/no-data.gif" style="max-width: 300px;
@@ -1088,7 +1101,7 @@ function myFormsContent() {
 
     const countPendingMaterialRequest = getTableData(`ims_material_request_tbl`,
     ` COUNT(materialRequestID) AS materialRequestList`,
-    `employeeID = ${sessionID} AND materialRequestStatus =0`);
+    `employeeID = ${sessionID} AND materialRequestStatus =1`);
 
     const countPendingMaterialWithdrawal = getTableData(`ims_material_withdrawal_tbl`,
     ` COUNT(materialWithdrawalID ) AS materialWithdrawalList`,
@@ -1101,7 +1114,8 @@ function myFormsContent() {
 
     const getProject = getTableData(`pms_timeline_builder_tbl as timelineBuilderID`,
     `(SELECT projectListName FROM pms_project_list_tbl WHERE projectListID = timelineBuilderID.projectID) AS projectName,
-    timelineBuilderID`,
+    timelineBuilderID,
+    projectCode`,
     `timelineBuilderStatus = 2 `);
 
     const getEvents = getTableData(`hris_event_calendar_tbl`,
@@ -1110,7 +1124,8 @@ function myFormsContent() {
     WHEN week(eventCalendarDateFrom)=week(now()) THEN eventCalendarDateFrom
     WHEN week(eventCalendarDateTo)=week(now()) THEN eventCalendarDateTo
     END AS eventDate`,
-    `week(eventCalendarDateFrom)=week(now()) OR week(eventCalendarDateTo)=week(now())`);
+    `week(eventCalendarDateFrom)=week(now()) OR week(eventCalendarDateTo)=week(now())`,
+    `eventCalendarDateFrom ASC`);
 
     const listApplicants = getTableData(`web_applicant_list_tbl AS applicant
     LEFT JOIN hris_applicant_interviewer_tbl AS interviewer
@@ -1203,14 +1218,14 @@ let html = `        <div class="row clearfix row-deck">
 
                    <div class="row clearfix row-deck">
                         <div class="col-xl-4 col-lg-12">
-                            <div class="card">
+                            <div class="card"  style="box-shadow:none !important;">
                                 <div class="header bg-primary">
                                    <div class="row">
                                         <div class="col-sm-12 col-md-6 col-lg-6"> 
-                                        <h2 class="font-weight-bold text-white">NO OF SUBORDINATES</h2>
+                                        <h2 class="font-weight-bold text-white">NO. OF SUBORDINATES</h2>
                                         </div>
                                     <div class="col-sm-12 col-md-6 col-lg-6 text-center"> 
-                                        <select class="float-right mr-4 btnDepartment select2">`;
+                                        <select class="float-right mr-4 btnDepartment select2" style="width:100%;">`;
                                         html+=`<option selected value="0" disabled>Select Department</option>`;
 
                                         getDepartment.map((department)=>{
@@ -1233,22 +1248,23 @@ let html = `        <div class="row clearfix row-deck">
                         </div>
 
                         <div class="col-xl-4 col-lg-12">
-                            <div class="card">
+                            <div class="card"  style="box-shadow:none !important;">
                                 <div class="header bg-primary">
                                    <div class="row">
                                         <div class="col-sm-12 col-md-6 col-lg-4"> 
                                         <h2 class="font-weight-bold text-white">WORKLOAD</h2>
                                         </div>
                                     <div class="col-sm-12 col-md-6 col-lg-8 text-center"> 
-                                        <select class="float-right mr-4 btnProject select2">`;
+                                        <select class="float-right mr-4 btnProject select2" style="width:100%;">`;
                                         html+=`<option selected value="0" disabled>Select Project</option>`;
 
                                         getProject.map((timeline)=>{
                                             let{
                                                 projectName,
-                                                timelineBuilderID
+                                                timelineBuilderID,
+                                                projectCode
                                             } = timeline;
-                                                html+=`<option value="${timelineBuilderID}">${projectName}</option>`;
+                                                html+=`<option value="${timelineBuilderID}">${projectCode} : ${projectName}</option>`;
                                             
                                         })
                                             
@@ -1277,16 +1293,14 @@ let html = `        <div class="row clearfix row-deck">
                                             eventCalendarName,
                                             eventDate
                                         } = event;
-                                        html+=`<div class="row mt-1">
-                                                    <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2">
-                                                        <div class="square rounded bg-secondary" style="
+                                         html+=`<div class="container card"  style="box-shadow:none !important;">
+                                                    <div class=" text-center mb-2 d-flex">
+                                                        <div class=" square rounded bg-secondary" style="
                                                                                 padding: 10px;
                                                                                 width: min-content;
-                                                                            "><small class="text-white font-weight-bolder m-0">${(moment(eventDate).format('MMM')).toUpperCase()}<h1
-                                                                    class="text-white font-weight-bolder">${moment(eventDate).format('DD')}</h1></small></div>
-                                                    </div>
-                                                    <div class="col-sm-10 col-md-10 col-lg-10 col-xl-10">
-                                                        <h6 class="font-weight-bolder ">${eventCalendarName}</h6>
+                                                                            "><small class="text-white font-weight-bolder m-0">${(moment(eventDate).format('MMM')).toUpperCase()}
+                                                                            <h1 class="text-white font-weight-bolder">${moment(eventDate).format('DD')}</h1></small></div>
+                                                                            <h6 class="font-weight-bolder p-0 pl-1 pt-3" style="width: fit-content;">${eventCalendarName}</h6>
                                                     </div>
                                                 </div>`;
                                     })
@@ -1343,6 +1357,7 @@ let html = `        <div class="row clearfix row-deck">
         noOfEmployeeWorkloadChart();
         noOfEmployeeChart();
         initAll();
+        // $('.select2-selection--single').select2({dropdownAutoWidth : true});
         return html;
     }, 300);
 }

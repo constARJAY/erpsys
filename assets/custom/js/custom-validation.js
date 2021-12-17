@@ -124,11 +124,12 @@ initInputmask();
 
 // ----- INITIALIZE AMOUNT FORMAT -----
 const initAmount = (element = null, displayPrefix = false) => {
-	let elem = getElement(element, ".amount");
+	let elem  = getElement(element, ".amount");
+	let minus = $(elem).attr('allow-minus') == "true";
 	$(elem).inputmask({
 		alias: "currency",
 		prefix: displayPrefix ? "₱ " : "",
-		allowMinus: false,
+		allowMinus: minus,
 		allowPlus:  false,
 	});
 };

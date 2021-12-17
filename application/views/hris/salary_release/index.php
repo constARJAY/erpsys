@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Salary Release</li>
                     </ul>
                     <h1 class="mt-3">Salary Release</h1>
-                    <span>This module is used to manage the releasing of salary.</span>
+                    <span>This module is used to generate and monitor the releasing of on hold salaries for employees.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 mt-4 text-right">
                 <button type="button" class="btn btn-default btn-add" id="btnLog"><i class="fas fa-clipboard-list"></i> Salary Release Log</button>

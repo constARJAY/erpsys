@@ -207,8 +207,9 @@ class EmployeeAttendance_model extends CI_Model {
 
             $scheduleDuration = ($scheduleOut - $scheduleIn) / 3600;
             $duration = ($diff / 3600); // COMPUTE IN HOURS 
+
             if ($duration >= $scheduleDuration || $duration >= ($scheduleDuration - $scheduleBreakDuration)) {
-                $duration = $duration - $scheduleBreakDuration; 
+                $duration = (float) $duration - (float) $scheduleBreakDuration; 
             } else if ($duration <= 0) {
                 $duration = 0;
             }
@@ -406,11 +407,6 @@ class EmployeeAttendance_model extends CI_Model {
                         $inCheckOut = $checkOut;
                     }
                 }
-                // $inCheckOut = $isInGreaterOutCheck ? null : $inCheckOut;
-                // $isWithin = isWithinSchedule($scheduleIn, $scheduleOut, $inCheckOut);
-                // if ($isWithin) {
-                //     $inCheckOut = $checkOut;
-                // }
                 
                 $duration = $this->getCheckDuration($scheduleIn, $scheduleOut, $scheduleBreakDuration, $inCheckIn, $inCheckOut);
     

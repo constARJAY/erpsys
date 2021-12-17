@@ -6,6 +6,7 @@ class Employee_module extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("hris/EmployeeModule_model", "employeemodule");
+        $this->load->model("hris/Backpay_model", "backpay");
 
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : false;
         if ($sessionID && $sessionID != 1) {
@@ -414,7 +415,20 @@ class Employee_module extends CI_Controller {
                 $saveAccessibility = $this->employeemodule->saveAccessibility($accessData, $action, $employeeID);
             }
 
-            
+            if($employeeStatus == 0){
+
+                $BackPayData = [
+                    "employeeID"                 => $sessionID,
+                    "backPayEmployeeID"          => $employeeID,
+                    "backPayStatus"              => 0,
+                    "releaseStatus"              => 0,
+                    "createdBy"                  => $createdBy
+                ];
+
+
+                $this->backpay->saveBackPayData("insert",$BackPayData,null,"not released");
+
+            }
 
             if ($saveEmployeeData) {
                 echo json_encode($saveEmployeeData);

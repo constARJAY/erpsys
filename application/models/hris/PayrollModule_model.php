@@ -29,7 +29,7 @@ class PayrollModule_model extends CI_Model {
 
             if ($action == "insert")
             {
-                $payrollCode = getFormCode("PAY", date("Y-m-d"), $insertID);
+                $payrollCode = getFormCode("PRL", date("Y-m-d"), $insertID);
                 $this->db->update("hris_payroll_tbl", ["payrollCode" => $payrollCode], ["payrollID" => $insertID]);
             }
 
@@ -57,6 +57,7 @@ class PayrollModule_model extends CI_Model {
                 unset($temp["fullname"]);
                 unset($temp["employeeCode"]);
                 unset($temp["profile"]);
+                unset($temp["hasBank"]);
                 $temp["payrollID"] = $payrollID;
                 $data[] = $temp;
             }
@@ -134,10 +135,10 @@ class PayrollModule_model extends CI_Model {
     {
         $sql = "
         SELECT 
-            (sssDeduction + (IF(sssAdjustment, sssAdjustment, 0)) 
-            + phicDeduction + (IF(phicAdjustment, phicAdjustment, 0)) 
-            + hdmfDeduction + (IF(hdmfAdjustment, hdmfAdjustment, 0)) 
-            + withHoldingDeduction + (IF(withHoldingAdjustment, withHoldingAdjustment, 0))) AS totalDeduction 
+            (sssDeduction + (IF(sssAdjustment, (IF(sssAdjustment > 0, (- sssAdjustment), ABS(sssAdjustment))), 0)) 
+            + phicDeduction + (IF(phicAdjustment, (IF(phicAdjustment > 0, (- phicAdjustment), ABS(phicAdjustment))), 0)) 
+            + hdmfDeduction + (IF(hdmfAdjustment, (IF(hdmfAdjustment > 0, (- hdmfAdjustment), ABS(hdmfAdjustment))), 0)) 
+            + withHoldingDeduction + (IF(withHoldingAdjustment, (IF(withHoldingAdjustment > 0, (- withHoldingAdjustment), ABS(withHoldingAdjustment))), 0))) AS totalDeduction 
         FROM hris_payroll_items_tbl WHERE payrollID = $payrollID AND employeeID = $employeeID";
         $query = $this->db->query($sql);
         $result = $query ? $query->row() : null;
@@ -391,7 +392,7 @@ class PayrollModule_model extends CI_Model {
                         // $this->updatePayrollItems($payrollID, $payrollAdjustmentID);
                     }
 
-                    $payrollAdjustmentCode = getFormCode("PA", date("Y-m-d"), $payrollAdjustmentID);
+                    $payrollAdjustmentCode = getFormCode("PRA", date("Y-m-d"), $payrollAdjustmentID);
                     $this->db->update("hris_payroll_adjustment_tbl", ["payrollAdjustmentCode" => $payrollAdjustmentCode], ["payrollAdjustmentID" => $payrollAdjustmentID]);
 
                     return "true|Success|$payrollAdjustmentID|".date("Y-m-d");
@@ -431,7 +432,7 @@ class PayrollModule_model extends CI_Model {
                             'payrollID'         => $payrollID,
                             'payrollItemID'     => $payrollItemID,
                             'employeeID'        => $employeeID,
-                            'payrollHoldStatus' => 1,
+                            'payrollHoldStatus' => 0,
                             'netPay'            => $netPay,
                             'createdBy'         => $sessionID,
                             'updatedBy'         => $sessionID
@@ -455,6 +456,40 @@ class PayrollModule_model extends CI_Model {
 
 
     // ---------- ********** PAYROLL REGISTER ********** ----------
+    public function getOtherAdditionalAdjustment($item = null) 
+    {
+        $additionalAdjustment = $otherDeduction = 0;
+        
+        if ($item)
+        {
+            $array = [
+                $item['holidayAdjustment'] ?? 0,
+                $item['overtimeAdjustment'] ?? 0,
+                $item['nightDifferentialAdjustment'] ?? 0,
+                $item['allowanceAdjustment'] ?? 0,
+                $item['lateUndertimeAdjustment'] ?? 0,
+                $item['lwopAdjustment'] ?? 0,
+                $item['sssAdjustment'] ?? 0,
+                $item['phicAdjustment'] ?? 0,
+                $item['hdmfAdjustment'] ?? 0,
+                $item['withHoldingAdjustment'] ?? 0,
+                $item['loanAdjustment'] ?? 0,
+                $item['otherAdjustment'] ?? 0,
+            ];
+    
+            foreach($array as $key => $arr)
+            {
+                if ($arr < 0) $otherDeduction += $arr;
+                else $additionalAdjustment += $arr;
+            } 
+        }
+
+        return [
+            "additionalAdjustment" => $additionalAdjustment,
+            "otherDeduction"       => $otherDeduction,
+        ];
+    }
+
     public function insertPayrollRegisterItems($payrollID = 0, $payrollRegisterID = 0)
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
@@ -465,32 +500,40 @@ class PayrollModule_model extends CI_Model {
             $data = [];
             foreach ($items as $item) 
             {
+                $adjustment = $this->getOtherAdditionalAdjustment($item);
+                $additionalAdjustment = $adjustment['additionalAdjustment'];
+                $otherDeduction       = $adjustment['otherDeduction'];
+
                 $data[] = [
                     'payrollRegisterID'      => $payrollRegisterID,
                     'payrollID'              => $payrollID,
+                    'employeeID'             => $item['employeeID'],
+                    'totalDays'              => $item['workingDays'],
                     'basicSalary'            => $item['basicSalary'],
                     'basicPay'               => $item['basicPay'],
-                    'holidayPay'             => ($item['holidayPay'] ?? 0) + ($item['holidayAdjustment']),
-                    'overtimePay'            => ($item['overtimePay'] ?? 0) + ($item['overtimeAdjustment'] ?? 0),
-                    'nightDifferentialPay'   => ($item['nightDifferentialPay'] ?? 0) + ($item['nightDifferentialAdjustment'] ?? 0),
-                    'allowance'              => ($item['allowance'] ?? 0) + ($item['allowanceAdjustment'] ?? 0),
-                    'additionalAdjustment'   => ($item['otherAdjustment'] ?? 0),
-                    'lateUndertimeDeduction' => ($item['lateUndertimeDeduction'] ?? 0) + ($item['lateUndertimeAdjustment'] ?? 0),
-                    'lwopDeduction'          => ($item['lwopDeduction'] ?? 0) + ($item['lwopAdjustment'] ?? 0),
+                    'holidayPay'             => $item['holidayPay'],
+                    'overtimePay'            => $item['overtimePay'],
+                    'nightDifferentialPay'   => $item['nightDifferentialPay'],
+                    'allowance'              => $item['allowance'],
+                    'paidLeave'              => $item['leavePay'],
+                    'additionalAdjustment'   => $additionalAdjustment,
+                    'lateUndertimeDeduction' => $item['lateUndertimeDeduction'],
+                    'lwopDeduction'          => $item['lwopDeduction'],
                     'grossPay'               => $item['grossPay'] ?? 0,
-                    'sssDeduction'           => ($item['sssDeduction'] ?? 0) + ($item['sssAdjustment'] ?? 0),
-                    'phicDeduction'          => ($item['phicDeduction'] ?? 0) + ($item['phicAdjustment'] ?? 0),
-                    'hdmfDeduction'          => ($item['hdmfDeduction'] ?? 0) + ($item['hdmfAdjustment'] ?? 0),
-                    'withHoldingDeduction'   => ($item['withHoldingDeduction'] ?? 0) + ($item['withHoldingAdjustment'] ?? 0), 
-                    'loanDeduction'          => ($item['loanDeduction'] ?? 0) + ($item['loanAdjustment'] ?? 0),
-                    'totalMandates'          => ($item['totalDeduction'] ?? 0),
-                    'otherDeductions'        => 0,
+                    'sssDeduction'           => $item['sssDeduction'],
+                    'phicDeduction'          => $item['phicDeduction'],
+                    'hdmfDeduction'          => $item['hdmfDeduction'],
+                    'withHoldingDeduction'   => $item['withHoldingDeduction'], 
+                    'loanDeduction'          => $item['loanDeduction'],
+                    'totalMandates'          => $item['totalDeduction'],
+                    'otherDeductions'        => $otherDeduction,
                     'netPay'                 => $item['netPay'] ?? 0,
-                    'salaryWages'            => $item['grossPay'] - (($item['allowance'] ?? 0) + ($item['allowanceAdjustment'] ?? 0)),
-                    'onHoldSalary'           => $item['holdSalary'] == 1 ? $item['grossPay'] : 0, 
-                    'salaryOnBank'           => $item['holdSalary'] == 0 && $item['hasBank'] == 1 ? $item['grossPay'] : 0,
-                    'salaryOnCheck'          => $item['holdSalary'] == 0 && $item['hasBank'] == 1 ? 0 : $item['grossPay'],
-                    'totalSalary'            => $item['grossPay'],
+                    'hasBank'                => $item['hasBank'],
+                    'salaryWages'            => $item['grossPay'] - $item['allowance'],
+                    'onHoldSalary'           => $item['holdSalary'] == 1 ? $item['netPay'] : 0, 
+                    'salaryOnBank'           => $item['holdSalary'] == 0 && $item['hasBank'] == 1 ? $item['netPay'] : 0,
+                    'salaryOnCheck'          => $item['holdSalary'] == 0 && $item['hasBank'] == 0 ? $item['netPay'] : 0,
+                    'totalSalary'            => $item['netPay'],
                     'createdBy'              => $sessionID,
                     'updatedBy'              => $sessionID,
                 ];
@@ -524,7 +567,7 @@ class PayrollModule_model extends CI_Model {
             if ($query)
             {
                 $payrollRegisterID   = $this->db->insert_id();
-                $payrollRegisterCode = getFormCode("PR", date("Y-m-d"), $payrollRegisterID);
+                $payrollRegisterCode = getFormCode("PRR", date("Y-m-d"), $payrollRegisterID);
                 $this->db->update("hris_payroll_register_tbl", ["payrollRegisterCode" => $payrollRegisterCode], ["payrollRegisterID" => $payrollRegisterID]);
 
                 $payrollRegisterItems = $this->insertPayrollRegisterItems($payrollID, $payrollRegisterID);
@@ -532,4 +575,206 @@ class PayrollModule_model extends CI_Model {
         }
     }
     // ---------- ********** END PAYROLL REGISTER ********** ----------
+
+
+
+
+
+    // ---------- ********** PAYROLL PAYSLIP ********** ----------
+    public function generateEmployeePayslip($payrollID = 0)
+    {
+        $sql = "
+        SELECT
+            hpit.payrollID,
+            helt.departmentID,
+            helt.designationID,
+            hpit.employeeID,
+            employeeCode,
+            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
+            departmentName,
+            designationName,
+            employeeSSS,
+            employeePhilHealth,
+            employeePagibig,
+            employeeTIN,
+            CONCAT(DATE_FORMAT(hpit.startDate, '%M %d, %Y'), ' - ', DATE_FORMAT(hpit.endDate, '%M %d, %Y')) AS payPeriod,
+            (SELECT
+                (CASE
+                    WHEN hpt.cutOff = 1 THEN DATE_FORMAT(CONCAT(DATE_FORMAT(hpit.endDate, '%Y-%m'), '-', IF(firstCutOffPayOut IN (30,31), DAY(LAST_DAY(hpit.endDate)), firstCutOffPayOut)), '%M %d, %Y')
+                    WHEN hpt.cutOff = 2 THEN DATE_FORMAT(CONCAT(DATE_FORMAT(hpit.endDate, '%Y-%m'), '-', IF(secondCutOffPayOut IN (30,31), DAY(LAST_DAY(hpit.endDate)), secondCutOffPayOut)), '%M %d, %Y')
+                    WHEN hpt.cutOff = 3 THEN DATE_FORMAT(CONCAT(DATE_FORMAT(hpit.endDate, '%Y-%m'), '-', IF(thirdCutOffPayOut IN (30,31), DAY(LAST_DAY(hpit.endDate)), thirdCutOffPayOut)), '%M %d, %Y')
+                    ELSE DATE_FORMAT(CONCAT(DATE_FORMAT(hpit.endDate, '%Y-%m'), '-', IF(fourthCutOffPayOut IN (30,31), DAY(LAST_DAY(hpit.endDate)), fourthCutOffPayOut)), '%M %d, %Y') END) AS payOut
+            FROM gen_system_setting_tbl) AS payOut,
+            workingDays AS totalDays,
+            basicSalary,
+            basicPay,
+            (holidayPay + (IF(holidayAdjustment, holidayAdjustment, 0))) AS holidayPay,
+            (overtimePay + (IF(overtimeAdjustment, overtimeAdjustment, 0))) AS overtimePay,
+            (nightDifferentialPay + (IF(nightDifferentialAdjustment, nightDifferentialAdjustment, 0))) AS nightDifferentialPay,
+            (allowance + (IF(allowanceAdjustment, allowanceAdjustment, 0))) AS allowance,
+            leavePay,
+            (lateUndertimeDeduction + (IF(lateUndertimeAdjustment, lateUndertimeAdjustment, 0))) AS lateUndertimeDeduction,
+            (lwopDeduction + (IF(lwopAdjustment, lwopAdjustment, 0))) AS lwopDeduction,
+            grossPay,
+            (basicSalary
+            + (holidayPay + (IF(holidayAdjustment, holidayAdjustment, 0)))
+            + (overtimePay + (IF(overtimeAdjustment, overtimeAdjustment, 0)))
+            + (nightDifferentialPay + (IF(nightDifferentialAdjustment, nightDifferentialAdjustment, 0)))
+            + (allowance + (IF(allowanceAdjustment, allowanceAdjustment, 0)))
+            + leavePay) AS totalEarning,
+            (sssDeduction + (IF(sssAdjustment, sssAdjustment, 0))) AS sssDeduction,
+            (phicDeduction + (IF(phicAdjustment, phicAdjustment, 0))) AS phicDeduction,
+            (hdmfDeduction + (IF(hdmfAdjustment, hdmfAdjustment, 0))) AS hdmfDeduction,
+            (withHoldingDeduction + (IF(withHoldingAdjustment, withHoldingAdjustment, 0))) AS withHoldingDeduction,
+            (loanDeduction + (IF(loanAdjustment, loanAdjustment, 0))) AS loanDeduction,
+            ((lateUndertimeDeduction + (IF(lateUndertimeAdjustment, lateUndertimeAdjustment, 0)))
+            + (lwopDeduction + (IF(lwopAdjustment, lwopAdjustment, 0)))
+            + (sssDeduction + (IF(sssAdjustment, sssAdjustment, 0)))
+            + (phicDeduction + (IF(phicAdjustment, phicAdjustment, 0)))
+            + (hdmfDeduction + (IF(hdmfAdjustment, hdmfAdjustment, 0)))
+            + (withHoldingDeduction + (IF(withHoldingAdjustment, withHoldingAdjustment, 0)))) AS totalDeduction,
+            netPay
+        FROM hris_payroll_items_tbl AS hpit
+            LEFT JOIN hris_employee_list_tbl AS helt ON hpit.employeeID = helt.employeeID
+            LEFT JOIN hris_department_tbl AS hdt ON helt.departmentID = hdt.departmentID
+            LEFT JOIN hris_designation_tbl AS hdt2 ON helt.designationID = hdt2.designationID
+            LEFT JOIN hris_payroll_tbl AS hpt ON hpit.payrollID = hpt.payrollID
+        WHERE hpit.payrollID = $payrollID";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    public function getLeaveCredits($payrollID = 0, $employeeID = 0, $leaveID = 0)
+    {
+        $totalLeave     = 0;
+        $usedLeave      = 0;
+        $remainingLeave = 0;
+
+        $sql = "
+        SELECT 
+            (SELECT 
+                COUNT(*) 
+            FROM hris_payroll_adjustment_pending_tbl AS hpapt2 
+                LEFT JOIN hris_leave_request_tbl AS hlrt2 ON hpapt2.tablePrimaryID=hlrt2.leaveRequestID
+            WHERE hpapt2.employeeID = $employeeID AND hlrt2.leaveID = $leaveID AND hpapt2.adjustmentType = 'leave') AS pendingLeave,
+            SUM(IF(htit.leaveWorkingDay = 1, 1, 0.5)) AS usedLeave,
+            (SELECT leaveCredit FROM hris_employee_leave_tbl WHERE employeeID = $employeeID AND leaveID = $leaveID) AS remainingLeave
+        FROM hris_payroll_tbl AS hpt 
+            LEFT JOIN hris_timekeeping_items_tbl AS htit USING(timekeepingID)
+            LEFT JOIN hris_leave_request_tbl AS hlrt ON htit.leaveID = hlrt.leaveRequestID
+        WHERE hpt.payrollID = $payrollID
+            AND htit.leaveID <> 0 
+            AND htit.employeeID = $employeeID
+            AND hlrt.leaveID = $leaveID";
+        $query  = $this->db->query($sql);
+        $result = $query ? $query->row() : null;
+        if ($result) {
+            $pendingLeave   = $result->pendingLeave ?? 0;
+            $usedLeave      = $result->usedLeave ?? 0;
+            $remainingLeave = $result->remainingLeave ?? 0;
+
+            $usedLeave  = $usedLeave + $pendingLeave;
+            $totalLeave = $usedLeave + $remainingLeave;
+        }
+
+        return [
+            "totalLeave"     => $totalLeave,
+            "usedLeave"      => $usedLeave,
+            "remainingLeave" => $remainingLeave,
+        ];
+    }
+
+    public function insertPayrollPayslip($payrollID = 0)
+    {
+        $data = $this->generateEmployeePayslip($payrollID);
+        if ($data && !empty($data))
+        {
+            foreach($data as $key => $dt)
+            {
+                $payrollID  = $dt['payrollID'];
+                $employeeID = $dt['employeeID'];
+
+                $sl = $this->getLeaveCredits($payrollID, $employeeID, 1); // SL 
+                $slTotal     = $sl['totalLeave'] ?? 0;               
+                $slUsed      = $sl['usedLeave'] ?? 0;               
+                $slRemaining = $sl['remainingLeave'] ?? 0;               
+
+                $vl = $this->getLeaveCredits($payrollID, $employeeID, 2); // SL 
+                $vlTotal     = $vl['totalLeave'] ?? 0;               
+                $vlUsed      = $vl['usedLeave'] ?? 0;               
+                $vlRemaining = $vl['remainingLeave'] ?? 0;    
+                
+                $data[$key]['slTotal']     = $slTotal;
+                $data[$key]['slUsed']      = $slUsed;
+                $data[$key]['slRemaining'] = $slRemaining;
+                $data[$key]['vlTotal']     = $vlTotal;
+                $data[$key]['vlUsed']      = $vlUsed;
+                $data[$key]['vlRemaining'] = $vlRemaining;
+            }
+            $query = $this->db->insert_batch('hris_payslip_tbl', $data);
+            return $query ? true : false;
+        }
+        return false;
+    }
+    // ---------- ********** END PAYROLL PAYSLIP ********** ----------
+
+
+
+
+
+    // ----- ********** REPORTS ********** -----
+    public function getCompanyProfile()
+    {
+        $sql   = "SELECT * FROM gen_company_profile_tbl LIMIT 1";
+        $query = $this->db->query($sql);
+        return $query ? $query->row() : null;
+    }
+    // ----- ********** END REPORTS ********** -----
+
+
+
+
+
+    // ---------- ********** LOAN ********** ---------
+    public function updateLoanForm($payrollID = 0)
+    {
+        $data = [];
+
+        $payroll = $this->getPayrollData($payrollID);
+        if ($payroll) {
+            $payrollCode = $payroll->payrollCode ?? '';
+
+            $items = $this->getAllPayrollItems($payrollID);
+            if ($items && !empty($items)) {
+                foreach ($items as $item) {
+                    $ammortizationID     = $item['ammortizationID'] ?? null;
+                    $ammortizationAmount = $item['ammortizationAmount'] ?? null;
+    
+                    if ($ammortizationID && $ammortizationAmount) {
+                        $ammortizationIDArr     = explode("|", $ammortizationID);
+                        $ammortizationAmountArr = explode("|", $ammortizationAmount);
+                        foreach ($ammortizationIDArr as $i => $arr) {
+                            $data[] = [
+                                'ammortizationID'     => $arr,
+                                'recievedDate'        => date('Y-m-d'),
+                                'payrollID'           => $payrollID,
+                                'payrollCode'         => $payrollCode,
+                                'payrollAmount'       => $ammortizationAmountArr[$i],
+                                'ammortizationStatus' => 1,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($data && !empty($data)) {
+            $query = $this->db->update_batch('hris_loan_ammortization_tbl', $data, 'ammortizationID');
+            return $query ? true : false;
+        }
+        return false;
+    }
+    // ---------- ********** END LOAN ********** ---------
+
+    
 }

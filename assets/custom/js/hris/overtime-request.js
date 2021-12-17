@@ -24,6 +24,19 @@ $(document).ready(function () {
 	}
 	// ---- END GET EMPLOYEE DATA -----
 
+		// ----- IS DOCUMENT REVISED -----
+		function isDocumentRevised(id = null) {
+			if (id) {
+				const revisedDocumentsID = getTableData(
+					"hris_overtime_request_tbl", 
+					"reviseOvertimeRequestID", 
+					"reviseOvertimeRequestID IS NOT NULL AND overtimeRequestStatus != 4");
+				return revisedDocumentsID.map(item => item.reviseLeaveRequestID).includes(id);
+			}
+			return false;
+		}
+		// ----- END IS DOCUMENT REVISED -----
+
 	// ----- REUSABLE FUNCTIONS -----	
 	const projectList = getTableData(
 		"pms_project_list_tbl AS project LEFT JOIN pms_timeline_builder_tbl AS timeline ON timeline.projectID = project.projectListID", 
@@ -34,8 +47,26 @@ $(document).ready(function () {
 		"pms_client_tbl", 
 		"clientID,clientName",
 		"clientStatus = 1");
-
-	// ----- END REUSABLE FUNCTIONS -----
+	const employeeSchedule = getTableData(
+			`hris_employee_list_tbl as helt
+				LEFT JOIN hris_schedule_setup_tbl AS hsst USING(scheduleID)`,
+			`IF(mondayStatus = 1, 1, 0) AS monday,
+			IF(tuesdayStatus = 1, 1, 0) AS tuesday,
+			IF(wednesdayStatus = 1, 1, 0) AS wednesday,
+			IF(thursdayStatus = 1, 1, 0) AS thursday,
+			IF(fridayStatus = 1, 1, 0) AS friday,
+			IF(saturdayStatus = 1, 1, 0) AS saturday,
+			IF(sundayStatus = 1, 1, 0) AS sunday,
+			mondayTo,
+			tuesdayTo,
+			wednesdayTo,
+			thursdayTo,
+			fridayTo,
+			saturdayTo,
+			sundayTo`,
+			`employeeID = ${sessionID}`
+		);
+		// ----- END REUSABLE FUNCTIONS -----
 
 	// ----- UPDATE CLIENT -----
 	function updateClientOptions() {
@@ -155,8 +186,8 @@ $(document).ready(function () {
 
 
 	// ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false) {
-		const loadData = (id) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("hris_overtime_request_tbl", "", "overtimeRequestID=" + id);
 
 			if (tableData.length > 0) {
@@ -183,8 +214,16 @@ $(document).ready(function () {
 				}
 
 				if (isAllowed) {
-					pageContent(true, tableData, isReadOnly);
-					updateURL(encryptString(id));
+					// pageContent(true, tableData, isReadOnly);
+					// updateURL(encryptString(id));
+
+					if (isRevise && employeeID == sessionID) {
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
+						updateURL(encryptString(id), true, true);
+					} else {
+						pageContent(true, tableData, isReadOnly);
+						updateURL(encryptString(id));
+					}
 				} else {
 					pageContent();
 					updateURL();
@@ -197,8 +236,11 @@ $(document).ready(function () {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id);
+				// let id = decryptString(view_id);
+				// id && isFinite(id) && loadData(id);
+				let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
+
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -213,11 +255,15 @@ $(document).ready(function () {
 		
 	}
 
-	function updateURL(view_id = 0, isAdd = false) {
+	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
 			window.history.pushState("", "", `${base_url}hris/overtime_request?view_id=${view_id}`);
 		} else if (!view_id && isAdd) {
-			window.history.pushState("", "", `${base_url}hris/overtime_request?add`);
+			if (view_id && isRevise) {
+				window.history.pushState("", "", `${base_url}hris/overtime_request?add=${view_id}`);
+			} else {
+				window.history.pushState("", "", `${base_url}hris/overtime_request?add`);
+			}
 		} else {
 			window.history.pushState("", "", `${base_url}hris/overtime_request`);
 		}
@@ -311,7 +357,7 @@ $(document).ready(function () {
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(60)) {
+			if (isCreateAllowed(56)) {
 				html = `
 				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
 			}
@@ -507,7 +553,7 @@ $(document).ready(function () {
 
 
 	// ----- FORM BUTTONS -----
-	function formButtons(data = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -525,32 +571,91 @@ $(document).ready(function () {
 					: false
 				: false;
 			if (employeeID === sessionID) {
-				if (overtimeRequestStatus == 0) {
+
+				if (overtimeRequestStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
 					<button 
 						class="btn btn-submit px-5 py-2" 
 						id="btnSubmit" 
-						overtimeRequestID="${overtimeRequestID}"
-						code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-paper-plane"></i>
+						overtimeRequestID="${encryptString(overtimeRequestID)}"
+						code="${getFormCode("OTR", createdAt, overtimeRequestID)}"
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
-					</button>
-					<button 
-						class="btn btn-cancel px-5 py-2"
-						id="btnCancelForm" 
-						overtimeRequestID="${overtimeRequestID}"
-						code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-ban"></i> 
-						Cancel
 					</button>`;
+
+					if (isRevise) {
+						button += `
+						<button type="button" 
+							class="btn btn-cancel btnCancel px-5 p-2" 
+							id="btnCancel"
+							overtimeRequestID="${encryptString(overtimeRequestID)}"
+							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					} else {
+						button += `
+						<button type="button" 
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancelForm" 
+							overtimeRequestID="${encryptString(overtimeRequestID)}"
+							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"
+							revise=${isRevise}><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					}
 				} else if (overtimeRequestStatus == 1) {
+					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
-						<button 
-							class="btn btn-cancel px-5 py-2"
+						<button type="button" 
+							class="btn btn-cancel  px-5 p-2"
 							id="btnCancelForm" 
-							overtimeRequestID="${overtimeRequestID}"
-							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-ban"></i> 
+							overtimeRequestID="${encryptString(overtimeRequestID)}"
+							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"
+							status="${overtimeRequestStatus}"><i class="fas fa-ban"></i> 
 							Cancel
+						</button>`;
+					}
+				} else if (overtimeRequestStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						overtimeRequestID="${encryptString(overtimeRequestID)}"
+						code="${getFormCode("OTR", createdAt, overtimeRequestID)}"
+						status="${overtimeRequestStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
+				} else if (overtimeRequestStatus == 3) {
+					// DENIED - FOR REVISE
+					if (!isDocumentRevised(overtimeRequestID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							overtimeRequestID="${encryptString(overtimeRequestID)}"
+							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"
+							status="${overtimeRequestStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				} else if (overtimeRequestStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(overtimeRequestID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							overtimeRequestID="${encryptString(overtimeRequestID)}"
+							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"
+							status="${overtimeRequestStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
 						</button>`;
 					}
 				}
@@ -593,11 +698,14 @@ $(document).ready(function () {
 
 
 	// ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
+
+		readOnly = isRevise ? false : readOnly;
 
 		let {
 			overtimeRequestID      = "",
+			reviseOvertimeRequestID = "",
 			employeeID            = "",
 			overtimeRequestDate    = "",
 			overtimeRequestTimeIn  = "",
@@ -629,80 +737,100 @@ $(document).ready(function () {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("overtimeRequestID", overtimeRequestID);
+		$("#btnBack").attr("overtimeRequestID", overtimeRequestID ? encryptString(overtimeRequestID) : "");
+		$("#btnBack").attr("code", getFormCode("OTR", moment(createdAt), overtimeRequestID));
 		$("#btnBack").attr("status", overtimeRequestStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
-		let button   = formButtons(data);
+		let button   = formButtons(data, isRevise, isFromCancelledDocument);
+
+		let reviseDocumentNo    = isRevise ? overtimeRequestID : reviseOvertimeRequestID;
+		let documentHeaderClass = isRevise || reviseOvertimeRequestID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseOvertimeRequestID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseOvertimeRequestID ? `
+		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+			<div class="card">
+				<div class="body">
+					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
+					<h6 class="mt-0 text-danger font-weight-bold">
+						${getFormCode("OTR", createdAt, reviseDocumentNo)}
+					</h6>      
+				</div>
+			</div>
+		</div>` : "";
 
 		let html = `
-        <div class="row px-2">
-            <div class="col-lg-2 col-md-6 col-sm-12 px-1">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Document No.</small>
-                        <h6 class="mt-0 text-danger font-weight-bold">
-							${overtimeRequestID ? getFormCode("OTR", createdAt, overtimeRequestID) : "---"}
+		<div class="row px-2">
+		${documentReviseNo}
+		<div class="${documentHeaderClass}">
+			<div class="card">
+				<div class="body">
+					<small class="text-small text-muted font-weight-bold">Document No.</small>
+					<h6 class="mt-0 text-danger font-weight-bold">
+						${overtimeRequestID && !isRevise ? getFormCode("LRF", createdAt, overtimeRequestID) : "---"}
+					</h6>      
+				</div>
+			</div>
+		</div>
+		<div class="${documentHeaderClass}">
+			<div class="card">
+				<div class="body">
+					<small class="text-small text-muted font-weight-bold">Status</small>
+					<h6 class="mt-0 font-weight-bold">
+						${overtimeRequestStatus && !isRevise ? getStatusStyle(overtimeRequestStatus) : "---"}
+					</h6>      
+				</div>
+			</div>
+		</div>
+		<div class="${documentDateClass}">
+			<div class="row m-0">
+			<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+				<div class="card">
+					<div class="body">
+						<small class="text-small text-muted font-weight-bold">Date Created</small>
+						<h6 class="mt-0 font-weight-bold">
+							${createdAt && !isRevise ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
 						</h6>      
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-6 col-sm-12 px-1">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Status</small>
-                        <h6 class="mt-0 font-weight-bold">
-							${overtimeRequestStatus ? getStatusStyle(overtimeRequestStatus) : "---"}
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+				<div class="card">
+					<div class="body">
+						<small class="text-small text-muted font-weight-bold">Date Submitted</small>
+						<h6 class="mt-0 font-weight-bold">
+							${submittedAt && !isRevise ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
 						</h6>      
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-8 col-md-12 col-sm-12 px-1">
-                <div class="row m-0">
-                <div class="col-lg-4 col-md-4 col-sm-12 px-1">
-                    <div class="card">
-                        <div class="body">
-                            <small class="text-small text-muted font-weight-bold">Date Created</small>
-                            <h6 class="mt-0 font-weight-bold">
-								${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
-                            </h6>      
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-12 px-1">
-                    <div class="card">
-                        <div class="body">
-                            <small class="text-small text-muted font-weight-bold">Date Submitted</small>
-                            <h6 class="mt-0 font-weight-bold">
-								${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
-							</h6>      
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-12 px-1">
-                    <div class="card">
-                        <div class="body">
-                            <small class="text-small text-muted font-weight-bold">Date Approved</small>
-                            <h6 class="mt-0 font-weight-bold">
-								${getDateApproved(overtimeRequestStatus, approversID, approversDate)}
-							</h6>      
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-            <div class="col-sm-12 px-1">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Remarks</small>
-                        <h6 class="mt-0 font-weight-bold">
-							${overtimeRequestRemarks ? overtimeRequestRemarks : "---"}
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+				<div class="card">
+					<div class="body">
+						<small class="text-small text-muted font-weight-bold">Date Approved</small>
+						<h6 class="mt-0 font-weight-bold">
+							${getDateApproved(overtimeRequestStatus, approversID, approversDate)}
 						</h6>      
-                    </div>
-                </div>
-            </div>
-        </div>
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>
+		<div class="col-sm-12 px-1">
+			<div class="card">
+				<div class="body">
+					<small class="text-small text-muted font-weight-bold">Remarks</small>
+					<h6 class="mt-0 font-weight-bold">
+						${overtimeRequestRemarks ? overtimeRequestRemarks : "---"}
+					</h6>      
+				</div>
+			</div>
+		</div>
+	</div>
+
+    
 
         <div class="row" id="form_overtime_request">
             <div class="col-md-4 col-sm-12">
@@ -767,12 +895,11 @@ $(document).ready(function () {
 
 			<div class="col-md-1 col-sm-12">
                 <div class="form-group">
-                    <label>Break ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Break</label>
                     <input type="text" 
                         class="form-control" 
                         id="overtimeRequestBreak" 
                         name="overtimeRequestBreak" 
-                        required
                         value="${formatAmount(overtimeRequestBreak || 0)}"
 						${disabled}>
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestBreak"></div>
@@ -782,7 +909,7 @@ $(document).ready(function () {
 			<div class="col-md-2 col-sm-12">
                 <div class="form-group">
                     <label>Class ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2" name="overtimeRequestClass" id="overtimeRequestClass"  required ${disabled}>
+					<select class="form-control validate select2" name="overtimeRequestClass" id="overtimeRequestClass"  required ${disabled} style="width:100%;">
 						<option disabled selected>Select Class</option>
 						<option value="Billable" ${overtimeRequestClass == "Billable" ? "selected" : ""}>
 							Billable
@@ -799,7 +926,7 @@ $(document).ready(function () {
                 </div>
             </div>
 
-			<div class="col-md-3 col-sm-12">
+			<div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Location ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
@@ -814,10 +941,10 @@ $(document).ready(function () {
             </div>
 
 
-			<div class="col-md-3 col-sm-12">
+			<div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Client ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2" name="overtimeRequestClientID" id="overtimeRequestClientID" ${disabled} required>
+					<select class="form-control validate select2" name="overtimeRequestClientID" id="overtimeRequestClientID" ${disabled} required style="width:100%;">
 						${getClientList(overtimeRequestClientID)}
 					</select>
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestClientID"></div>
@@ -827,31 +954,14 @@ $(document).ready(function () {
 			<div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Project ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2" name="overtimeRequestProjectID" id="overtimeRequestProjectID" required ${disabled}>
+					<select class="form-control validate select2" name="overtimeRequestProjectID" id="overtimeRequestProjectID" required ${disabled} style="width:100%;">
 							${getprojectList(overtimeRequestProjectID)}
 						</select>
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestProjectID"></div>
                 </div>
             </div>
 
-			<div class="col-md-2 col-sm-12">
-                <div class="form-group">
-                    <label>Status ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2 autoSaved" name="overtimeRequestProjectStatus"  id="overtimeRequestProjectStatus" ${disabled} required>
-						<option disabled selected>Select Status</option>
-						<option value="Pending" ${overtimeRequestProjectStatus == "Pending" ? "selected" : ""}>
-							Pending
-						</option>
-						<option value="Done" ${overtimeRequestProjectStatus == "Done" ? "selected" : ""}>
-							Done
-						</option>
-						<option value="Overdue" ${overtimeRequestProjectStatus == "Overdue" ? "selected" : ""}>
-							Overdue
-						</option>
-					</select>
-                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestProjectStatus"></div>
-                </div>
-            </div>
+			
 
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
@@ -877,6 +987,25 @@ $(document).ready(function () {
 			${getApproversStatus(approversID, approversStatus, approversDate)}
 		</div>`;
 
+		// <div class="col-md-2 col-sm-12">
+        //         <div class="form-group">
+        //             <label>Status ${!disabled ? "<code>*</code>" : ""}</label>
+		// 			<select class="form-control validate select2 autoSaved" name="overtimeRequestProjectStatus"  id="overtimeRequestProjectStatus" ${disabled} required>
+		// 				<option disabled selected>Select Status</option>
+		// 				<option value="Pending" ${overtimeRequestProjectStatus == "Pending" ? "selected" : ""}>
+		// 					Pending
+		// 				</option>
+		// 				<option value="Done" ${overtimeRequestProjectStatus == "Done" ? "selected" : ""}>
+		// 					Done
+		// 				</option>
+		// 				<option value="Overdue" ${overtimeRequestProjectStatus == "Overdue" ? "selected" : ""}>
+		// 					Overdue
+		// 				</option>
+		// 			</select>
+        //             <div class="d-block invalid-feedback" id="invalid-overtimeRequestProjectStatus"></div>
+        //         </div>
+        //     </div>
+
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initAll();
@@ -894,6 +1023,7 @@ $(document).ready(function () {
 				$("#overtimeRequestDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			}
 
+			// $("#overtimeRequestDate").data("daterangepicker").minDate = moment().subtract(7, 'days');
 			$("#overtimeRequestDate").data("daterangepicker").minDate = moment().subtract(10, 'days');
 			return html;
 		}, 300);
@@ -902,7 +1032,7 @@ $(document).ready(function () {
 
 
 	// ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -925,14 +1055,55 @@ $(document).ready(function () {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
 	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 	// ----- END PAGE CONTENT -----
+
+	// VALIDATE OVERTIME DATE//
+	function validateTimeInOvertime(){
+
+		let getOvertimeDate = $("#overtimeRequestDate").val();
+		let dayNow = moment(getOvertimeDate).format('dddd');
+		let getThisTime = $("#overtimeRequestTimeIn").val();
+		let getSchedTimeOut = getDateScheduled(dayNow) || "00:00";
+
+		if(getSchedTimeOut < getThisTime){
+			$("#overtimeRequestTimeIn").removeClass("is-invalid");
+			$("#invalid-overtimeRequestTimeIn").text("");
+			return true;
+		}else{
+			$("#overtimeRequestTimeIn").addClass("is-invalid");
+			$("#invalid-overtimeRequestTimeIn").text("must be above on the employee schdeduled(day)");
+			return false;
+		}
+		
+	}
+
+	function getDateScheduled(dayNow = "")
+	{
+		let lowercaseDay = dayNow.toLowerCase();
+		let timeOutLabel = lowercaseDay+"To";
+		let dayStatus = employeeSchedule[0][lowercaseDay];
+		let dayTimeOut = employeeSchedule[0][timeOutLabel];
+		if(dayStatus == 1){
+		
+			return dayTimeOut;
+		}else{
+			dayTimeOut = "00:00:00";
+		
+			return dayTimeOut;
+		}
+	}
+
+	// // CHECK SCHEDULE OF EMPLOYEE IN THIS DOCUMENT//
+	$(document).on("change",'#overtimeRequestDate,#overtimeRequestTimeIn',function(){
+		validateTimeInOvertime();
+	});
 
 
 	// ----- CUSTOM INPUTMASK -----
@@ -1074,21 +1245,59 @@ $(document).ready(function () {
 
 	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("overtimeRequestID");
+		const id         = decryptString($(this).attr("overtimeRequestID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
-			$("#page_content").html(preloader);
-			pageContent();
+			// $("#page_content").html(preloader);
+			// pageContent();
 
-			if (employeeID != sessionID) {
-				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			// if (employeeID != sessionID) {
+			// 	$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			// }
+
+			if (revise) {
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getData(action, 0, "save", feedback, id);
+				data["overtimeRequestStatus"] = 0;
+				if (!isFromCancelledDocument) {
+					data["reviseOvertimeRequestID"] = id;
+					data[`feedback`] = getFormCode("OTR", new Date);
+					delete data["overtimeRequestID"];
+				} else {
+					delete data["action"];
+					data["overtimeRequestID"] = id;
+					data["action"] = "update";
+				}
+
+				setTimeout(() => {
+					cancelForm(
+						"save", 
+						action,
+						"LEAVE REQUEST",
+						"",
+						"form_leave_request",
+						data,
+						true,
+						pageContent
+					);
+				}, 0);
+			} else {
+				$("#page_content").html(preloader);
+				pageContent();
+	
+				if (employeeID != sessionID) {
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+				}
 			}
 		} else {
 			const action   = id && feedback ? "update" : "insert";
 			const data     = getData(action, 0, "save", feedback, id);
+			data["overtimeRequestStatus"] = 0;
 
 			setTimeout(() => {
 				cancelForm(
@@ -1106,10 +1315,18 @@ $(document).ready(function () {
 	});
 	// ----- END CLOSE FORM -----
 
+	// ----- REVISE DOCUMENT -----
+	$(document).on("click", "#btnRevise", function () {
+		const id                    = decryptString($(this).attr("overtimeRequestID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
+	});
+	// ----- END REVISE DOCUMENT -----
+
 
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		// const tableData = getTableData("hris_overtime_request_tbl", "", "overtimeRequestID=" + id);
 		// pageContent(true, tableData);
 		viewDocument(id);
@@ -1119,7 +1336,7 @@ $(document).ready(function () {
 
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		// const tableData = getTableData("hris_overtime_request_tbl", "", "overtimeRequestID=" + id);
 		// pageContent(true, tableData, true);
 		viewDocument(id, true);
@@ -1175,15 +1392,28 @@ $(document).ready(function () {
 
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("overtimeRequestID");
+		const id           				= decryptString($(this).attr("overtimeRequestID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_overtime_request");
 		const validateTime = checkTimeRange(false, true);
+		const checkTimeOvertime = validateTimeInOvertime();
 
-		if (validate && validateTime) {
+		if (validate && validateTime && checkTimeOvertime) {
 			const feedback = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
-			const action   = id && feedback ? "update" : "insert";
+			const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data     = getData(action, 1, "submit", feedback, id);
 
+			if (revise) {
+				if (!isFromCancelledDocument) {
+					data[`tableData[reviseOvertimeRequestID]`] = id;
+					delete data[`tableData[overtimeRequestID]`];
+					data["feedback"] = getFormCode("OTR", new Date);
+				} else {
+					data[`whereFilter`] = `overtimeRequestID = ${id}`;
+				}
+			}
+			
 			const employeeID = getNotificationEmployeeID(
 				data["tableData[approversID]"],
 				data["tableData[approversDate]"],
@@ -1193,9 +1423,9 @@ $(document).ready(function () {
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                60,
+					moduleID:                56,
 					// tableID:                 1, // AUTO FILL
-					notificationTitle:       "Overtime Request Form",
+					notificationTitle:       "Overtime Request",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
@@ -1222,7 +1452,7 @@ $(document).ready(function () {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id       = $(this).attr("overtimeRequestID");
+		const id       = decryptString($(this).attr("overtimeRequestID"));
 		const feedback = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
 		const action   = "update";
 		const data     = getData(action, 4, "cancelform", feedback, id);
@@ -1241,14 +1471,32 @@ $(document).ready(function () {
 	// ----- END CANCEL DOCUMENT -----
 
 
-	// ----- CANCEL DOCUMENT -----
-	$(document).on("click", "#btnCancel", function () {
-		const id       = $(this).attr("overtimeRequestID");
-		const feedback = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
-		const action   = id && feedback ? "update" : "insert";
-		const data     = getData(action, 0, "save", feedback, id);
 
-		cancelForm(
+	// ----- CANCEL DOCUMENT -----
+	$(document).on("click", "#btnSave, #btnCancel", function () {
+		const id       = decryptString($(this).attr("overtimeRequestID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise   = $(this).attr("revise") == "true";
+		const feedback = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
+		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
+		const data     = getData(action, 0, "save", feedback);
+		data[`tableData[overtimeRequestStatus]`] = 0;
+
+		if (revise) {
+			if (!isFromCancelledDocument) {
+				data[`feedback`] = getFormCode("OTR", new Date);
+				data[`tableData[reviseOvertimeRequestID]`] = id;
+				data[`whereFilter`] = `overtimeRequestID = ${id}`;
+				delete data[`tableData[overtimeRequestID]`];
+			} else {
+				data[`tableData[overtimeRequestID]`] = id;
+				data[`whereFilter`] = `overtimeRequestID = ${id}`;
+				delete data[`action`];
+				data[`action`] = "update";
+			}
+		}
+
+		formConfirmation(
 			"save",
 			action,
 			"OVERTIME REQUEST",
@@ -1273,7 +1521,8 @@ $(document).ready(function () {
 		let breakDuration	= getDateRange[0].overtimeRequestBreak;
 		let paidStatus = 1;
 		let getLocation = getDateRange[0].overtimeRequestLocation;
-		let getStatus = getDateRange[0].overtimeRequestProjectStatus;
+		// let getStatus = getDateRange[0].overtimeRequestProjectStatus;
+		let getStatus = 0;
 		let getClass = getDateRange[0].overtimeRequestClass;
 		let getClientID = getDateRange[0].overtimeRequestClientID;
 		let getClientName = getDateRange[0].overtimeRequestClientName;
@@ -1339,9 +1588,9 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                60,
+					moduleID:                56,
 					tableID:                 id,
-					notificationTitle:       "Overtime Request Form",
+					notificationTitle:       "Overtime Request",
 					notificationDescription: `${getFormCode("OTR", createdAt, id)}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
@@ -1349,9 +1598,9 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                60,
+					moduleID:                56,
 					tableID:                 id,
-					notificationTitle:       "Overtime Request Form",
+					notificationTitle:       "Overtime Request",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
@@ -1371,7 +1620,7 @@ $(document).ready(function () {
 					true,
 					pageContent,
 					notificationData,
-					this,
+					"",
 					status == 2 ? generateProductionReport : false,
 					status == 2 ? [employeeID,2,id] : []
 				);
@@ -1436,9 +1685,9 @@ $(document).ready(function () {
 				data["tableData[approversDate]"]         = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID:                60,
+					moduleID:                56,
 					tableID: 				 id,
-					notificationTitle:       "Overtime Request Form",
+					notificationTitle:       "Overtime Request",
 					notificationDescription: `${getFormCode("OTR", createdAt, id)}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,

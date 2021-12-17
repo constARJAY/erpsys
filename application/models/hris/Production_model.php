@@ -101,7 +101,7 @@ class Production_model extends CI_Model {
             $query =        $this->db->insert("hris_production_tbl", $data);
             $insertID =    $this->db->insert_id();
 
-            $productionCode = "PRD-".date("y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
+            $productionCode = "PDN-".date("y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
             $updateArr = ["productionCode"=> $productionCode ];
             $this->db->update("hris_production_tbl", $updateArr, ["productionID" => $insertID]);
 
@@ -112,7 +112,7 @@ class Production_model extends CI_Model {
             $query =        $this->db->insert("hris_production_tbl", $data);
             $insertID =    $this->db->insert_id();
 
-            $productionCode = "PRD-".date("y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
+            $productionCode = "PDN-".date("y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
             $updateArr = ["productionCode"=> $productionCode ];
             $this->db->update("hris_production_tbl", $updateArr, ["productionID" => $insertID]);
 
