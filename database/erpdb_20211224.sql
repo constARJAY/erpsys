@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `erpdb` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
-USE `erpdb`;
 -- MySQL dump 10.13  Distrib 5.7.17, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: erpdb
@@ -2101,7 +2099,7 @@ CREATE TABLE `hris_loan_form_tbl` (
   `loanFormCode` text NOT NULL,
   `employeeID` bigint(20) NOT NULL,
   `loanID` bigint(20) NOT NULL,
-  `loanFormTermPayment` int(10) NOT NULL,
+  `loanFormTermPayment` varchar(255) DEFAULT NULL,
   `loanFormDate` text NOT NULL,
   `loanFormNoOfDays` int(10) NOT NULL,
   `loanFormInterest` decimal(10,2) DEFAULT NULL,
@@ -2127,7 +2125,7 @@ CREATE TABLE `hris_loan_form_tbl` (
 
 LOCK TABLES `hris_loan_form_tbl` WRITE;
 /*!40000 ALTER TABLE `hris_loan_form_tbl` DISABLE KEYS */;
-INSERT INTO `hris_loan_form_tbl` VALUES (1,NULL,'',1,3,1,'May 26, 2021 - September 26, 2021',0,1.00,7000.00,56.91,'','','',4,'',NULL,1,1,'2021-05-26 15:13:43','2021-05-26 07:14:00'),(2,NULL,'',1,2,1,'May 27, 2021 - October 26, 2021',0,1.00,9000.00,118.42,'2|3|4','2|2|2','2021-05-26 15:25:33|2021-05-26 15:26:20|2021-05-26 15:26:58',5,'','2021-05-26 15:23:14',1,1,'2021-05-26 15:16:11','2021-05-27 07:44:06'),(3,NULL,'',1,1,1,'May 27, 2021 - May 27, 2021',0,0.50,25000.00,0.00,'2|3|4','','',4,'','2021-05-27 15:34:45',1,1,'2021-05-27 15:34:45','2021-05-27 07:35:02'),(4,NULL,'',1,4,1,'June 3, 2021 - May 27, 2021',0,5.00,250000.00,0.00,'2|3|4','2|2|2','2021-06-01 11:38:29|2021-06-01 11:46:38|2021-06-03 11:11:01',2,'','2021-05-27 15:39:39',1,4,'2021-05-27 15:35:37','2021-06-03 03:11:02'),(5,NULL,'',1,2,1,'June 1, 2021 - June 1, 2022',0,10.00,150000.00,2260.27,'2|3|4','','',4,'','2021-05-31 11:13:56',1,1,'2021-05-31 10:09:48','2021-05-31 03:14:09'),(6,NULL,'',1,1,1,'June 2, 2021 - June 2, 2021',0,5.00,150000.00,0.00,'2|3|4','','',0,'','2021-06-02 11:02:48',1,1,'2021-06-02 11:02:48','2021-06-02 03:04:56'),(7,NULL,'',1,2,1,'June 3, 2021 - June 3, 2022',0,5.00,150000.00,6562.50,'2|3|4','2|2|2','2021-06-03 11:13:45|2021-06-03 11:15:19|2021-06-03 11:15:51',2,'','2021-06-03 11:13:03',1,4,'2021-06-03 11:13:03','2021-06-03 03:15:52');
+INSERT INTO `hris_loan_form_tbl` VALUES (1,NULL,'',1,3,'1','May 26, 2021 - September 26, 2021',0,1.00,7000.00,56.91,'','','',4,'',NULL,1,1,'2021-05-26 15:13:43','2021-05-26 07:14:00'),(2,NULL,'',1,2,'1','May 27, 2021 - October 26, 2021',0,1.00,9000.00,118.42,'2|3|4','2|2|2','2021-05-26 15:25:33|2021-05-26 15:26:20|2021-05-26 15:26:58',5,'','2021-05-26 15:23:14',1,1,'2021-05-26 15:16:11','2021-05-27 07:44:06'),(3,NULL,'',1,1,'1','May 27, 2021 - May 27, 2021',0,0.50,25000.00,0.00,'2|3|4','','',4,'','2021-05-27 15:34:45',1,1,'2021-05-27 15:34:45','2021-05-27 07:35:02'),(4,NULL,'',1,4,'1','June 3, 2021 - May 27, 2021',0,5.00,250000.00,0.00,'2|3|4','2|2|2','2021-06-01 11:38:29|2021-06-01 11:46:38|2021-06-03 11:11:01',2,'','2021-05-27 15:39:39',1,4,'2021-05-27 15:35:37','2021-06-03 03:11:02'),(5,NULL,'',1,2,'1','June 1, 2021 - June 1, 2022',0,10.00,150000.00,2260.27,'2|3|4','','',4,'','2021-05-31 11:13:56',1,1,'2021-05-31 10:09:48','2021-05-31 03:14:09'),(6,NULL,'',1,1,'1','June 2, 2021 - June 2, 2021',0,5.00,150000.00,0.00,'2|3|4','','',0,'','2021-06-02 11:02:48',1,1,'2021-06-02 11:02:48','2021-06-02 03:04:56'),(7,NULL,'',1,2,'1','June 3, 2021 - June 3, 2022',0,5.00,150000.00,6562.50,'2|3|4','2|2|2','2021-06-03 11:13:45|2021-06-03 11:15:19|2021-06-03 11:15:51',2,'','2021-06-03 11:13:03',1,4,'2021-06-03 11:13:03','2021-06-03 03:15:52');
 /*!40000 ALTER TABLE `hris_loan_form_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2604,6 +2602,7 @@ CREATE TABLE `hris_payroll_items_tbl` (
   `prevNetPay` decimal(15,2) DEFAULT NULL,
   `netPay` decimal(15,2) DEFAULT NULL,
   `ammortizationID` text DEFAULT NULL,
+  `ammortizationName` text DEFAULT NULL,
   `ammortizationAmount` text DEFAULT NULL,
   `printedPayslip` int(11) DEFAULT 0,
   `createdBy` bigint(21) DEFAULT NULL,
@@ -2848,6 +2847,7 @@ CREATE TABLE `hris_payslip_tbl` (
   `nightDifferentialPay` decimal(15,2) DEFAULT NULL,
   `allowance` decimal(15,2) DEFAULT NULL,
   `leavePay` decimal(15,2) DEFAULT NULL,
+  `otherEarning` decimal(15,2) DEFAULT NULL,
   `totalEarning` decimal(15,2) DEFAULT NULL,
   `lateUndertimeDeduction` decimal(15,2) DEFAULT NULL,
   `lwopDeduction` decimal(15,2) DEFAULT NULL,
@@ -2856,7 +2856,10 @@ CREATE TABLE `hris_payslip_tbl` (
   `phicDeduction` decimal(15,2) DEFAULT NULL,
   `hdmfDeduction` decimal(15,2) DEFAULT NULL,
   `withHoldingDeduction` decimal(15,2) DEFAULT NULL,
+  `ammortizationName` text DEFAULT NULL,
+  `ammortizationAmount` text DEFAULT NULL,
   `loanDeduction` decimal(15,2) DEFAULT NULL,
+  `otherDeduction` decimal(15,2) DEFAULT NULL,
   `totalDeduction` decimal(15,2) DEFAULT NULL,
   `netPay` decimal(15,2) DEFAULT NULL,
   `slTotal` decimal(15,2) DEFAULT NULL,
@@ -7402,4 +7405,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-17 22:13:30
+-- Dump completed on 2021-12-24  9:12:16
