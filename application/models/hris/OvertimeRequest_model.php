@@ -156,9 +156,29 @@ class OvertimeRequest_model extends CI_Model {
 
     }
 
+    public function getEmployeeOvertimeAmount($employeeID,$schedule){
+        $getHourlyRate = $this->db->query("SELECT IFNULL(footer.workingDays,0) AS workingDays FROM hris_timekeeping_items_tbl as footer
+        LEFT JOIN hris_timekeeping_tbl AS header
+        ON footer.timekeepingID = header.timekeepingID
+        WHERE header.timekeepingStatus =2 AND footer.employeeID = $employeeID AND footer.scheduleDate = '$schedule'");
+
+
+        $hourlyRate =  $getHourlyRate->num_rows() > 0 ? $getHourlyRate->row()->workingDays : 0;
+        $basicSalary = getEmployeeBasicSalary($employeeID);
+        $getCutOff = getCutOffCount();
+
+        $loanAmount = 0;
+
+        $loanAmount = ($basicSalary/$getCutOff)/$hourlyRate;
+
+        
+
+        return $loanAmount ? $loanAmount : 0;
+    }
+
     public function generatePayrollAdjustment($data = false){
         if($data){
-            $query = $this->db->insert("fms_payroll_adjust_tbl", $data);
+            $query = $this->db->insert("hris_payroll_adjustment_pending_tbl", $data);
             if ($query) {
                 return "true|Successfully submitted";
             }

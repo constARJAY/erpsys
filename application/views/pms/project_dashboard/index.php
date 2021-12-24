@@ -17,7 +17,7 @@
 						<li class="breadcrumb-item active">Project Dashboard</li>
 					</ul>
 					<h1 class="mt-3">Project Dashboard</h1>
-					<span>Displays useful and informative data for project use.</span>
+					<span>This module is used to monitor project management dashboard.</span>
 				</div>
 			</div>
 		</div>

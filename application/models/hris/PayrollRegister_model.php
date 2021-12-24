@@ -172,7 +172,6 @@ class PayrollRegister_model extends CI_Model {
                 }
                 $idStr = implode(', ', $idArr);
                 $this->updateBatchPayrollRegisterItems($payrollRegisterID, $data, $idStr);
-                // $this->updateEmployeeSummary($payrollRegisterID);
             }
         }
         return false;

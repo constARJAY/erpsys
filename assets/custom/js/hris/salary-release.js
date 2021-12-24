@@ -390,7 +390,7 @@ function myFormsContent() {
         isrt.monthDetailsID,
         CASE
         WHEN isrt.payrollID = 0 THEN isrt.monthCode
-        WHEN isrt.payrollID != 0 THEN CONCAT('PRL',LPAD(isrt.payrollID,3,'0')) 
+        WHEN isrt.payrollID != 0 THEN (SELECT CONCAT('PRL-',SUBSTR(createdAt,3,2),'-',LPAD(payrollID,5,'0')) FROM hris_payroll_tbl WHERE payrollID = isrt.payrollID)  
         END AS referenceCode,
         concat('SLR-',SUBSTR(isrt.createdAt,3,2),'-',LPAD(isrt.salaryReleaseID,5,'0')) AS salaryReleaseCode`,
         ``,
@@ -1993,7 +1993,7 @@ $(document).on("click", "#btnLog", function () {
         `isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,employeeStatus,
         CASE
         WHEN isrt.payrollID = 0 THEN monthCode
-        WHEN isrt.payrollID =! 0 THEN CONCAT('PRL',LPAD(isrt.payrollID,3,'0')) 
+        WHEN isrt.payrollID =! 0 THEN (SELECT CONCAT('PRL-',SUBSTR(createdAt,3,2),'-',LPAD(payrollID,5,'0')) FROM hris_payroll_tbl WHERE payrollID = isrt.payrollID)  
         END AS referenceCode,
         concat('SLR-',SUBSTR(isrt.createdAt,3,2),'-',LPAD(isrt.salaryReleaseID,5,'0')) AS salaryReleaseCode`,
         ``,

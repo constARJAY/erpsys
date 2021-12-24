@@ -1494,62 +1494,6 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td style="z-index: 1;">
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<span class="input-group-text">₱</span>
-						</div>
-						<input type="text" 
-							class="form-control text-right" 
-							name="loanPay"
-							value="${formatAmount(loanPay)}"
-							disabled>
-						<div class="input-group-append">
-							<span class="input-group-text">
-								<i class="fal fa-info-circle" 
-									style="color:#007bff;" 
-									data-toggle="tooltip" 
-									title="Deduction" 
-									data-original-title="Deduction"></i>
-							</span>
-						</div>
-					</div>
-					<div class="form-group mb-0">
-						<div class="input-group">
-							<div class="input-group-prepend">
-								<span class="input-group-text">₱</span>
-							</div>
-							<input type="text" 
-								class="form-control text-right amount"
-								allow-minus="true"
-								min="-99000"
-								max="99000" 
-								name="loanAdjustment"
-								value="${formatAmount(loanAdjustment)}">
-							<div class="input-group-append">
-								<span class="input-group-text">
-									<i class="fal fa-info-circle" 
-										style="color:#007bff;" 
-										data-toggle="tooltip" 
-										title="Adjustment" 
-										data-original-title="Adjustment"></i>
-								</span>
-							</div>
-						</div>
-						<div class="d-block invalid-feedback"></div>
-					</div>
-					<div class="form-group mb-0">
-						<textarea class="form-control validate"
-							minlength="2"
-							maxlength="725"
-							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
-							name="loanRemarks"
-							rows="3"
-							placeholder="Notes..."
-							style="resize: none;">${loanRemarks || ""}</textarea>
-						<div class="d-block invalid-feedback"></div>
-					</div>
-				</td>
-				<td style="z-index: 1;">
 					<div class="form-group mb-0">
 						<div class="input-group">
 							<div class="input-group-prepend">
@@ -1794,25 +1738,6 @@ $(document).ready(function() {
 						<small>${withHoldingRemarks || "-"}</small>
 					</td>
 					<td class="text-right">
-						<div>
-							${formatAmount(loanPay, true)}
-							<i class="fal fa-info-circle" 
-								style="color:#007bff;" 
-								data-toggle="tooltip" 
-								title="Deduction" 
-								data-original-title="Deduction"></i>
-						</div>
-						<div class="${loanAdjustment != 0 ? loanAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
-							${formatAmount(loanAdjustment, true)}
-							<i class="fal fa-info-circle" 
-								style="color:#007bff;" 
-								data-toggle="tooltip" 
-								title="Adjustment" 
-								data-original-title="Adjustment"></i>
-						</div>
-						<small>${loanRemarks || "-"}</small>
-					</td>
-					<td class="text-right">
 						<div class="${otherAdjustment != 0 ? otherAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
 							${formatAmount(otherAdjustment, true)}
 							<i class="fal fa-info-circle" 
@@ -1859,7 +1784,6 @@ $(document).ready(function() {
 				<th class="thAdjust">PHIC</th>
 				<th class="thAdjust">HDMF</th>
 				<th class="thAdjust">Withholding Tax</th>
-				<th class="thAdjust">Loan</th>
 				<th class="thAdjust">Others</th>
 			</tr>`;
 
@@ -1892,7 +1816,6 @@ $(document).ready(function() {
 				<th class="thAdjust">PHIC</th>
 				<th class="thAdjust">HDMF</th>
 				<th class="thAdjust">Withholding Tax</th>
-				<th class="thAdjust">Loan</th>
 				<th class="thAdjust">Others</th>
 			</tr>`;
 		}
@@ -2279,8 +2202,9 @@ $(document).ready(function() {
 						hdmfAdjustment              = getNonFormattedAmount(hdmfAdjustment);
 					let withHoldingAdjustment       = $(`[name="withHoldingAdjustment"]`, this).val();
 						withHoldingAdjustment       = getNonFormattedAmount(withHoldingAdjustment);
-					let loanAdjustment              = $(`[name="loanAdjustment"]`, this).val();
-						loanAdjustment              = getNonFormattedAmount(loanAdjustment);
+					// let loanAdjustment              = $(`[name="loanAdjustment"]`, this).val() ?? 0;
+					// 	loanAdjustment              = getNonFormattedAmount(loanAdjustment);
+					let loanAdjustment              = 0;
 					let otherAdjustment             = $(`[name="otherAdjustment"]`, this).val();
 						otherAdjustment             = getNonFormattedAmount(otherAdjustment);
 	
@@ -2294,7 +2218,8 @@ $(document).ready(function() {
 					let phicRemarks              = $(`[name="phicRemarks"]`, this).val().trim();
 					let hdmfRemarks              = $(`[name="hdmfRemarks"]`, this).val().trim();
 					let withHoldingRemarks       = $(`[name="withHoldingRemarks"]`, this).val().trim();
-					let loanRemarks              = $(`[name="loanRemarks"]`, this).val().trim();
+					// let loanRemarks              = $(`[name="loanRemarks"]`, this).val().trim();
+					let loanRemarks              = '';
 					let otherRemarks             = $(`[name="otherRemarks"]`, this).val().trim();
 	
 					let item = {

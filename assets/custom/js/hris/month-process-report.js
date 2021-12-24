@@ -168,11 +168,12 @@ function initDataTables() {
                 { targets: 1,  width: 250 },
                 { targets: 2,  width: 120 },
                 // { targets: 3,  width: 250 },
-                { targets: 3,  width: 150 },
-                { targets: 4,  width: 250 },
-                { targets: 5,  width: 80  },
+                { targets: 3,  width: 250 },
+                { targets: 4,  width: 150 },
+                { targets: 5,  width: 250  },
                 { targets: 6,  width: 80  },
-                { targets: 7,  width: 220 },
+                { targets: 7,  width: 80 },
+                { targets: 8,  width: 220 },
             ],
         });
 
@@ -190,11 +191,12 @@ function initDataTables() {
                 { targets: 1,  width: 250 },
                 { targets: 2,  width: 120 },
                 // { targets: 3,  width: 250 },
-                { targets: 3,  width: 150 },
-                { targets: 4,  width: 250 },
-                { targets: 5,  width: 80  },
+                { targets: 3,  width: 250 },
+                { targets: 4,  width: 150 },
+                { targets: 5,  width: 250  },
                 { targets: 6,  width: 80  },
-                { targets: 7,  width: 220 },
+                { targets: 7,  width: 80 },
+                { targets: 8,  width: 220 },
             ],
         });
 
@@ -662,17 +664,30 @@ function getSerialNumber(scope = {}, readOnly = false, monthID = 0) {
         payrollCode = "",
         payrollItemID = "",
         employeeID = "",
-        grossPay = "",
+        basicSalary = "",
+        lateUndertimeDeduction = "",
+        lwopDeduction = "",
+        grossPay="",
         submittedAt = "",
 	} = scope;
+
+    let netPay = 0;
+
+    if(monthID){
+        netPay = grossPay;
+
+    }else{
+        netPay = parseFloat(basicSalary) - (parseFloat(lateUndertimeDeduction) +  parseFloat(lwopDeduction));
+
+    }
 
 
 	let html = "";
 
 
 		html = `
-        <div class=" dropdown-item disabled" payrollID="${payrollID}" payrollCode="${payrollCode}" payrollItemID=${payrollItemID} submittedAt="${submittedAt}" grossPay="${grossPay}"> 
-            <small class=" p-1 mb-0">${payrollCode} : ${formatAmount(grossPay,true)}</small>
+        <div class=" dropdown-item disabled" payrollID="${payrollID}" payrollCode="${payrollCode}" payrollItemID=${payrollItemID} submittedAt="${submittedAt}" grossPay="${netPay}"> 
+            <small class=" p-1 mb-0">${payrollCode} : ${formatAmount(netPay,true)}</small>
             <footer class="blockquote-footer">Date Submitted: ${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY") : " - "}</cite></footer>
             <hr class="w-100">
         </div>`;
@@ -754,7 +769,9 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
             payroll.payrollCode,
             payrolldetails.payrollItemID,
             payrolldetails.employeeID,
-            payrolldetails.grossPay,
+            payrolldetails.basicSalary,
+            payrolldetails.lateUndertimeDeduction,
+            payrolldetails.lwopDeduction,
             payroll.submittedAt`,
             `payrollStatus =2 AND payrolldetails.employeeID = ${employeeID} AND ((payroll.payrollStartDate >= '${startDate}' AND payroll.payrollStartDate <= '${endDate}') OR (payroll.payrollEndDate >= '${startDate}' AND  payroll.payrollEndDate <= '${endDate}'))`
         );
@@ -794,7 +811,9 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
 					
 			}else{
                 grossPayListData += payrollData.map(payroll => {
-                    totalGrossPayAmount += payroll.grossPay || 0;
+                    let netPay = 0;
+                    netPay = parseFloat(payroll.basicSalary) - (parseFloat(payroll.lateUndertimeDeduction) +  parseFloat(payroll.lwopDeduction));
+                    totalGrossPayAmount = parseFloat(netPay) || 0;
                     return getSerialNumber(payroll, readOnly,monthID,totalGrossPayAmount);
                 }).join("");
 			}
@@ -805,7 +824,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                                 </div>`;
 
             if( monthTotalPayAmount =="" || monthTotalPayAmount ==0){
-                monthTotalPayAmount =(totalGrossPayAmount /(numOfMonths * 2));
+                monthTotalPayAmount =parseFloat(totalGrossPayAmount /(numOfMonths * 2)) || 0;
                 // monthTotalPayAmount = 100;
             }
             
@@ -828,6 +847,11 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
 
               
                 html +=` <tr class="text-center itemTableRow" monthID="${monthID}">
+                <td>
+                  <div>
+                    ${statusRowBadge}
+                  </div>
+                </td> 
                 <td> <div name="monthemployeeID">${employeeCode || "-"}</div> </td>
                 <td class="text-left">
                     <div>${fullname || "-"}</div>
@@ -837,7 +861,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                 <td>
                     <div class="btn-group w-100">
                         <button type="button" class="btn btn-none dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            ---- 
+                        ${formatAmount(totalGrossPayAmount,true)} 
                         </button>
                         <div class="dropdown-menu dropdown-menu-right grossPayData">
                         ${grossPayListData} 
@@ -845,11 +869,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                     </div>
                 </td>
                 <td class="text-right" name="monthTotalPayAmount">${formatAmount(monthTotalPayAmount || 0,true)}</td> 
-                <td>
-                  <div>
-                    ${statusRowBadge}
-                  </div>
-                </td> 
+                
             </tr>`;
 
                 
@@ -857,6 +877,11 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
             } else {
    
         html +=` <tr class="text-center itemTableRow" monthID="${monthID}" employeeID="${employeeID}">
+                    <td class="text-center">
+                        <div class="action">
+                            <input type="checkbox" class="checkboxrow monthHoldStatus" name="monthHoldStatus" ${ monthHoldStatus == 0 ? "checked" : ""}> <label> OnHold</label>
+                        </div>
+                    </td> 
                     <td> <div name="monthemployeeID">${employeeCode || "-"}</div> </td>
                     <td class="text-left">
                         <div>${fullname || "-"}</div>
@@ -866,7 +891,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                     <td>
                         <div class="btn-group w-100">
                             <button type="button" class="btn btn-none dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                ---- 
+                            ${formatAmount(totalGrossPayAmount,true)}
                             </button>
                             <div class="dropdown-menu dropdown-menu-right grossPayData">
                             ${grossPayListData} 
@@ -874,11 +899,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                         </div>
                     </td>
                     <td class="text-right" name="monthTotalPayAmount">${formatAmount(monthTotalPayAmount,true)}</td> 
-                    <td class="text-center">
-                        <div class="action">
-                            <input type="checkbox" class="checkboxrow monthHoldStatus" name="monthHoldStatus" ${ monthHoldStatus == 0 ? "checked" : ""}> <label> OnHold</label>
-                        </div>
-                    </td> 
+                    
                 </tr>`;
 
                 }
@@ -1183,12 +1204,13 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                     <table class="table table-striped" id="${tableInventoryReceivingItems}">
                     <thead>
                         <tr style="white-space: nowrap">
+                            <th>Hold</th>
                             <th>Employee Code</th>
                             <th>Employee Name</th>
                             <th>Basic Salary</th>
                             <th>Gross Pay</th>
                             <th>Total 13th Month</th>
-                            <th>Status</th>
+                            
                         </tr>
                     </thead>
                     <tbody class="purchaseOrderItemsBody">

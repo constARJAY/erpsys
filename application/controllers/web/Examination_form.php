@@ -17,7 +17,7 @@ class Examination_form extends CI_Controller {
             array(
                     'cipher' => 'aes-256',
                     'mode'   => 'ctr',
-                    'key'    => '<a 32-character random string>'
+                    'key'    => '<a 3-character A-Z a-z string>'
             )
         );
 

@@ -200,6 +200,10 @@ class Production_model extends CI_Model {
     }
 
     public function savedProductionActivities($data = false){
+        
+        // echo "<pre>";
+        // print_r($data);
+    
 
         if($data){
             $query = $this->db->insert_batch("hris_production_activity_tbl", $data);
@@ -223,7 +227,8 @@ class Production_model extends CI_Model {
 
     public function updateDateEntries($insertNewEntries, $deleteEntries,$productionID){
 
-
+        $query = true;
+        
         if($deleteEntries){
 
             // echo $deleteEntries[0];

@@ -98,18 +98,18 @@ class Overtime_request extends CI_Controller {
         $reason = $this->input->post("reason");
 
 
-        $explode = explode(";", $reason);
-        $newDescription = '';
-        $getLength = count($explode) ; 
-        for($loop = 0; $loop<count($explode);$loop++){
+         // $explode = explode(";", $reason);
+        $newDescription = $reason;
+        // $getLength = count($explode) ; 
+        // for($loop = 0; $loop<count($explode);$loop++){
 
-            if($loop == $getLength -1){
-                $newDescription .= $explode[$loop];
-            }else{
-                $newDescription .= $explode[$loop]."<br>";
-            }
+        //     if($loop == $getLength -1){
+        //         $newDescription .= $explode[$loop];
+        //     }else{
+        //         $newDescription .= $explode[$loop]."<br>";
+        //     }
             
-        }
+        // }
 
 
         // $paidStatusBadge ='';
@@ -172,26 +172,41 @@ class Overtime_request extends CI_Controller {
         $getProductionRecord = $this->overtime->getProductionRecord($employeeID);
         $activityData = [];
 
+         // ---- CHECK AND SAVED IN PAYROLL ADJUSTMENT -----//
+         $isApprovedTimekeeping = $this->overtime->checkTimeKeeping($requestDate,$requestDate);
+
+         if($isApprovedTimekeeping != 0){
+
+            $getEmployeeOvertimeAmount = $this->overtime->getEmployeeOvertimeAmount($employeeID,$requestDate);
+            
+            $loanAmount = 0;
+            if($getEmployeeOvertimeAmount){
+                $loanAmount = $getEmployeeOvertimeAmount;
+            }
+
+             $dataPayroll = array(
+                "employeeID" =>$employeeID,
+                "tableName" =>"hris_overtime_request_tbl",
+                "tablePrimaryID" =>$overtimeRequestID,
+                "tablePrimaryCode" =>$overtimeRequestCode,
+                "adjustmentType"=>"overtime",
+                "controller"=> base_url("hris/overtime_request"),
+                "adjustmentAmount" => $loanAmount,
+                'createdBy'=>$employeeID,
+            );
+
+             $this->overtime->generatePayrollAdjustment($dataPayroll);
+
+         }
+         // ---- CHECK AND SAVED IN PAYROLL ADJUSTMENT -----/
+
+        //  echo "Production Record";
+        //  echo "<pre>";
+        //  print_r($getProductionRecord);
+
+
         foreach($getProductionRecord as $key => $value){
 
-            
-            // ---- CHECK AND SAVED IN PAYROLL ADJUSTMENT -----//
-            $isApprovedTimekeeping = $this->checkTimeKeeping($startDate,$endDate);
-
-            if($isApprovedTimekeeping > 0){
-                $dataPayroll = [
-                    'payrollAdjustStatus'   =>0,
-                    'overtimeRequestID'        =>$overtimeRequestID,
-                    'overtimeRequestCode'      =>$overtimeRequestCode,
-                    'createdBy'             =>$employeeID,
-                ];
-
-                $this->leaverequest->generatePayrollAdjustment($dataPayroll);
-
-            }
-            // ---- CHECK AND SAVED IN PAYROLL ADJUSTMENT -----/
-
-      
             $getDate = $value["dateEntries"];
             $getDay = $value["dayEntries"];
             $productionID = $value["productionID"];
@@ -227,8 +242,8 @@ class Overtime_request extends CI_Controller {
 
             $overtimeDescription = $paidStatusBadge.' '.$overtimeBadge.'<br>'.$newDescription;
            
-
-            if($getDate == $requestDate){
+            // echo $getDate .'=='. $requestDate."<br>";
+            if($getDate === $requestDate){
                 $temp = [
                     "productionID"          =>  $productionID,
                     "productionEntriesID"   =>  $productionEntriesID,
@@ -251,12 +266,13 @@ class Overtime_request extends CI_Controller {
             ];
             array_push($activityData, $temp);
             }
+
         }
 
         $checkActivity = "";
 
         // echo "<pre>";
-        // print_r($getProductionRecord);
+        // print_r($activityData);
         // exit;
 
         if($activityData){

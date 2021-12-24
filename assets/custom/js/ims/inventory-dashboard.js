@@ -1332,7 +1332,7 @@ function myFormsContent() {
     `timelineBuilderStatus = 2 `);
 
     const getReservedItems = getTableData(`ims_inventory_validation_tbl`,
-    `materialRequestCode,employeeID,projectName,projectCategory,dateNeeded`,
+    `inventoryValidationID,materialRequestCode,employeeID,projectName,projectCategory,dateNeeded`,
     `week(dateNeeded)=week(now())  AND inventoryValidationStatus =2`);
 
     const listApplicants = getTableData(`web_applicant_list_tbl AS applicant
@@ -1473,6 +1473,7 @@ let html = `        <div class="row clearfix row-deck">
                                 
                                         getReservedItems.map((reserve) => {
                                             let {
+                                                inventoryValidationID,
                                                 materialRequestCode,
                                                 employeeID,
                                                 projectName,
@@ -1483,7 +1484,7 @@ let html = `        <div class="row clearfix row-deck">
                                             let getDateNeeded = moment(dateNeeded).format("MMMM DD, YYYY");
 
                                             html += `
-                                            <tr class="">
+                                            <tr class="btnView" id="${encryptString(inventoryValidationID)}">
                                                 <td>${materialRequestCode || "-"}</td>
                                                 <td>${employeeFullname(employeeID) || "-"}</td>
                                                 <td>${projectName || "-"}</td>
@@ -2915,12 +2916,12 @@ $("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE
 // // ----- END OPEN EDIT FORM -----
 
 
-// // ----- VIEW DOCUMENT -----
-// $(document).on("click", ".btnView", function () {
-//     const id = $(this).attr("id");
-//     viewDocument(id, true);
-// });
-// // ----- END VIEW DOCUMENT -----
+// ----- VIEW DOCUMENT -----
+$(document).on("click", ".btnView", function () {
+    const id = $(this).attr("id");
+    window.open(`${base_url}ims/inventory_validation?view_id=${id}`);
+});
+// ----- END VIEW DOCUMENT -----
 
 
 // // ----- VIEW DOCUMENT -----

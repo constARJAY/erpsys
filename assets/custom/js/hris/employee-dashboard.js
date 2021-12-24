@@ -472,7 +472,7 @@ function attendanceChart(startYear = moment().format("YYYY"),endYear = moment().
             height: 300,
             type: 'bar',
         },
-        colors: ['#59c4bc', '#613c95', '#868e96'],
+        colors: ['#ffc107', '#28a745', '#dc3450'],
         plotOptions: {
             bar: {
                 horizontal: false,
@@ -510,7 +510,7 @@ function attendanceChart(startYear = moment().format("YYYY"),endYear = moment().
         },
         yaxis: {
             title: {
-                text: 'Attendace Record/s'
+                text: 'Attendance Record/s'
             }
         },
         fill: {
@@ -613,6 +613,7 @@ function myFormsContent() {
     `DISTINCT subtaskboardID,ped.taskID,subTaskAssignee,ped.subTaskName,ped.subTaskStatus,pml.projectMilestoneName,ped.subTaskStartDates,phaseCode`, 
     ` FIND_IN_SET(${sessionID},replace(ped.subTaskAssignee,'|',','))`);
 
+    const leaveTypeList = getTableData("hris_leave_tbl", "leaveID, leaveName", "leaveStatus = 1");
 
 
 
@@ -669,7 +670,7 @@ function myFormsContent() {
             <div class="header bg-primary">
             <div class="row">
                 <div class="col-sm-12 col-md-8 col-lg-8"> 
-                <h2 class="font-weight-bold text-white">ATTENDACE CHART</h2>
+                <h2 class="font-weight-bold text-white">ATTENDANCE CHART</h2>
                 </div>
             <div class="col-sm-12 col-md-4 col-lg-4"> 
                 
@@ -790,8 +791,8 @@ function myFormsContent() {
                                                         width: min-content;
                                                     "><small class="text-white font-weight-bolder m-0">${(moment(subTaskStartDates).format('MMM')).toUpperCase()}
                                                     <h1 class="text-white font-weight-bolder">${moment(subTaskStartDates).format('DD')}</h1></small></div>
-                                                    <h6 class="font-weight-bolder p-0 pl-1 pt-3" style="width: fit-content;">${projectMilestoneName}</h6>
-                                                    <small>${phaseCode} | ${subTaskName}</small>
+                                                    <h6 class="font-weight-bolder p-0 pl-1 pt-3" style="width: fit-content;"> <small class="float-left ml-1">${phaseCode} | ${subTaskName}</small><br>${projectMilestoneName}</h6>
+
                             </div>
                         </div>`;
                  })
@@ -816,6 +817,67 @@ function myFormsContent() {
     </div>
 
 </div>`;
+
+ html +=`<div class="row clearfix row-deck">
+            <div class="card-header w-100 bg-primary text-white text-left">
+                <h6 class="font-weight-bold">LEAVE BALANCE</h6>
+            </div>
+        </div>
+
+                `;
+            
+        html += `
+            <div class="table table-responsive ">
+                <table class="table table-bordered table-striped" id="">
+                    <thead>
+                        <tr style="white-space: nowrap">
+                            <th>No.</th>
+                            <th>Leave Type</th>
+                            <th>Accumulated</th>
+                            <th>Leave Count</th>
+                            <th>Total Leave</th>
+                        </tr>
+                    </thead>
+                    <tbody >`;
+
+                    let getLeaveBalance = [];
+                    
+                        getLeaveBalance = getTableData(
+                            "hris_employee_leave_tbl", 
+                            "", 
+                            `employeeID = ${sessionID}`);
+                    
+            
+            
+                    leaveTypeList.map((leave, index) => {
+                        let { leaveName, leaveID } = leave;
+                        let leaveCredit = 0, leaveAccumulated = 0;
+    
+                            getLeaveBalance.filter(lv => lv.leaveID == leaveID).map(leave => {
+                                leaveCredit      = +leave.leaveCredit;
+                                leaveAccumulated = +leave.leaveAccumulated;
+                            });
+                        
+
+                        const max = 30;
+                        let displayLeaveAccumulated = leaveID != 1 ? "-" : leaveAccumulated.toFixed(2);
+
+                    html += `
+                    <tr class="">
+                        <td>${index+1}</td>
+                        <td>${leaveName}</td>
+                        <td>${formatAmount(displayLeaveAccumulated > 0 ? displayLeaveAccumulated  : 0)}</td>
+                        <td>${formatAmount(leaveCredit > 0 ? leaveCredit : 0 )}</td>
+                        <td>${formatAmount((leaveCredit + leaveAccumulated) > 0 ? (leaveCredit + leaveAccumulated) : 0)}</td>
+      
+                    </tr>`;
+                });
+            
+                html += `
+                    </tbody>
+                </table>
+            </div>
+            `;
 
 
     setTimeout(() => {

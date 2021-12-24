@@ -1,5 +1,7 @@
 $(document).ready(function() {
+    
     // GLOBAL VARIABLES
+        let companyProfile  = getTableData("gen_company_profile_tbl");
         let applicantID = $("#table_content").data('applicantid') ? $("#table_content").data('applicantid') : 0;
         let jobID       = $("#table_content").data('jobid') ? $("#table_content").data('jobid') : 0;
         let pending     = $("#table_content").data('pending') ? $("#table_content").data('pending') : 0;
@@ -86,7 +88,6 @@ $(document).ready(function() {
             langHtml += "<span class='m-r-5 badge badge-outline-primary'>"+info+"</span>";
         });
 
-        // console.log(langHtml);
 
         let html = `
         <div class="form-group">
@@ -100,9 +101,9 @@ $(document).ready(function() {
                                 <span class='badge badge-outline-info' style="margin-bottom:10px;">${formatAmount(salaryRange,true)}</span>
                                 <span class='badge badge-outline-info' style="margin-bottom:10px;">${jobType}</span>
                                     <div class="sub-header" style="">
-                                        <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-globe"></i> www.theblackcoders.com</span>
-                                        <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-phone"></i> 09279475792</span>
-                                        <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-envelope"></i> hr@theblackcoders.com</span>
+                                        <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-globe"></i> ${companyProfile[0].companyWebsite    || "www.theblackcoders.com"}</span>
+                                        <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-phone"></i> ${companyProfile[0].companyMobile     || companyProfile[0].companyTelephone || "0987-987-3211" }</span>
+                                        <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-envelope"></i> ${ companyProfile[0].companyEmail  || "hr@theblackcoders.com"}</span>
                                         ${pending=="0" ? `<button class="btn btn-save pull-right" style="width:160px; line-height:1;" designationid="${designationID||""}" id="btnApply"><i class="fas fa-send"></i> Apply for job</button>` : ''}
                                     </div>
                                 <hr>
@@ -135,12 +136,7 @@ $(document).ready(function() {
                                 </span>
                             </div>
 
-                            <div class="form-group col-12">
-                                <span class='displayblock' style="font-size:20px;">Language</span>
-                                <span class='displayblock' style="font-size:13px; color:#888888;">
-                                    ${langHtml}
-                                </span>
-                            </div>
+                       
                         </div>
                     </div>
                 </div>

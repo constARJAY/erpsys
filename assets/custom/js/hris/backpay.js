@@ -814,7 +814,7 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
                                     class="form-control validate" 
                                     name="otherReference" 
                                     id="otherReference" 
-                                    data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                    data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][_][(][)][%][&][*][ ]"
                                     required
                                     value="${ otherReference || "-"}">
                                     <div class="d-block invalid-feedback" id="invalid-otherReference"></div>
@@ -1022,7 +1022,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
         departmentName as requestemployeeDepartment,
         designationName as requestemployeeDesignation,
         employeeStatus as requestemployeeStatus`,
-        "(employeeStatus = 0 OR employeeStatus = 4) && employeeID=" + backPayEmployeeID 
+        "employeeStatus = 7 && employeeID=" + backPayEmployeeID 
     );
 
     let {

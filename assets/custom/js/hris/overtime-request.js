@@ -38,6 +38,16 @@ $(document).ready(function () {
 		// ----- END IS DOCUMENT REVISED -----
 
 	// ----- REUSABLE FUNCTIONS -----	
+	const getApproveLeave = getTableData(
+		"hris_leave_request_tbl", 
+		"leaveRequestDateFrom",
+		`leaveRequestStatus = 2 AND employeeID = ${sessionID}`);
+
+	const getOvertimeDateList = getTableData(
+		"hris_overtime_request_tbl", 
+		"overtimeRequestDate",
+		`overtimeRequestDate = 2 AND employeeID = ${sessionID}`);
+
 	const projectList = getTableData(
 		"pms_project_list_tbl AS project LEFT JOIN pms_timeline_builder_tbl AS timeline ON timeline.projectID = project.projectListID", 
 		"projectListID,clientID,projectListName",
@@ -859,6 +869,7 @@ $(document).ready(function () {
                         required
                         id="overtimeRequestDate"
                         name="overtimeRequestDate"
+						condition ="false"
                         value="${overtimeRequestDate && moment(overtimeRequestDate).format("MMMM DD, YYYY")}"
 						${disabled}
 						unique="${overtimeRequestID}"
@@ -871,6 +882,7 @@ $(document).ready(function () {
                     <label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="time" 
                         class="form-control timeIn" 
+						condition ="false"
                         id="overtimeRequestTimeIn" 
                         name="overtimeRequestTimeIn" 
                         required
@@ -1014,21 +1026,51 @@ $(document).ready(function () {
 			updateProjectOptions();
 			if (data) {
 				initInputmaskTime(false);
-				
-				$("#overtimeRequestDate").data("daterangepicker").startDate = moment(overtimeRequestDate, "YYYY-MM-DD");
-				$("#overtimeRequestDate").data("daterangepicker").endDate   = moment(overtimeRequestDate, "YYYY-MM-DD");
-				
+				overtimeRequestDateRange(overtimeRequestDate);
 			} else {
 				initInputmaskTime();
-				$("#overtimeRequestDate").val(moment(new Date).format("MMMM DD, YYYY"));
+				
+				overtimeRequestDateRange(moment());
 			}
-
-			// $("#overtimeRequestDate").data("daterangepicker").minDate = moment().subtract(7, 'days');
-			$("#overtimeRequestDate").data("daterangepicker").minDate = moment().subtract(10, 'days');
 			return html;
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
+
+	function overtimeRequestDateRange(overtimeRequestDate){
+		$('#overtimeRequestDate').daterangepicker({
+
+			singleDatePicker: true,
+			"showDropdowns": true,
+			autoApply: true,
+			minDate:moment().subtract(10, 'days'),
+			startDate:moment(overtimeRequestDate),
+			endDate:moment(overtimeRequestDate),
+			isInvalidDate: function(date) {
+				let listDate =[];
+
+				getOvertimeDateList.map((overtime)=>{
+					let {overtimeRequestDate} = overtime;
+
+					listDate.push(overtimeRequestDate);		
+				});
+
+				getApproveLeave.map((leave)=>{
+					let {leaveRequestDateFrom} = leave;
+
+					listDate.push(leaveRequestDateFrom);		
+				});
+				
+				if (listDate.includes(date.format('YYYY-MM-DD')) && date.format('YYYY-MM-DD') != overtimeRequestDate) {
+					return true; 
+				}
+				
+			},
+			locale: {
+				format: 'MMMM DD, YYYY'
+			  },
+		});
+	}
 
 
 	// ----- PAGE CONTENT -----
@@ -1072,7 +1114,14 @@ $(document).ready(function () {
 		let getThisTime = $("#overtimeRequestTimeIn").val();
 		let getSchedTimeOut = getDateScheduled(dayNow) || "00:00";
 
-		if(getSchedTimeOut < getThisTime){
+		let formatgetSchedTimeOut = "00:00";
+		if(getSchedTimeOut){
+			formatgetSchedTimeOut = getSchedTimeOut.slice(0,-3);
+		}
+		
+
+
+		if(formatgetSchedTimeOut <= getThisTime){
 			$("#overtimeRequestTimeIn").removeClass("is-invalid");
 			$("#invalid-overtimeRequestTimeIn").text("");
 			return true;
@@ -1102,7 +1151,15 @@ $(document).ready(function () {
 
 	// // CHECK SCHEDULE OF EMPLOYEE IN THIS DOCUMENT//
 	$(document).on("change",'#overtimeRequestDate,#overtimeRequestTimeIn',function(){
-		validateTimeInOvertime();
+
+		let condition = $(this).attr("condition") || false;
+
+		if(condition == "true"){
+			validateTimeInOvertime();
+		}else{
+			$("#overtimeRequestDate").attr("condition","true");
+			$("#overtimeRequestTimeIn").attr("condition","true");
+		}
 	});
 
 
@@ -1432,6 +1489,20 @@ $(document).ready(function () {
 				};
 			}
 
+			// setTimeout(() => {
+			// 	formConfirmation(
+			// 		"submit",
+			// 		action,
+			// 		"OVERTIME REQUEST",
+			// 		"",
+			// 		"form_overtime_request",
+			// 		data,
+			// 		true,
+			// 		pageContent,
+			// 		notificationData
+			// 	);
+			// }, 0);
+
 			setTimeout(() => {
 				formConfirmation(
 					"submit",
@@ -1442,9 +1513,12 @@ $(document).ready(function () {
 					data,
 					true,
 					pageContent,
-					notificationData
+					notificationData,
+					"",
+					data["tableData[overtimeRequestStatus]"] == 2 ? generateProductionReport : false,
+					data["tableData[overtimeRequestStatus]"] == 2 ? [employeeID,2,id] : []
 				);
-			}, 0);
+			}, 300);
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----

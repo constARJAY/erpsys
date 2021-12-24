@@ -496,5 +496,11 @@ class Applicant extends CI_Controller {
         echo json_encode($result);
     }
 
+    public function getExamResult(){
+        $applicantID    = $this->input->post("applicantID");
+        $result         = $this->applicant->getExamResult($applicantID);
+        echo json_encode($result);
+    }
+
 }
 ?>

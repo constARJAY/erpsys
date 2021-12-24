@@ -32,7 +32,7 @@ $(document).ready(function(){
                     html = getCardApplication(getApplicantInterviewerData || false);
                 break;
             case "examination":
-                //    html = getCardApplication(getApplicantInterviewerData || false);
+                   html = getCardExamination();
                 break;
             case "interview":
                    html = getCardInterview();
@@ -102,9 +102,10 @@ $(document).ready(function(){
         let givenAction     = thisEvent.attr("givenaction");
         let action          = givenAction == "application" ? false : true;
         let data            = getApplicantListFormData(givenAction,thisEvent);
-        let condition       = givenAction == "application" ? validateForm("tableApplication") : true ;
+        let condition       = givenAction == "application" || givenAction == "interview"   
+                                ? validateForm(givenAction == "application" ? "tableApplication" : "tableInterviewer") : true ;
         if(condition){
-            let argData         = {
+            let argData         = { 
                 condition:  "update",            // add|update|cancel
                 moduleName: "Applicant List",   // Title
                 msgExt: "",                    // Message Extension,
@@ -115,6 +116,24 @@ $(document).ready(function(){
             updateConfirmation(argData,action);
         }
     });
+    
+    $(document).on("click","#generateExam", function(){
+        $("#showUrl").html(preloader);
+
+        let applicantID     = $(this).attr("applicantid");
+        let designationID   = $(this).attr("designationid");
+        let examDate        = moment($("#examDate").val()).format("YYYY-MM-DD");
+
+        let data = {applicantID, designationID, examDate};
+        let link = generateExamURL(data);
+        let html =   `<label>Exam URL:</label>
+                            <textarea class="form-control" style="resize:none; height: 90px" readonly>${link}</textarea>`;
+        setTimeout(() => {
+            $("#showUrl").html(html);
+        }, 500);
+
+    });
+
     
     // CHANGES
     $(document).on("change", "[name=progression]", function(){
@@ -331,7 +350,7 @@ function tableContent(data = false){
         let progressionFlag      = 0;
         let progressionTableData = getTableData(`hris_applicant_interviewer_tbl`,``,`applicantID = '${value.applicantID}'`);
         progressionTableData.map(x=>{
-            if(x.applicantInterviewerStatus || x.applicantInterviewerStatus != "" ){ 
+            if(x.applicantInterviewerNote){
                 progressionFlag++;
             }
         });
@@ -352,10 +371,10 @@ function tableContent(data = false){
                             <td> ${value.applicantMobile}</td>
                             <td>${value.applicantEmail} </td>
                             <td>${value.applicantResume}</td>
-                            <td class="text-center">${applicantInterviewerProgression}</td>
-                            <td class="text-center">${personInCharge}</td>
-                            <td class="text-left">${moment(applicantUpdatedAt).format("MMMM DD, YYYY")}</td>
-                            <td class="text-center">${applicantInterviewerStatus}</td>
+                            <td class="text-center">${applicantInterviewerProgression || "-"}</td>
+                            <td class="text-center">${personInCharge || "-"}</td>
+                            <td class="text-left">${applicantUpdatedAt ? moment(applicantUpdatedAt).format("MMMM DD, YYYY") : "-"}</td>
+                            <td class="text-center">${getStatusStyle(applicantInterviewerStatus)}</td>
                         </tr>`;
     }); 
     let html =  `   
@@ -423,13 +442,18 @@ function getPersonInChargeOption(id = false){
     return html;
 }
 
-function getApplicationStatusOption(id){
+function getApplicationStatusOption(id, isLastOption = false){
     let html = `<option value="Pending" disabled ${id? "": "selected"}>Pending</option>`;
     // let html;
     getApplicantStatus.map((value, index)=>{
         index > 0 ?
         html += `<option value="${value.type}" ${value.type == id ? "selected" : ""}>${value.type}</option>` : "";
     });
+
+    if(isLastOption){
+        html += `<option value="Job Order" ${id == "Job Order" ? "selected" : ""}>Job Order</option>`;
+    }
+    
     return html;
 }
 
@@ -1198,9 +1222,6 @@ function updateSelect(){
         }
 
         let html = `
-                <div class="header">
-                    <h2>Application Tab</h2>
-                </div>
                 <div class="body">
                     <div class="row clearfix">
                         <div class="col-12">
@@ -1280,6 +1301,132 @@ function updateSelect(){
     }
 // END GETTING THE APPLICATION OF APPLICANT
  
+function getCardExamination(){
+    let tableData = getTableData( `web_applicant_job_tbl AS appJob
+                                                       INNER JOIN hris_job_posting_tbl as postJob ON postJob.jobID = appJob.jobID
+                                                       LEFT JOIN pms_personnel_requisition_tbl AS pprt ON postJob.requisitionID = pprt.requisitionID
+                                                       LEFT JOIN hris_employee_list_tbl AS helt ON helt.employeeID = pprt.personnelReportByID`, 
+                                    `	pprt.requisitionID AS requisitionID , CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) as reportBy, 
+                                        personnelDateNeeded, pprt.createdAt AS createdAt, pprt.designationID as designationID`, 
+                                    `applicantID = ${getApplicantID}` );
+    let examinationData = getExaminationResult();
+    let showUrl         = examinationData.length > 0 ? true : false;
+    let html = `
+        <div class="body">                        
+            <div class="tab-content mt-3">
+                    <div class="card">
+                        <div class="body">
+                            <div class="row clearfix">
+                                <div class="col-lg-6 col-md-12"></div>
+                                <div class="col-lg-6 col-md-12">
+                                    <div class="input-group mb-3">
+                                        
+
+                                            ${showUrl ? `` : `
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                                </div>
+                                                <input type="button" class="form-control daterange text-left" name = "examDate" id="examDate" value="${moment().format("MMMM DD, YYYY")}">
+                                                <div class="input-group-prepend">
+                                                    <button type="button" class="btn p-2 btn-submit" id="generateExam" 
+                                                title="Generate Examination URL" applicantid="${getApplicantID}" 
+                                                    designationid="${tableData[0].designationID}"> <i class="fa fa-link" aria-hidden="true"></i></button>`
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-12 col-md-12">
+                                    <div id="showUrl">${showUrl ? getExamination() : ""}</div>
+                                </div>
+                            </div>  
+
+                            <div id="tableExamination"> </div>    
+                        </div>
+                    </div> 
+            </div>
+        </div>`;
+    return html;
+}
+
+
+function getExamination(){
+    let html = "";
+    let tableData   = getExaminationResult();
+    let tableRow    = ""; 
+    let percentage  = 0;
+            tableData.map((value,index)=>{
+               tableRow +=  `   
+                                <tr>
+                                    <td>
+                                        ${value.examinationName}<br>
+                                        <small>${value.examinationType}</small>
+                                    </td>
+                                    <td class="text-right">${value.percent} %</td>
+                                </tr>
+                            `; 
+                percentage += parseFloat(value.percent);
+            });
+
+            tableRow += `
+                            <tr>
+                                <td>
+                                   Total Pecentage :
+                                </td>
+                                <td class="text-right"><strong>${percentage} %</strong></td>
+                            </tr>
+                        `;
+
+        html    +=  `
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover" id="tableExamResult">
+                                <thead>
+                                    <tr>
+                                        <th>Examination Name</th>
+                                        <th style="width:10%">Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        ${tableRow}
+                                </tbody>    
+                            </table>
+                        </div>
+                    `;
+        return html ;
+        // setTimeout(() => {
+        //     $("#showUrl").html(html);
+        // }, 500);
+}
+
+function getExaminationResult(){
+    let applicantID  =   getApplicantID;
+    let result       =  [];
+        $.ajax({
+            method:  "POST",
+            url:     `${base_url}web/applicant/getExamResult`,
+            data:	 {applicantID},
+            async: false,
+            dataType: "json",
+            beforeSend: function() {
+                // $("#loader").show();
+            },
+
+            success: function(data) {
+                result = data;
+            },
+
+            error: function() {
+                setTimeout(() => {
+                    // $("#loader").hide();
+                    showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                }, 500);
+            }
+        });
+    return result;
+}
+
+
+
 function getCardInterview(){
     let html = `
         <div class="body">                        
@@ -1322,22 +1469,24 @@ function getInfo_InterviewTab(){
                                 </div>
                             </div>  
 
-                            ${getLevelInterviewer()}
-                                
+                            <div id="tableInterviewer">
+                                ${getLevelInterviewer()}
+                            </div>    
                         </div>
                     </div> `;
         return html;
 }
 
 function getLevelInterviewer(){
-    let html = "";
+    let html      = "";
+    let lastIndex = parseInt(getApplicantInterviewerData.length) - 1;
     getApplicantInterviewerData.map((value,index)=>{
         let row         = value;
-        let isDisabled  = sessionID == row.employeeID ? "" : "disabled";   
+        let isDisabled  = sessionID == row.employeeID ? "required" : "disabled";   
         let hasUpdate   = sessionID == row.employeeID ? `<button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="interview" tableid="${row.applicantInterviewerID}">
                                                             <i class="fas fa-save"></i> Update</button>`:``;
         html += `
-                    <div class="card">
+                    <div class="card" >
                         <h2 class="text-danger font-weight-bold p-2">${row.applicantInterviewerProgression}</h2>
                         <div class="body">
                             <div class="row clearfix table-row-interview" tableid="${row.applicantInterviewerID}">
@@ -1349,20 +1498,19 @@ function getLevelInterviewer(){
                                 </div>
                                 <div class="col-lg-6 col-md-12">
                                     <div class="form-group">
-                                        <label class="font-weight-bold">Status</label>                                                
+                                        <label class="font-weight-bold">Status ${row.applicantInterviewerNote ? `` : `<code>*</code>`} </label>                                                
                                         <select class="form-control validate select2 w-100" tabtype="interview"
                                             name="applicationStatus"  ${row.applicantInterviewerNote ? "disabled" : isDisabled}>
-                                            ${getApplicationStatusOption(row.applicantInterviewerStatus)}
+                                            ${getApplicationStatusOption(row.applicantInterviewerStatus, lastIndex == index)}
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-lg-12 col-md-12">
                                     <div class="form-group">
-                                        <label class="font-weight-bold">Notes</label>                                                
-                                        <textarea rows="2" class="form-control no-resize" 
-                                            tabtype="interview"
-                                            name="interviewerNote"
-                                            placeholder="Please type what you want..." ${row.applicantInterviewerNote ? "disabled" : isDisabled}>${row.applicantInterviewerNote || ""}</textarea>
+                                        <label class="font-weight-bold">Notes ${row.applicantInterviewerNote ? `` : `<code>*</code>`} </label>                                                
+                                        <textarea rows="2" class="form-control no-resize validate" 
+                                            tabtype="interview" name="interviewerNote" placeholder="Please type what you want..." 
+                                            ${row.applicantInterviewerNote ? "disabled" : isDisabled}>${row.applicantInterviewerNote || ""}</textarea>
                                     </div>
                                 </div>
                                 
@@ -1693,4 +1841,58 @@ function questionaire(param = false){
         </div>`;
     }
     return html;
+}
+
+
+
+
+// ----- BADGE STATUS -----
+function getStatusStyle(status = "Pending") {
+	switch (status) {
+		case "Failed":
+			return `<span class="badge badge-danger w-100">${status}</span>`;
+		case "Cancelled":
+			return `<span class="badge badge-dark w-100">${status}</span>`;
+		case "Job Order":
+			return `<span class="badge badge-outline-success w-100" style="width: 100% !important">${status}</span>`;
+		case "Passed":
+			return `<span class="badge badge-outline-success w-100" style="width: 100% !important">${status}</span>`;
+		case "":
+            return  `<span class="badge badge-warning w-100">Pending</span>`;
+		default:
+            return  `<span class="badge badge-warning w-100">Pending</span>`;
+	}
+}
+// ----- END BADGE STATUS -----
+
+
+function generateExamURL(data){
+    let result;
+
+    if(data){
+        $.ajax({
+            method:  "POST",
+            url:     `${base_url}hris/applicant_list/generateExamUrl`,
+            data,
+            async: false,
+            dataType: "json",
+            beforeSend: function() {
+                // $("#loader").show();
+            },
+
+            success: function(data) {
+                // result = data;base_url()."/web/examination_form?id=".
+                result = `${base_url}/web/examination_form?id=${data}`;
+            },
+
+            error: function() {
+                setTimeout(() => {
+                    // $("#loader").hide();
+                    showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                }, 500);
+            }
+        });
+    }
+    
+    return result;
 }

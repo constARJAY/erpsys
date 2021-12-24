@@ -262,6 +262,7 @@
             $nightDifferentialPay   = $pay["nightDifferentialPay"] ?? "0";
             $allowance              = $pay["allowance"] ?? "0";
             $leavePay               = $pay["leavePay"] ?? "0";
+            $otherEarning           = $pay["otherEarning"] ?? "0";
             $totalEarning           = $pay["totalEarning"] ?? "0";
             $lateUndertimeDeduction = $pay["lateUndertimeDeduction"] ?? "0";
             $lwopDeduction          = $pay["lwopDeduction"] ?? "0";
@@ -269,6 +270,7 @@
             $phicDeduction          = $pay["phicDeduction"] ?? "0";
             $hdmfDeduction          = $pay["hdmfDeduction"] ?? "0";
             $taxDeduction           = $pay["withHoldingDeduction"] ?? "0";
+            $otherDeduction         = $pay["otherDeduction"] ?? "0";
             $totalDeduction         = $pay["totalDeduction"] ?? "0";
             $basicSalary            = $pay["basicSalary"] ?? "0";
             $grossPay               = $pay["grossPay"] ?? "0";
@@ -279,6 +281,11 @@
             $vlTotal                = $pay["vlTotal"] ?? "0";
             $vlUsed                 = $pay["vlUsed"] ?? "0";
             $vlRemaining            = $pay["vlRemaining"] ?? "0";
+
+            $ammortizationName      = $pay['ammortizationName'] ?? '';
+            $ammortizationAmount    = $pay['ammortizationAmount'] ?? '';
+            $ammortizationNameArr   = explode('|', $ammortizationName);
+            $ammortizationAmountArr = explode('|', $ammortizationAmount);
         ?>
         <div class="card w-100 <?= (($index+1) != count($payslip) && ((($index+1) % 2) == 1) ? 'line-break' : '') ?>">
             <div class="card-header">
@@ -351,7 +358,7 @@
                 <!-- -----END HEADER ----- -->
 
                 <!-- ----- BODY ----- -->
-                <div class="d-flex" style="margin-top: 10px">
+                <div class="d-flex" style="margin-top: 0px">
                     <table class="table-body">
                         <tr class="text-center">
                             <th colspan="2">EARNINGS</th>
@@ -379,6 +386,10 @@
                         <tr>
                             <th class="text-left">Allowance</th>
                             <td class="text-right"><?= formatAmount($allowance, true) ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left">Others</th>
+                            <td class="text-right"><?= formatAmount($otherEarning, true) ?></td>
                         </tr>
                         <tr>
                             <th class="text-left">TOTAL EARNINGS</th>
@@ -414,6 +425,10 @@
                             <td class="text-right"><?= formatAmount($taxDeduction, true) ?></td>
                         </tr>
                         <tr>
+                            <th class="text-left">Others</th>
+                            <td class="text-right"><?= formatAmount($otherDeduction, true) ?></td>
+                        </tr>
+                        <tr>
                             <th class="text-left">TOTAL DEDUCTION</th>
                             <td class="text-right"><?= formatAmount($totalDeduction, true) ?></td>
                         </tr>
@@ -422,7 +437,26 @@
                         <tr class="text-center">
                             <th colspan="2">BALANCE</th>
                         </tr>
+                        <?php
+                            $totalBalance = 0;
+                            if ($ammortizationNameArr && !empty($ammortizationNameArr)):
+                            for ($i=0; $i<=6; $i++):
+                                $name       = $ammortizationNameArr[$i] ?? '&nbsp;';
+                                $tempAmount = $ammortizationAmountArr[$i] ?? '';
+                                $amount     = $tempAmount ? formatAmount($tempAmount, true) : '&nbsp;';
+
+                                $tempAmount2 = (float) $tempAmount;
+                                $totalBalance += $tempAmount2;
+                        ?>
                         <tr>
+                            <th class="text-left"><?= $name ?></th>
+                            <td class="text-right"><?= $amount ?></td>
+                        </tr>
+                        <?php
+                            endfor;
+                            endif;
+                        ?>
+                        <!-- <tr>
                             <th class="text-left">&nbsp;</th>
                             <td class="text-right">&nbsp;</td>
                         </tr>
@@ -445,17 +479,17 @@
                         <tr>
                             <th class="text-left">&nbsp;</th>
                             <td class="text-right">&nbsp;</td>
-                        </tr>
+                        </tr> -->
                         <tr>
                             <th class="text-left">TOTAL BALANCE</th>
-                            <td class="text-right"><?= formatAmount(0, true) ?></td>
+                            <td class="text-right"><?= formatAmount($totalBalance, true) ?></td>
                         </tr>
                     </table>
                 </div>
                 <!-- ----- BODY ----- -->
 
                 <!-- ----- FOOTER ----- -->
-                <div class="d-flex" style="margin-top: 10px">
+                <div class="d-flex" style="margin-top: 0px">
                     <table class="table-footer text-center">
                         <tr>
                             <th>Leave Type</th>

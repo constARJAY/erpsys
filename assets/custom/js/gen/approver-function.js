@@ -448,10 +448,10 @@ function getApproversStatus(approversID, approversStatus, approversDate) {
 }
 
 // ----- BADGE STATUS -----
-function getStatusStyle(status = 1, isInventory = false, isPayroll = false) {
+function getStatusStyle(status = 1, isInventory = false,isPayroll = false) {
 	switch (status) {
 		case "1":
-			return `<span class="badge badge-outline-info w-100">For Approval</span>`;
+				return `<span class="badge badge-outline-info w-100">For Approval</span>`;
 		case "2":
 			return `<span class="badge badge-info w-100">Approved</span>`;
 		case "3":
@@ -467,15 +467,20 @@ function getStatusStyle(status = 1, isInventory = false, isPayroll = false) {
 		case "8":
 			return `<span class="badge badge-outline-success w-100" style="width: 100% !important">Assessed</span>`;
 		case "9":
-			return `<span class="badge badge-outline-success w-100" style="width: 100% !important">Completed</span>`;
+			if(isPayroll){
+				return `<span class="badge badge-success w-100">Released</span>`;
+			}else{
+				return `<span class="badge badge-outline-success w-100" style="width: 100% !important">Completed</span>`;
+			}
 		case "0":
 		default:
-			if(isPayroll) {
-				return `<span class="badge badge-secondary w-100">Hold</span>`;
-			} else {
+			if(isPayroll){
+				return `<span class="badge badge-secondary w-100">On Hold</span>`;
+			}else{
 				let text = isInventory ? "Pending" : "Draft";
 				return `<span class="badge badge-warning w-100">${text}</span>`;
 			}
+			
 	}
 }
 // ----- END BADGE STATUS -----

@@ -13,7 +13,7 @@ class Payroll_adjustment_report extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Payroll Adjustment";
+        $data["title"] = "Payroll Adjustment Report";
         $this->load->view("template/header", $data);
         $this->load->view("hris/payroll_adjustment_report/index");
         $this->load->view("template/footer");

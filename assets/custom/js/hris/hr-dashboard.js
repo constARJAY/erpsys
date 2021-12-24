@@ -316,6 +316,19 @@ function forApprovalContent() {
     `eventDate ASC`);
 
 
+
+    const getLate = getTableData(`hris_timekeeping_items_tbl`,
+    ` COUNT(lateDuration) as lates , scheduleDate`,
+    ` lateDuration > 0 AND day(scheduleDate)=day(now())`,
+    ``,
+    ``);
+  const getAbsent = getTableData(`hris_timekeeping_items_tbl`,
+    ` COUNT(timekeepingItemStatus) as absent,scheduleDate`,
+    `  timekeepingItemStatus = 'ABSENT' AND day(scheduleDate)=day(now())`,
+    ``,
+    ``);
+
+
     const task = getTableData(`pms_employeetaskoard_tbl as pet
     LEFT JOIN pms_timeline_task_list_tbl as ptt ON ptt.taskID = pet.taskID AND ptt.timelineBuilderID = pet.timelineBuilderID
     LEFT JOIN pms_timeline_management_tbl as ptm  ON ptm.taskID = ptt.taskID
@@ -338,8 +351,9 @@ function forApprovalContent() {
 
 
 
+
 let html = `        <div class="row clearfix row-deck">
-                        <div class="col-lg-3 col-md-3 col-sm-12">
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
                             <div class="card top_widget">
                                 <div class="body">
                                     <div class="icon"><i class="fas fa-users"></i> </div>
@@ -350,7 +364,7 @@ let html = `        <div class="row clearfix row-deck">
                                 </div>
                             </div>
                         </div>
-                         <div class="col-lg-3 col-md-3 col-sm-12">
+                         <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
                             <div class="card top_widget">
                                 <div class="body">
                                     <div class="icon"><i class="far fa-user-hard-hat"></i> </div>
@@ -361,7 +375,7 @@ let html = `        <div class="row clearfix row-deck">
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-3 col-sm-12">
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
                             <div class="card top_widget">
                                 <div class="body">
                                     <div class="icon"><i class="fas fa-user-clock"></i> </div>
@@ -372,13 +386,37 @@ let html = `        <div class="row clearfix row-deck">
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-3 col-sm-12">
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
                             <div class="card top_widget">
                                 <div class="body">
                                     <div class="icon"><i class="fas fa-stopwatch"></i> </div>
                                     <div class="content">
                                         <div class="text mb-2 text-uppercase">Overtime</div>
                                         <h4 class="number mb-0">${countPendingOvertmine[0].pendingovertime || 0}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                         <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
+                            <div class="card top_widget">
+                                <div class="body">
+                                    <div class="icon"><i class="fas fa-watch"></i> </div>
+                                    <div class="content">
+                                        <div class="text mb-2 text-uppercase">Late</div>
+                                        <h4 class="number mb-0">${getLate[0].late || 0}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                         <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
+                            <div class="card top_widget">
+                                <div class="body">
+                                    <div class="icon"><i class="fas fa-user-times"></i> </div>
+                                    <div class="content">
+                                        <div class="text mb-2 text-uppercase">Absent</div>
+                                        <h4 class="number mb-0">${getAbsent[0].absent || 0}</h4>
                                     </div>
                                 </div>
                             </div>
@@ -1006,7 +1044,7 @@ function noOfApplicantChart(){
     const getNumPosition = getTableData(`web_applicant_list_tbl AS applicant`,
     `COUNT(applicantID) AS applicant, 
     (SELECT designationName FROM hris_designation_tbl WHERE designationID = applicantDesignationID) AS designationName`,
-    `applicantStatus =0 AND (applicantDesignationID != 0 AND applicantDesignationID IS NOT NULL)`,
+    `(applicantDesignationID != 0 AND applicantDesignationID IS NOT NULL)`,
     ``,
     `applicantDesignationID`);
 
@@ -1177,7 +1215,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-xl-6 col-lg-12">
                             <div class="card" style="box-shadow:none !important;">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO OF APPLICANTS</h2>
+                                    <h2 class="font-weight-bold text-white">NO. OF APPLICANTS</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-applicant-listApplicant"></div>

@@ -650,12 +650,12 @@ function pageContent(level = "0",onGoing = false) {
 		// var examStatus="0";
 		var dateToday=moment().format('YYYY-MM-DD');
 		// var schedule=  "2021-08-26";
-		var applicantDesignationID;
+		var applicantDesignationID = decryptString($(".body_area").attr("designationID"));
 		var schedule=  decryptString($(".body_area").attr("applicantSchedule"));
 
 		// console.log(dateToday)
 		const applicantData = getTableData(`web_applicant_list_tbl`,"","applicantID= "+applicantID);
-		applicantDesignationID = applicantData[0].applicantDesignationID;
+		// applicantDesignationID = applicantData[0].applicantDesignationID;
 		const getExamData = getTableData(`hris_examination_setup_tbl hest
 							LEFT JOIN hris_examination_tbl as het ON het.examinationID  = hest.examinationID  `,"","designationID= "+ applicantDesignationID);
 		

@@ -13,6 +13,10 @@ $(document).ready(function () {
 
 	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
 
+// REUSABLE GET TABLE DATA
+const getCutOff = getTableData(`gen_system_setting_tbl`,`firstCutOffPayOut,secondCutOffPayOut`); 
+// REUSABLE GET TABLE DATA
+
 // ----- MODULE APPROVER -----
 const moduleApprover = getModuleApprover(59);
 // ----- END MODULE APPROVER -----
@@ -219,7 +223,9 @@ function initDataTables() {
 				{ targets: 0, width: 10 },
 				{ targets: 1, width: 100 },
 				{ targets: 2, width: 100 },
-				{ targets: 3, width: 50 },
+				{ targets: 3, width: 150 },
+				{ targets: 4, width: 150 },
+				{ targets: 5, width: 50 },
 				
 			],
 		});
@@ -402,7 +408,7 @@ function myFormsContent() {
 
 		let fullnameBtn =
 			loanFormStatus == 2
-				? ` <button class="ammortization_link text-danger btn btn-primary-outline p-0"><b>${fullname}</b></button>`
+				? ` <button class="ammortization_link text-danger btn btn-primary-outline p-0" id="${encryptString(loanFormID)}"><b>${fullname}</b></button>`
 				: fullname;
 		html += `
 		<tr class="${btnClass}" id="${encryptString(loanFormID)}">
@@ -579,6 +585,38 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 }
 // ----- END FORM BUTTONS -----
 
+// function optionLoanFormTermPayment//
+
+const getTermPayment = getTableData(`gen_system_setting_tbl`,
+` *,
+IF(firstCutOffPayOut, '1', '0') AS firstCutOff,
+IF(secondCutOffPayOut, '1', '0') AS secondCutOff,
+IF(thirdCutOffPayOut, '1', '0') AS thirdCutOff,
+IF(fourthCutOffPayOut, '1', '0') AS fourthCutOff`);
+
+// function optionLoanFormTermPayment(loanFormTermPayment){
+	
+// 	let html =`<option value="0" disabled selected>Select Term of Payment</option>`;
+
+// 	if(getTermPayment[0].firstCutOff == 1){
+// 		html +=`<option value="1" ${loanFormTermPayment == 1 ? "selected" : ""}>Monthly (First Cutoff)</option>`;
+// 	}
+// 	if(getTermPayment[0].secondCutOff == 1){
+// 		html +=`<option value="2" ${loanFormTermPayment == 2 ? "selected" : ""}>Monthly (Second Cutoff)</option>`;
+// 	}
+// 	if(getTermPayment[0].thirdCutOff == 1){
+// 		html +=`<option value="3" ${loanFormTermPayment == 3 ? "selected" : ""}>Monthly (Third Cutoff)</option>`;
+// 	}
+// 	if(getTermPayment[0].fourthCutOff == 1){
+// 		html +=`<option value="4" ${loanFormTermPayment == 4 ? "selected" : ""}>Monthly (Fourth Cutoff)</option>`;
+// 	}
+
+// 	html +=`<option value="5" ${loanFormTermPayment == 5 ? "selected" : ""}>Payday</option>`;
+
+
+// 	return html;
+	
+// }
 
 // ----- FORM CONTENT -----
 function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
@@ -634,16 +672,16 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 	let optionLoanFormTermPayment = data == false ? `<option value="" disabled selected>Select Term of Payment</option> 
 	<option value="1">Monthly (First cutoff)</option>
 	<option value="2">Monthly (Second cutoff)</option>
-	<option value="3">Payday</option>`: (loanFormTermPayment == "1" ? `<option value="" disabled>Select Term of Payment</option>
+	<option value="0">Payday</option>`: (loanFormTermPayment == "1" ? `<option value="" disabled>Select Term of Payment</option>
 	<option value="1" selected>Monthly (First cutoff)</option>
 	<option value="2">Monthly (Second cutoff)</option>
-	<option value="3">Payday</option>` : (loanFormTermPayment == "2" ?`<option value="" disabled>Select Term of Payment</option>
+	<option value="0">Payday</option>` : (loanFormTermPayment == "2" ?`<option value="" disabled>Select Term of Payment</option>
 	<option value="1">Monthly (First cutoff)</option> 
 	<option value="2" selected>Monthly (Second cutoff)</option> 
-	<option value="3">Payday</option>`:`<option value="" disabled>Select Term of Payment</option>
+	<option value="0">Payday</option>`:`<option value="" disabled>Select Term of Payment</option>
 	<option value="1">Monthly (First cutoff)</option> 
 	<option value="2">Monthly (Second cutoff)</option> 
-	<option value="3" selected>Payday</option>` ));
+	<option value="0" selected>Payday</option>` ));
 
 	let reviseDocumentNo    = isRevise ? loanFormID : reviseLoanFormID;
 	let documentHeaderClass = isRevise || reviseLoanFormID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -759,7 +797,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 			<div class="form-group">
 				<label>Term of Payment ${!disabled ? "<code>*</code>" : ""}</label>
 				<select class="form-control select2 text-left" required id="loanFormTermPayment" name="loanFormTermPayment" ${disabled}>
-					${optionLoanFormTermPayment}
+				${optionLoanFormTermPayment}
 				</select>
 				<div class="d-block invalid-feedback" id="invalid-loanFormTermPayment"></div>
 			</div>
@@ -1212,6 +1250,7 @@ $(document).on("click", "#btnSubmit", function () {
 		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
         const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getData(action, 1, "submit", feedback, id);
+		const loanFormDate = data["tableData"]["loanFormDate"];
 
         if (revise) {
             if (!isFromCancelledDocument) {
@@ -1237,6 +1276,7 @@ $(document).on("click", "#btnSubmit", function () {
 		// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
 		let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
 		let loanFormDeductionAmount = data["tableData"]["loanFormDeductionAmount"].replaceAll(",","");
+		let loanFormTermPayment = data["tableData"]["loanFormTermPayment"].replaceAll(",","");
 
 		data["tableData"]["loanFormAmount"] = loanFormAmount;
 		data["tableData"]["loanFormDeductionAmount"] = loanFormDeductionAmount;
@@ -1261,6 +1301,20 @@ $(document).on("click", "#btnSubmit", function () {
 			};
 		}
 
+		// setTimeout(() => {
+		// 	formConfirmation(
+		// 		"submit",
+		// 		action,
+		// 		"LOAN",
+		// 		"",
+		// 		"form_loan_form",
+		// 		data,
+		// 		true,
+		// 		pageContent,
+		// 		notificationData
+		// 	);
+		// }, 0);
+
 		setTimeout(() => {
 			formConfirmation(
 				"submit",
@@ -1271,9 +1325,13 @@ $(document).on("click", "#btnSubmit", function () {
 				data,
 				true,
 				pageContent,
-				notificationData
+				notificationData,
+				"",
+				data[`tableData[loanFormStatus]`] == 2 ? updateEmployeeLoan : false,
+				data[`tableData[loanFormStatus]`] == 2 ? [employeeID, loanFormTermPayment,loanFormDate,loanFormDeductionAmount,id] : []
 			);
-		}, 0);
+			// updateEmployeeLoan(employeeID, leaveID, leaveCredit);
+		}, 300);
 	}
 });
 // ----- END SUBMIT DOCUMENT -----
@@ -1393,6 +1451,116 @@ $(document).on("click", "#btnCancel", function () {
 });
 // ----- END CANCEL DOCUMENT -----
 
+function dateRange(startDate, endDate,loanFormTermPayment) {
+	var start      = startDate.split('-');
+	var end        = endDate.split('-');
+	var startYear  = parseInt(start[0]);
+	var endYear    = parseInt(end[0]);
+	var dates      = [];
+
+
+  
+	for(var i = startYear; i <= endYear; i++) {
+	  var endMonth = i != endYear ? 11 : parseInt(end[1]) - 1;
+	  var startMon = i === startYear ? parseInt(start[1])-1 : 0;
+	  for(var j = startMon; j <= endMonth; j = j > 12 ? j % 12 || 11 : j+1) {
+		var month = j+1;
+		var displayMonth = month < 10 ? '0'+month : month;
+		
+		
+
+		if(loanFormTermPayment == 1){
+			let day = getCutOff[0].firstCutOffPayOut;
+
+			let tmpdate = moment(i+"-"+displayMonth+"-"+day);
+			let flag = tmpdate.isValid();
+
+				if(!flag){
+					 day = moment(month+"-01-"+ i).endOf('month').format("DD");
+				}
+
+				dates.push([i, displayMonth, day].join('-'));
+
+		}else if(loanFormTermPayment ==2){
+			
+			let day = getCutOff[0].secondCutOffPayOut;
+
+			let tmpdate = moment(i+"-"+displayMonth+"-"+day);
+			let flag = tmpdate.isValid();
+
+				if(!flag){
+					 day = moment(month+"-01-"+ i).endOf('month').format("DD");
+				}
+
+				dates.push([i, displayMonth, day].join('-'));
+			
+			
+		}else{
+
+			
+
+			let firstCutOffDay = getCutOff[0].firstCutOffPayOut;
+			let tmpfirstdate = moment(i+"-"+displayMonth+"-"+firstCutOffDay);
+			let firstFlag = tmpfirstdate.isValid();
+
+				if(!firstFlag){
+					firstCutOffDay = moment(month+"-01-"+ i).endOf('month').format("DD");
+				}
+
+				dates.push([i, displayMonth, firstCutOffDay].join('-'));
+
+
+			let secondCutOffDay = getCutOff[0].secondCutOffPayOut;
+			let tmpseconddate = moment(i+"-"+displayMonth+"-"+secondCutOffDay);
+			let secondFlag = tmpseconddate.isValid();
+
+				if(!secondFlag){
+					secondCutOffDay = moment(month+"-01-"+ i).endOf('month').format("DD");
+				}
+
+				dates.push([i, displayMonth, secondCutOffDay].join('-'));
+
+		}
+		
+	  }
+	}
+	return dates;
+  }
+  
+
+// ----- UPDATE EMPLOYEE LEAVE -----
+function updateEmployeeLoan(employeeID = 0, loanFormTermPayment = 0,loanFormDate ="",loanFormDeductionAmount= 0,loanFormID = 0) {
+
+	const splitDateRange = loanFormDate.split("-");
+	const dateFrom = moment(splitDateRange[0]).format("YYYY-MM-DD");
+	const dateTo = moment(splitDateRange[1]).format("YYYY-MM-DD");
+	  
+	const listDate =   dateRange(dateFrom, dateTo,loanFormTermPayment);
+
+	let formData = new FormData();
+	formData.append("employeeID", employeeID);
+	formData.append("loanFormTermPayment", loanFormTermPayment);
+	formData.append("loanFormDate", loanFormDate);
+	formData.append("loanFormDeductionAmount", loanFormDeductionAmount);
+	formData.append("loanFormID", loanFormID);
+	formData.append("listDate", listDate);
+
+		$.ajax({
+			method:      "POST",
+			url: `loan_form/generateAmmortization`,
+			data:formData,
+			processData: false,
+			contentType: false,
+			global:      false,
+			cache:       false,
+			async:       false,
+			dataType:    "json",
+			success: function(data) {}
+		})
+
+}
+// ----- END UPDATE EMPLOYEE LEAVE -----
+
 
 // ----- APPROVE DOCUMENT -----
 $(document).on("click", "#btnApprove", function () {
@@ -1406,6 +1574,10 @@ $(document).on("click", "#btnApprove", function () {
 		let approversDate   = tableData[0].approversDate;
 		let employeeID      = tableData[0].employeeID;
 		let createdAt       = tableData[0].createdAt;
+		let loanFormDate = tableData[0].loanFormDate;
+		let loanFormDeductionAmount = tableData[0].loanFormDeductionAmount;
+		let loanFormTermPayment = tableData[0].loanFormTermPayment;
+
 
 		let data = getData("update", 2, "approve", feedback, id);
 		data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 2);
@@ -1437,6 +1609,20 @@ $(document).on("click", "#btnApprove", function () {
 
 		data["tableData[loanFormStatus]"] = status;
 
+		// setTimeout(() => {
+		// 	formConfirmation(
+		// 		"approve",
+		// 		"update",
+		// 		"LOAN",
+		// 		"",
+		// 		"form_loan_form",
+		// 		data,
+		// 		true,
+		// 		pageContent,
+		// 		notificationData
+		// 	);
+		// }, 300);
+
 		setTimeout(() => {
 			formConfirmation(
 				"approve",
@@ -1447,8 +1633,12 @@ $(document).on("click", "#btnApprove", function () {
 				data,
 				true,
 				pageContent,
-				notificationData
+				notificationData,
+				this,
+				status == 2 ? updateEmployeeLoan : false,
+				status == 2 ? [employeeID, loanFormTermPayment,loanFormDate,loanFormDeductionAmount,id] : []
 			);
+			// updateEmployeeLoan(employeeID, leaveID, leaveCredit);
 		}, 300);
 	}
 });
@@ -1695,7 +1885,7 @@ $('#loanFormDate').daterangepicker({
 // ----- AMMORTIZATION MODAL -----
 $(document).on("click", ".ammortization_link", function (e) {
 	e.stopImmediatePropagation();
-	// const id       = $(this).attr("loanFormID");
+	const id       = decryptString($(this).attr("id"));
 	// const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 
 	$("#modal_ammortization_content").html(preloader);
@@ -1703,72 +1893,47 @@ $(document).on("click", ".ammortization_link", function (e) {
 		"Loan Amortization Schedule"
 	);
 	$("#modal_ammortization").modal("show");
-	// let html = `
-	// <div class="modal-body">
-	// 	<div class="form-group">
-	// 		<label>Remarks <code>*</code></label>
-	// 		<textarea class="form-control validate"
-	// 			data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
-	// 			minlength="2"
-	// 			maxlength="250"
-	// 			id="loanFormRemarks"
-	// 			name="loanFormRemarks"
-	// 			rows="4"
-	// 			style="resize: none"
-	// 			required></textarea>
-	// 		<div class="d-block invalid-feedback" id="invalid-loanFormRemarks"></div>
-	// 	</div>
-	// </div>
-	// `;
-	// $("#modal_ammortization_content").html(html);
-	ammortizationContent();
+	ammortizationContent(id);
 });
 
 // ----- MY FORMS CONTENT -----
-function ammortizationContent() {
+function ammortizationContent(id =0) {
 	$("#modal_ammortization_content").html(preloader);
-	let scheduleData = getTableData(
-		"hris_loan_form_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
-		"hris_loan_form_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_loan_form_tbl.createdAt AS dateCreated",
-		`hris_loan_form_tbl.employeeID = ${sessionID}`,
-		`FIELD(loanFormStatus, 0, 1, 3, 2, 4, 5), COALESCE(hris_loan_form_tbl.submittedAt, hris_loan_form_tbl.createdAt)`
-	);
+	let scheduleData = getTableData(`hris_loan_ammortization_tbl`,``,
+	`loanFormID = ${id}`);
 
 	let html = `
 	<table class="table table-bordered table-striped table-hover pr-2 pl-2" id="tableAmmortization">
 		<thead>
 			<tr style="white-space: nowrap">
-				<th>#</th>
-				<th>Deduction Date</th>
-				<th>Amount</th>
+				<th class="text-center">#</th>
+				<th>Due Date</th>
+				<th>Loan Amount</th>
+				<th>Received Date</th>
+				<th>Paid Amount</th>
 				<th>Status</th>
 			</tr>
 		</thead>
 		<tbody>`;
 
+	let count =1;
 	scheduleData.map((item) => {
 		let {
-			fullname,
-			loanFormID,
-			loanFormDate,
-			approversID,
-			approversDate,
-			loanFormStatus,
-			loanFormRemarks,
-			submittedAt,
-			createdAt,
+			dueDate,
+			loanAmount,
+			recievedDate,
+			payrollCode,
+			payrollAmount,
+			ammortizationStatus
 		} = item;
 
 
-		let remarks       = loanFormRemarks ? loanFormRemarks : "-";
-		let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-		let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-		let dateApproved  = loanFormStatus == 2 || loanFormStatus == 5 ? approversDate.split("|") : "-";
-		if (dateApproved !== "-") {
-			dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
-		}
+	
+		let targetDate   = dueDate ? moment(dueDate).format("MMMM DD, YYYY ") : "-";
+		let recieveDate   = recievedDate ? moment(recievedDate).format("MMMM DD, YYYY ") : "-";
+		
 		let status ='';
-		if(loanFormStatus == 1){
+		if(ammortizationStatus == 1){
 			status =`<span class="badge badge-info w-100">Paid</span>` ;
 		}else{
 			status=`<span class="badge badge-danger w-100">Unpaid</span>`;
@@ -1776,13 +1941,24 @@ function ammortizationContent() {
 
 		html += `
 		<tr>
-			<td>1</td>
-			<td>Oct 15, 2020</td>
-			<td>278.1700</td>
+			<td class="text-center">${count++}</td>
+			<td>${targetDate}</td>
+			<td class="text-right">${formatAmount(loanAmount || 0,true)}</td>
+			<td>
+				<div>
+					${recieveDate}
+				</div>
+				<small>${payrollCode || "-"}</small>
+			</td>
+			<td class="text-right">${formatAmount(payrollAmount || 0,true)}</td>
 			<td>${status}</td>
 			
 		</tr>`;
 	});
+
+	if(scheduleData.length == 0){
+		html +=`<tr><td colspan="6" class="text-center">No Loan History</td></tr>`;
+	}
 
 	html += `
 		</tbody>

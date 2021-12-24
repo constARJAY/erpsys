@@ -6,7 +6,7 @@ class Loan_form extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        // $this->load->model("Companysetup_model", "company_setup");
+        $this->load->model("hris/LoanForm_model", "loanform");
         isAllowed(59);
     }
 
@@ -52,6 +52,38 @@ class Loan_form extends CI_Controller {
     //         echo json_encode("false|Invalid arguments");
     //     }
     // }
+
+    public function generateAmmortization(){
+
+        // echo "<pre>";
+        // print_r($_POST);
+        // exit;
+
+        $employeeID    = $this->input->post("employeeID");
+        $loanFormTermPayment    = $this->input->post("loanFormTermPayment");
+        $loanFormDate    = $this->input->post("loanFormDate");
+        $loanFormDeductionAmount    = $this->input->post("loanFormDeductionAmount");
+        $loanFormID    = $this->input->post("loanFormID");
+        $listDate    = $this->input->post("listDate");
+
+        $lisDateArr = (explode(",",$listDate));
+
+        if(!empty($lisDateArr)){
+            $ammortizationData = [];
+            for($loop = 0; $loop < count($lisDateArr); $loop++){
+                $temp = [
+                    "loanFormID"            =>  $loanFormID,
+                    "dueDate"               =>   $lisDateArr[$loop],
+                    "loanAmount"            =>  $loanFormDeductionAmount,
+                    "ammortizationStatus"   =>0,
+                    "createdBy"             =>  $employeeID
+            ];
+            array_push($ammortizationData, $temp);
+            }
+
+            $saveAmmortizationData = $this->loanform->saveAmmortizationData($ammortizationData);
+        }
+    }
 
 }
 ?>

@@ -149,6 +149,8 @@ class Production extends CI_Controller {
                         $getDataOvertime = $this->production->getApprovedRequest($employeeID,"overtime");
 
 
+
+
                         //  PROCESS FOR LEAVE REQUEST ///
 
                         // for($loop2 =0;$loop2<count($listDateRange);$loop2++){
@@ -278,6 +280,7 @@ class Production extends CI_Controller {
                                     $setBreak = $valueOvertime["overtimeRequestBreak"];
 
                                 // ----- GET SCHEDULE OF EMPLOYEE ----//
+                     
 
                                 if(in_array($getDateOvertime, $dateOvertime)){
                                     $temp =[
@@ -311,7 +314,8 @@ class Production extends CI_Controller {
                         // }
 
                         // PROCESS FOR OVERTIME REQUEST //
-                 
+                        
+
                          $this->production->savedProductionActivities($dataActivities);
                     }
                 }

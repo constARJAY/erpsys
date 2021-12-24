@@ -104,4 +104,21 @@ class Applicant_model extends CI_Model {
         return $query ? "true|Success|$applicantID|".date("Y-m-d") : "false|System error: Please contact the system administrator for assistance!";
     }
 
+    public function getExamResult($applicantID){
+        $result = [];
+        $sql    = "SELECT weft.*, examinationName, heqt.examinationType as examinationType FROM web_examination_form_tbl AS weft 
+                        LEFT JOIN web_examination_form_details_tbl AS wefdt ON weft.examFormID = wefdt.examFormID
+                        LEFT JOIN hris_examination_qa_tbl AS heqt ON wefdt.examinationQaID = heqt.examinationQaID
+                        
+                        LEFT JOIN hris_examination_tbl AS het ON heqt.examinationID = het.examinationID
+                    WHERE weft.applicantID = '$applicantID' GROUP BY examFormID ";
+        $query  = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+
+
+
+
+
 }

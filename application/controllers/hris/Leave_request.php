@@ -20,6 +20,10 @@ class Leave_request extends CI_Controller {
 
     public function updateEmployeeLeave()
     {
+        // echo "<pre>";
+        // print_r($_POST);
+        // exit;
+
         $employeeID  = $this->input->post("employeeID");
         $leaveID     = $this->input->post("leaveID");
         $leaveCredit = $this->input->post("leaveCredit");
@@ -164,24 +168,44 @@ class Leave_request extends CI_Controller {
         $data = array();
         $getProductionRecord = $this->leaverequest->getProductionRecord($employeeID);
         $activityData = [];
+    
+        // ---- CHECK AND SAVED IN PAYROLL ADJUSTMENT -----//
+        $isApprovedTimekeeping = $this->leaverequest->checkTimeKeeping($dateFrom,$dateTo);
+            
+          
+        if($isApprovedTimekeeping !=0){
+           
+            // echo "pasok approved timekeeping ";
+            // exit;
+            $getEmployeeLeaveAmount = $this->leaverequest->getEmployeeLeaveAmount($employeeID,$dateFrom);
+
+            // echo "pasok loan AMount".$getEmployeeLeaveAmount;
+
+            $loanAmount = 0;
+            if($getEmployeeLeaveAmount){
+                $loanAmount = $getEmployeeLeaveAmount;
+            }
+
+            
+            $dataPayroll = array(
+                "employeeID" =>$employeeID,
+                "tableName" =>"hris_leave_request_tbl",
+                "tablePrimaryID" =>$leaveRequestID,
+                "tablePrimaryCode" =>$leaveRequestCode,
+                "adjustmentType"=>"leave",
+                "controller"=> base_url("hris/leave_request"),
+                "adjustmentAmount" => $loanAmount,
+                'createdBy'=>$employeeID,
+            );
+
+          
+
+            $this->leaverequest->generatePayrollAdjustment($dataPayroll);
+
+        }
+        // ---- CHECK AND SAVED IN PAYROLL ADJUSTMENT -----//
 
         foreach($getProductionRecord as $key => $value){
-
-            // ---- CHECK AND SAVED IN PAYROLL ADJUSTMENT -----//
-            $isApprovedTimekeeping = $this->leaverequest->checkTimeKeeping($startDate,$endDate);
-
-            if($isApprovedTimekeeping > 0){
-                $dataPayroll = [
-                    'payrollAdjustStatus'   =>0,
-                    'leaveRequestID'        =>$leaveRequestID,
-                    'leaveRequestCode'      =>$leaveRequestCode,
-                    'createdBy'             =>$employeeID,
-                ];
-
-                $this->leaverequest->generatePayrollAdjustment($dataPayroll);
-
-            }
-            // ---- CHECK AND SAVED IN PAYROLL ADJUSTMENT -----//
 
       
             $getDate = $value["dateEntries"];
@@ -228,6 +252,7 @@ class Leave_request extends CI_Controller {
         if($activityData){
             $checkActivity = $this->leaverequest->generateActivity($activityData);
         }
+
 
         echo json_encode($checkActivity);
 

@@ -17,7 +17,7 @@
 						<li class="breadcrumb-item active">Finance Dashboard</li>
 					</ul>
 					<h1 class="mt-3">Finance Dashboard</h1>
-					<span>Displays useful and informative data for finance use.</span>
+					<span>This module is used to monitor finance management dashboard.</span>
 				</div>
 			</div>
 		</div>

@@ -282,7 +282,7 @@ $(document).ready(function(){
                                         </div>
                                     </div>
     
-                                    <div class="col-lg-3 col-md-12">
+                                    <div class="col-lg-4 col-md-12">
                                         <div class="form-group">  
                                             <label class="font-weight-bold">Province</label>                                             
                                             <div class="border-bottom w-100">${capitalizeString(employeeProvince)}</div>
@@ -296,7 +296,7 @@ $(document).ready(function(){
                                         </div>
                                     </div>
     
-                                    <div class="col-lg-3 col-md-12">
+                                    <div class="col-lg-2 col-md-12">
                                         <div class="form-group">  
                                             <label class="font-weight-bold">Zip Code</label>                                             
                                             <div class="border-bottom w-100">${employeeZipCode != "null" ? (employeeZipCode || "-") : "-"}</div>

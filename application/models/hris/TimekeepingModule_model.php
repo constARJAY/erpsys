@@ -1380,8 +1380,9 @@ class TimekeepingModule_model extends CI_Model {
                 $lwopDeduction          = $lwopDeduction > $basicSalary ? $basicSalary : $lwopDeduction;
 
                 $loan = getEmployeeLoan($employeeID, $cutoff);
-                $loanBasis       = $loan['total'] ?? 0;
-                $ammortizationID = $loan['ammortizationID'] ?? '';
+                $loanBasis           = $loan['total'] ?? 0;
+                $ammortizationID     = $loan['ammortizationID'] ?? '';
+                $ammortizationName   = $loan['ammortizationName'] ?? '';
                 $ammortizationAmount = $loan['ammortizationAmount'] ?? '';
 
                 $grossPay = ($basicSalary + $holidayPay + $overtimePay + $nightDifferentialPay + $leavePay) - ($lateUndertimeDeduction + $lwopDeduction);
@@ -1461,6 +1462,7 @@ class TimekeepingModule_model extends CI_Model {
                     'loanBasis'              => $loanBasis,
                     'loanDeduction'          => 0,
                     'ammortizationID'        => $ammortizationID,
+                    'ammortizationName'      => $ammortizationName,
                     'ammortizationAmount'    => $ammortizationAmount,
                     'prevNetPay'             => $prevNetPay,
                     'netPay'                 => $netPay,

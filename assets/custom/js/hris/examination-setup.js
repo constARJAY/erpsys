@@ -567,7 +567,7 @@ function deleteTableRow(isProject = true) {
 	$(document).on("click", "#btnUpdate", function () {
 	
 			const validate = validateForm("modal_examination_setup");
-			var designationID = $(this).attr("designationID");
+			var designationID = $(this).attr("roleID");
 			var designationName = $(this).attr("designationName");
 			if (validate) {
 				saveExaminationData(designationID,designationName);

@@ -21,6 +21,7 @@ $(document).ready(function() {
             updateTableItems();
             initDashboardDataTables();
             initAll();
+            initExpDate();
             const disabledFutureDates = {
                 autoUpdateInput:  false,
                 singleDatePicker: true,
@@ -1537,8 +1538,8 @@ $(document).ready(function() {
                     <div class="col-md-6 col-sm-12 form-group">
                         <label>Expiration Date</label>
                         <input type="text"
-                            class="form-control inputmask"
-                            mask="99/99/99"
+                            class="form-control"
+                           
                             data-allowcharacters="[0-9]"
                             name="applicantPRCExpiration"
                             id="applicantPRCExpiration"
@@ -2514,7 +2515,7 @@ $(document).ready(function() {
 
     // ----- VACANT TAB -----
     function vacantTab(data = false) { 
-        let html = ` <table class="table table-hover" id="tableJobPosting">
+        let html  = ` <table class="table table-hover" id="tableJobPosting">
                         <thead>
                         <tr>
                             <th>${data.length} JOBS & VACANCIES</th>
@@ -2537,7 +2538,17 @@ $(document).ready(function() {
                     </tr>`;
         });
         html += `</tbody>
-            </table>`;
+            </table>
+            
+            <div class="w-100">
+                <span>
+                        <strong class="text-warning">Note :</strong>
+                        <small class="text-warning">
+                            Please update your profile to apply.
+                        </small>
+                    </span>
+            </div>
+            `;
 
         return html;
     }
@@ -2566,7 +2577,7 @@ $(document).ready(function() {
                     let {
                         dependentName   = "",
                         relationship    = "",
-                        birthday        = moment(new Date()).format("MMMM DD, YYYY")
+                        birthday        = "",
                     } = data;
                     html = `
                     <tr class="table-row-dependent-information">
@@ -2603,7 +2614,7 @@ $(document).ready(function() {
                         </td>
                         <td>
                             <div class="form-group mb-0">
-                                <input type="text"
+                                <input type="button"
                                     class="form-control validate"
                                     name="applicantDependentBirthday"
                                     id="applicantDependentBirthday"
@@ -2638,7 +2649,7 @@ $(document).ready(function() {
                         </td>
                         <td>
                             <div class="form-group mb-0">
-                                <input type="text"
+                                <input type="button"
                                     class="form-control"
                                     name="employmentHistoryFromTo"
                                     data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
@@ -2707,7 +2718,7 @@ $(document).ready(function() {
                                     </div>
                                         <input type="text" class="form-control amount" min="1" max="99999999" 
                                             data-allowcharacters="[0-9][.]" placeholder="0.00" 
-                                            required="" autocomplete="off" 
+                                            autocomplete="off" 
                                             minlength="2"
                                             maxlength="50" 
                                             name="employmentHistorySalary" 
@@ -2736,7 +2747,7 @@ $(document).ready(function() {
                         </td>
                         <td>
                             <div class="form-group mb-0">
-                                <input type="text"
+                                <input type="button"
                                     class="form-control validate"
                                     name="educationalAttainmentSchoolYear"
                                     data-allowcharacters="[0-9]"
@@ -2863,7 +2874,7 @@ $(document).ready(function() {
                         </td>
                         <td>
                             <div class="form-group mb-0">
-                                <input type="text"
+                                <input type="button"
                                     class="form-control validate"
                                     name="examTakenDate"
                                     data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
@@ -3120,45 +3131,72 @@ $(document).ready(function() {
                 });
             });
 
-            $(`[name=applicantDependentBirthday]`).daterangepicker({
-                singleDatePicker: true,
-                showDropdowns: true,
-                autoApply: true,
-                maxDate: moment(new Date).format("MMMM DD, YYYY"),
-                locale: {
-                    format: 'MMMM DD, YYYY'
-                },
-            });
+            $(`[name=applicantDependentBirthday]`).each(function(){
+                let thisID      = $(this).attr("id");
+                let thisValue   = $(this).val();
+                $(`#${thisID}`).daterangepicker({
+                    singleDatePicker: true,
+                    showDropdowns: true,
+                    autoApply: true,
+                    maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                    locale: {
+                        format: 'MMMM DD, YYYY'
+                    },
+                });
 
-            $(`[name=employmentHistoryFromTo]`).daterangepicker({
-                singleDatePicker: false,
-                showDropdowns: true,
-                autoApply: true,
-                maxDate: moment(new Date).format("MMMM DD, YYYY"),
-                locale: {
-                    format: 'MMMM DD, YYYY'
-                },
-            });
+                $(this).val(thisValue? thisValue : "");
+            })
+            
 
-            $(`[name=educationalAttainmentSchoolYear]`).daterangepicker({
-                singleDatePicker: false,
-                showDropdowns: true,
-                autoApply: true,
-                maxDate: moment(new Date).format("YYYY"),
-                locale: {
-                    format: 'YYYY'
-                },
+            $(`[name=employmentHistoryFromTo]`).each(function(){
+                let thisID      = $(this).attr("id");
+                let thisValue   = $(this).val();
+                $(`#${thisID}`).daterangepicker({
+                    singleDatePicker: false,
+                    showDropdowns: true,
+                    autoApply: true,
+                    maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                    locale: {
+                        format: 'MMMM DD, YYYY'
+                    },
+                });
+                $(this).val(thisValue ? thisValue : "");
             });
+            
 
-            $(`[name=examTakenDate]`).daterangepicker({
-                singleDatePicker: false,
-                showDropdowns: true,
-                autoApply: true,
-                maxDate: moment(new Date).format("MMMM DD, YYYY"),
-                locale: {
-                    format: 'MMMM DD, YYYY'
-                },
+
+            $(`[name=educationalAttainmentSchoolYear]`).each(function(){
+                let thisID      = $(this).attr("id");
+                let thisValue   = $(this).val();
+                $(`#${thisID}`).daterangepicker({
+                    singleDatePicker: false,
+                    showDropdowns: true,
+                    autoApply: true,
+                    maxDate: moment(new Date).format("YYYY"),
+                    locale: {
+                        format: 'YYYY'
+                    },
+                });
+                $(this).val(thisValue ? thisValue : ``);
             });
+           
+
+            $(`[name=examTakenDate]`).each(function(){
+                let thisID      = $(this).attr("id");
+                let thisValue   = $(this).val();
+                $(`#${thisID}`).daterangepicker({
+                    singleDatePicker: false,
+                    showDropdowns: true,
+                    autoApply: true,
+                    maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                    locale: {
+                        format: 'MMMM DD, YYYY'
+                    },
+                });
+
+                $(this).val(thisValue ? thisValue : ``);
+            });
+            
 
 
             $(`[name=organizationJoinedFromTo]`).each(function(){
@@ -3173,7 +3211,7 @@ $(document).ready(function() {
                         format: 'YYYY'
                     },
                 });
-                $(this).val(thisValue ? thisValue : `${moment().format("YYYY")} - ${moment().format("YYYY")}`);
+                $(this).val(thisValue ? thisValue : ``);
             });
                
             // let organizationDate = $(`[name=organizationJoinedFromTo]`).val();
@@ -3528,7 +3566,9 @@ $(document).ready(function() {
 		const validate  = validateForm("page_content");
         const isValid   = comparePassword();
         const hasResume = validateResume();
+
         $(".form-control").removeClass("validated is-valid");
+
 		if (validate && isValid && hasResume) {
             setTimeout(() => {
                 getApplicantData()
@@ -3544,6 +3584,21 @@ $(document).ready(function() {
                 })
             }, 100);
 		} else {
+            let parentTab   = $("#page_content").find(".is-invalid").first().closest(".tab-pane").addClass("active");
+            if(parentTab){
+                let parentTabID = parentTab.attr("id");
+                $(".tab-pane").removeClass("active");
+                $(".modal-tab").removeClass("active");
+
+                parentTab.addClass("active");
+
+                $(".modal-tab").each(function(){
+                    if($(this).attr("href") == `#${parentTabID}` ){
+                        $(this).addClass("active")
+                    };
+                });
+            }
+
             formButtonHTML(this, false);
         }
 	});
@@ -3722,3 +3777,13 @@ function getProfileData(applicantID = null){
     
     return result;
 }	
+
+
+function initExpDate(){
+    $("#applicantPRCExpiration" ).inputmask({
+        mask: "99/99/99" ,
+        placeholder: "mm/dd/yy",
+        undoOnEscape: false,
+        clearMaskOnLostFocus: false,
+    });
+}

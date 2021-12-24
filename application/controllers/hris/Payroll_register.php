@@ -140,10 +140,6 @@ class Payroll_register extends CI_Controller {
                         ];
                     } 
                     $idArrStr = implode(", ", $payrollRegisterItemIDArr);
-
-                    // echo json_encode($payrollRegisterItems);
-                    // echo json_encode($idArrStr);
-                    // exit;
                     $savePayrollRegisterItems = $this->payrollregister->savePayrollRegisterItems($action, $payrollRegisterItems, $payrollRegisterID, $idArrStr);
                 }
             }

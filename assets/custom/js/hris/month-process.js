@@ -642,7 +642,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 function updateTableRows(){
     $(".itemTableRow").each(function(i){
         // CHECKBOX
-        $("td .action .checkboxholdrow", this).attr("id", `checkboxholdrow${i}`);
+        $("td .action .checkboxrow ", this).attr("id", `checkboxholdrow${i}`);
 
         // INPUTS ID's
         let monthID = 0;
@@ -675,17 +675,32 @@ function getSerialNumber(scope = {}, readOnly = false, monthID = 0) {
         payrollCode = "",
         payrollItemID = "",
         employeeID = "",
-        grossPay = "",
+        basicSalary = "",
+        lateUndertimeDeduction = "",
+        lwopDeduction = "",
+        grossPay="",
         submittedAt = "",
 	} = scope;
+
+    // console.log(scope);
+
+    let netPay = 0;
+
+    if(monthID){
+        netPay = grossPay;
+
+    }else{
+        netPay = parseFloat(basicSalary) - (parseFloat(lateUndertimeDeduction) +  parseFloat(lwopDeduction));
+
+    }
 
 
 	let html = "";
 
 
 		html = `
-        <div class=" dropdown-item disabled" payrollID="${payrollID}" payrollCode="${payrollCode}" payrollItemID=${payrollItemID} submittedAt="${submittedAt}" grossPay="${grossPay}"> 
-            <small class=" p-1 mb-0">${payrollCode} : ${formatAmount(grossPay,true)}</small>
+        <div class=" dropdown-item disabled" payrollID="${payrollID}" payrollCode="${payrollCode}" payrollItemID=${payrollItemID} submittedAt="${submittedAt}" grossPay="${netPay}"> 
+            <small class=" p-1 mb-0">${payrollCode} : ${formatAmount(netPay,true)}</small>
             <footer class="blockquote-footer">Date Submitted: ${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY") : " - "}</cite></footer>
             <hr class="w-100">
         </div>`;
@@ -767,7 +782,9 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
             payroll.payrollCode,
             payrolldetails.payrollItemID,
             payrolldetails.employeeID,
-            payrolldetails.grossPay,
+            payrolldetails.basicSalary,
+            payrolldetails.lateUndertimeDeduction,
+            payrolldetails.lwopDeduction,
             payroll.submittedAt`,
             `payrollStatus =2 AND payrolldetails.employeeID = ${employeeID} AND ((payroll.payrollStartDate >= '${startDate}' AND payroll.payrollStartDate <= '${endDate}') OR (payroll.payrollEndDate >= '${startDate}' AND  payroll.payrollEndDate <= '${endDate}'))`
         );
@@ -807,7 +824,9 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
 					
 			}else{
                 grossPayListData += payrollData.map(payroll => {
-                    totalGrossPayAmount = parseFloat(payroll.grossPay) || 0;
+                    let netPay = 0;
+                    netPay = parseFloat(payroll.basicSalary) - (parseFloat(payroll.lateUndertimeDeduction) +  parseFloat(payroll.lwopDeduction));
+                    totalGrossPayAmount = parseFloat(netPay) || 0;
                     return getSerialNumber(payroll, readOnly,monthID,totalGrossPayAmount);
                 }).join("");
 			}
@@ -855,7 +874,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                 <td>
                     <div class="btn-group w-100">
                         <button type="button" class="btn btn-none dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            ---- 
+                        ${formatAmount(totalGrossPayAmount,true)} 
                         </button>
                         <div class="dropdown-menu dropdown-menu-right grossPayData">
                         ${grossPayListData} 
@@ -876,7 +895,8 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                             <input type="checkbox" class="checkboxrow monthHoldStatus" name="monthHoldStatus" ${ monthHoldStatus == 0 ? "checked" : ""}>
                         </div>
                     </td> 
-                    <td> <div name="monthemployeeID">${employeeCode || "-"}</div> </td>
+                    <td> <div name="monthemployeeID">${employeeCode || "-"}</div> </td>3
+
                     <td class="text-left">
                         <div>${fullname || "-"}</div>
                         <span><small>${departmentName} | ${designationName}</small></span>
@@ -885,7 +905,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                     <td>
                         <div class="btn-group w-100">
                             <button type="button" class="btn btn-none dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                ---- 
+                            ${formatAmount(totalGrossPayAmount,true)}
                             </button>
                             <div class="dropdown-menu dropdown-menu-right grossPayData">
                             ${grossPayListData} 
@@ -1012,14 +1032,12 @@ $(document).on("click","#generatePeriod",function(){
 
     // ----- CHECK ALL -----
     $(document).on("change", ".checkboxall", function() {
-        // let parentTable  =   $(this).closest(".itemTableRow");
-        // let checkBoxCount = parentTable.find(".checkboxholdrow").length;
-        // let getAssetID = $(this).attr("assetID");
-        // const getIndex = $(this).attr("index");
-        // const isChecked = $(this).prop("checked");
-       
-        $(".purchaseOrderItemsBody .checkboxholdrow").each(function(i, obj) {
-            $(this).prop("checked", isChecked);
+
+        const isChecked = $(this).prop("checked");
+    
+
+        $(".purchaseOrderItemsBody > tr").each(function(i, obj) {
+            $(".checkboxrow ",this).prop("checked", isChecked);
         });
    
     });
@@ -1074,7 +1092,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
 	let checkboxHoldStatus = !disabled ? `<th class="text-center"><div class="action">
 					<input type="checkbox" class="checkboxall" project="true"> Hold
-				</div></th>` : `Hold`;
+				</div></th>` : `<th>Hold</th>`;
 
     // let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
 

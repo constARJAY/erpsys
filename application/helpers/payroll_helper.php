@@ -489,8 +489,9 @@
         $CI =& get_instance();
         $sql = "
         SELECT
-            *
-        FROM hris_loan_form_tbl
+            hlft.*, loanName
+        FROM hris_loan_form_tbl AS hlft
+            LEFT JOIN hris_loan_tbl AS hlt USING(loanID)
         WHERE employeeID = $employeeID
             AND (loanFormTermPayment = $cutoff OR loanFormTermPayment = 0)
             AND loanFormStatus = 2";
@@ -517,18 +518,21 @@
     {
         $total = 0;
         $ammortizationID     = [];
+        $ammortizationName   = [];
         $ammortizationAmount = [];
 
         $loans = getLoanRequest($employeeID, $cutoff);
         if ($loans && !empty($loans)) {
             foreach ($loans as $loan) {
                 $loanFormID = $loan['loanFormID'];
+                $loanName   = $loan['loanName'] ?? "";
 
                 $ammortization = getLoanAmortization($loanFormID);
                 if ($ammortization) {
                     $amount = $ammortization->loanAmount ?? 0;
 
                     $ammortizationID[]     = $ammortization->ammortizationID;
+                    $ammortizationName[]   = $loanName;
                     $ammortizationAmount[] = $amount;
 
                     $total += $amount;
@@ -537,9 +541,10 @@
         } 
 
         return [
-            'employeeID'         => $employeeID,
-            'total'              => $total,
+            'employeeID'          => $employeeID,
+            'total'               => $total,
             'ammortizationID'     => !empty($ammortizationID) ? implode('|', $ammortizationID) : '',
+            'ammortizationName'   => !empty($ammortizationName) ? implode('|', $ammortizationName) : '',
             'ammortizationAmount' => !empty($ammortizationAmount) ? implode('|', $ammortizationAmount) : '',
         ];
     }

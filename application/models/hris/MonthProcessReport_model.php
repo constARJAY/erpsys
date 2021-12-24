@@ -69,7 +69,8 @@ class MonthProcessReport_model extends CI_Model {
             $query = $this->db->insert_batch("hris_salary_release_tbl", $data);
         }
 
-        return $query ? true : false;
+        // return $query ? true : false;
+        return true;
     }
 
     // public function changeReleaseStatus($backPayEmployeeID = false,$employeeID = 0){

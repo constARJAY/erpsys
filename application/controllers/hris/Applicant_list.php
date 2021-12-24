@@ -7,10 +7,21 @@ class Applicant_list extends CI_Controller {
         parent::__construct();
         $this->load->model("web/Applicant_model", "applicant");
         isAllowed(106);
+        $this->encryption->initialize(
+            array(
+                    'cipher' => 'aes-256',
+                    'mode'   => 'ctr',
+                    'key'    => '<a 3-character A-Z a-z string>'
+            )
+        );
+
+        $this->encryption->initialize(array('driver' => 'mcrypt'));
+        
     }
 
     public function index(){
         $data["title"] = "Applicant List";
+        
         $this->load->view("template/header", $data);
         $this->load->view("hris/applicant_list/index");
         $this->load->view("template/footer");
@@ -59,19 +70,15 @@ class Applicant_list extends CI_Controller {
     }
 
     public function generateExamUrl(){
-        //  generate encrypted url parameter
-        // $code = '2|1|2021-11-02';
+        // applicantID|DesignationID|ExamDate
+        $applicantID    = $this->input->post("applicantID");
+        $designationID  = $this->input->post("designationID");    
+        $examDate       = $this->input->post("examDate");
+        
+        $code   =   $applicantID."|".$designationID."|".$examDate;
+        $url    =   $this->encryption->encrypt(str_replace("slash","/",$code));
 
-        // $url = $this->encryption->encrypt(str_replace("slash","/","$code"));
-
-        // echo $url;
-        // exit;
-
-        // end  generate encrypted url parameter
-
-        //  decode encrypted url parameter
-        // $code ="c90fc36ab1ff5e4db0e9bce71bc4bf44e74a254864b5dc455f0e935b9f3d4778c73da9e9145cf0285d71d9553295cf5039d1c8da7fd13658e7d30c4e9add8b5dlKo9o4rgijZDSgbEvMmGjne2PXpEQa7VpuSeuA==";
-        //"web/examination_form?id=$code"; 
+        echo json_encode($url);
     }
 
 }

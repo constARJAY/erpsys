@@ -781,11 +781,17 @@ $(document).ready(function() {
 
 						if (!readOnly) {
 							payrollItemsHTML += `
-							<tr payrollItemID = "${payrollItemID}"
-								loanBasis     = "${loanBasis}"
-								prevGrossPay  = "${prevGrossPay}"
-								grossPay      = "${grossPay}"
-								employeeID    = "${employeeID}">
+							<tr payrollItemID       = "${payrollItemID}"
+								sssAdjustment       = "${sssAdjustment || 0}"
+								phicAdjustment      = "${phicAdjustment || 0}"
+								hdmfAdjustment      = "${hdmfAdjustment || 0}"
+								loanAdjustment      = "${loanAdjustment || 0}"
+								allowance           = "${allowance || 0}"
+								allowanceAdjustment = "${allowanceAdjustment || 0}"
+								prevGrossPay        = "${prevGrossPay || 0}"
+								grossPay            = "${grossPay || 0}"
+								otherAdjustment     = "${otherAdjustment || 0}"
+								employeeID          = "${employeeID}">
 								<td style="z-index: 2;">
 									<div class="d-flex justify-content-start align-items-center">
 										<img class="rounded-circle" 
@@ -1620,12 +1626,14 @@ $(document).ready(function() {
 	function getAllDeduction($parent = '') {
 		let deduction = 0;
 		if ($parent) {
-			let nonTaxable    = getNonTaxableAmount($parent);
-			let withHolding   = $parent.find(`[name="withHoldingDeduction"]`).val();
-				withHolding   = getNonFormattedAmount(withHolding);
-			let loanDeduction = $parent.find(`[name="loanDeduction"]`).val();
-				loanDeduction = getNonFormattedAmount(loanDeduction);
-			deduction = nonTaxable + withHolding + loanDeduction;
+			let nonTaxable     = getNonTaxableAmount($parent);
+			let withHolding    = $parent.find(`[name="withHoldingDeduction"]`).val();
+				withHolding    = getNonFormattedAmount(withHolding);
+			let loanDeduction  = $parent.find(`[name="loanDeduction"]`).val();
+				loanDeduction  = getNonFormattedAmount(loanDeduction);
+			let loanAdjustment = $parent.attr("loanAdjustment");
+				loanAdjustment = getNonFormattedAmount(loanAdjustment);
+			deduction = nonTaxable + withHolding + loanDeduction + loanAdjustment;
 		}
 		return deduction;
 	}
@@ -1635,9 +1643,13 @@ $(document).ready(function() {
 	// ----- UPDATE NET PAY -----
 	function updateNetPay($parent = '') {
 		if ($parent) {
-			let grossPay = $parent.attr("grossPay") ?? 0;
+			let grossPay            = +$parent.attr("grossPay") ?? 0;
+			let allowance           = +$parent.attr("allowance") ?? 0;
+			let allowanceAdjustment = +$parent.attr("allowanceAdjustment") ?? 0;
+			let otherAdjustment     = +$parent.attr("otherAdjustment") ?? 0;
+			let totalAllowance      = allowance + allowanceAdjustment;
 			let allDeduction = getAllDeduction($parent);
-			let netPay = grossPay - allDeduction;
+			let netPay = ((grossPay - allDeduction) + otherAdjustment) + totalAllowance;
 				netPay = formatAmount(netPay, true);
 			$parent.find(`td.netPay`).text(netPay);
 		}
@@ -1748,12 +1760,6 @@ $(document).ready(function() {
 
 		$parent.find(`[name="sssDeduction"]`).val(deduction);
 
-		// const deductSssLength  = $(`[name="deductSss"]`).length;
-		// const deductSssChecked = $(`[name="deductSss"]:checked`).length;
-
-		// let checkParent = deductSssLength == deductSssChecked;
-		// $(`[name="checkAllSss"]`).prop("checked", checkParent);
-
 		updateWithHoldingTax($parent);
 	})
 
@@ -1767,12 +1773,6 @@ $(document).ready(function() {
 			deduction = formatAmount(deduction, true);
 
 		$parent.find(`[name="phicDeduction"]`).val(deduction);
-
-		// const deductPhicLength  = $(`[name="deductPhic"]:not([disabled])`).length;
-		// const deductPhicChecked = $(`[name="deductPhic"]:checked`).length;
-
-		// let checkParent = deductPhicLength == deductPhicChecked;
-		// $(`[name="checkAllPhic"]`).prop("checked", checkParent);
 
 		updateWithHoldingTax($parent);
 	})
@@ -1788,11 +1788,11 @@ $(document).ready(function() {
 
 		$parent.find(`[name="hdmfDeduction"]`).val(deduction);
 
-		// const deductHdmfLength  = $(`[name="deductHdmf"]:not([disabled])`).length;
-		// const deductHdmfChecked = $(`[name="deductHdmf"]:checked`).length;
+		updateWithHoldingTax($parent);
+	})
 
-		// let checkParent = deductHdmfLength == deductHdmfChecked;
-		// $(`[name="checkAllHdmf"]`).prop("checked", checkParent);
+	$(document).on("change", `[name="deductWithHolding"]`, function() {
+		$parent = $(this).closest(`tr`);
 
 		updateWithHoldingTax($parent);
 	})
@@ -1810,18 +1810,6 @@ $(document).ready(function() {
 		$parent.find(`[name="loanDeduction"]`).val(deduction);
 	})
 	// ----- END CHECK DEDUCT LOAN -----
-
-	$(document).on("change", `[name="deductWithHolding"]`, function() {
-		$parent = $(this).closest(`tr`);
-
-		// const deductWithHoldingLength  = $(`[name="deductWithHolding"]`).length;
-		// const deductWithHoldingChecked = $(`[name="deductWithHolding"]:checked`).length;
-
-		// let checkParent = deductWithHoldingLength == deductWithHoldingChecked;
-		// $(`[name="checkAllWithHolding"]`).prop("checked", checkParent);
-
-		updateWithHoldingTax($parent);
-	})
 
 	$(document).on("change", `[name="deductMandates"]`, function() {
 		$parent = $(this).closest(`tr`);

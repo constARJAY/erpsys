@@ -135,10 +135,10 @@ class PayrollModule_model extends CI_Model {
     {
         $sql = "
         SELECT 
-            (sssDeduction + (IF(sssAdjustment, (IF(sssAdjustment > 0, (- sssAdjustment), ABS(sssAdjustment))), 0)) 
-            + phicDeduction + (IF(phicAdjustment, (IF(phicAdjustment > 0, (- phicAdjustment), ABS(phicAdjustment))), 0)) 
-            + hdmfDeduction + (IF(hdmfAdjustment, (IF(hdmfAdjustment > 0, (- hdmfAdjustment), ABS(hdmfAdjustment))), 0)) 
-            + withHoldingDeduction + (IF(withHoldingAdjustment, (IF(withHoldingAdjustment > 0, (- withHoldingAdjustment), ABS(withHoldingAdjustment))), 0))) AS totalDeduction 
+            (sssDeduction + (IF(sssAdjustment, sssAdjustment, 0)) 
+            + phicDeduction + (IF(phicAdjustment, phicAdjustment, 0)) 
+            + hdmfDeduction + (IF(hdmfAdjustment, hdmfAdjustment, 0)) 
+            + withHoldingDeduction + (IF(withHoldingAdjustment, withHoldingAdjustment, 0))) AS totalDeduction 
         FROM hris_payroll_items_tbl WHERE payrollID = $payrollID AND employeeID = $employeeID";
         $query = $this->db->query($sql);
         $result = $query ? $query->row() : null;
@@ -621,6 +621,7 @@ class PayrollModule_model extends CI_Model {
             + (overtimePay + (IF(overtimeAdjustment, overtimeAdjustment, 0)))
             + (nightDifferentialPay + (IF(nightDifferentialAdjustment, nightDifferentialAdjustment, 0)))
             + (allowance + (IF(allowanceAdjustment, allowanceAdjustment, 0)))
+            + (IF(otherAdjustment AND otherAdjustment > 0, otherAdjustment, 0))
             + leavePay) AS totalEarning,
             (sssDeduction + (IF(sssAdjustment, sssAdjustment, 0))) AS sssDeduction,
             (phicDeduction + (IF(phicAdjustment, phicAdjustment, 0))) AS phicDeduction,
@@ -632,7 +633,10 @@ class PayrollModule_model extends CI_Model {
             + (sssDeduction + (IF(sssAdjustment, sssAdjustment, 0)))
             + (phicDeduction + (IF(phicAdjustment, phicAdjustment, 0)))
             + (hdmfDeduction + (IF(hdmfAdjustment, hdmfAdjustment, 0)))
-            + (withHoldingDeduction + (IF(withHoldingAdjustment, withHoldingAdjustment, 0)))) AS totalDeduction,
+            + (withHoldingDeduction + (IF(withHoldingAdjustment, withHoldingAdjustment, 0)))
+            + (IF(otherAdjustment AND otherAdjustment < 0, ABS(otherAdjustment), 0))) AS totalDeduction,
+            (IF(otherAdjustment AND otherAdjustment < 0, ABS(otherAdjustment), 0)) AS otherDeduction,
+            (IF(otherAdjustment AND otherAdjustment > 0, otherAdjustment, 0)) AS otherEarning,
             netPay
         FROM hris_payroll_items_tbl AS hpit
             LEFT JOIN hris_employee_list_tbl AS helt ON hpit.employeeID = helt.employeeID

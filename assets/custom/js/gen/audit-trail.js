@@ -63,12 +63,12 @@ function getActionDiv(isForm = "false"){
     if(isForm == "false"){
         html += `<div class="card my-0 p-2 action-list" dataaction="insert" style="box-shadow: none !important;">
                     <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">ADD</h6> 
+                        <h6 class="mx-3 module-header py-1 text-gray">CREATE</h6> 
                     </div>
                 </div>
                 <div class="card my-0 p-2 action-list" dataaction="update" style="box-shadow: none !important;">
                     <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">UPDATE</h6> 
+                        <h6 class="mx-3 module-header py-1 text-gray">MODIFIED</h6> 
                     </div>
                 </div>`;
     }else{
@@ -143,8 +143,8 @@ function getDescriptionTable(moduleID, action){
         tableData.filter(value => value.auditType == action).map((value,index)=>{
             let auditColumn = value["auditColumn"] ? value["auditColumn"].split("|") : false;
             tableRow    += `<tr>`;
-            tableRow    += `<td>${moment(value.createdAt).format(`MMMM DD, YYYY hh:mm:ss A`)}</td>
-                            <td>${value.auditDescription}</td>
+            tableRow    += `    <td>${moment(value.createdAt).format(`MMMM DD, YYYY hh:mm:ss A`)}</td>
+                                <td>${value.auditDescription}</td>
                            `;
             // if(auditColumn){
             //     tableID     = "descriptionTable_update";
@@ -223,7 +223,7 @@ function getDescriptionTable(moduleID, action){
             //                         </table>`;
             //     tableRow += "</td>";
             // } 
-            tableRow    += `<td>${value.accountablePerson}</td>`;
+            tableRow    += ``;
             tableRow    += `</tr>`;
         });
 
@@ -234,7 +234,6 @@ function getDescriptionTable(moduleID, action){
                                 <tr>
                                     <th>Date and Time</th>
                                     <th>Description</th>
-                                    <th>Accountable Person</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -267,7 +266,7 @@ function initDataTables() {
             lengthMenu: [ 50, 75, 100, 150],
             columnDefs: [
                 { targets: 0, width:  250 },
-                { targets: 2, width:  150 }
+                // { targets: 2, width:  150 }
             ],
         }
     );
@@ -286,7 +285,7 @@ function initDataTables() {
             lengthMenu: [ 50, 75, 100, 150],
             columnDefs: [
                 { targets: 0, width:  250 },
-                { targets: 2, width:  150 }
+                // { targets: 2, width:  150 }
             ],
         }
     );

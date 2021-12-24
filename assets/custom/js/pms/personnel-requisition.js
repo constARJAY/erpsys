@@ -18,12 +18,32 @@ $(document).ready(function() {
 
 
 	// ---- GET EMPLOYEE DATA -----
-	const allEmployeeData = getAllEmployeeData();
+
+	const getAllDataEmployee = (employeeID = null) => {
+		const whereEmployee = employeeID ? `employeeID = ${employeeID}` : "1=1";
+		const data = getTableData(
+			`hris_employee_list_tbl AS helt
+				LEFT JOIN hris_department_tbl USING(departmentID)
+				LEFT JOIN hris_designation_tbl USING(designationID)`,
+			`employeeID,
+			CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
+			helt.departmentID,
+			departmentName AS department,
+			designationName AS designation, designationID AS designationID`,
+			`employeeStatus = 1 OR employeeStatus = 2 OR ${whereEmployee}`
+		);
+		return data || [];
+	};
+
+	
+
+	
+	const allEmployeeData = getAllDataEmployee();
 	const employeeData = (id) => {
 		if (id) {
 			let data = allEmployeeData.filter(employee => employee.employeeID == id);
-			let { employeeID, fullname, designation, department } = data && data[0];
-			return { employeeID, fullname, designation, department };
+			let { employeeID, fullname, designation, department, departmentID } = data && data[0];
+			return { employeeID, fullname, designation, department, departmentID };
 		}
 		return {};
 	}
@@ -651,6 +671,7 @@ $(document).ready(function() {
                     html += `<option departmentid="${deptID}" value="${dsg.designationID}" ${dsg.designationID == dsgID  ? "selected":""}>${dsg.designationName}</option>`;
                 })
             }
+			console.log(html)
             $("#designationID").html(html);
     }
     // ----- END DESIGNATION CONTENT -----
@@ -689,18 +710,21 @@ $(document).ready(function() {
         }
         // ----- END REPORT EMPLOYEE CONTENT -----
 
-        $(document).on("change","#departmentID",function(){
-            let thisValue   =   $(this).val();
-            designationList (thisValue,"");
-            reportEmployeeList(thisValue,"");
-            // initAll();
-        });
+        // $(document).on("change","#departmentID",function(){
+        //     let thisValue   =   $(this).val();
+        //     designationList (thisValue,"");
+        //     reportEmployeeList(thisValue,"");
+        //     // initAll();
+        // });
 
         $(document).on("change","#designationID",function(){
             let thisValue   =   $(this).val();
             let departmentID = $(this).find(":selected").attr("departmentid");
-            // reportEmployeeList(thisValue,departmentID,"");
+            
+			reportEmployeeList(departmentID,"","");
             reportEmployeeList2(thisValue,departmentID,"");
+			// reportEmployeeList(thisValue,departmentID,"");
+            // reportEmployeeList2(thisValue,departmentID,"");
             // initAll();
         });
     
@@ -747,6 +771,7 @@ $(document).ready(function() {
 		let {
 			fullname:    employeeFullname    = "",
 			department:  employeeDepartment  = "",
+			departmentID: employeeEDepartmentID = "",
 			designation: employeeDesignation = "",
 		} = employeeData(data ? employeeID : sessionID);
 		// ----- END GET EMPLOYEE DATA -----
@@ -759,6 +784,8 @@ $(document).ready(function() {
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
+
+		let tmpDepartmentID = departmentID != "" ? departmentID : employeeEDepartmentID;
 	
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
@@ -887,7 +914,7 @@ $(document).ready(function() {
                 </div>
 		    </div>
 
-			<div class="col-md-3 col-sm-12">
+			<div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>No. of Vacancies ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
@@ -906,44 +933,28 @@ $(document).ready(function() {
                 </div>
             </div>
 
-            <div class="col-md-3 col-sm-12">
+			 <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Department ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Requesting Department</label>
+                    <input type="text" class="form-control" disabled value="${employeeDepartment}">
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Designation ${!disabled ? "<code>*</code>" : ""}</label>
                     <!-- <input type="text" class="form-control" disabled value=""> -->
                     <select class="form-control validate select2"
-                        name="departmentID"
-                        id="departmentID"
+                        name="designationID"
+                        id="designationID"
                         style="width: 100%"
                         required
                         display=${readOnly}
                         ${disabled}>
-                        <option selected disabled>Select Department</option> 
-						${getDepartmentList(departmentID)}            
+                        <option selected disabled>Select Designation</option> 
+					           
                     </select>
-                    <div class="d-block invalid-feedback" id="invalid-departmentID"></div>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-12">
-                <div class="form-group">
-                    <label>Designation ${!disabled ? "<code>*</code>" : ""}</label>
-                    <select class="form-control validate select2"
-                    name="designationID"
-                    id="designationID"
-                    style="width: 100%"
-                    required
-                    ${disabled}>
-                    <option selected disabled>Select Designation</option> 
-					    
-                </select>
-                <div class="d-block invalid-feedback" id="invalid-designationID"></div>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-12">
-                <div class="form-group">
-                    <label>Requesting Department</label>
-                    <input type="text" class="form-control" disabled value="${employeeDepartment}">
+                    <div class="d-block invalid-feedback" id="invalid-designationID"></div>
                 </div>
             </div>
 
@@ -1127,10 +1138,9 @@ $(document).ready(function() {
 			$("#page_content").html(html);
 			initDataTables();
 			initAll();
-			
-			requisitionID && requisitionID != 0 &&  $("#departmentID").trigger("change");
+			designationList(tmpDepartmentID,designationID);
+			requisitionID && requisitionID != 0 &&  $("#designationID").trigger("change");
 			requisitionID && requisitionID != 0 &&  reportEmployeeList(departmentID,personnelReportByID) ;
-			requisitionID && requisitionID != 0 &&  designationList(departmentID,designationID);
 			requisitionID && requisitionID != 0 &&  $("[name='personnelOption']:checked").trigger("change");
 
 			!requisitionID && requisitionID == 0 && $("#personnelDateNeeded").val(moment(new Date).format("MMMM DD, YYYY"));
@@ -1352,6 +1362,7 @@ $(document).ready(function() {
             $("#personnelDuration").addClass("validate").removeClass("is-valid");
             $("#personnelDuration").attr("required","");
             $("#personnelDuration").prop("readonly",false);
+            $("#personnelDuration").removeAttr("disabled");
 
 			$("[name=salaryPackage]").removeClass("required").removeClass("validated").removeClass("is-invalid");
             $("#invalid-salaryPackage").text("");
@@ -1465,7 +1476,7 @@ $(document).ready(function() {
 			
 			data["employeeID"]            = sessionID;
 			data["vacancy"] = $("[name=vacancy]").val();
-			data["departmentID"] = $("[name=departmentID]").val();
+			data["departmentID"] = $("[name=designationID] option:selected").attr("departmentID");
 			data["designationID"] = $("[name=designationID]").val();
 			data["salaryPackage"] = $("[name=salaryPackage]").val();
 			data["personnelReportByID"] = $("[name=personnelReportByID]").val();
@@ -1487,7 +1498,7 @@ $(document).ready(function() {
 	
 			formData.append("employeeID", sessionID);
 			formData.append("vacancy", $("[name=vacancy]").val() || null);
-			formData.append("departmentID", $("[name=departmentID]").val() || null);
+			formData.append("departmentID", $("[name=designationID] option:selected").attr("departmentID") || null);
 			formData.append("designationID", $("[name=designationID]").val() || null);
 			formData.append("salaryPackage", $("[name=salaryPackage]").val().replaceAll(",","") || null);
 			formData.append("personnelReportByID", $("[name=personnelReportByID]").val() || null);

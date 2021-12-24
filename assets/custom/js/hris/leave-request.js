@@ -45,6 +45,16 @@ $(document).ready(function () {
 		IF(sundayStatus = 1, 1, 0) AS sunday`,
 		`employeeID = ${sessionID}`
 	);
+
+	const getOvertimeDateList = getTableData(
+		"hris_overtime_request_tbl", 
+		"overtimeRequestDate",
+		`overtimeRequestDate = 2 AND employeeID = ${sessionID}`);
+
+		const getApproveLeave = getTableData(
+			"hris_leave_request_tbl", 
+			"leaveRequestDateFrom",
+			`leaveRequestStatus = 2 AND employeeID = ${sessionID}`);
 	// ----- END REUSABLE FUNCTIONS -----
 
 
@@ -1160,7 +1170,7 @@ $(document).ready(function () {
 			const feedback = $(this).attr("code") || getFormCode("LRF", dateToday(), id);
 			const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data     = getData(action, 1, "submit", feedback, id);
-
+			const leaveStatus = data[`tableData[leaveStatus]`] ;
 			if (revise) {
 				if (!isFromCancelledDocument) {
 					data[`tableData[reviseLeaveRequestID]`] = id;
@@ -1201,7 +1211,7 @@ $(document).ready(function () {
 					notificationData,
 					this,
 					data[`tableData[leaveRequestStatus]`] == 2 ? updateEmployeeLeave : false,
-					data[`tableData[leaveRequestStatus]`] == 2 ?  [employeeID, leaveID, leaveCredit,id] : [],
+					data[`tableData[leaveRequestStatus]`] == 2 ?  [employeeID, leaveID, leaveCredit,id,leaveStatus] : [],
 				);
 			
 			}, 300);
@@ -1274,23 +1284,25 @@ $(document).ready(function () {
 
 
 	// ----- UPDATE EMPLOYEE LEAVE -----
-	function updateEmployeeLeave(employeeID = 0, leaveID = 0, leaveCredit = 0,leaveRequestID = 0) {
+	function updateEmployeeLeave(employeeID = 0, leaveID = 0, leaveCredit = 0,leaveRequestID = 0,leaveStatus = 0) {
 		const data = { employeeID, leaveID, leaveCredit };
 
-		let getCreditStatus =  $("#leaveStatus option:selected").val();
+	
 
-		if(getCreditStatus === 1){
+		if(leaveStatus == 1){
 			$.ajax({
 				method: "POST",
 				url: `leave_request/updateEmployeeLeave`,
 				data,
 				dataType: "json",
 				success: function(data) {}
+			}).done(function() {
+
 			})
 		}
+		generateProductionReport(employeeID,2,leaveRequestID);
 	
 
-		generateProductionReport(employeeID,2,leaveRequestID);
 	}
 	// ----- END UPDATE EMPLOYEE LEAVE -----
 
@@ -1310,6 +1322,7 @@ $(document).ready(function () {
 			let employeeID      = tableData[0].employeeID;
 			let leaveID         = tableData[0].leaveID;
 			let leaveCredit     = tableData[0].leaveRequestNumberOfDate;
+			let leaveStatus     = tableData[0].leaveStatus;
 
 			let data = getData("update", 2, "approve", feedback, id);
 			data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 2);
@@ -1356,7 +1369,7 @@ $(document).ready(function () {
 					notificationData,
 					this,
 					status == 2 ? updateEmployeeLeave : false,
-					status == 2 ? [employeeID, leaveID, leaveCredit,id] : []
+					status == 2 ? [employeeID, leaveID, leaveCredit,id,leaveStatus] : []
 				);
 				// updateEmployeeLeave(employeeID, leaveID, leaveCredit);
 			}, 300);
@@ -1369,11 +1382,12 @@ $(document).ready(function () {
 
 		let getDateRange = getTableData("hris_leave_request_tbl","*",`leaveRequestID =${leaveRequestID}`);
 
-		let extractDate = getDateRange[0].leaveRequestDate.split("-");
-		let getDateFrom = moment(extractDate[0]).format("YYYY-MM-DD");
-		let getDateTo = moment(extractDate[1]).format("YYYY-MM-DD");
+		let requestDate = getDateRange[0].leaveRequestDate;
+		let leaveRequstCreatedAt = getDateRange[0].createdAt;
+		let getDateFrom = moment(requestDate).format("YYYY-MM-DD");
+		let getDateTo = moment(requestDate).format("YYYY-MM-DD");
 
-		let leaveRequestCode = getDateRange[0].leaveRequestCode;
+		let leaveRequestCode = getFormCode("LRF", leaveRequstCreatedAt, leaveRequestID);
 		let paidStatus = getDateRange[0].leaveStatus;
 		let leaveType = getDateRange[0].leaveID;
 		let workType = getDateRange[0].leaveWorkingDay;
@@ -1552,92 +1566,112 @@ $(document).ready(function () {
 		return html;
 	}
 	// ----- END APPROVER STATUS -----
+
+	function getLeaveOptions(leaveID  = 0) {
+		let getLeave = getTableData("hris_leave_tbl", "*", "leaveStatus = 1");
+		let leaveOptions = `<option selected value="0" disabled>Select Leave Type</option>`;
+		getLeave.map(item => {
+			leaveOptions += `<option value="${item.leaveID}" ${item.leaveID == leaveID && "selected"}>${item.leaveName}</option>`;
+		})
+		return leaveOptions;
+	}
+	
+	function leaveRequestDateRange(iStartDate = new Date, iEndDate = new Date, employeeSchedule, holidayData){
+		$("#leaveRequestDate").attr("start", moment(iStartDate).format("YYYY-MM-DD"));
+		$("#leaveRequestDate").attr("end", moment(iEndDate).format("YYYY-MM-DD"));
+		// console.log(iStartDate);
+	
+		$('#leaveRequestDate').daterangepicker({
+			singleDatePicker: true,
+			"showDropdowns": true,
+			// minDate: moment(),
+			minDate: moment().subtract(7, "days"),
+			startDate: moment(iStartDate),
+			endDate:   moment(iEndDate),
+			autoApply: true,
+			locale: {
+			  format: 'MMMM DD, YYYY'
+			},
+			isInvalidDate: function(date) {
+						let optionDay  = moment(date).day();
+	
+						let isActive = '1';
+						employeeSchedule.map(schedule => {
+								 if (optionDay == 0) isActive = schedule.sunday ?? '1';
+							else if (optionDay == 1) isActive = schedule.monday ?? '1';
+							else if (optionDay == 2) isActive = schedule.tuesday ?? '1';
+							else if (optionDay == 3) isActive = schedule.wednesday ?? '1';
+							else if (optionDay == 4) isActive = schedule.thursday ?? '1';
+							else if (optionDay == 5) isActive = schedule.friday ?? '1';
+							else if (optionDay == 6) isActive = schedule.saturday ?? '1';
+						});
+	
+						let optionDate = moment(date).format("YYYY-MM-DD");
+						return holidayData.includes(optionDate) || isActive == '0';
+					},
+			isInvalidDate: function(date) {
+				let listDate =[];
+	
+				getOvertimeDateList.map((overtime)=>{
+					let {overtimeRequestDate} = overtime;
+	
+					listDate.push(overtimeRequestDate);		
+				});
+
+				getApproveLeave.map((leave)=>{
+					let {leaveRequestDateFrom} = leave;
+
+					listDate.push(leaveRequestDateFrom);		
+				});
+	
+				if (listDate.includes(date.format('YYYY-MM-DD')) && date.format('YYYY-MM-DD') != iStartDate) {
+					return true; 
+				}
+			},
+		}, function(start, end) {
+			$("#leaveRequestDate").attr("start", moment(start).format("YYYY-MM-DD"));
+			$("#leaveRequestDate").attr("end", moment(end).format("YYYY-MM-DD"));
+		});
+	}
+	
+	$(document).on("change","#leaveRequestDate", function(){
+		let thisValue           = $(this).val();
+		let splitingValue       = thisValue.split("-");
+		let fromDate            = new Date(splitingValue[0]); 	
+		let toDate              = new Date(splitingValue[1]);
+		let numberOfDays        =  1;
+		var leaveWorkingDay 	= $("#leaveWorkingDay option:selected").val() || 0;
+		var leaveType 	= $("#leaveID option:selected").val() || 0;
+		var remaining_of_days   = parseFloat($("#leaveRequestRemainingLeave").val()) || 0;
+		var computeNumOfDays = 0;
+	
+		if(leaveWorkingDay === "0"){
+			let countDeductDays  = parseFloat(numberOfDays * .5);
+			computeNumOfDays = parseFloat(numberOfDays) - countDeductDays;
+	
+		}else{
+			computeNumOfDays = parseFloat(numberOfDays);
+	
+		}
+	
+		// console.log(computeNumOfDays)
+		$("#leaveRequestNumberOfDate").val(computeNumOfDays);
+		$("#leaveRequestNumberOfDate").attr("numberOfDays",computeNumOfDays);
+	
+	if(leaveType !=0 ){
+		if(numberOfDays > remaining_of_days){
+			$("#leaveRequestNumberOfDate").addClass("is-invalid");
+			$("#invalid-leaveRequestNumberOfDate").addClass("is-invalid");
+			$("#invalid-leaveRequestNumberOfDate").text("Not enough number of leave!");
+		}else{
+			$("#leaveRequestNumberOfDate").removeClass("is-invalid");
+			$("#invalid-leaveRequestNumberOfDate").removeClass("is-invalid");
+			$("#invalid-leaveRequestNumberOfDate").text("");
+		}
+	}
+		
+	});
 	
 });
 
 
-function getLeaveOptions(leaveID  = 0) {
-    let getLeave = getTableData("hris_leave_tbl", "*", "leaveStatus = 1");
-    let leaveOptions = `<option selected value="0" disabled>Select Leave Type</option>`;
-    getLeave.map(item => {
-        leaveOptions += `<option value="${item.leaveID}" ${item.leaveID == leaveID && "selected"}>${item.leaveName}</option>`;
-    })
-    return leaveOptions;
-}
-
-function leaveRequestDateRange(iStartDate = new Date, iEndDate = new Date, employeeSchedule, holidayData){
-	$("#leaveRequestDate").attr("start", moment(iStartDate).format("YYYY-MM-DD"));
-	$("#leaveRequestDate").attr("end", moment(iEndDate).format("YYYY-MM-DD"));
-	// console.log(iStartDate);
-
-    $('#leaveRequestDate').daterangepicker({
-		singleDatePicker: true,
-        "showDropdowns": true,
-		// minDate: moment(),
-		minDate: moment().subtract(7, "days"),
-        startDate: moment(iStartDate),
-        endDate:   moment(iEndDate),
-        autoApply: true,
-        locale: {
-          format: 'MMMM DD, YYYY'
-        },
-        isInvalidDate: function(date) {
-					let optionDay  = moment(date).day();
-
-					let isActive = '1';
-					employeeSchedule.map(schedule => {
-							 if (optionDay == 0) isActive = schedule.sunday ?? '1';
-						else if (optionDay == 1) isActive = schedule.monday ?? '1';
-						else if (optionDay == 2) isActive = schedule.tuesday ?? '1';
-						else if (optionDay == 3) isActive = schedule.wednesday ?? '1';
-						else if (optionDay == 4) isActive = schedule.thursday ?? '1';
-						else if (optionDay == 5) isActive = schedule.friday ?? '1';
-						else if (optionDay == 6) isActive = schedule.saturday ?? '1';
-					});
-
-					let optionDate = moment(date).format("YYYY-MM-DD");
-					return holidayData.includes(optionDate) || isActive == '0';
-				},
-    }, function(start, end) {
-		$("#leaveRequestDate").attr("start", moment(start).format("YYYY-MM-DD"));
-		$("#leaveRequestDate").attr("end", moment(end).format("YYYY-MM-DD"));
-	});
-}
-
-$(document).on("change","#leaveRequestDate", function(){
-    let thisValue           = $(this).val();
-    let splitingValue       = thisValue.split("-");
-    let fromDate            = new Date(splitingValue[0]); 	
-    let toDate              = new Date(splitingValue[1]);
-    let numberOfDays        =  1;
-	var leaveWorkingDay 	= $("#leaveWorkingDay option:selected").val() || 0;
-	var leaveType 	= $("#leaveID option:selected").val() || 0;
-    var remaining_of_days   = parseFloat($("#leaveRequestRemainingLeave").val()) || 0;
-	var computeNumOfDays = 0;
-
-	if(leaveWorkingDay === "0"){
-		let countDeductDays  = parseFloat(numberOfDays * .5);
-		computeNumOfDays = parseFloat(numberOfDays) - countDeductDays;
-
-	}else{
-		computeNumOfDays = parseFloat(numberOfDays);
-
-	}
-
-	// console.log(computeNumOfDays)
-    $("#leaveRequestNumberOfDate").val(computeNumOfDays);
-    $("#leaveRequestNumberOfDate").attr("numberOfDays",computeNumOfDays);
-
-if(leaveType !=0 ){
-	if(numberOfDays > remaining_of_days){
-        $("#leaveRequestNumberOfDate").addClass("is-invalid");
-        $("#invalid-leaveRequestNumberOfDate").addClass("is-invalid");
-        $("#invalid-leaveRequestNumberOfDate").text("Not enough number of leave!");
-    }else{
-        $("#leaveRequestNumberOfDate").removeClass("is-invalid");
-        $("#invalid-leaveRequestNumberOfDate").removeClass("is-invalid");
-        $("#invalid-leaveRequestNumberOfDate").text("");
-    }
-}
-    
-});

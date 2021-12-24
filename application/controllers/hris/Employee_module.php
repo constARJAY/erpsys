@@ -415,7 +415,7 @@ class Employee_module extends CI_Controller {
                 $saveAccessibility = $this->employeemodule->saveAccessibility($accessData, $action, $employeeID);
             }
 
-            if($employeeStatus == 0){
+            if($employeeStatus == 7){
 
                 $BackPayData = [
                     "employeeID"                 => $sessionID,
