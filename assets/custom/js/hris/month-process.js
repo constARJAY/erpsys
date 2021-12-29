@@ -212,13 +212,13 @@ function initDataTables() {
             info: false,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 10 },
-                { targets: 1,  width: 50 },
-                { targets: 2,  width: 200 },
+               
+                { targets: 0,  width: 50 },
+                { targets: 1,  width: 200 },
+                { targets: 2,  width: 150 },
                 { targets: 3,  width: 150 },
                 { targets: 4,  width: 150 },
-                { targets: 5,  width: 150 },
-                
+                { targets: 5,  width: 10 },
 
             ],
         });
@@ -235,12 +235,13 @@ function initDataTables() {
             scrollCollapse: true,
             sorting: false,
             columnDefs: [
-                { targets: 0,  width: 10 },
-                { targets: 1,  width: 50 },
-                { targets: 2,  width: 200 },
+               
+                { targets: 0,  width: 50 },
+                { targets: 1,  width: 200 },
+                { targets: 2,  width: 150 },
                 { targets: 3,  width: 150 },
                 { targets: 4,  width: 150 },
-                { targets: 5,  width: 150 },
+                { targets: 5,  width: 10 },
                 
               
     
@@ -375,7 +376,7 @@ function forApprovalContent() {
                 ${getStatusStyle(monthStatus)}
             </td>
             <td class="text-center">
-            ${getStatusStyle(monthReleaseStatus,false,true)}
+            ${ monthReleaseStatus == 0 && monthStatus == 2 ? `<span class="badge badge-warning w-100">For Releasing</span>` : getStatusStyle(monthReleaseStatus,false,true)} 
         </td>
             <td>${remarks}</td>
         </tr>`;
@@ -472,7 +473,7 @@ function myFormsContent() {
                 ${getStatusStyle(monthStatus)}
             </td>
             <td class="text-center">
-            ${getStatusStyle(monthReleaseStatus,false,true)}
+            ${ monthReleaseStatus == 0 && monthStatus == 2 ? `<span class="badge badge-warning w-100">For Releasing</span>` : getStatusStyle(monthReleaseStatus,false,true)} 
         </td>
             <td>${remarks}</td>
         </tr>`;
@@ -701,7 +702,7 @@ function getSerialNumber(scope = {}, readOnly = false, monthID = 0) {
 		html = `
         <div class=" dropdown-item disabled" payrollID="${payrollID}" payrollCode="${payrollCode}" payrollItemID=${payrollItemID} submittedAt="${submittedAt}" grossPay="${netPay}"> 
             <small class=" p-1 mb-0">${payrollCode} : ${formatAmount(netPay,true)}</small>
-            <footer class="blockquote-footer">Date Submitted: ${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY") : " - "}</cite></footer>
+            <footer class="blockquote-footer">13th Month Pay Period: ${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY") : " - "}</cite></footer>
             <hr class="w-100">
         </div>`;
 	
@@ -810,7 +811,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                 if (scopeData.length > 0 && monthID != "") {
                 
                     grossPayListData += scopeData.map(scope => {
-                        totalGrossPayAmount += scope.grossPay || 0;
+                        totalGrossPayAmount += parseFloat(scope.grossPay) || 0;
                         return getSerialNumber(scope, readOnly,monthID,totalGrossPayAmount);
                     }).join("");
                 }
@@ -837,7 +838,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                                 </div>`;
 
             if( monthTotalPayAmount =="" || monthTotalPayAmount ==0){
-                monthTotalPayAmount =parseFloat(totalGrossPayAmount /(numOfMonths * 2)) || 0;
+                monthTotalPayAmount =(parseFloat(totalGrossPayAmount) || 0 /( parseFloat(numOfMonths) || 0 * 2)) || 0;
                 // monthTotalPayAmount = 100;
             }
             
@@ -860,11 +861,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
 
               
                 html +=` <tr class="text-center itemTableRow" monthID="${monthID}">
-                <td>
-                <div>
-                  ${statusRowBadge}
-                </div>
-              </td> 
+               
                 <td> <div name="monthemployeeID">${employeeCode || "-"}</div> </td>
                 <td class="text-left">
                     <div>${fullname || "-"}</div>
@@ -882,7 +879,11 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                     </div>
                 </td>
                 <td class="text-right" name="monthTotalPayAmount">${formatAmount(monthTotalPayAmount || 0,true)}</td> 
-              
+                <td>
+                    <div>
+                    ${statusRowBadge}
+                    </div>
+                </td> 
             </tr>`;
 
                 
@@ -890,12 +891,8 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
             } else {
    
         html +=` <tr class="text-center itemTableRow" monthID="${monthID}" employeeID="${employeeID}">
-                    <td class="text-center">
-                        <div class="action">
-                            <input type="checkbox" class="checkboxrow monthHoldStatus" name="monthHoldStatus" ${ monthHoldStatus == 0 ? "checked" : ""}>
-                        </div>
-                    </td> 
-                    <td> <div name="monthemployeeID">${employeeCode || "-"}</div> </td>3
+                   
+                    <td> <div name="monthemployeeID">${employeeCode || "-"}</div> </td>
 
                     <td class="text-left">
                         <div>${fullname || "-"}</div>
@@ -913,7 +910,11 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                         </div>
                     </td>
                     <td class="text-right" name="monthTotalPayAmount">${formatAmount(monthTotalPayAmount,true)}</td> 
-                    
+                    <td class="text-center">
+                        <div class="action">
+                            <input type="checkbox" class="checkboxrow monthHoldStatus" name="monthHoldStatus" ${ monthHoldStatus == 0 ? "checked" : ""}>
+                        </div>
+                    </td> 
                 </tr>`;
 
                 }
@@ -951,18 +952,19 @@ $(document).on("click","#generatePeriod",function(){
         if (result.isConfirmed) {
            
             $(".purchaseOrderItemsBody").html(preloader);
-            let getDateRangeVal = $("#setDatePeriod").val();
-            let split = getDateRangeVal.split("-");
+            let dateFrom = $("#setDateFrom").val();
+            let dateTo = $("#setDateTo").val();
+      
 
-            let getDateFrom = moment(split[0]).format("YYYY-MM-DD");
-            let getDateFromYear = moment(split[0]).format("YYYY");
-            let getDateFromMonth = moment(split[0]).format("MM");
-            let getDateFromDay = moment(split[0]).format("DD");
+            let getDateFrom = moment(dateFrom).format("YYYY-MM-DD");
+            let getDateFromYear = moment(dateFrom).format("YYYY");
+            let getDateFromMonth = moment(dateFrom).format("MM");
+            let getDateFromDay = moment(dateFrom).format("DD");
 
-            let getDateTo = moment(split[1]).format("YYYY-MM-DD");
-            let getDateToYear = moment(split[1]).format("YYYY");
-            let getDateToMonth = moment(split[1]).format("MM");
-            let getDateToDay = moment(split[1]).format("DD");
+            let getDateTo = moment(dateTo).endOf("month").format("YYYY-MM-DD");
+            let getDateToYear = moment(dateTo).format("YYYY");
+            let getDateToMonth = moment(dateTo).format("MM");
+            let getDateToDay = moment(dateTo).endOf("month").format("DD");
 
             let start = moment([getDateFromYear, getDateFromMonth, getDateFromDay]);
             let end = moment([getDateToYear, getDateToMonth, getDateToDay]);
@@ -970,7 +972,7 @@ $(document).on("click","#generatePeriod",function(){
 
             let generateData =  getItemsRow("", false,numOfMonths,getDateFrom,getDateTo);
 
-            $(".displayDateRange").text(getDateRangeVal);
+            $(".displayDateRange").text(moment(dateFrom).format("MMMM YYYY") +" - "+moment(dateTo).endOf("month").format("MMMM YYYY"));
             
             setTimeout(() => {
                 $(".purchaseOrderItemsBody").html(generateData); 
@@ -1008,24 +1010,24 @@ $(document).on("click","#generatePeriod",function(){
 
 
 
-    function monthProcessDateRange(disabledDays){
-        $('#setDatePeriod').daterangepicker({
-            "showDropdowns": true,
-            autoApply: true,
+    // function monthProcessDateRange(disabledDays){
+    //     $('#setDateFrom').daterangepicker({
+    //         "showDropdowns": true,
+    //         autoApply: true,
 
-            isInvalidDate: function(date) {
-                //getDate() returns the day (0-31)
-                if (moment(date).format("MMMM/DD/YYYY") == LastDayOfMonth(moment(date).format("YYYY"),moment(date).format("MMMM")) || moment(date).format("MMMM/DD/YYYY") == FirstDayOfMonth(moment(date).format("YYYY"),moment(date).format("MMMM"))) {
-                    return false;
-                }
-                return true;
-            },
+    //         isInvalidDate: function(date) {
+    //             //getDate() returns the day (0-31)
+    //             if (moment(date).format("MMMM/DD/YYYY") == LastDayOfMonth(moment(date).format("YYYY"),moment(date).format("MMMM")) || moment(date).format("MMMM/DD/YYYY") == FirstDayOfMonth(moment(date).format("YYYY"),moment(date).format("MMMM"))) {
+    //                 return false;
+    //             }
+    //             return true;
+    //         },
 
-            locale: {
-                format: 'MMMM DD, YYYY'
-              },
-        });
-    }
+    //         locale: {
+    //             format: 'MMMM DD, YYYY'
+    //           },
+    //     });
+    // }
     
     
     //  ----- DATE RANGE PERIOD ----//
@@ -1092,7 +1094,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
 	let checkboxHoldStatus = !disabled ? `<th class="text-center"><div class="action">
 					<input type="checkbox" class="checkboxall" project="true"> Hold
-				</div></th>` : `<th>Hold</th>`;
+				</div></th>` : `<th>Status</th>`;
 
     // let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
 
@@ -1230,21 +1232,36 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                 <hr class="pb-1">
 
                 <div class="row">
-                    <div class="${!disabled ? `col-md-9 col-sm-12` : `col-md-12 col-sm-12`}">
+                    <div class="${!disabled ? `col-md-4 col-sm-12` : `col-md-6 col-sm-6`}">
                         <div class="form-group">
-                            <label>Date Period:  ${!disabled ? "<code>*</code>" : ""}</label>
-                            <input type="button" 
-                            name="setDatePeriod" 
-                            id="setDatePeriod" 
-                            class="form-control daterange validate" 
+                            <label>Date from:  ${!disabled ? "<code>*</code>" : ""}</label>
+                            <input type="month" 
+                            name="setDateFrom" 
+                            id="setDateFrom" 
+                            class="form-control  validate" 
                             required
                             
                             ${disabled}>
-                            <div class="d-block invalid-feedback" id="invalid-setDatePeriod"></div>
+                            <div class="d-block invalid-feedback" id="invalid-setDateFrom"></div>
                         </div>
                     </div>
 
-                    ${!disabled ? `<div class="col-md-3 col-sm-12 text-left align-self-end">
+                    <div class="${!disabled ? `col-md-4 col-sm-12` : `col-md-6 col-sm-6`}">
+
+                        <div class="form-group">
+                            <label>Date To:  ${!disabled ? "<code>*</code>" : ""}</label>
+                            <input type="month" 
+                            name="setDateTo" 
+                            id="setDateTo" 
+                            class="form-control  validate" 
+                            required
+                            
+                            ${disabled}>
+                            <div class="d-block invalid-feedback" id="invalid-setDateTo"></div>
+                        </div>
+                    </div>
+
+                    ${!disabled ? `<div class="col-md-4 col-sm-12 text-left align-self-end">
                     <div class="form-group">
                         <button class="btn btn-primary w-100 py-2" 
                         id="generatePeriod"><i class="fas fa-cloud-upload-alt"></i> Generate Date Period</button>
@@ -1257,20 +1274,21 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
                 <div class"card">
                     <div class="card-header bg-primary text-white text-center">
-                        <h6 class="font-weight-bold displayDateRange">${moment(monthDateStart).format("MMMM DD, YYYY")+" - "+ moment(monthDateEnd).format("MMMM DD, YYYY")}</h6>
+                        <h6 class="font-weight-bold displayDateRange">${moment(monthDateStart).format("MMMM YYYY")+" - "+ moment(monthDateEnd).format("MMMM YYYY")}</h6>
                     </div>
 
                     <div class="card-body">
                     <table class="table table-striped" id="${tableInventoryReceivingItems}">
                     <thead>
                         <tr style="white-space: nowrap">
-                            ${checkboxHoldStatus}
+                            
                             <th>Employee Code</th>
                             <th>Employee Name</th>
                             <th>Basic Salary</th>
                             <th>Gross Pay</th>
-                            <th>Total 13th Month</th>
-                           
+                            <th>Total 13th Month <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="13th MONTH COMPUTATION:
+                                                                                                                                                    13th Month   =  Every CutOff(Salary Earned for the month - Late - Absent(LWOP)) / No. of months for date period. "></i></th>
+                            ${checkboxHoldStatus}
                         </tr>
                     </thead>
                     <tbody class="purchaseOrderItemsBody">
@@ -1298,10 +1316,11 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
         $("#page_content").html(html);
         initDataTables();
         initAll();
-        monthProcessDateRange();
-        monthDateStart ? $('#setDatePeriod').data('daterangepicker').setStartDate( moment(monthDateStart).format("MMMM DD, YYYY")) : '';
-        monthDateEnd ? $('#setDatePeriod').data('daterangepicker').setEndDate( moment(monthDateEnd).format("MMMM DD, YYYY")) : '';
-        // monthDateStart && monthDateEnd ?  $('#setDatePeriod').daterangepicker({ startDate: moment(monthDateStart).format("MM/DD/YYYY"), endDate: moment(monthDateEnd).format("MM/DD/YY") }): ""; 
+        // monthProcessDateRange();
+        $('[data-toggle="tooltip"]').tooltip();
+        monthDateStart ? $('#setDateFrom').val( moment(monthDateStart).format("YYYY-MM")) : '';
+        monthDateEnd ? $('#setDateTo').val( moment(monthDateEnd).format("YYYY-MM")) : '';
+        // monthDateStart && monthDateEnd ?  $('#setDateFrom').daterangepicker({ startDate: moment(monthDateStart).format("MM/DD/YYYY"), endDate: moment(monthDateEnd).format("MM/DD/YY") }): ""; 
         return html;
     }, 300);
 }
@@ -1393,11 +1412,12 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
         
         data["monthDescription"]  = $("[name=monthDescription]").val()?.trim() || null;
 
-        let getDateRangeVal = $("#setDatePeriod").val();
-        let split = getDateRangeVal.split("-");
+        let dateFrom = $("#setDateFrom").val();
+        let dateTo = $("#setDateTo").val();
+       
     
-        let getDateFrom = moment(split[0]).format("YYYY-MM-DD");
-        let getDateTo = moment(split[1]).format("YYYY-MM-DD");
+        let getDateFrom = moment(dateFrom).format("YYYY-MM-DD");
+        let getDateTo = moment(dateTo).endOf("month").format("YYYY-MM-DD");
 
         data["monthDateStart"]  = getDateFrom || null;
         data["monthDateEnd"]  = getDateTo || null;

@@ -623,7 +623,7 @@ function myFormsContent() {
             <div class="body">
                 <div class="icon"><i class="fas fa-book-open"></i> </div>
                 <div class="content">
-                    <div class="text mb-2 text-uppercase">FOR APPROVAL PRODUCTION REPORT</div>
+                    <div class="text mb-2 mr-4 text-uppercase">FOR APPROVAL PRODUCTION REPORT</div>
                     <h4 class="number mb-0">${countPendingReport[0].pendingProduction || 0}</h4>
                 </div>
             </div>
@@ -634,7 +634,7 @@ function myFormsContent() {
             <div class="body">
                 <div class="icon"><i class="fas fa-user-clock"></i> </div>
                 <div class="content">
-                    <div class="text mb-2 text-uppercase">FOR APPROVAL LEAVE REQUEST</div>
+                    <div class="text mb-2 mr-4 text-uppercase">FOR APPROVAL LEAVE REQUEST</div>
                     <h4 class="number mb-0">${countPendingLeave[0].pendingleaves || 0}</h4>
                 </div>
             </div>
@@ -645,7 +645,7 @@ function myFormsContent() {
             <div class="body">
                 <div class="icon"><i class="fas fa-stopwatch"></i> </div>
                 <div class="content">
-                    <div class="text mb-2 text-uppercase">FOR APPROVAL OVERTIME REQUEST</div>
+                    <div class="text mb-2 mr-4 text-uppercase">FOR APPROVAL OVERTIME REQUEST</div>
                     <h4 class="number mb-0">${countPendingOvertmine[0].pendingovertime || 0}</h4>
                 </div>
             </div>
@@ -656,7 +656,7 @@ function myFormsContent() {
             <div class="body">
                 <div class="icon"><i class="fas fa-briefcase"></i> </div>
                 <div class="content">
-                    <div class="text mb-2 text-uppercase">Total Leave Credit</div>
+                    <div class="text mb-2 mr-4 text-uppercase">Total Leave Credit</div>
                     <h4 class="number mb-0">${formatAmount(countTotalLeave[0].totalleave)}</h4>
                 </div>
             </div>
@@ -818,65 +818,70 @@ function myFormsContent() {
 
 </div>`;
 
- html +=`<div class="row clearfix row-deck">
-            <div class="card-header w-100 bg-primary text-white text-left">
-                <h6 class="font-weight-bold">LEAVE BALANCE</h6>
-            </div>
-        </div>
+ html +=`<div class="row ">
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                <div class="card" style="box-shadow:none !important;"> 
+                    <div class="card-header w-100 bg-primary text-white text-left">
+                        <h6 class="font-weight-bold">LEAVE BALANCE</h6>
+                    </div>
+       
 
                 `;
             
-        html += `
-            <div class="table table-responsive ">
-                <table class="table table-bordered table-striped" id="">
-                    <thead>
-                        <tr style="white-space: nowrap">
-                            <th>No.</th>
-                            <th>Leave Type</th>
-                            <th>Accumulated</th>
-                            <th>Leave Count</th>
-                            <th>Total Leave</th>
-                        </tr>
-                    </thead>
-                    <tbody >`;
+            html += `
+                    <div class="table table-responsive ">
+                        <table class=" card-body table table-bordered table-striped" id="">
+                            <thead>
+                                <tr style="white-space: nowrap">
+                                    <th>No.</th>
+                                    <th>Leave Type</th>
+                                    <th>Accumulated</th>
+                                    <th>Leave Count</th>
+                                    <th>Total Leave</th>
+                                </tr>
+                            </thead>
+                            <tbody >`;
 
-                    let getLeaveBalance = [];
+                            let getLeaveBalance = [];
+                            
+                                getLeaveBalance = getTableData(
+                                    "hris_employee_leave_tbl", 
+                                    "", 
+                                    `employeeID = ${sessionID}`);
+                            
                     
-                        getLeaveBalance = getTableData(
-                            "hris_employee_leave_tbl", 
-                            "", 
-                            `employeeID = ${sessionID}`);
                     
+                            leaveTypeList.map((leave, index) => {
+                                let { leaveName, leaveID } = leave;
+                                let leaveCredit = 0, leaveAccumulated = 0;
             
-            
-                    leaveTypeList.map((leave, index) => {
-                        let { leaveName, leaveID } = leave;
-                        let leaveCredit = 0, leaveAccumulated = 0;
-    
-                            getLeaveBalance.filter(lv => lv.leaveID == leaveID).map(leave => {
-                                leaveCredit      = +leave.leaveCredit;
-                                leaveAccumulated = +leave.leaveAccumulated;
-                            });
-                        
+                                    getLeaveBalance.filter(lv => lv.leaveID == leaveID).map(leave => {
+                                        leaveCredit      = +leave.leaveCredit;
+                                        leaveAccumulated = +leave.leaveAccumulated;
+                                    });
+                                
 
-                        const max = 30;
-                        let displayLeaveAccumulated = leaveID != 1 ? "-" : leaveAccumulated.toFixed(2);
+                                const max = 30;
+                                let displayLeaveAccumulated = leaveID != 1 ? "-" : leaveAccumulated.toFixed(2);
 
-                    html += `
-                    <tr class="">
-                        <td>${index+1}</td>
-                        <td>${leaveName}</td>
-                        <td>${formatAmount(displayLeaveAccumulated > 0 ? displayLeaveAccumulated  : 0)}</td>
-                        <td>${formatAmount(leaveCredit > 0 ? leaveCredit : 0 )}</td>
-                        <td>${formatAmount((leaveCredit + leaveAccumulated) > 0 ? (leaveCredit + leaveAccumulated) : 0)}</td>
-      
-                    </tr>`;
-                });
+                            html += `
+                            <tr class="">
+                                <td>${index+1}</td>
+                                <td>${leaveName}</td>
+                                <td>${formatAmount(displayLeaveAccumulated > 0 ? displayLeaveAccumulated  : 0)}</td>
+                                <td>${formatAmount(leaveCredit > 0 ? leaveCredit : 0 )}</td>
+                                <td>${formatAmount((leaveCredit + leaveAccumulated) > 0 ? (leaveCredit + leaveAccumulated) : 0)}</td>
             
-                html += `
-                    </tbody>
-                </table>
+                            </tr>`;
+                        });
+                    
+                        html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+        </div>
             `;
 
 

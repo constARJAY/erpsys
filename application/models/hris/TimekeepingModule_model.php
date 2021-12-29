@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+date_default_timezone_set('Asia/Manila');
 
 class TimekeepingModule_model extends CI_Model {
 
@@ -18,6 +19,7 @@ class TimekeepingModule_model extends CI_Model {
             );
             foreach($period as $prd) {
                 $temp = [
+                    "month"  => $prd->format("M"),
                     "day"    => $prd->format("D"),
                     "date"   => $prd->format("Y-m-d"),
                     "number" => $prd->format("d")
@@ -57,7 +59,7 @@ class TimekeepingModule_model extends CI_Model {
 
             $sql = "SELECT * FROM hris_employee_list_tbl WHERE FIND_IN_SET(employeeID, '$idStr') AND scheduleID <> 0 AND employeeID <> 1";
         } else {
-            $sql = "SELECT * FROM hris_employee_list_tbl WHERE employeeStatus IN (1,2,5) AND scheduleID <> 0 AND employeeID <> 1";
+            $sql = "SELECT * FROM hris_employee_list_tbl WHERE employeeStatus IN (1,2,5,7) AND scheduleID <> 0 AND employeeID <> 1";
         }
 
         $query = $this->db->query($sql);
@@ -603,7 +605,7 @@ class TimekeepingModule_model extends CI_Model {
 
                     if (!in_array($date, $dateRange))
                     {
-                        $error = "Warning|There is a value ignored at line $row";
+                        $error = "Warning|Out of scope <b>$date</b> at line $row";
                         $data["errors"][] = $error;
                     }
                 }
@@ -885,18 +887,6 @@ class TimekeepingModule_model extends CI_Model {
                                         $leaveIn = $finalCheckIn;
                                     }
 
-                                    // $tempScheduleDuration = $scheduleDuration / 2;
-                                    // if ($checkDuration > $tempScheduleDuration)
-                                    // {
-                                    //     $basicHours = $tempScheduleDuration + $leaveDuration;
-                                    // }
-                                    // else
-                                    // {
-                                    //     $basicHours = $checkDuration + $leaveDuration;
-                                    // }
-                                    
-                                    // echo "$isMorningLeave | $finalCheckIn - $finalCheckOut = $basicHours | $leaveDuration<br><br>";
-                                    // $checkDuration = $basicHours;
                                     $basicHours = $checkDuration + $leaveDuration;
                                 }
                                 else // Whole Day
@@ -983,7 +973,7 @@ class TimekeepingModule_model extends CI_Model {
                                         }
                                         else
                                         {
-                                            $error = "Warning|There is a value ignored at line $row";
+                                            $error = "Warning|$empCode is on Rest Day <b>$date</b> at line $row";
                                             $data["errors"][] = $error;
                                         }
                                     }
@@ -1287,6 +1277,7 @@ class TimekeepingModule_model extends CI_Model {
                     'totalPay'               => $totalPay,
                     'createdBy'              => $sessionID,
                     'updatedBy'              => $sessionID,
+                    'createdAt'              => date('Y-m-d H:i:s')
                 ];
             }
         }
@@ -1468,6 +1459,7 @@ class TimekeepingModule_model extends CI_Model {
                     'netPay'                 => $netPay,
                     'createdBy'              => $sessionID,
                     'updatedBy'              => $sessionID,
+                    'createdAt'              => date('Y-m-d H:i:s')
                 ];
             }
 
@@ -1495,10 +1487,12 @@ class TimekeepingModule_model extends CI_Model {
                     'payrollStartDate' => $timekeepingData->timekeepingStartDate,
                     'payrollEndDate'   => $timekeepingData->timekeepingEndDate,
                     'cutOff'           => $timekeepingData->cutOff,
+                    'payOut'           => $timekeepingData->payOut,
                     'employeeID'       => 0,
                     'payrollStatus'    => 0,
                     'createdBy'        => $sessionID,
                     'updatedBy'        => $sessionID,
+                    'createdAt'        => date('Y-m-d H:i:s')
                 ];
                 $query = $this->db->insert("hris_payroll_tbl", $data);
                 $payrollID = $this->db->insert_id();

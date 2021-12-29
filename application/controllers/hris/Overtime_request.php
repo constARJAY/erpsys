@@ -141,7 +141,7 @@ class Overtime_request extends CI_Controller {
         // }
 
         // $leaveBadge ='<span class="badge badge-danger">LRF</span>';
-        $overtimeBadge ='<span class="badge badge-info">OTRF</span>';
+        $overtimeBadge ='<span class="badge badge-info">'.$overtimeRequestCode.'</span>';
        
         
 
@@ -254,11 +254,11 @@ class Overtime_request extends CI_Controller {
                     "timeStart"             =>  $setTimeIn,
                     "timeEnd"               =>  $setTimeOut,
                     "activityLocation"      =>  $getLocation,
-                    "activityClass"         =>  $getClass,
-                    "activityClient"        =>  $getClientID,
-                    "activityClientName"    =>  $getClientName,
+                    "activityClass"         =>  ($getClass =='Please select a category' ? 'N/A' : $getClass),
+                    "activityClient"        =>  $getClientID, 
+                    "activityClientName"    =>  ($getClientName=='Please select a client' ? 'N/A' : $getClientName),
                     "activityProject"       =>  $getProjectID,
-                    "activityProjectName"   =>  $getProjectName,
+                    "activityProjectName"   =>  ($getProjectName=='Please select a project' ? 'N/A' : $getProjectName),
                     "activityStatus"        =>  $getStatus,
                     "activityHours"         =>  $this->computeHours($setTimeIn,$setTimeOut,$setBreak),
                     "activityDescription"   =>  $overtimeDescription,

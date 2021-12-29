@@ -688,7 +688,7 @@ function getSerialNumber(scope = {}, readOnly = false, monthID = 0) {
 		html = `
         <div class=" dropdown-item disabled" payrollID="${payrollID}" payrollCode="${payrollCode}" payrollItemID=${payrollItemID} submittedAt="${submittedAt}" grossPay="${netPay}"> 
             <small class=" p-1 mb-0">${payrollCode} : ${formatAmount(netPay,true)}</small>
-            <footer class="blockquote-footer">Date Submitted: ${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY") : " - "}</cite></footer>
+            <footer class="blockquote-footer">13th Month Pay Period: ${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY") : " - "}</cite></footer>
             <hr class="w-100">
         </div>`;
 	
@@ -797,7 +797,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                 if (scopeData.length > 0 && monthID != "") {
                 
                     grossPayListData += scopeData.map(scope => {
-                        totalGrossPayAmount += scope.grossPay || 0;
+                        totalGrossPayAmount += parseFloat(scope.grossPay) || 0;
                         return getSerialNumber(scope, readOnly,monthID,totalGrossPayAmount);
                     }).join("");
                 }
@@ -824,7 +824,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                                 </div>`;
 
             if( monthTotalPayAmount =="" || monthTotalPayAmount ==0){
-                monthTotalPayAmount =parseFloat(totalGrossPayAmount /(numOfMonths * 2)) || 0;
+                monthTotalPayAmount =(parseFloat(totalGrossPayAmount) || 0 /(parseFloat(numOfMonths) || 0 * 2)) || 0;
                 // monthTotalPayAmount = 100;
             }
             
@@ -1209,7 +1209,8 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                             <th>Employee Name</th>
                             <th>Basic Salary</th>
                             <th>Gross Pay</th>
-                            <th>Total 13th Month</th>
+                            <th>Total 13th Month <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="13th MONTH COMPUTATION:
+                                                                                                                                                    13th Month   =  Every CutOff(Salary Earned for the month - Late - Absent(LWOP)) / No. of months for date period. "></i></th>
                             
                         </tr>
                     </thead>
@@ -1240,7 +1241,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
         initDataTables();
         initAll();
         monthProcessDateRange();
-      
+        $('[data-toggle="tooltip"]').tooltip();
         // monthDateStart && monthDateEnd ?  $('#setDatePeriod').daterangepicker({ startDate: moment(monthDateStart).format("MM/DD/YYYY"), endDate: moment(monthDateEnd).format("MM/DD/YY") }): ""; 
         return html;
     }, 300);

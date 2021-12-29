@@ -328,7 +328,7 @@ $(document).ready(function() {
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
 			"hpt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hpt.createdAt AS dateCreated",
 			`hpt.payrollStatus = 2`,
-			`FIELD(payrollStatus, 0, 1, 3, 2, 4, 5), COALESCE(hpt.submittedAt, hpt.createdAt)`
+			`FIELD(payrollStatus, 0, 1, 3, 2, 4, 5), payrollStartDate DESC, COALESCE(hpt.submittedAt, hpt.createdAt)`
 		);
 
 		let html = `

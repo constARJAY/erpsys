@@ -20,8 +20,10 @@ $(document).ready(function() {
             return `<span class="badge badge-outline-info" style="width: 100% !important">Retired</span>`;
         } else if (status == "5") {
             return `<span class="badge badge-outline-warning" style="width: 100% !important">Suspended</span>`;
-        } else {
+        } else if (status == "6") {
             return `<span class="badge badge-outline-danger" style="width: 100% !important">Terminated</span>`;
+        } else {
+            return `<span class="badge badge-info" style="width: 100% !important">Rendering</span>`;
         }
     }
     // ----- END GLOBAL VARIABLES -----
@@ -801,6 +803,7 @@ $(document).ready(function() {
             { id: 4, value: "Retired"      },
             { id: 5, value: "Suspended"    },
             { id: 6, value: "Terminated"   },
+            { id: 7, value: "Rendering"    },
             // 7 - NON-ORGANIC
         ]
         return statuses.map(status => {

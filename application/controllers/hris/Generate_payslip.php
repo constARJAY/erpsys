@@ -34,11 +34,12 @@ class Generate_payslip extends CI_Controller {
 
     public function printPaySlip()
     {
-        $payrollID = $this->input->post("payrollID");
-        $idStr     = $this->input->post("idStr");
-        $payStr    = $this->input->post("payrollStr");
+        $payrollID         = $this->input->post("payrollID");
+        $idStr             = $this->input->post("idStr");
+        $payStr            = $this->input->post("payrollStr");
+        $printedPayslipStr = $this->input->post("printedPayslipStr");
 
-        $updatePayrollItem = $this->generatepayslip->updatePayrollItems($payrollID, $payStr);
+        $updatePayrollItem = $this->generatepayslip->updatePayrollItems($payrollID, $payStr, $printedPayslipStr);
 
         $data = [
             'title'   => 'PRINT PAYSLIP',

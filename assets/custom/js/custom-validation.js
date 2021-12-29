@@ -52,6 +52,7 @@ const initAll = () => {
 	initQuantity();
 	initHours();
 	initPoints();
+	initPercentage();
 };
 // ----- END REINITIALIZE ALL FUNCTION -----
 
@@ -123,13 +124,12 @@ initInputmask();
 
 
 // ----- INITIALIZE AMOUNT FORMAT -----
-const initAmount = (element = null, displayPrefix = false) => {
-	let elem  = getElement(element, ".amount");
-	let minus = $(elem).attr('allow-minus') == "true";
+const initAmount = (element = null, displayPrefix = false,allowMinus = false) => {
+	let elem = getElement(element, ".amount");
 	$(elem).inputmask({
 		alias: "currency",
 		prefix: displayPrefix ? "₱ " : "",
-		allowMinus: minus,
+		allowMinus: allowMinus,
 		allowPlus:  false,
 	});
 };
@@ -146,6 +146,18 @@ const initAmountFuel = (element = null, displayPrefix = false) => {
 	});
 };
 initAmountFuel();
+// ----- END INITIALIZE AMOUNT FORMAT -----
+
+const initPercentage = (element = null, displayPrefix = false) => {
+	let elem = getElement(element, ".input-percentage");
+	$(elem).inputmask({
+		alias: "currency",
+		prefix: displayPrefix ? " " : "",
+		allowMinus: false,
+		allowPlus:  false,
+	});
+};
+initPercentage();
 // ----- END INITIALIZE AMOUNT FORMAT -----
 
 
@@ -569,6 +581,59 @@ const checkFuel = (elementID, invalidFeedback, value) => {
 };
 // ----- END VALIDATE FUEL CONSUMPTION -----
 
+// ----- VALIDATE PERCENTAGE -----
+const checkPercentage = (elementID, invalidFeedback, value) => {
+	const validated = $(elementID).hasClass("validated");
+	const min = $(elementID).attr("min") ? +$(elementID).attr("min") : false;
+	const max = $(elementID).attr("max") ? +$(elementID).attr("max") : false;
+	let currencyValue = +value.split(",").join("");
+
+	if (typeof min != "number" && typeof max != "number") {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	} else if (typeof min != "number" && typeof max == "number") {
+		if (currencyValue > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input  value less than ${formatAmount(max)}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max != "number") {
+		if (currencyValue < min) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input value greater than ${formatAmount(min)}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max == "number") {
+		if (currencyValue >= min && currencyValue > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input value less than ${formatAmount(max)}`);
+		} else if (currencyValue >= min && currencyValue <= max) {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		} else if (currencyValue < min && currencyValue <= max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input value greater than ${formatAmount(min - 0.01)}`);
+		}
+	} else {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	}
+};
+// ----- END VALIDATE PERCENTAGE -----
 
 // ----- VALIDATE QUANTITY -----
 const checkQuantity = (elementID, invalidFeedback, value) => {
@@ -908,7 +973,7 @@ const checkExists = (elementID, invalidFeedback) => {
 			inputs["multiple"] = multiple;
 			uniqueData.map((data) => {
 				if (keys.length > 0) {
-					if ((data?.id != uniqueID && data["multiple"]?.id != uniqueID) && elementID && invalidFeedback) {
+					if (data["multiple"].id !== uniqueID && elementID && invalidFeedback) {
 						let countKeys = keys.length;
 						let countTemp = 0;
 						keys.map((item, index) => {
@@ -1049,6 +1114,7 @@ const validateInput = (elementID) => {
 	$(elementID).addClass("validated");
 	let fuelConsumption = $(elementID).hasClass("input-fuel");
 	let currency = $(elementID).hasClass("amount");
+	let percentage = $(elementID).hasClass("input-percentage");
 	let number   = $(elementID).hasClass("number");
 	let quantity = $(elementID).hasClass("input-quantity");
 	let numberLength = $(elementID).hasClass("input-numberLength");
@@ -1188,6 +1254,7 @@ const validateInput = (elementID) => {
 					number && checkNumber(elementID, invalidFeedback, value);
 					currency && checkAmount(elementID, invalidFeedback, value);
 					fuelConsumption && checkFuel(elementID, invalidFeedback, value);
+					percentage && checkPercentage(elementID, invalidFeedback, value);
 					quantity && checkQuantity(elementID, invalidFeedback, value);
 					numberLength && checkNumberLength(elementID, invalidFeedback, value);
 					hours && checkHours(elementID, invalidFeedback, value);
@@ -1202,6 +1269,7 @@ const validateInput = (elementID) => {
 				number && checkNumber(elementID, invalidFeedback, value);
 				currency && checkAmount(elementID, invalidFeedback, value);
 				fuelConsumption && checkFuel(elementID, invalidFeedback, value);
+				percentage && checkPercentage(elementID, invalidFeedback, value);
 				quantity && checkQuantity(elementID, invalidFeedback, value);
 				numberLength && checkNumberLength(elementID, invalidFeedback, value);
 				hours && checkHours(elementID, invalidFeedback, value);
@@ -1401,13 +1469,6 @@ $(function () {
 		}
 	});
 	// ----- END CHECK IF THE INPUTS IS VALID OR INVALID BASED ON THE LENGTH -----
-
-
-	// ----- PREVENT PASTE -----
-	$(document).on("paste", ".validate", function(e) {
-		e.preventDefault();
-	})
-	// ----- END PREVENT PASTE -----
 
 
 	// ----- EVERY TIME THE SELECT CHANGES -----

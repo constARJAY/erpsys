@@ -463,7 +463,7 @@ $(document).ready(function() {
 			`hpat.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hpat.createdAt AS dateCreated,
 			payrollStartDate, payrollEndDate`,
 			`hpat.employeeID = 0 OR hpat.employeeID IS NULL OR hpat.employeeID = ${sessionID}`,
-			`FIELD(payrollAdjustmentStatus, 0, 1, 3, 2, 4, 5), COALESCE(hpat.submittedAt, hpat.createdAt)`
+			`FIELD(payrollAdjustmentStatus, 0, 1, 3, 2, 4, 5), hpt.payrollStartDate DESC, COALESCE(hpat.submittedAt, hpat.createdAt)`
 		);
 
 		let html = `
@@ -556,7 +556,7 @@ $(document).ready(function() {
 			`hpat.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hpat.createdAt AS dateCreated,
 			payrollStartDate, payrollEndDate`,
 			`hpat.employeeID != ${sessionID} AND payrollAdjustmentStatus != 0 AND payrollAdjustmentStatus != 4`,
-			`FIELD(payrollAdjustmentStatus, 0, 1, 3, 2, 4, 5), COALESCE(hpat.submittedAt, hpat.createdAt)`
+			`FIELD(payrollAdjustmentStatus, 0, 1, 3, 2, 4, 5), hpt.payrollStartDate DESC, COALESCE(hpat.submittedAt, hpat.createdAt)`
 		);
 
 		let html = `

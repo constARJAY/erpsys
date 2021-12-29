@@ -55,7 +55,15 @@
 	<div class="container">
 		<div class="row clearfix row-deck mx-1">
             <div class="card col-12">
-                <div class="card-body" id="page_content"></div>
+                <div class="card-body" id="page_content">
+					<div class="loader w-100 p-5 text-center" id="preloader">
+						<div class="mt-3">
+							<i class="zmdi zmdi-rotate-right zmdi-hc-spin zmdi-hc-3x text-primary"></i>
+							<br>
+							<p class="text-primary">Please wait...</p>
+						</div>
+					</div>
+				</div>
             </div>
         </div>
 	</div>

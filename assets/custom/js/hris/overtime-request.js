@@ -46,7 +46,7 @@ $(document).ready(function () {
 	const getOvertimeDateList = getTableData(
 		"hris_overtime_request_tbl", 
 		"overtimeRequestDate",
-		`overtimeRequestDate = 2 AND employeeID = ${sessionID}`);
+		`overtimeRequestStatus = 2 AND employeeID = ${sessionID}`);
 
 	const projectList = getTableData(
 		"pms_project_list_tbl AS project LEFT JOIN pms_timeline_builder_tbl AS timeline ON timeline.projectID = project.projectListID", 
@@ -92,7 +92,7 @@ $(document).ready(function () {
 		
 
 		clientElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Client</option>`;
+			let html = `<option selected disabled>Please select a client</option>`;
 			// let tmpClientList = [clientList];
 			html += clientList.filter(client => !clientIDArr.includes(client.clientID) || client.clientID == clientIDArr[index]).map(client => {
 				return `
@@ -119,7 +119,7 @@ $(document).ready(function () {
 		}) 
 
 		projectElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Project</option>`;
+			let html = `<option selected disabled>Please select a project</option>`;
 			// let itemList = [...inventoryStorageList];
 			html += projectList.map(project => {
 				return `
@@ -142,7 +142,7 @@ $(document).ready(function () {
 			html = `
 		<option 
 			value       = "0"
-			${id == "0" && "selected"}>Select Client</option>`;
+			${id == "0" && "selected"}>Please select a client</option>`;
 		html += clientList.map(client => {
 
 			return `
@@ -159,7 +159,7 @@ $(document).ready(function () {
 	// ---- GET PROJECT LIST ----//
 	function getprojectList(id = null, display = true, clientID = null) {
 	
-		let html   = `<option selected disabled>Select Project</option>`;
+		let html   = `<option selected disabled>Please select a project</option>`;
 
 		let projectIDArr = []; // 0 IS THE DEFAULT VALUE
 		$(`[name=overtimeRequestProjectID]`).each(function(i, obj) {
@@ -779,7 +779,7 @@ $(document).ready(function () {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${overtimeRequestID && !isRevise ? getFormCode("LRF", createdAt, overtimeRequestID) : "---"}
+						${overtimeRequestID && !isRevise ? getFormCode("OTR", createdAt, overtimeRequestID) : "---"}
 					</h6>      
 				</div>
 			</div>
@@ -920,9 +920,9 @@ $(document).ready(function () {
 
 			<div class="col-md-2 col-sm-12">
                 <div class="form-group">
-                    <label>Class ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Category ${!disabled ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2" name="overtimeRequestClass" id="overtimeRequestClass"  required ${disabled} style="width:100%;">
-						<option disabled selected>Select Class</option>
+						<option disabled selected>Please select a category</option>
 						<option value="Billable" ${overtimeRequestClass == "Billable" ? "selected" : ""}>
 							Billable
 						</option>
@@ -1032,6 +1032,9 @@ $(document).ready(function () {
 				
 				overtimeRequestDateRange(moment());
 			}
+
+			(!overtimeRequestID || overtimeRequestDate == "0000-00-00") && $("#overtimeRequestDate").val("");
+			
 			return html;
 		}, 300);
 	}
@@ -1523,6 +1526,27 @@ $(document).ready(function () {
 	});
 	// ----- END SUBMIT DOCUMENT -----
 
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const id       = decryptString($(this).attr("overtimeRequestID"));
+		const feedback = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
+		const action   = "update";
+		const data     = getData(action, 5, "drop", feedback, id);
+
+		
+		formConfirmation(
+			"drop",
+			action,
+			"OVERTIME REQUEST",
+			"",
+			"form_overtime_request",
+			data,
+			true,
+			pageContent
+		);
+	})
+	// ----- END DROP DOCUMENT -----
+
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
@@ -1589,7 +1613,8 @@ $(document).ready(function () {
 
 
 		let getDate = moment(getDateRange[0].overtimeRequestDate).format("YYYY-MM-DD");
-		let overtimeRequestCode = getDateRange[0].overtimeRequestCode;
+		let overtimeRequestCreatedAt = getDateRange[0].createdAt;
+		let overtimeRequestCode = getFormCode("OTR", overtimeRequestCreatedAt, overtimeRequestID);
 		let timeIn = getDateRange[0].overtimeRequestTimeIn;
 		let timeOut = getDateRange[0].overtimeRequestTimeOut;
 		let breakDuration	= getDateRange[0].overtimeRequestBreak;

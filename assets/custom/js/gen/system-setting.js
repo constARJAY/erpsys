@@ -1,7 +1,14 @@
-let systemSettingData;
+let lastDate    =  31;
+let dateArray   =  [];
+
+for (let index = 1; index <= lastDate; index++) {
+    dateArray.push(index);
+}
+
+// let systemSettingData;
 let placing;
 $(document).ready(function(){
-    systemSettingData   = getTableData(`gen_system_setting_tbl`);
+    // systemSettingData   = getTableData(`gen_system_setting_tbl`);
     placing             = ["First", "Second","Third","Fourth"];
     pageContent();
 
@@ -64,7 +71,7 @@ $(document).ready(function(){
             data["whereFilter"]              =  "systemSettingID ="+systemSettingID;
             data["tableName"]                =  "gen_system_setting_tbl";
             data["feedback"]                 =  feedback;
-            sweetAlertConfirmation("update", feedback,"modal_content", null , data, true, pageContent);
+            thisAlertConfirmation("update", feedback,"modal_content", null , data, true);
         }
         
     });
@@ -87,16 +94,40 @@ $(document).ready(function(){
         }
         let condition = isFormEmpty("system_setting_form");
         if(!condition){ 
-            sweetAlertConfirmation("cancel", feedback,"modal_content");
+            thisAlertConfirmation("cancel", feedback,"modal_content");
         }else{
             $("#modal_content").modal("hide");
         }
         
     });
     
-    
+    $(document).on("keyup","[name=firstCutOffDateStart], [name=firstCutOffDateEnd] ",function(){
+        let remainingDate   = [];
+        let startCutoff     =  $("[name=firstCutOffDateStart]").val();
+        let endCutoff       =  $("[name=firstCutOffDateEnd]").val();
+
+        if(startCutoff && endCutoff){
+           dateArray.filter(x=> x > endCutoff).map(x=>{
+                remainingDate.push(x);
+           });
+           dateArray.filter(x=> x < startCutoff).map(x=>{
+                remainingDate.push(x);
+           });  
+           let start = remainingDate.shift();
+           let end   = remainingDate.pop();
+           $("[name=secondCutOffDateStart]").val(start);
+           $("[name=secondCutOffDateEnd]").val(end);
+
+           
+        }else{
+            $("[name=secondCutOffDateStart]").val("");
+            $("[name=secondCutOffDateEnd]").val("");
+        }
+        
+    });
 
     function getApprovalModal(isEdit = false){
+        let  systemSettingData   = getTableData(`gen_system_setting_tbl`);
         let {   minimumToApprove = "",
                 maximumToApprove = ""
             } = systemSettingData[0];
@@ -124,7 +155,9 @@ $(document).ready(function(){
     }
     
     function getCutOffModal(isEdit = false){
+        let  systemSettingData   = getTableData(`gen_system_setting_tbl`);
         let html = "";
+        let payrollTable = getTableData("hris_payroll_tbl","","payrollStatus = '2'");
         placing.map((value,index)=>{
             let startDate    = `${value.toLowerCase()}CutOffDateStart`;
             let endDate      = `${value.toLowerCase()}CutOffDateEnd`;
@@ -139,17 +172,19 @@ $(document).ready(function(){
 
                         <div class="col-md-6 col-sm-12">
                             <div class="form-group">
-                                <label for="${startDate}" >Start of Cutoff <code>*</code></label>
+                                <label for="${startDate}" >Start of Cutoff ${index == 1 ? "<code>*</code>" : ""} </label>
                                 <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${startDate}" id="${startDate}" 
-                                    data-allowcharacters="[0-9]" value="${systemSettingData[0][startDate] || "" }" ${index < 2 ? "required" : ""}>
+                                    ${payrollTable.length > 0 ? "disabled" : ""}
+                                    data-allowcharacters="[0-9]" value="${systemSettingData[0][startDate] || "" }" ${index < 2 ? "required" : ""} ${index == 1 ? "disabled" : ""}>
                                 <div class="invalid-feedback d-block" id="invalid-${startDate}"></div>
                             </div>
                         </div>
                         <div class="col-md-6 col-sm-12">
                             <div class="form-group">
-                                <label for="${endDate}" >End of Cutoff <code>*</code></label>
+                                <label for="${endDate}" >End of Cutoff ${index == 1 ? "<code>*</code>" : ""} </label>
                                 <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${endDate}" id="${endDate}" 
-                                    data-allowcharacters="[0-9]" value="${systemSettingData[0][endDate] || "" }" ${index < 2 ? "required" : ""}>
+                                    ${payrollTable.length > 0 ? "disabled" : ""}
+                                    data-allowcharacters="[0-9]" value="${systemSettingData[0][endDate] || "" }" ${index < 2 ? "required" : ""} ${index == 1 ? "disabled" : ""}>
                                 <div class="invalid-feedback d-block" id="invalid-${endDate}"></div>
                             </div>
                         </div>
@@ -157,7 +192,7 @@ $(document).ready(function(){
                             <div class="form-group">
                                 <label for="${payout}">Payout Date <code>*</code></label>
                                 <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${payout}" id="${payout}" 
-                                    data-allowcharacters="[0-9]" value="${systemSettingData[0][payout] || ""}" ${index < 2 ? "required" : ""} >
+                                    data-allowcharacters="[0-9]"  ${payrollTable.length > 0 ? "disabled" : ""} value="${systemSettingData[0][payout] || ""}" ${index < 2 ? "required" : ""} >
                                 <div class="invalid-feedback d-block" id="invalid-${payout}"></div>
                             </div>
                         </div>
@@ -168,7 +203,7 @@ $(document).ready(function(){
     }
     
     function getPettyCash(isEdit = false){
-
+        let  systemSettingData   = getTableData(`gen_system_setting_tbl`);
         let html = `
                     <div class="row"> 
                         <div class="col-md-12 col-sm-12">
@@ -208,7 +243,8 @@ $(document).ready(function(){
         return html;
     }
 
-    function pageContent(){
+    function pageContent(argument = false){
+        let  systemSettingData   = getTableData(`gen_system_setting_tbl`); 
         let tableData   = systemSettingData[0];
         let approvalRow = `
                             <div class="col-lg-12 col-12">
@@ -279,6 +315,131 @@ $(document).ready(function(){
     
         return `${number}${extension}`;
     }
+
+
+
+            // ----- SWEET ALERT CONFIRMATION -----
+const thisAlertConfirmation = (
+    condition   = "add",            // add|update|cancel
+    moduleName  = "Another Data",   // Title
+    modalID     = null,             // Modal ID 
+    containerID = null,             // ContainerID - if not modal
+    data        = null,             // data - object or formData
+    isObject    = true,             // if the data is object or not
+) => {
+
+if (checkIfUpdateNotAllowed()) {
+    const isUpdate = $(`#${modalID}`).find(".page-title").text().trim().toLowerCase().indexOf("edit");
+    if (isUpdate != -1) {
+        return false;
+    } 
+}
+
+$("#"+modalID).modal("hide");
+
+let lowerCase 	= moduleName.toLowerCase();
+let upperCase	= moduleName.toUpperCase();
+let capitalCase = moduleName;
+let title 		      =  "";
+let text 		      =  ""
+let success_title     =  "";
+let swalImg           =  "";
+let argument          =  "";
+switch(condition) {
+    case "add":
+        title 					+=  "ADD " + upperCase;
+        text 					+=  "Are you sure that you want to add a new "+ lowerCase +" to the system?"
+        success_title        	+=  "Add new "+capitalCase + " successfully saved!";
+        swalImg                 +=  `${base_url}assets/modal/add.svg`;
+        break;
+    case "update":
+        title 					+=  "UPDATE " + upperCase;
+        text 					+=  "Are you sure that you want to update the "+ lowerCase +" to the system?"
+        success_title        	+=  "Update "+ capitalCase + " successfully saved!";
+        swalImg                 +=  `${base_url}assets/modal/update.svg`;
+        break;
+    default:
+        title 					+=  "DISCARD CHANGES";
+        text 					+=  "Are you sure that you want to cancel this process?"
+        success_title        	+=  "Process successfully discarded!";
+        swalImg                 +=  `${base_url}assets/modal/cancel.svg`;
+    }
+switch (moduleName) {
+        case "Cutoff":
+            argument = "cutoff";
+            break;
+        case "Petty Cash":
+            argument = "pettycash";
+            break;
+        case "Client Fund":
+            argument = "clientfund";
+            break;    
+        default:
+            argument = "approval";
+            break;
+    }
+    Swal.fire({
+        title, 
+        text,
+        imageUrl: swalImg,
+        imageWidth: 200,
+        imageHeight: 200,
+        imageAlt: 'Custom image',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#1a1a1a',
+        cancelButtonText: 'No',
+        confirmButtonText: 'Yes',
+        allowOutsideClick: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let swalTitle = success_title.toUpperCase();
+
+            if (condition != "cancel") {
+                let saveData = condition.toLowerCase() == "add" ? insertTableData(data, isObject, false, swalTitle) : updateTableData(data, isObject, false, swalTitle);
+                saveData.then(res => {  
+                    if (res) {
+                        
+                        if (condition.toLowerCase() == "add" && (moduleName.toLowerCase() === "role" || moduleName.toLowerCase() === "designation")) {
+                            generateNewRolesPermission();
+                        }   
+
+                        pageContent(argument);
+
+                    } else {
+                        Swal.fire({
+                            icon: 'danger',
+                            title: "Failed!",
+                            text: result[1],
+                            showConfirmButton: false,
+                            timer: 2000
+                        })
+                    }
+                })
+            } else {
+                preventRefresh(false);
+                Swal.fire({
+                    icon:  'success',
+                    title: swalTitle,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+                    if(modalID == "isNotModal" ){
+                        pageContent(argument);
+                    }
+            }
+        } else {
+            preventRefresh(false);
+            containerID && $("#"+containerID).show();
+            $("#"+modalID).modal("show");
+        }
+    });
+}
+// ----- END SWEET ALERT CONFIRMATION -----
+
+
+
+
 
 
 });

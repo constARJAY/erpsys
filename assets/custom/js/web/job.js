@@ -36,7 +36,8 @@ $(document).ready(function() {
                 WHEN personnelOption = '2' THEN 'Non-Permanent'
                 WHEN personnelOption = '3' THEN 'Other Justifications'
                 END as jobType,
-          
+                ppr.personnelQualification AS 	techSkillsQualification,
+                ppr.personnelStatement AS jobResponsibilities,
                 departmentName,
                 personnelQualification,
                 jobBenefits,

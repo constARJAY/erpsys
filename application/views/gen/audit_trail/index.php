@@ -125,3 +125,4 @@
 <!-- ----- END ADD MODAL ----- -->
 
 <script src="<?=base_url('assets/custom/js/gen/audit-trail.js')?>"></script>
+

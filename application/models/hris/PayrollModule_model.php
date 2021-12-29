@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+date_default_timezone_set('Asia/Manila');
 
 class PayrollModule_model extends CI_Model {
 
@@ -261,9 +262,9 @@ class PayrollModule_model extends CI_Model {
 
     public function isPayrollOnAdjustment($payrollID = 0)
     {
-        $flag = 0;
+        $flag = $status = 0;
 
-        $sql    = "SELECT * FROM hris_payroll_adjustment_tbl WHERE payrollID = $payrollID AND payrollAdjustmentStatus NOT IN(3,4,5)";
+        $sql    = "SELECT payrollAdjustmentStatus FROM hris_payroll_adjustment_tbl WHERE payrollID = $payrollID AND payrollAdjustmentStatus NOT IN(3,4,5)";
         $query  = $this->db->query($sql);
         $result = $query ? $query->row() : null;
 
@@ -274,7 +275,10 @@ class PayrollModule_model extends CI_Model {
             if ($status == 2) $flag = 2;
         }
 
-        return $flag;
+        return [
+            "flag"   => $flag,
+            "status" => $status
+        ];
     }
 
     public function getAllPayrollData($payrollID = 0)
@@ -435,7 +439,8 @@ class PayrollModule_model extends CI_Model {
                             'payrollHoldStatus' => 0,
                             'netPay'            => $netPay,
                             'createdBy'         => $sessionID,
-                            'updatedBy'         => $sessionID
+                            'updatedBy'         => $sessionID,
+                            'createdAt'         => date('Y-m-d H:i:s')
                         ];
                     }
                 }
@@ -562,6 +567,7 @@ class PayrollModule_model extends CI_Model {
                 'payrollRegisterStatus' => 0,
                 'createdBy'             => $sessionID,
                 'updatedBy'             => $sessionID,
+                'createdAt'             => date('Y-m-d H:i:s'),
             ];
             $query = $this->db->insert('hris_payroll_register_tbl', $data);
             if ($query)
@@ -714,6 +720,7 @@ class PayrollModule_model extends CI_Model {
                 $data[$key]['vlTotal']     = $vlTotal;
                 $data[$key]['vlUsed']      = $vlUsed;
                 $data[$key]['vlRemaining'] = $vlRemaining;
+                $data[$key]['createdAt']   = date('Y-m-d H:i:s');
             }
             $query = $this->db->insert_batch('hris_payslip_tbl', $data);
             return $query ? true : false;

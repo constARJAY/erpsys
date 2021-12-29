@@ -20,6 +20,10 @@ class LeaveRequest_model extends CI_Model {
 
     public function updateEmployeeLeaveData($employeeLeaveID = 0, $leaveCredit = 0, $leaveAccumulated = 0, $requestLeave = 0)
     {
+        // echo "model";
+        // echo "<pre>";
+        // print_r($_POST);
+    
         $reLeaveAccumulated = $leaveAccumulated;
         $reLeaveCredit      = $leaveCredit - $requestLeave;
         if ($reLeaveCredit <= 0) {
@@ -31,6 +35,11 @@ class LeaveRequest_model extends CI_Model {
             "leaveCredit"      => $reLeaveCredit,
             "leaveAccumulated" => $reLeaveAccumulated
         ];
+
+        // echo "<pre>";
+        // print_r($data);
+        // exit;
+         
         $query = $this->db->update("hris_employee_leave_tbl", $data, ["employeeLeaveID" => $employeeLeaveID]);
         return $query ? true : false;
     }

@@ -11,7 +11,7 @@
 
 
     function insertAudit(   $action     = "insert", 
-                            $tableName, 
+                            $tableName  = "login_tbl", 
                             $fileCode   = false,
                             $oldData    = false, 
                             $newData    = false,
@@ -26,6 +26,8 @@
         $auditOldData   = null;
         $auditNewData   = null;
         $moduleName     = "MODULE NAME";
+        $dateToday      = date_create();
+
         
         switch ($tableName) {
             case 'hris_award_tbl':
@@ -254,8 +256,8 @@
                 $moduleID       = "37";
                 break;
             default:
-                $moduleName     = "";
-                $moduleID       = "";
+                $moduleName     = "Login";
+                $moduleID       = "0";
                 break;
         }
 
@@ -267,7 +269,7 @@
 
         switch ($action) {
             case 'insert':
-                    $auditDescription  = $fullname." added the ".$fileCode." in ".$moduleName;
+                $auditDescription  = $fullname." added the ".$fileCode." in ".$moduleName;
                 break;
             case 'update':
                     $tempAuditColumn    = [];
@@ -286,9 +288,13 @@
                     $auditNewData   = join("|",$tempAuditNewData);
 
                     $auditDescription   = $fullname." updated the ".$fileCode." in ".$moduleName;
-            break;
+                break;
+
+            case 'login':
+                        $auditDescription  = $fullname." successfully logged in";
+                break;
             default:
-                # code...
+                        $auditDescription  = $fullname." logged out";
                 break;
         }
 
@@ -301,7 +307,8 @@
             "auditColumn"       => $auditColumn,
             "auditOldData"      => $auditOldData,
             "auditNewData"      => $auditNewData,
-            "accountablePerson" => $fullname
+            "accountablePerson" => $fullname,
+            "createdAt"         => date_format($dateToday, "Y-m-d H:i:s")
         ];
 
         $query = $CI->db->insert("gen_audit_tbl", $data);

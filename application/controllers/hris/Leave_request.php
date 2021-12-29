@@ -137,7 +137,7 @@ class Leave_request extends CI_Controller {
             $workTypeBadge ='<span class="badge badge-danger">Whole</span>';
         }
 
-        $leaveBadge ='<span class="badge badge-danger">LRF</span>';
+        $leaveBadge ='<span class="badge badge-danger">'.$leaveRequestCode.'</span>';
         $overtimeBadge ='<span class="badge badge-info">OTRF</span>';
        
         

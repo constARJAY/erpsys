@@ -134,7 +134,10 @@ $(document).ready(function(){
 
     });
 
-    
+    $(document).on("click",".filename-table", function(e){
+        e.stopPropagation();
+    }); 
+
     // CHANGES
     $(document).on("change", "[name=progression]", function(){
         updateSelect();
@@ -370,7 +373,17 @@ function tableContent(data = false){
                             <td>${applicantAddress}</td>
                             <td> ${value.applicantMobile}</td>
                             <td>${value.applicantEmail} </td>
-                            <td>${value.applicantResume}</td>
+                            <td>
+                                
+                                        <a class="filename filename-table text-danger" title="${value.applicantResume}" style="display: block;
+                                            color: black;
+                                            width: 90%;
+                                            overflow: hidden;
+                                            white-space: nowrap;
+                                            text-overflow: ellipsis;" href="${base_url}assets/upload-files/resumes/${value.applicantResume}" target="_blank">
+                                            ${value.applicantResume}
+                                        </a>
+                            </td>
                             <td class="text-center">${applicantInterviewerProgression || "-"}</td>
                             <td class="text-center">${personInCharge || "-"}</td>
                             <td class="text-left">${applicantUpdatedAt ? moment(applicantUpdatedAt).format("MMMM DD, YYYY") : "-"}</td>
@@ -868,7 +881,7 @@ function updateSelect(){
                          
                         </div>
                 `;
-        if(data["dependent"]){
+        if(data["dependent"].length > 0){
             html = "";
             data["dependent"].map(value=>{
                 html += `
@@ -989,7 +1002,7 @@ function updateSelect(){
                                                     </div>
                                                     <div class="for-salary">
                                                         <label>Last Salary:</label>
-                                                        <p>${formatAmount(value.historySalary)}</p>
+                                                        <p>${formatAmount(value.historySalary, true)}</p>
                                                     </div>
                                                 </div>
                                             </div>`;

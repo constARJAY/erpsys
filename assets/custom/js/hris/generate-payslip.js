@@ -28,9 +28,10 @@ $(document).ready(function () {
                 bStateSave:     true,
 				columnDefs: [
 					{ targets: 0, width: "50px"  },
-					{ targets: 1, width: "50%"   },
-					{ targets: 2, width: "50%"   },
+					{ targets: 1, width: "300px" },
+					{ targets: 2, width: "300px" },
 					{ targets: 3, width: "200px" },
+					{ targets: 4, width: "300px" },
 				],
 			});
 	}
@@ -146,13 +147,15 @@ $(document).ready(function () {
                     employeeCode,
                     departmentName,
                     designationName,
-                    printedPayslip
+                    printedPayslip,
+                    generatedDate,
+                    generatedFullname,
                 } = item;
 
                 tbodyHTML += `
                 <tr>
                     <td class="text-center">
-                        <input type="checkbox" name="checkRow" employeeID="${employeeID}" payslipID="${payslipID}">
+                        <input type="checkbox" name="checkRow" employeeID="${employeeID}" payslipID="${payslipID}" printedPayslip="${printedPayslip}">
                     </td>
                     <td>
                         <div>${fullname || "-"}</div>
@@ -163,6 +166,10 @@ $(document).ready(function () {
                         <small>${designationName || "-"}</small>
                     </td>
                     <td class="text-center">${getStatusStyle(printedPayslip)}</td>
+                    <td>
+                        <div>${generatedDate ? moment(generatedDate).format("MMMM DD, YYYY hh:mm:ss A") : "-"}</div>
+                        <small>${generatedFullname || ""}</small>
+                    </td>
                 </tr>`;
             })
         }
@@ -183,6 +190,7 @@ $(document).ready(function () {
                     <th>Full Name</th>
                     <th>Department</th>
                     <th>Status</th>
+                    <th>Generated</th>
                 </tr>
             </thead>
             <tbody>
@@ -340,13 +348,15 @@ $(document).ready(function () {
     // ----- BUTTON PRINT -----
     $(document).on("click", "#btnPrint", function() {
         let payrollID = $(this).attr("payrollID");
-        let employeeIDArr = [], payslipIDArr = [];
+        let employeeIDArr = [], payslipIDArr = [], printedPayslipArr = [];
         $(`[name="checkRow"]:checked`).each(function() {
-            employeeIDArr.push($(this).attr("employeeID"))
-            payslipIDArr.push($(this).attr("payslipID"))
+            employeeIDArr.push($(this).attr("employeeID"));
+            payslipIDArr.push($(this).attr("payslipID"));
+            printedPayslipArr.push($(this).attr("printedPayslip"));
         });
-        let employeeIDStr = employeeIDArr.join(", ");
-        let payslipIDStr  = payslipIDArr.join(", ");
+        let employeeIDStr     = employeeIDArr.join(",");
+        let payslipIDStr      = payslipIDArr.join(",");
+        let printedPayslipStr = printedPayslipArr.join(",");
         
         $.ajax({
             method: "POST",
@@ -354,7 +364,8 @@ $(document).ready(function () {
 			data: {
 				payrollID,
                 idStr:      employeeIDStr,
-                payrollStr: payslipIDStr
+                payrollStr: payslipIDStr,
+                printedPayslipStr
 			},
 			success: function (data) {
 				let left = ($(window).width() / 2) - (900 / 2),

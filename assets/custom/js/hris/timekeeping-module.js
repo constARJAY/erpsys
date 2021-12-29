@@ -20,7 +20,7 @@ function writeToFile(messages = []) {
 
 $(document).ready(function() {
 
-	let approvedTimekeepingPeriod = [], disableDates = [];
+	let createdTimekeeping = [], approvedTimekeepingPeriod = [], disableDates = [];
 	const allowedUpdate = isUpdateAllowed(109);
 
 
@@ -320,7 +320,7 @@ $(document).ready(function() {
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
 			"htt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, htt.createdAt AS dateCreated",
 			`htt.employeeID <> ${sessionID} AND timekeepingStatus <> 0 AND timekeepingStatus <> 4`,
-			`FIELD(timekeepingStatus, 0, 1, 3, 2, 4, 5), COALESCE(htt.submittedAt, htt.createdAt)`
+			`FIELD(timekeepingStatus, 0, 1, 3, 2, 4, 5), timekeepingStartDate DESC, COALESCE(htt.submittedAt, htt.createdAt)`
 		);
 
 		let html = `
@@ -411,7 +411,7 @@ $(document).ready(function() {
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
 			"htt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, htt.createdAt AS dateCreated",
 			`htt.employeeID = ${sessionID}`,
-			`FIELD(timekeepingStatus, 0, 1, 3, 2, 4, 5), COALESCE(htt.submittedAt, htt.createdAt)`
+			`FIELD(timekeepingStatus, 0, 1, 3, 2, 4, 5), timekeepingStartDate DESC, COALESCE(htt.submittedAt, htt.createdAt)`
 		);
 
 		let html = `
@@ -876,9 +876,10 @@ $(document).ready(function() {
 	
 			let columnDatesHTML = "";
 			columns.map(col => {
-				const { day, date, number } = col;
+				const { month, day, date, number } = col;
 				columnDatesHTML += `
 				<th class="thDay text-center">
+					<small>${month}</small>
 					<div>${number}</div>
 					<small>${day}</small>
 				</th>`;
@@ -969,7 +970,7 @@ $(document).ready(function() {
 					} else if (status == "REST_DAY" || status == "NO_SCHEDULE") {
 						html = `
 						<a href="javascript:void(0)"
-							class="viewAttendance font-weight-bold text-success"
+							class="viewAttendance font-weight-bold text-dark"
 							${elementAttr}>RD</a>`;
 					} else if (status == "NO_TIME_IN" || status == "NO_TIME_OUT") {
 						html = `
@@ -1094,7 +1095,7 @@ $(document).ready(function() {
 										<div class="font-weight-bold">Leave/Overtime Hours</div>
 									</div>
 									<div class="d-flex justify-content-start align-items-center py-1">
-										<div style="text-align: right; width: 40px; color: #28a745">RD</div>
+										<div style="text-align: right; width: 40px;" class="text-dark">RD</div>
 										<div class="mx-2">-</div> 
 										<div class="font-weight-bold">Rest Day</div>
 									</div>
@@ -1145,7 +1146,7 @@ $(document).ready(function() {
 								<th class="thSummary">Basic Hours</th>
 								<th class="thSummary">Overtime Hours</th>
 								<th class="thSummary">Rest Day</th>
-								<th class="thSummary">No. of Working Days</th>
+								<th class="thSummary">Number of Working Days</th>
 							</tr>
 						</thead>
 						<tbody id="tableTimekeepingTbody">
@@ -1193,7 +1194,7 @@ $(document).ready(function() {
 
 
 	// ----- FILTER DISPLAY -----
-	function filterDisplay(timekeepingID, startDate, endDate, timesheetDate, cutOff) {
+	function filterDisplay(timekeepingID, startDate, endDate, payOut, timesheetDate, cutOff) {
 
 		let firstCutOff = 0, secondCutOff = 0, thirdCutOff = 0, fourthCutOff = 0;
 
@@ -1210,6 +1211,7 @@ $(document).ready(function() {
 					cutoffName: "First Cut-Off",
 					start:  cutoff.firstCutOffDateStart,
 					end:    cutoff.firstCutOffDateEnd,
+					payOut: cutoff.firstCutOffPayOut,
 				})
 			}
 			if (secondCutOff) {
@@ -1218,6 +1220,7 @@ $(document).ready(function() {
 					cutoffName: "Second Cut-Off",
 					start:  cutoff.secondCutOffDateStart,
 					end:    cutoff.secondCutOffDateEnd,
+					payOut: cutoff.secondCutOffPayOut,
 				})
 			}
 			if (thirdCutOff) {
@@ -1226,6 +1229,7 @@ $(document).ready(function() {
 					cutoffName: "Third Cut-Off",
 					start:  cutoff.thirdCutOffDateStart,
 					end:    cutoff.thirdCutOffDateEnd,
+					payOut: cutoff.thirdCutOffPayOut,
 				})
 			}
 			if (fourthCutOff) {
@@ -1234,18 +1238,20 @@ $(document).ready(function() {
 					cutoffName: "Fourth Cut-Off",
 					start:  cutoff.fourthCutOffDateStart,
 					end:    cutoff.fourthCutOffDateEnd,
+					payOut: cutoff.fourthCutOffPayOut,
 				})
 			}
 		}
 
 		let cutoffHTML = '';
 		cutOffData.map(cod => {
-			let { cutoffID, cutoffName, start, end } = cod;
+			let { cutoffID, cutoffName, start, end, payOut } = cod;
 
 			cutoffHTML += `
 			<option value="${cutoffID}"
 				start="${start}"
 				end="${end}"
+				payOut="${payOut}"
 				${cutoffID == cutOff ? "selected" : ""}>${cutoffName}</option>`;
 		})
 
@@ -1326,6 +1332,7 @@ $(document).ready(function() {
 								class="form-control validate"
 								start="${startDate}"
 								end="${endDate}"
+								payOut="${payOut}"
 								value="${timesheetDate}"
 								disabled>
 							<div class="d-block invalid-feedback" id="invalid-timesheetDate"></div>
@@ -1338,7 +1345,8 @@ $(document).ready(function() {
 								id="btnSearch"
 								timekeepingID="${timekeepingID}"
 								start="${startDate}"
-								end="${endDate}"><i class="fas fa-cloud-upload-alt"></i> Generate Timekeeping</button>
+								end="${endDate}"
+								payOut="${payOut}"><i class="fas fa-cloud-upload-alt"></i> Generate Timekeeping</button>
 						</div>
 					</div>
 				</div>
@@ -1353,6 +1361,10 @@ $(document).ready(function() {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 
+		createdTimekeeping = getTableData(
+			`hris_timekeeping_tbl WHERE timekeepingStatus IN(1,2)`, 
+			`timekeepingStartDate, timekeepingEndDate, CONCAT(DATE_FORMAT(timekeepingStartDate, '%M %d, %Y'), ' - ', DATE_FORMAT(timekeepingEndDate, '%M %d, %Y')) AS timesheetDate, timekeepingID`);
+
 		let {
 			timekeepingID         = "",
 			timekeepingCode       = "",
@@ -1362,6 +1374,7 @@ $(document).ready(function() {
             timekeepingStartDate  = "",
 			timekeepingEndDate    = "",
 			cutOff                = "",
+			payOut                = "",
 			timekeepingReason     = "",
 			timekeepingRemarks    = "",
 			approversID           = "",
@@ -1517,7 +1530,7 @@ $(document).ready(function() {
             </div>
 
 			<div class="col-12 row pr-0" id="filterDisplay">
-				${timekeepingStatus == 0 || (['3','4'].includes(timekeepingStatus) && isRevise) ? filterDisplay(timekeepingID, startDate, endDate, timesheetDate, cutOff) : ""}
+				${timekeepingStatus == 0 || (['3','4'].includes(timekeepingStatus) && isRevise) ? filterDisplay(timekeepingID, startDate, endDate, payOut, timesheetDate, cutOff) : ""}
 			</div>
 
             <div class="col-sm-12 mt-3">
@@ -1642,8 +1655,9 @@ $(document).ready(function() {
 			data["employeeID"] = sessionID;
 			data["cutOff"]     = $(`[name="cutoff"]`).val();;
 			data["timekeepingReason"] = $("[name=timekeepingReason]").val()?.trim();
-			data["timekeepingStartDate"] = $("#btnSearch").attr("start");
-			data["timekeepingEndDate"]   = $("#btnSearch").attr("end");
+			data["timekeepingStartDate"] = $(`[name="timesheetDate"]`).attr("start");
+			data["timekeepingEndDate"]   = $(`[name="timesheetDate"]`).attr("end");
+			data["payOut"]               = $(`[name="timesheetDate"]`).attr("payOut");
 
 			if (action == "insert") {
 				data["createdBy"] = sessionID;
@@ -1978,7 +1992,7 @@ $(document).ready(function() {
 				<tr>
 					<td class="text-left  p-1 m-2 font-weight-bold">Night Differential: </td>
 					<td class="text-right p-1 m-2 " style="font-style: italic">
-						<div>${totalHours > 0 ? getTimeFormat(nightDifferential) : "-----"}</div>
+						<div>${totalHours > 0 ? getTimeFormat(nightDifferential) : "----"}</div>
 					</td>
 				</tr>
 			</tbody>
@@ -2032,11 +2046,13 @@ $(document).ready(function() {
 				confirmButtonText:  "Yes"
 			}).then(res => {
 				if (res.isConfirmed) {
-					const startDate = $(`[name="timesheetDate"]`).attr("start");
-					const endDate   = $(`[name="timesheetDate"]`).attr("end");
-					$(this).attr("start", startDate);
-					$(this).attr("end", endDate);
-					$(this).removeAttr("timekeepingID");
+					const startDate = $("#btnSearch").attr("start");
+					const endDate   = $("#btnSearch").attr("end");
+					const payOut    = $("#btnSearch").attr("payOut");
+					$(`[name="timesheetDate"]`).attr("start", startDate);
+					$(`[name="timesheetDate"]`).attr("end", endDate);
+					$(`[name="timesheetDate"]`).attr("payOut", payOut);
+					$("#btnSearch").removeAttr("timekeepingID");
 	
 					$("#tableTimekeepingParent").html(preloader);
 					setTimeout(() => {
@@ -2268,36 +2284,33 @@ $(document).ready(function() {
 		let monthYear = $(`[name="monthYear"]`).val();
 		let monthYearArr = monthYear.split('-');
 
-		let cutOff      = $(`[name="cutoff"]`).val();
-		let cutOffStart = +$(`[name="cutoff"] option:selected`).attr("start");
-		let cutOffEnd   = +$(`[name="cutoff"] option:selected`).attr("end");
-
-		const isFullMonth = (month, year) => {
-			return new Date(year, month, 0).getDate() == 31;
-		}
+		let cutOff       = $(`[name="cutoff"]`).val();
+		let cutOffStart  = +$(`[name="cutoff"] option:selected`).attr("start");
+		let cutOffEnd    = +$(`[name="cutoff"] option:selected`).attr("end");
+		let cutOffPayOut = +$(`[name="cutoff"] option:selected`).attr("payOut");
 
 		const transformDate = (num) => {
 			let temp = num.toString();
 			return temp.length == 1 ? `0${num}` : num;
 		}
 
-		let year  = monthYearArr[0];
-		let month = +monthYearArr[1];
+		let year   = monthYearArr[0];
+		let month  = +monthYearArr[1];
 
 		let firstMonth  = month;
 		let secondMonth = cutOffStart > cutOffEnd ? (month == 12 ? 1 : month+1) : month;
 		if (cutOff == 1) {
-			firstMonth  = cutOffStart > cutOffEnd ? (month  - 1) : month;
+			firstMonth  = cutOffStart > cutOffEnd ? (firstMonth == 1 ? 12 : (month  - 1)) : month;
 			secondMonth = month;
 		}
 
 		let start = `${year}-${transformDate(firstMonth)}-${transformDate(cutOffStart)}`;
 		let end   = `${year}-${transformDate(secondMonth)}-${transformDate(cutOffEnd)}`;
+		let payOut = `${year}-${transformDate(month)}-${transformDate(cutOffPayOut)}`;
 
-		$(`[name="timesheetDate"]`).attr("start", start);
-		$(`[name="timesheetDate"]`).attr("end", end);
 		$(`[id="btnSearch"]`).attr("start", start);
 		$(`[id="btnSearch"]`).attr("end", end);
+		$(`[id="btnSearch"]`).attr("payOut", payOut);
 
 		dateRangePicker(start, end);
 	})
@@ -2315,7 +2328,7 @@ $(document).ready(function() {
 	// ----- UNIQUE TIMEKEEPING PERIOD -----
 	function uniqueTimekeepingPeriod() {
 		const timesheetDate = `${moment($("#btnSearch").attr("start")).format("MMMM DD, YYYY")} - ${moment($("#btnSearch").attr("end")).format("MMMM DD, YYYY")}`;
-		const hasSome = uniqueData.some(data => data.timesheetDate == timesheetDate);
+		const hasSome = createdTimekeeping.some(data => data.timesheetDate == timesheetDate);
 		if (hasSome) {
 			showNotification("danger", "Timekeeping period is already exists!");
 		}

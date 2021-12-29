@@ -365,6 +365,7 @@ $(document).ready(function() {
                 
                 $("#table_content").html(applicantDisplay(applicantData, applicantID));
             }else if(sidebarID=="appliedjob"){
+                
                 const appliedJobsData = getTableData( `web_applicant_job_tbl AS appJob
                                                        INNER JOIN hris_job_posting_tbl as postJob ON postJob.jobID = appJob.jobID
                                                        LEFT JOIN pms_personnel_requisition_tbl AS pprt ON postJob.requisitionID = pprt.requisitionID
@@ -377,17 +378,22 @@ $(document).ready(function() {
                                                                     WHEN personnelOption = '2' THEN 'Non-Permanent'
                                                                     WHEN personnelOption = '3' THEN 'Other Justifications'
                                                                 END as jobType,
+                                                            (SELECT applicantInterviewerProgression FROM hris_applicant_interviewer_tbl AS sub_hait 
+                                                                    WHERE sub_hait.applicantInterviewerStatus IS NOT NULL AND sub_hait.applicantID = '${applicantID}' ORDER BY sub_hait.updatedAt DESC LIMIT 1) 
+                                                                AS appJobStatus,
                                                             salaryPackage as salaryRange`, 
                                                         `applicantID = ${applicantID}` );
               
                 $("#table_content").html(appliedJobsTab(appliedJobsData));
                 initAppliedDataTables();
             }else if(sidebarID=="vacant"){
-                const jobData = getTableData( `
-                hris_job_posting_tbl as jpt
+                const jobData = getTableData(
+                // TABLE SELECTED
+                `hris_job_posting_tbl as jpt
                 LEFT JOIN  pms_personnel_requisition_tbl AS ppr USING(requisitionID)
                 LEFT JOIN  hris_designation_tbl AS dsg ON dsg.designationID  = ppr.designationID 
                 LEFT JOIN  hris_department_tbl AS dept ON dept.departmentID  = ppr.departmentID`, 
+                // COLUMN SELECTED
                 `jobID,
                 CONCAT('JPG-',SUBSTR(jpt.createdAt,3,2),"-",LPAD(jpt.jobID,5,0)) as jobCode,
                 requisitionCode,
@@ -407,7 +413,11 @@ $(document).ready(function() {
                 jobSlot,
                 salaryPackage as salaryRange,
                 jobStatus,
-                jpt.createdAt` );
+                jpt.createdAt`,
+                // WHERE CLAUSE
+                `ppr.requisitionStatus = 2`
+                
+                );
 
                 $("#table_content").html(vacantTab(jobData));
                 initJobDataTables();
@@ -2474,7 +2484,7 @@ $(document).ready(function() {
                                 <tbody>`;
 
         data.map((applied, index) => {
-            var statusText = '', statusBadge = '';
+            var statusText = applied.appJobStatus, statusBadge = '';
             // 0 = PENDING
             // 1 = FOR REVIEW
             // 2 = WAITLISTED
@@ -2483,13 +2493,18 @@ $(document).ready(function() {
             // 5 = FAILED
             // 6 = RE-EVALUATE
 
-                 if(applied.appJobStatus==0){ statusText='PENDING'; statusBadge='warning'}
-            else if(applied.appJobStatus==1){ statusText='FOR REVIEW'; statusBadge='info'}
-            else if(applied.appJobStatus==2){ statusText='WAITLISTED'; statusBadge='info'}
-            else if(applied.appJobStatus==3){ statusText='CANCELLED'; statusBadge='primary'}
-            else if(applied.appJobStatus==4){ statusText='PASSED'; statusBadge='success'}
-            else if(applied.appJobStatus==5){ statusText='FAILED'; statusBadge='danger'}
-            else if(applied.appJobStatus==6){ statusText='RE-EVALUATE'; statusBadge='info'}                
+                 if(applied.appJobStatus=="0"){ statusBadge='warning'}
+            else if(applied.appJobStatus=="For Review"){ statusBadge='info'}
+            else if(applied.appJobStatus=="Initial Interview"){statusBadge='info'}
+            else if(applied.appJobStatus=="Technical Exam"){statusBadge='info'}
+            else if(applied.appJobStatus=="Technical Interview"){statusBadge='info'}
+            else if(applied.appJobStatus=="Exam"){statusBadge='info'}
+            else if(applied.appJobStatus=="Final Interview"){statusBadge='info'}
+            else if(applied.appJobStatus=="Initial Interview"){statusBadge='info'}
+            else if(applied.appJobStatus=="Technical Exam"){statusBadge='primary'}
+            else if(applied.appJobStatus=="Job Order"){statusBadge='success'}
+            // else if(applied.appJobStatus=="asdasdasdasd"){statusBadge='danger'}
+            // else if(applied.appJobStatus=="asdasdasdasd"){statusBadge='info'}                
 
             html += `
                     <tr
@@ -2518,7 +2533,21 @@ $(document).ready(function() {
         let html  = ` <table class="table table-hover" id="tableJobPosting">
                         <thead>
                         <tr>
-                            <th>${data.length} JOBS & VACANCIES</th>
+                            <th>
+                                <div class="w-100 d-flex justify-content-between">
+                                    <div>
+                                        ${data.length} JOBS & VACANCIES
+                                    </div>
+                                    <div>
+                                        <span>
+                                            <strong class="text-warning">Note :</strong>
+                                            <small class="text-warning">
+                                                Please update your profile to apply.
+                                            </small>
+                                        </span>
+                                    </div>
+                                </div>
+                            </th>
                         </tr>
                         </thead>
                         <tbody>`;
@@ -2540,14 +2569,7 @@ $(document).ready(function() {
         html += `</tbody>
             </table>
             
-            <div class="w-100">
-                <span>
-                        <strong class="text-warning">Note :</strong>
-                        <small class="text-warning">
-                            Please update your profile to apply.
-                        </small>
-                    </span>
-            </div>
+            
             `;
 
         return html;

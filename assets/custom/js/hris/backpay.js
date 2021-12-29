@@ -826,7 +826,7 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
                                     class="form-control amount text-right" 
                                     name="backPayAmount"
                                     id="backPayAmount"
-                                    min="0.01" 
+                                    min="-999999" 
                                     max="999999" 
                                     minlength="1" 
                                     maxlength="20"
@@ -862,7 +862,7 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
                         class="form-control validate" 
                         name="otherReference" 
                         id="otherReference" 
-                        data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                        data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][_][(][)][%][&][*][ ]"
                         required>
                         <div class="d-block invalid-feedback" id="invalid-otherReference"></div>
                     </div>
@@ -873,7 +873,7 @@ function getItemsRow(backPayID = "", readOnly = false,backPayEmployeeID = 0) {
                         class="form-control amount text-right" 
                         name="backPayAmount"
                         id="backPayAmount"
-                        min="0.01" 
+                        min="-999999" 
                         max="999999" 
                         minlength="1" 
                         maxlength="20"
@@ -954,7 +954,7 @@ $(document).on("click", ".btnAddRow", function(){
     let row = getItemsRow(backPayID,false);
     $(".purchaseOrderItemsBody").append(row[2]);  
     updateTableRows();
-    initAmount();
+    initAmount("",false,true);
     computeTotalAmount();
 });
 // ---- BUTTON FOR ADD ROW ------//
@@ -1200,7 +1200,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
                                 <div class="form-group">
                                     <label>Employee Status:</label><br>
-                                ${requestemployeeStatus == 4 ? `<span class="badge badge-secondary w-25">RETIRED</span>`: `<span class="badge badge-danger w-25">RESIGNED</span>`}
+                                ${requestemployeeStatus == 4 ? `<span class="badge badge-secondary w-25">RETIRED</span>`: `<span class="badge badge-danger w-25">RENDERING</span>`}
                                 </div>
 
                                 <div class="form-group">
@@ -1276,6 +1276,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
         $("#page_content").html(html);
         initDataTables();
         initAll();
+        initAmount("",false,true);
         computeTotalAmount();
         // !purchaseOrderID && purchaseOrderID == 0 && $("#dateReceived").val(moment(new Date).format("MMMM DD, YYYY"));
         // $("#dateReceived").data("daterangepicker").maxDate = moment();

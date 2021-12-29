@@ -39,13 +39,8 @@
                                 <p class='text-left'>Please enter your username and password to login.</p>
                             </div>
 
-                            <div class="col-12">
-                                <div class="alert alert-danger displaynone">
-                                    <strong>ERROR: </strong> The username or password you entered is incorrect.
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
+                            <div class="col-12 alert-message">
+                                
                             </div>
 
                             <div class="col-12">

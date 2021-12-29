@@ -49,7 +49,7 @@ $(document).ready(function () {
 	const getOvertimeDateList = getTableData(
 		"hris_overtime_request_tbl", 
 		"overtimeRequestDate",
-		`overtimeRequestDate = 2 AND employeeID = ${sessionID}`);
+		`overtimeRequestStatus = 2 AND employeeID = ${sessionID}`);
 
 		const getApproveLeave = getTableData(
 			"hris_leave_request_tbl", 
@@ -1223,6 +1223,27 @@ $(document).ready(function () {
 	});
 	// ----- END SUBMIT DOCUMENT -----
 
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const id       = decryptString($(this).attr("leaveRequestID"));
+		const feedback = $(this).attr("code") || getFormCode("LRF", dateToday(), id);
+		const action   = "update";
+		const data     = getData(action, 5, "drop", feedback, id);
+
+		
+		formConfirmation(
+			"drop",
+			action,
+			"LEAVE REQUEST",
+			"",
+			"form_leave_request",
+			data,
+			true,
+			pageContent
+		);
+	})
+	// ----- END DROP DOCUMENT -----
+
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
@@ -1287,8 +1308,6 @@ $(document).ready(function () {
 	function updateEmployeeLeave(employeeID = 0, leaveID = 0, leaveCredit = 0,leaveRequestID = 0,leaveStatus = 0) {
 		const data = { employeeID, leaveID, leaveCredit };
 
-	
-
 		if(leaveStatus == 1){
 			$.ajax({
 				method: "POST",
@@ -1322,12 +1341,13 @@ $(document).ready(function () {
 			let employeeID      = tableData[0].employeeID;
 			let leaveID         = tableData[0].leaveID;
 			let leaveCredit     = tableData[0].leaveRequestNumberOfDate;
-			let leaveStatus     = tableData[0].leaveStatus;
+		
 
 			let data = getData("update", 2, "approve", feedback, id);
 			data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 2);
 			let dateApproved = updateApproveDate(approversDate)
 			data["tableData[approversDate]"]   = dateApproved;
+			let leaveStatus     =$("#leaveStatus option:selected").val();
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
@@ -1367,7 +1387,7 @@ $(document).ready(function () {
 					true,
 					pageContent,
 					notificationData,
-					this,
+					"",
 					status == 2 ? updateEmployeeLeave : false,
 					status == 2 ? [employeeID, leaveID, leaveCredit,id,leaveStatus] : []
 				);

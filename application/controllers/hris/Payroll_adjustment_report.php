@@ -6,7 +6,7 @@ class Payroll_adjustment_report extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        $this->load->model("hris/PayrollAdjustment_model", "payrolladjustment");
+        $this->load->model("hris/PayrollAdjustmentReport_model", "payrolladjustmentreport");
         isAllowed(81);
     }
 
@@ -42,4 +42,30 @@ class Payroll_adjustment_report extends CI_Controller {
         return $this->load->view('hris/payroll_adjustment_report/print', $data);
     }
 
+
+
+    public function getFilterDisplayData()
+    {
+        echo json_encode($this->payrolladjustmentreport->getFilterDisplayData());
+    }
+
+
+    public function getTableDisplayData()
+    {
+        $adjustmentNo  = $this->input->post('adjustmentNo');
+        $departmentID  = $this->input->post('departmentID');
+        $designationID = $this->input->post('designationID');
+        $employeeID    = $this->input->post('employeeID');
+        
+        echo json_encode($this->payrolladjustmentreport->getTableDisplayData($adjustmentNo, $departmentID, $designationID, $employeeID));
+    }
+
+
+    public function downloadExcel()
+    {
+        $payrollAdjustmentItemID = $this->input->get('payrollAdjustmentItemID');
+        $data = $this->payrolladjustmentreport->getTableDisplayData('', 0, 0, '', $payrollAdjustmentItemID);
+        // echo json_encode($data);
+        getPayrollAdjustmentReportExcel($data);
+    }
 }

@@ -463,7 +463,7 @@ function myFormsContent() {
             <td class="text-right">${formatAmount(netPay || "0",true)}</td>
             <td>${dateReleased != "Invalid date" ? dateReleased : "-"}</td>
             <td class="text-center">
-                ${getStatusStyle(payrollHoldStatus,false,true)}
+                ${ payrollHoldStatus == 0 ? `<span class="badge badge-warning w-100">For Releasing</span>` : getStatusStyle(payrollHoldStatus,false,true)}
             </td>
             <td>
             ${button}`;

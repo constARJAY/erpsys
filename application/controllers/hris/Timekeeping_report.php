@@ -8,6 +8,7 @@ class Timekeeping_report extends CI_Controller {
         parent::__construct();
         $this->load->model("hris/TimekeepingModule_model", "timekeeping");
         $this->load->model("hris/EmployeeAttendance_model", "employeeattendance");
+        $this->load->model("hris/TimekeepingReport_model", "timekeepingreport");
         isAllowed(109);
     }
 
@@ -18,6 +19,35 @@ class Timekeeping_report extends CI_Controller {
         $this->load->view("template/header", $data);
         $this->load->view("hris/timekeeping_report/index");
         $this->load->view("template/footer");
+    }
+
+
+    public function getFilterDisplayData()
+    {
+        echo json_encode($this->timekeepingreport->getFilterDisplayData());
+    }
+
+
+    public function getTableDisplayData()
+    {
+        $departmentID  = $this->input->post('departmentID');
+        $designationID = $this->input->post('designationID');
+        $startDate     = $this->input->post('startDate');
+        $endDate       = $this->input->post('endDate');
+        
+        echo json_encode($this->timekeepingreport->getTableDisplayData($departmentID, $designationID, $startDate, $endDate));
+    }
+
+    
+
+
+
+
+
+
+    public function getTimekeepingReportDisplay()
+    {
+        echo json_encode($this->timekeepingreport->getTimekeepingReportDisplay());
     }
 
 
@@ -45,6 +75,19 @@ class Timekeeping_report extends CI_Controller {
         ];
         return $this->load->view('hris/timekeeping_report/print', $data);
     }
+
+
+    // ----- EXCEL -----
+    public function downloadExcel()
+    {
+        $startDate  = $this->input->get("startDate");
+        $endDate    = $this->input->get("endDate");
+        $employeeID = $this->input->get("employeeID");
+        
+        $data = $this->timekeepingreport->getTableDisplayData(0, 0, $startDate, $endDate, $employeeID);
+        getTimekeepingReportExcel($data);
+    }
+    // ----- END EXCEL -----
 
 
 }

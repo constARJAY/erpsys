@@ -6,30 +6,50 @@ $(document).ready(function() {
 		if (validate) {
             let applicantUsername = $("#applicantUsername").val();
             let applicantPassword = $("#applicantPassword").val();
-
+            let messageAlert      = `
+                                        <div class="alert alert-danger ">
+                                                <strong>ERROR: </strong> The username or password you entered is incorrect.
+                                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                        </div>`;
             setTimeout(() => {
                 formButtonHTML(this, false);
                 $("#loader").show();
                 $(".loader p").text('Loading...');
                 setTimeout(() => {
                     var result = getTableData("web_applicant_list_tbl",
-                                              "applicantID",
-                                              "applicantUsername = BINARY '"+applicantUsername+"' AND applicantPassword = BINARY '"+applicantPassword+"' AND applicantStatus <> 0");
+                                              "applicantID,applicantStatus",
+                                              "applicantUsername = BINARY '"+applicantUsername+"' AND applicantPassword = BINARY '"+applicantPassword+"'");
 
                     if(result.length != 0){
-                        let data = {"applicantID"  : result[0]["applicantID"]};
-
-                        $.ajax({
-                            url:`${base_url}web/login/set_session`,
-                            method:"POST",
-                            data,
-                            success:function(){
-                                window.location.replace(`${base_url}web/applicant`);
-                            }
-                        });
+                        messageAlert      = `
+                                        <div class="alert alert-danger ">
+                                                <strong>ERROR: </strong> The email of this user is unverified." - for unverfied users.
+                                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                        </div>`;
+                        if(result[0].applicantStatus == "0"){
+                            $("#loader").hide();    
+                            $(".alert-message").html(messageAlert);
+                            $("#applicantUsername").removeClass("is-valid").addClass("is-invalid");
+                            $("#applicantPassword").removeClass("is-valid").addClass("is-invalid");
+                            $("#applicantUsername").focus();
+                        }else{
+                            let data = {"applicantID"  : result[0]["applicantID"]};
+                            $.ajax({
+                                url:`${base_url}web/login/set_session`,
+                                method:"POST",
+                                data,
+                                success:function(){
+                                    window.location.replace(`${base_url}web/applicant`);
+                                }
+                            });
+                        }
                     }else{
                         $("#loader").hide();    
-                        $(".alert").removeClass("displaynone").addClass("displayblock");
+                        $(".alert-message").html(messageAlert);
                         $("#applicantUsername").removeClass("is-valid").addClass("is-invalid");
                         $("#applicantPassword").removeClass("is-valid").addClass("is-invalid");
                         $("#applicantUsername").focus();

@@ -1224,51 +1224,56 @@ let html = `        <div class="row clearfix row-deck">
                         </div>
                     </div>
 
-                    <div class="row clearfix row-deck">
-                        <div class="card-header w-100 bg-primary text-white text-left">
-                            <h6 class="font-weight-bold">APPLICANT PROGRESSION</h6>
-                        </div>
-                    </div>
+                    <div class="row ">
+                        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                            <div class="card" style="box-shadow:none !important;">
+                                <div class="card-header w-100 bg-primary text-white text-left">
+                                    <h6 class="font-weight-bold">APPLICANT PROGRESSION</h6>
+                                </div>
 
                             `;
                         
-                    html += `
-                        <div class="table table-responsive ">
-                            <table class="table table-bordered table-striped" id="tableMyForms">
-                                <thead>
-                                    <tr style="white-space: nowrap">
-                                        <th>Applicant Code</th>
-                                        <th>Applicant Name</th>
-                                        <th>Applied Position</th>
-                                        <th>Progression</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody >`;
-                        
-                            listApplicants.map((applicant) => {
-                                let {
-                                    applicantCode,
-                                    fullname,
-                                    applicantInterviewerProgression,
-                                    designationName,
-                                    applicantStatus,
-                                } = applicant;
-
-                                html += `
-                                <tr class="">
-                                    <td>${applicantCode || "-"}</td>
-                                    <td>${fullname || "-"}</td>
-                                    <td>${designationName || "-"}</td>
-                                    <td>${applicantInterviewerProgression || "-"}</td>
-                                    <td>${applicantStatus || "-"}</td>
-                                </tr>`;
-                            });
-                        
                             html += `
-                                </tbody>
-                            </table>
+                                <div class="table table-responsive ">
+                                    <table class="table table-bordered table-striped" id="tableMyForms">
+                                        <thead>
+                                            <tr style="white-space: nowrap">
+                                                <th>Applicant Code</th>
+                                                <th>Applicant Name</th>
+                                                <th>Applied Position</th>
+                                                <th>Progression</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody >`;
+                                
+                                    listApplicants.map((applicant) => {
+                                        let {
+                                            applicantCode,
+                                            fullname,
+                                            applicantInterviewerProgression,
+                                            designationName,
+                                            applicantStatus,
+                                        } = applicant;
+
+                                        html += `
+                                        <tr class="">
+                                            <td>${applicantCode || "-"}</td>
+                                            <td>${fullname || "-"}</td>
+                                            <td>${designationName || "-"}</td>
+                                            <td>${applicantInterviewerProgression || "-"}</td>
+                                            <td>${applicantStatus || "-"}</td>
+                                        </tr>`;
+                                    });
+                                
+                                    html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+
                       `;
 
 

@@ -26,9 +26,9 @@ class Examination_form extends CI_Controller {
         $code = $this->input->get('id');
 
         //  generate encrypted url parameter
-        // $code = '2|1|2021-11-02'; // applicantID|DesignationID|ExamDate
+        // $code = '1|1|2021-12-29'; // applicantID|DesignationID|ExamDate
 
-        // $url = $this->encryption->encrypt(str_replace("slash","/","$code"));
+        // $url = $this->encryption->encrypt($code);
 
         // echo $url;
         // exit;
@@ -38,7 +38,7 @@ class Examination_form extends CI_Controller {
         //  decode encrypted url parameter
         // $code ="c90fc36ab1ff5e4db0e9bce71bc4bf44e74a254864b5dc455f0e935b9f3d4778c73da9e9145cf0285d71d9553295cf5039d1c8da7fd13658e7d30c4e9add8b5dlKo9o4rgijZDSgbEvMmGjne2PXpEQa7VpuSeuA==";
 
-        $url = $this->encryption->decrypt(str_replace("slash","/","$code"));
+        $url = $this->encryption->decrypt($code);
         // end  decode encrypted url parameter
 
        

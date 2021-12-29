@@ -340,7 +340,7 @@ $(document).ready(function() {
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
 			"hpt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hpt.createdAt AS dateCreated",
 			`hpt.employeeID <> ${sessionID} AND payrollStatus <> 0 AND payrollStatus <> 4`,
-			`FIELD(payrollStatus, 0, 1, 3, 2, 4, 5), COALESCE(hpt.submittedAt, hpt.createdAt)`
+			`FIELD(payrollStatus, 0, 1, 3, 2, 4, 5), payrollStartDate DESC, COALESCE(hpt.submittedAt, hpt.createdAt)`
 		);
 
 		let html = `
@@ -434,7 +434,7 @@ $(document).ready(function() {
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
 			"hpt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hpt.createdAt AS dateCreated",
 			`hpt.employeeID = 0 OR hpt.employeeID IS NULL OR hpt.employeeID = ${sessionID}`,
-			`FIELD(payrollStatus, 0, 1, 3, 2, 4, 5), COALESCE(hpt.submittedAt, hpt.createdAt)`
+			`FIELD(payrollStatus, 0, 1, 3, 2, 4, 5), payrollStartDate DESC, COALESCE(hpt.submittedAt, hpt.createdAt)`
 		);
 
 		let html = `
@@ -699,7 +699,7 @@ $(document).ready(function() {
         return result;
     }
 
-    function payrollTable(payrollID = 0, payrollStatus = 0, onAdjustment = 0, readOnly = false) {
+    function payrollTable(payrollID = 0, payrollStatus = 0, adjustmentFlag = 0, adjustmentStatus = 0, readOnly = false) {
         let payrollItemsHTML = "", header = "";
 
         if (payrollID) {
@@ -948,7 +948,6 @@ $(document).ready(function() {
 											<span class="input-group-text">
 												<input type="checkbox" 
 													name="deductLoan" 
-													mandates="child"
 													loanBasis="${loanBasis}"
 													${loanDeduction > 0 ? "checked" : ""}
 													${grossPay > 0 ? "" : "disabled"}>
@@ -1071,8 +1070,8 @@ $(document).ready(function() {
         }
 
 		let adjustmentDisplay = "";
-		if (onAdjustment != 2 && payrollStatus == 0) {
-			adjustmentDisplay = onAdjustment == 0  ? `
+		if (adjustmentFlag != 2 && payrollStatus == 0) {
+			adjustmentDisplay = adjustmentFlag == 0  ? `
 			<div class="text-right">
 				<button class="btn btn-danger" id="btnPayrollAdjustment"
 					payrollID="${payrollID}">
@@ -1081,7 +1080,7 @@ $(document).ready(function() {
 			</div>` : `
 			<div class="d-flex">
 				<h5 class="font-weight-bold text-warning">NOTE:</h5>
-				<span class="text-dark ml-2">The payroll adjustment must still undergo an approval before the payroll process to continue.</span>
+				<span class="text-dark ml-2">The payroll adjustment must still undergo an approval before the payroll process to continue. Current Status: ${getStatusStyle(adjustmentStatus, true, false)}</span>
 			</div>`;
 		}
 
@@ -1243,6 +1242,8 @@ $(document).ready(function() {
 		} = data && data?.header;
 
 		let adjustment = data?.adjustment;
+		let adjustmentFlag   = adjustment?.flag || 0;
+		let adjustmentStatus = adjustment?.status || 0;
 
 		// ----- GET EMPLOYEE DATA -----
 		let {
@@ -1365,12 +1366,12 @@ $(document).ready(function() {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>
+						Date Approved
 						<i class="fal fa-info-circle" 
 							style="color:#007bff;" 
 							data-toggle="tooltip" 
 							title="Timekeeping Date Approved" 
 							data-original-title="Timekeeping Date Approved"></i>
-							Date Approved
                     </label>
                     <input type="text" class="form-control" disabled value="${timekeepingApproved}">
                 </div>
@@ -1425,7 +1426,7 @@ $(document).ready(function() {
 
             <div class="col-sm-12 mt-3">
                 <div class="w-100" id="tablePayrollParent">
-					${payrollTable(payrollID, payrollStatus, adjustment, readOnly)}
+					${payrollTable(payrollID, payrollStatus, adjustmentFlag, adjustmentStatus, readOnly)}
 				</div>
             </div>
 
@@ -1819,7 +1820,6 @@ $(document).ready(function() {
 		$parent.find(`[name="deductPhic"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 		$parent.find(`[name="deductHdmf"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 		$parent.find(`[name="deductWithHolding"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-		$parent.find(`[name="deductLoan"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 
 		const deductMandateLength  = $(`[name="deductMandates"]`).length;
 		const deductMandateChecked = $(`[name="deductMandates"]:checked`).length;
@@ -1852,11 +1852,6 @@ $(document).ready(function() {
 
 
 	// ----- CHECK ALL -----
-	$(document).on("change", `[name="checkAllDeductLoan"]`, function() { // HOLD SALARY
-		const isChecked = $(this).prop("checked");
-		$(`[name="deductLoan"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	})
-
 	$(document).on("change", `[name="checkAllHoldSalary"]`, function() { // HOLD SALARY
 		const isChecked = $(this).prop("checked");
 		$(`[name="holdSalary"]:not([disabled])`).prop("checked", isChecked).trigger("change");
@@ -2170,30 +2165,30 @@ $(document).ready(function() {
 
 
 	// ----- BADGE STATUS -----
-	function getStatusStyle(status = 1, hasPreparedBy = false) {
+	function getStatusStyle(status = 1, hasPreparedBy = false, width = true) {
 		switch (status) {
 			case "1":
-				return `<span class="badge badge-outline-info w-100">For Approval</span>`;
+				return `<span class="badge badge-outline-info ${width ? 'w-100' : ''}">For Approval</span>`;
 			case "2":
-				return `<span class="badge badge-info w-100">Approved</span>`;
+				return `<span class="badge badge-info ${width ? 'w-100' : ''}">Approved</span>`;
 			case "3":
-				return `<span class="badge badge-danger w-100">Denied</span>`;
+				return `<span class="badge badge-danger ${width ? 'w-100' : ''}">Denied</span>`;
 			case "4":
-				return `<span class="badge badge-primary w-100">Cancelled</span>`;
+				return `<span class="badge badge-primary ${width ? 'w-100' : ''}">Cancelled</span>`;
 			case "5":
-				return `<span class="badge badge-secondary w-100">Dropped</span>`;
+				return `<span class="badge badge-secondary ${width ? 'w-100' : ''}">Dropped</span>`;
 			case "6":
-				return `<span class="badge badge-outline-info w-100">For Proposal</span>`;
+				return `<span class="badge badge-outline-info ${width ? 'w-100' : ''}">For Proposal</span>`;
 			case "7":
-				return `<span class="badge badge-outline-info w-100">Reassessment</span>`;
+				return `<span class="badge badge-outline-info ${width ? 'w-100' : ''}">Reassessment</span>`;
 			case "8":
-				return `<span class="badge badge-outline-success w-100" style="width: 100% !important">Assessed</span>`;
+				return `<span class="badge badge-outline-success ${width ? 'w-100' : ''}" style="width: 100% !important">Assessed</span>`;
 			case "9":
-				return `<span class="badge badge-outline-success w-100" style="width: 100% !important">Completed</span>`;
+				return `<span class="badge badge-outline-success ${width ? 'w-100' : ''}" style="width: 100% !important">Completed</span>`;
 			case "0":
 			default:
 				let text = hasPreparedBy ? "Draft" : "Pending";
-				return `<span class="badge badge-warning w-100">${text}</span>`;
+				return `<span class="badge badge-warning ${width ? 'w-100' : ''}">${text}</span>`;
 		}
 	}
 	// ----- END BADGE STATUS -----

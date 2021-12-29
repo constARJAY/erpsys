@@ -19,10 +19,11 @@ function initDataTables() {
   }
   
   var table = $("#tableJobPosting").css({"min-width": "100%"}).removeAttr('width').DataTable({
-      proccessing:    false,
-      serverSide:     false,
-      scrollX:        true,
-      scrollCollapse: true,
+    proccessing: false,
+    serverSide: false,
+    scrollX: true,
+    sorting: [],
+    scrollCollapse: true,
       columnDefs: [
         { targets: 0, width: 100  },
         { targets: 1, width: 150 },
@@ -72,13 +73,15 @@ function tableContent() {
                 jobSlot,
                 salaryPackage,
                 jobStatus,
-                jpt.createdAt` },
+                jpt.createdAt`,
+                orderBy: `FIELD(jpt.jobStatus, 0, 1, 2), COALESCE(jpt.updatedAt, jpt.createdAt)` },
       beforeSend: function() {
           $("#table_content").html(preloader);
           // $("#inv_headerID").text("List of Inventory Item");
       },
       success: function(data) {
       
+        
           let html = `
           <table class="table table-bordered table-striped table-hover" id="tableJobPosting">
               <thead>

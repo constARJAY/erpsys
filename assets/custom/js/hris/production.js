@@ -169,6 +169,9 @@ $(document).ready(function () {
 			projectIDArr.push($(this).val());
 		}) 
 
+		const nonProject = ["Admin Works", "Company ID","Event Management","HR Works","Meeting(Department)","Meeting(General)","Meeting(Officer)","On boarding","Orientation","Payroll Run","Performance Report","Web Portal","Weekly Report"];
+		const nonProjectID = [1, 2,3,4,5,6,7,8,9,10,11,12,13];
+
 		
 		html += projectList.map(project => {
 				
@@ -185,6 +188,19 @@ $(document).ready(function () {
 				
 			
 		})
+
+		if(clientID == 0){
+			for(var loop = 0; loop<nonProjectID.length;loop++){
+				
+				html += `<option 
+					value        = "${nonProjectID[loop]}" 
+					${nonProjectID[loop] == id && "selected"}>
+					${nonProject[loop]}
+				</option>`;
+			
+			}
+		}
+
 		
 		return display ? html : inventoryStorageList;
 	}
@@ -980,7 +996,7 @@ $(document).ready(function () {
 					<div class="dropdown-menu">
 					<a class="dropdown-item btnOverView"  id="${encryptString(productionID)}" code="${productionCode}" href="javascript:void(0);"><i class="fas fa-list-ul"></i> Overview</a>
 					<a class="dropdown-item ${btnClass}"  id="${encryptString(productionID)}" code="${productionCode}" href="javascript:void(0);"><i class="fas fa-eye"></i> View</a>
-					${productionStatus == 0 ? `<a class="dropdown-item"  id="btnSubmit" productionID="${encryptString(productionID)}" code="${productionCode}" revise="${false}" cancel="${false}"  href="javascript:void(0);"><i class="fas fa-paper-plane"></i> Send</a>` : ""}
+					${productionStatus == 0 ? `<a class="dropdown-item"  id="btnSubmit" productionID="${encryptString(productionID)}" code="${productionCode}" revise="${false}" cancel="${false}"  href="javascript:void(0);"><i class="fas fa-paper-plane"></i> Submit</a>` : ""}
 					
 					
 					</div>
@@ -1581,7 +1597,7 @@ $(document).ready(function () {
 							code="${getFormCode("PDN", createdAt, productionID)}"
 							revise="${isRevise}"
 							cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
-							Send
+							Submit
 						</button>`;
 					} else {
 						// button += `
@@ -1862,7 +1878,7 @@ $(document).ready(function () {
 			
 			for(var loop =0;loop<7;loop++){
 
-				console.log(dayEntries.toLowerCase() +"=="+ dayArr[loop])
+				// console.log(dayEntries.toLowerCase() +"=="+ dayArr[loop])
 
 				if(dayEntries.toLowerCase() == dayArr[loop]){
 
@@ -1902,16 +1918,26 @@ $(document).ready(function () {
 		let splitDurationTime = getMiddleDurationTime.split(":");
 		let getNewBreakDurationTime = new Date(0, 0, 0, splitDurationTime[0], splitDurationTime[1], 0);
 
-		let checkBreakTime = moment(getNewCheckBrekTime).isBetween(startDate,endDate,null,'[]');
-		// let checkDurationTime = moment(getNewBreakDurationTime).isBetween(startDate,endDate,null,'[]');
+		console.log(startDate)
+		console.log(endDate)
+
+		console.log("splitcheckTime " +splitcheckTime)
+		console.log("splitDurationTime " +splitDurationTime)
 
 	
 		// check lunch time // 
 		
-		var lunchFrom = new Date(0, 0, 0, 12, 0, 0);
-		var lunchTo = new Date(0, 0, 0, 13, 0, 0);
-		let checkDurationTimeStart = moment(startDate).isBetween(lunchFrom,lunchTo,null,'[]');
-		let checkDurationTimeEnd = moment(endDate).isBetween(lunchFrom,lunchTo,null,'[]');
+
+		let checkDurationTimeStart = moment(startDate).isBetween(getNewCheckBrekTime,getNewBreakDurationTime,null,'[]');
+		let checkDurationTimeEnd = moment(endDate).isBetween(getNewCheckBrekTime,getNewBreakDurationTime,null,'[]');
+
+		console.log("checkDurationTimeStart " + checkDurationTimeStart)
+		console.log("checkDurationTimeEnd " +checkDurationTimeEnd)
+
+		// var lunchFrom = new Date(0, 0, 0, 12, 0, 0);
+		// var lunchTo = new Date(0, 0, 0, 13, 0, 0);
+		// let checkDurationTimeStart = moment(startDate).isBetween(lunchFrom,lunchTo,null,'[]');
+		// let checkDurationTimeEnd = moment(endDate).isBetween(lunchFrom,lunchTo,null,'[]');
 		// end  check lunch time // 
 
 		//check include lunch time//
@@ -1921,8 +1947,28 @@ $(document).ready(function () {
 		var schedTimeTo = new Date(0, 0, 0, splitschedTimeTo[0], splitschedTimeTo[1], 0);
 		let checkIncludeLunchTimeStart = moment(startDate).isBetween(schedTimeFrom,schedTimeTo,null,'[]');
 		let checkIncludeLunchTimeEnd = moment(endDate).isBetween(schedTimeFrom,schedTimeTo,null,'[]');
+
+		console.log("checkIncludeLunchTimeStart " + checkIncludeLunchTimeStart)
+		console.log("checkIncludeLunchTimeEnd " + checkIncludeLunchTimeEnd)
 		//end check include lunch time//
 	
+		// if(checkDurationTimeStart &&  checkDurationTimeEnd ){
+			
+		// 	var totalHours = (parseFloat(hours - 1) + parseFloat((minutes/60))).toFixed(2);
+
+		// }else{
+
+		// 	if(checkDurationTimeStart){
+		// 		var totalHours =  (parseFloat(hours -1) + parseFloat((minutes/60))).toFixed(2);
+		// 	}else{
+		// 		if(checkIncludeLunchTimeStart && checkIncludeLunchTimeEnd){
+		// 			var totalHours =  (parseFloat(hours-1) + parseFloat((minutes/60))).toFixed(2);
+		// 		}else{
+		// 			var totalHours =  (parseFloat(hours) + parseFloat((minutes/60))).toFixed(2);
+		// 		}
+		// 	}
+		// }
+
 		if(checkDurationTimeStart &&  checkDurationTimeEnd ){
 			
 			var totalHours = (parseFloat(hours - 1) + parseFloat((minutes/60))).toFixed(2);
@@ -1932,13 +1978,14 @@ $(document).ready(function () {
 			if(checkDurationTimeStart){
 				var totalHours =  (parseFloat(hours -1) + parseFloat((minutes/60))).toFixed(2);
 			}else{
-				if(checkIncludeLunchTimeStart && checkIncludeLunchTimeEnd){
+				if(checkIncludeLunchTimeStart || checkIncludeLunchTimeEnd){
 					var totalHours =  (parseFloat(hours-1) + parseFloat((minutes/60))).toFixed(2);
 				}else{
 					var totalHours =  (parseFloat(hours) + parseFloat((minutes/60))).toFixed(2);
 				}
 			}
 		}
+
 		return  totalHours > 0 ? totalHours : "0.00";
 	}
 
@@ -2017,7 +2064,7 @@ $(document).ready(function () {
                     <small>${formatAmount(activityHours)} </small>
                 </td>
 				<td>
-                    <small> ${activityLocation || "-"} </small>
+                    <small> ${activityLocation == null || activityLocation ==""  ?  "-" : activityLocation} </small>
                 </td>
 				<td>
                     <small> ${activityClass || "-"} </small>
@@ -2110,12 +2157,11 @@ $(document).ready(function () {
 						: `<input type="text" 
 						class="form-control text-center autoSaved validate" 
 						name="activityLocation" 
-						id="activityLocation0" 
-						placeholder="N/A"
+						id="activityLocation0"
 						data-allowcharacters="[a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][[][]][ ]"
                         minlength="1"
                         maxlength="75"
-						value="${activityLocation}" >
+						value="${activityLocation == null || activityLocation == "" ? "" : activityLocation}" >
 						<div class="d-block invalid-feedback"></div>`}
 							
 						</div>
@@ -2829,7 +2875,7 @@ $(document).ready(function () {
 		html +=`			</tbody>
 						</table>
 					</div>	
-						<small><strong>Total Hours: ${formatAmount(manHoursTotal)}</strong></small>
+						<small class="float-right"><strong>Total Hours: ${formatAmount(manHoursTotal)}</strong></small>
 					<div>
 					</div>
 				</div>

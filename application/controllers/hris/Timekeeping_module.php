@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+date_default_timezone_set('Asia/Manila');
 
 class Timekeeping_module extends CI_Controller {
 
@@ -70,6 +71,7 @@ class Timekeeping_module extends CI_Controller {
         $timekeepingStartDate = $this->input->post("timekeepingStartDate") ?? null;
         $timekeepingEndDate   = $this->input->post("timekeepingEndDate") ?? null;
         $cutOff               = $this->input->post("cutOff") ?? null;
+        $payOut               = $this->input->post("payOut") ?? null;
         $timekeepingStatus    = $this->input->post("timekeepingStatus") ?? null;
         $approversID          = $this->input->post("approversID") ?? null;
         $approversStatus      = $this->input->post("approversStatus") ?? null;
@@ -88,6 +90,7 @@ class Timekeeping_module extends CI_Controller {
             "timekeepingStartDate" => $timekeepingStartDate,
             "timekeepingEndDate"   => $timekeepingEndDate,
             "cutOff"               => $cutOff,
+            "payOut"               => $payOut,
             "timekeepingStatus"    => $timekeepingStatus,
             "approversID"          => $approversID,
             "approversStatus"      => $approversStatus,
@@ -304,6 +307,7 @@ class Timekeeping_module extends CI_Controller {
                             "timekeepingItemStatus" => $status,
                             "createdBy"             => $updatedBy,
                             "updatedBy"             => $updatedBy,
+                            "createdAt"             => date('Y-m-d H:i:s')
                         ];
                         $saveTimekeepingItem = $this->timekeeping->saveTimekeepingItem($timekeepingID, $timekeepingItem);
 
@@ -457,7 +461,7 @@ class Timekeeping_module extends CI_Controller {
                                     $isDateTime = ($col == "timein" || $col == "timeout") ? true : false;
                                     $valid = $this->checkDate($value, $isDateTime);
                                     if (!$valid) {
-                                        $error = "danger|Invalid date format at line $row";
+                                        $error = "danger|Invalid <b>$value</b> date format at line $row";
                                         $errors[] = $error;
                                         $flag = false;
                                         break;

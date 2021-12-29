@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+date_default_timezone_set('Asia/Manila');
 
 class Payroll_module extends CI_Controller {
 
@@ -120,6 +121,7 @@ class Payroll_module extends CI_Controller {
                 $payrollData["timekeepingID"]     = $payroll->timekeepingID;
                 $payrollData["timekeepingCode"]   = $payroll->timekeepingCode;
                 $payrollData["cutOff"]            = $payroll->cutOff;
+                $payrollData["payOut"]            = $payroll->payOut;
             }
         }
 

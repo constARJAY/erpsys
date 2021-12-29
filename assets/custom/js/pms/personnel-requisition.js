@@ -785,7 +785,7 @@ $(document).ready(function() {
 
 		let disabled = readOnly ? "disabled" : "";
 
-		let tmpDepartmentID = departmentID != "" ? departmentID : employeeEDepartmentID;
+		let tmpDepartmentID = departmentID != "" && departmentID != 0 ? departmentID : employeeEDepartmentID;
 	
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
@@ -918,7 +918,7 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>No. of Vacancies ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
-					class="form-control  input-numberLength" 
+					class="form-control  input-numberLength validate" 
 					name="vacancy"
 					id="vacancy"
 					required 
@@ -1139,7 +1139,7 @@ $(document).ready(function() {
 			initDataTables();
 			initAll();
 			designationList(tmpDepartmentID,designationID);
-			requisitionID && requisitionID != 0 &&  $("#designationID").trigger("change");
+			(requisitionID && requisitionID != 0) && (designationID && designationID != 0) &&   $("#designationID").trigger("change");
 			requisitionID && requisitionID != 0 &&  reportEmployeeList(departmentID,personnelReportByID) ;
 			requisitionID && requisitionID != 0 &&  $("[name='personnelOption']:checked").trigger("change");
 

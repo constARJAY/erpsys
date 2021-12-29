@@ -4,7 +4,7 @@ $(document).ready(function () {
 
 
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("payroll register");
+	const moduleApprover = getModuleApprover(113);
 	// ----- END MODULE APPROVER -----
 
 
@@ -301,7 +301,7 @@ $(document).ready(function () {
 			`hprt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hprt.createdAt AS dateCreated,
             payrollStartDate, payrollEndDate`,
 			`hprt.employeeID <> ${sessionID} AND payrollRegisterStatus <> 0 AND payrollRegisterStatus <> 4`,
-			`FIELD(payrollRegisterStatus, 0, 1, 3, 2, 4, 5), COALESCE(hprt.submittedAt, hprt.createdAt)`
+			`FIELD(payrollRegisterStatus, 0, 1, 3, 2, 4, 5), hpt.payrollStartDate DESC, COALESCE(hprt.submittedAt, hprt.createdAt)`
 		);
 
 		let html = `
@@ -397,7 +397,7 @@ $(document).ready(function () {
 			`hprt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hprt.createdAt AS dateCreated,
             payrollStartDate, payrollEndDate`,
 			`hprt.employeeID = 0 OR hprt.employeeID IS NULL OR hprt.employeeID = ${sessionID}`,
-			`FIELD(payrollRegisterStatus, 0, 1, 3, 2, 4, 5), COALESCE(hprt.submittedAt, hprt.createdAt)`
+			`FIELD(payrollRegisterStatus, 0, 1, 3, 2, 4, 5), hpt.payrollStartDate DESC, COALESCE(hprt.submittedAt, hprt.createdAt)`
 		);
 
 		let html = `

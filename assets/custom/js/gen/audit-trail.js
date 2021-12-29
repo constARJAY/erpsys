@@ -3,8 +3,8 @@ $(document).ready(function(){
 
     $(document).on("change", "#select2-modules", function(){
         let moduleID    = $(`option:selected`, this).val();
-		let isForm	    = $(`option:selected`, this).attr("isform");
-        pageContent(isForm);
+		let isCreateUpdate	    = $(`option:selected`, this).attr("isform");
+        pageContent(isCreateUpdate);
     });
     
     $(document).on("click", ".action-list", function(){
@@ -27,6 +27,7 @@ $(document).ready(function(){
 function select2_modules(moduleID = null){
     let tableData       = getTableData("gen_module_list_tbl", "", "moduleApprover = '0' AND moduleID > '3' AND moduleID != '144' ");
     let option          = `<option value="" ${!moduleID ? "selected" : ""} disabled>Select Module</option>`;
+    option              += `<option value="0" ${!moduleID == "0" ? "selected" : ""} >User Authentication</option>`;
     tableData.map((value,index)=>{
         option += `<option value="${value.moduleID}" 
                         isform="${value.moduleApprover != "0" ? "true" : "false"}"
@@ -46,11 +47,11 @@ function select2_modules(moduleID = null){
     
 }
 
-function pageContent(isForm = false){
+function pageContent(isCreateUpdate = false){
     $("#description_div").html(preloader);
     $("#action_div").html(preloader);
-    let actionDiv       =   getActionDiv(isForm);
-    let descriptionDiv  =   getDescriptionDiv(isForm);
+    let actionDiv       =   getActionDiv(isCreateUpdate);
+    let descriptionDiv  =   getDescriptionDiv(isCreateUpdate);
 
     setTimeout(() => {
         $("#description_div").html(descriptionDiv);
@@ -58,71 +59,39 @@ function pageContent(isForm = false){
     }, 200);
 }
 
-function getActionDiv(isForm = "false"){
+function getActionDiv(isCreateUpdate = "false"){
     let html = "";
-    if(isForm == "false"){
+    if(isCreateUpdate == "false"){
         html += `<div class="card my-0 p-2 action-list" dataaction="insert" style="box-shadow: none !important;">
                     <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">CREATE</h6> 
+                        <h6 class="mx-3 module-header py-1 text-gray">Create</h6> 
                     </div>
                 </div>
                 <div class="card my-0 p-2 action-list" dataaction="update" style="box-shadow: none !important;">
                     <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">MODIFIED</h6> 
+                        <h6 class="mx-3 module-header py-1 text-gray">Modified</h6> 
                     </div>
                 </div>`;
     }else{
-         html += `<div class="card my-0 p-2 action-list action-create" style="box-shadow: none !important;">
-                    <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">CREATE FORM</h6> 
+         html += `  
+                    <div class="card my-0 p-2 action-list" dataaction="login" style="box-shadow: none !important;">
+                        <div class="d-flex justify-content-start align-items-center">
+                            <h6 class="mx-3 module-header py-1 text-gray">Login</h6> 
+                        </div>
                     </div>
-                </div>
-                <div class="card my-0 p-2 action-list action-save" style="box-shadow: none !important;">
-                    <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">SAVE FORM</h6> 
+                    <div class="card my-0 p-2 action-list" dataaction="logout" style="box-shadow: none !important;">
+                        <div class="d-flex justify-content-start align-items-center">
+                            <h6 class="mx-3 module-header py-1 text-gray">Logout</h6> 
+                        </div>
                     </div>
-                </div>
-                <div class="card my-0 p-2 action-list action-submit" style="box-shadow: none !important;">
-                    <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">SUBMIT FORM</h6> 
-                    </div>
-                </div>
-                <div class="card my-0 p-2 action-list action-cancel" style="box-shadow: none !important;">
-                    <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">CANCEL FORM</h6> 
-                    </div>
-                </div>
-                <div class="card my-0 p-2 action-list action-approve" style="box-shadow: none !important;">
-                    <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">APPROVED FORM</h6> 
-                    </div>
-                </div>
-                <div class="card my-0 p-2 action-list action-denied" style="box-shadow: none !important;">
-                    <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">DENIED FORM</h6> 
-                    </div>
-                </div>
-                <div class="card my-0 p-2 action-list action-revise" style="box-shadow: none !important;">
-                    <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">REVISED DENIED FORM</h6> 
-                    </div>
-                </div>
-                <div class="card my-0 p-2 action-list action-revise-cancel" style="box-shadow: none !important;">
-                    <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">REVISED CANCELLED FORM</h6> 
-                    </div>
-                </div>
-                <div class="card my-0 p-2 action-list action-print" style="box-shadow: none !important;">
-                    <div class="d-flex justify-content-start align-items-center">
-                        <h6 class="mx-3 module-header py-1 text-gray">PRINT DOCUMENT</h6> 
-                    </div>
-                </div>`;
+                    
+                    `;
     }
     return html;
     
 }
 
-function getDescriptionDiv(isForm = "false"){
+function getDescriptionDiv(isCreateUpdate = "false"){
     let html    = `<div class="row">
                         <div class="col-4"></div>
                         <div class="col-4"><img class="img-fluid" src="${base_url}assets/modal/please-select.gif" alt=""> <h6 class="text-primary text-center font-weight-bold">DESCRIPTION</h6>
@@ -243,9 +212,29 @@ function getDescriptionTable(moduleID, action){
                     </div>
                     `;
     }else{
-        html += `
-        
-            `;
+        let tableRow  = "";
+        tableData.filter(value => value.auditType == action).map((value,index)=>{
+            tableRow    += `<tr>`;
+            tableRow    += `    <td>${moment(value.createdAt).format(`MMMM DD, YYYY hh:mm:ss A`)}</td>
+                                <td>${value.auditDescription}</td>`;
+            tableRow    += `</tr>`;
+        });
+
+
+        html += `<div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover" id="${tableID}">
+                            <thead>
+                                <tr>
+                                    <th>Date and Time</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRow}
+                            </tbody>
+                        </table>
+                    </div>
+                    `;
     }
     return html;
 }
