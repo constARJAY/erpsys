@@ -22,7 +22,7 @@ class Login extends CI_Controller {
         $userType       =   $this->input->post("userType");
         $sessionID      =   $this->input->post("userAccountID");
         $sessionName    =   $userType == 1 ? "adminSessionID" : "otherSessionID";
-        $url            = base_url("approval_setup");
+        $url            = base_url("hris/employee_dashboard");
         if ($this->session->set_userdata($sessionName, $sessionID)) {
             insertAudit("login");
             $url = $this->session->has_userdata("request_url") ? $this->session->userdata("request_url") : $url;
