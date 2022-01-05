@@ -25,7 +25,7 @@ $(document).ready(function() {
                     if(result.length != 0){
                         messageAlert      = `
                                         <div class="alert alert-danger ">
-                                                <strong>ERROR: </strong> The email of this user is unverified." - for unverfied users.
+                                                <strong>ERROR: </strong> The email of this user is unverified.
                                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>

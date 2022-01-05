@@ -46,6 +46,7 @@ $(document).ready(function(){
             updateAttr();
             initDataTables();
             initAll();
+            initExamDate();
         }, 500);    
     });
 
@@ -98,7 +99,7 @@ $(document).ready(function(){
     });
 
     $(document).on("click", ".btnUpdate", function(){
-        let thisEvent       = $(this);
+        let thisEvent       = $(this); 
         let givenAction     = thisEvent.attr("givenaction");
         let action          = givenAction == "application" ? false : true;
         let data            = getApplicantListFormData(givenAction,thisEvent);
@@ -652,13 +653,13 @@ function updateSelect(){
         let html = `
         <div class="body">
             <ul class="nav nav-tabs">                                
-                <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tab-basic-information">Basic Information</a></li>
-                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-ph-id-information">PH ID Information</a></li>
-                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-employment-history">Employment History</a></li>
-                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-organization-joined">Organization Joined</a></li>
-                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-exam-taken">Exam Taken</a></li>
-                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-seminars">Seminars</a></li>
-                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-character-reference">Character Reference</a></li>
+                <li class="nav-item text-center" style="width: 13% !important; font-size:95%;"><a class="nav-link active" data-toggle="tab" href="#tab-basic-information">Basic <br> Information</a></li>
+                <li class="nav-item text-center" style="width: 13% !important; font-size:95%;"><a class="nav-link" data-toggle="tab" href="#tab-ph-id-information">PH ID <br> Information</a></li>
+                <li class="nav-item text-center" style="width: 13% !important; font-size:95%;"><a class="nav-link" data-toggle="tab" href="#tab-employment-history">Employment <br> History</a></li>
+                <li class="nav-item text-center" style="width: 13% !important; font-size:95%;"><a class="nav-link" data-toggle="tab" href="#tab-organization-joined">Organization <br> Joined</a></li>
+                <li class="nav-item text-center" style="width: 13% !important; font-size:95%;"><a class="nav-link" data-toggle="tab" href="#tab-exam-taken">Exam <br> Taken</a></li>
+                <li class="nav-item text-center" style="width: 13% !important; font-size:95%;"><a class="nav-link" data-toggle="tab" href="#tab-seminars">Seminars <br> Certification</a></li>
+                <li class="nav-item text-center" style="width: 13% !important; font-size:95%;"><a class="nav-link" data-toggle="tab" href="#tab-character-reference">Character <br> Reference</a></li>
             </ul>                        
             <div class="tab-content mt-3">
                 ${getInformationTab(data)}
@@ -1227,9 +1228,10 @@ function updateSelect(){
         let tableBodyData =  getApplicationRow();
         if(data){
             if(data.length > 0){
+                let lastIndex = parseInt(data.length) - 1; 
                 tableBodyData = "";
-                data.map(value=>{
-                    tableBodyData +=  getApplicationRow(value);
+                data.map((value,index)=>{
+                    tableBodyData +=  getApplicationRow(value, lastIndex == index);
                 });
             }
         }
@@ -1268,7 +1270,7 @@ function updateSelect(){
         return html;
     }
 
-    function getApplicationRow(data = false){
+    function getApplicationRow(data = false, isLastIndex = false){
         let {
             applicantID                     =   "",
             applicantInterviewerProgression =   "",
@@ -1305,7 +1307,7 @@ function updateSelect(){
                     <td>
                         <select class="form-control validate select2 w-100" tabtype="application"
                             name="applicationStatus" disabled>
-                            ${getApplicationStatusOption(applicantInterviewerStatus)}
+                            ${getApplicationStatusOption(applicantInterviewerStatus, isLastIndex)}
                         </select>
                     </td>
                 </tr>
@@ -1339,7 +1341,7 @@ function getCardExamination(){
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
                                                 </div>
-                                                <input type="button" class="form-control daterange text-left" name = "examDate" id="examDate" value="${moment().format("MMMM DD, YYYY")}">
+                                                <input type="button" class="form-control text-left" name = "examDate" id="examDate" value="${moment().format("MMMM DD, YYYY")}">
                                                 <div class="input-group-prepend">
                                                     <button type="button" class="btn p-2 btn-submit" id="generateExam" 
                                                 title="Generate Examination URL" applicantid="${getApplicantID}" 
@@ -1384,7 +1386,7 @@ function getExamination(){
             tableRow += `
                             <tr>
                                 <td>
-                                   Total Pecentage :
+                                   Total Percentage :
                                 </td>
                                 <td class="text-right"><strong>${percentage} %</strong></td>
                             </tr>
@@ -1908,4 +1910,16 @@ function generateExamURL(data){
     }
     
     return result;
+}
+
+function initExamDate(){
+    $(`#examDate`).daterangepicker({
+        	singleDatePicker: true,
+        	showDropdowns: true,
+        	autoApply: true,
+            minDate: moment().subtract(10, 'd'),
+        	locale: {
+        		format: 'MMMM DD, YYYY'
+        	},
+        });
 }

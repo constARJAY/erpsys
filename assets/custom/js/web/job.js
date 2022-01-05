@@ -105,7 +105,7 @@ $(document).ready(function() {
                                         <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-globe"></i> ${companyProfile[0].companyWebsite    || "www.theblackcoders.com"}</span>
                                         <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-phone"></i> ${companyProfile[0].companyMobile     || companyProfile[0].companyTelephone || "0987-987-3211" }</span>
                                         <span class='p-r-20'  style="font-size:13px; color:#888888;"><i class="fas fa-envelope"></i> ${ companyProfile[0].companyEmail  || "hr@theblackcoders.com"}</span>
-                                        ${pending=="0" ? `<button class="btn btn-save pull-right" style="width:160px; line-height:1;" designationid="${designationID||""}" id="btnApply"><i class="fas fa-send"></i> Apply for job</button>` : ''}
+                                        ${pending=="0" ? `<button class="btn btn-save pull-right" style="width:160px; line-height:1;" designationid="${designationID||""}" id="btnApply"><i class="fas fa-send"></i> Apply Now</button>` : ''}
                                     </div>
                                 <hr>
                             </div>

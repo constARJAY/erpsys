@@ -379,7 +379,7 @@ $(document).ready(function() {
                                                                     WHEN personnelOption = '3' THEN 'Other Justifications'
                                                                 END as jobType,
                                                             (SELECT applicantInterviewerProgression FROM hris_applicant_interviewer_tbl AS sub_hait 
-                                                                    WHERE sub_hait.applicantInterviewerStatus IS NOT NULL AND sub_hait.applicantID = '${applicantID}' ORDER BY sub_hait.updatedAt DESC LIMIT 1) 
+                                                                    WHERE sub_hait.applicantInterviewerStatus IS NOT NULL AND sub_hait.applicantID = '${applicantID}' ORDER BY sub_hait.applicantInterviewerID DESC LIMIT 1) 
                                                                 AS appJobStatus,
                                                             salaryPackage as salaryRange`, 
                                                         `applicantID = ${applicantID}` );
@@ -2738,7 +2738,7 @@ $(document).ready(function() {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₱</span>
                                     </div>
-                                        <input type="text" class="form-control amount" min="1" max="99999999" 
+                                        <input type="text" class="form-control amount" max="99999999" 
                                             data-allowcharacters="[0-9][.]" placeholder="0.00" 
                                             autocomplete="off" 
                                             minlength="2"
