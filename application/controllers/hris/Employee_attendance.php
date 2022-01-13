@@ -61,6 +61,13 @@ class Employee_attendance extends CI_Controller {
         echo json_encode($this->employeeattendance->getEmployeeNotInDevice());
     }
 
+    
+    public function getOverbreak()
+    {
+        $employeeID = $this->input->post("employeeID");
+        echo json_encode(getBreakOpposeData($employeeID));
+    }
+
 
 }
 

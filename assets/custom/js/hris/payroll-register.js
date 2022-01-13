@@ -664,11 +664,13 @@ $(document).ready(function () {
 		let totalLoan                 = 0;
 		let totalMandate              = 0;
 		let totalOtherDeduction       = 0;
+		let totalTotalDeduction       = 0;
 		let totalNetPay               = 0;
 		let totalSalaryWages          = 0;
 		let totalSalaryOnBank         = 0;
 		let totalOnHoldSalary         = 0;
 		let totalSalaryOnCheck        = 0;
+		let totalSalaryRelease        = 0;
 
 		let grandTotalOnHoldSalary  = 0;
 		let grandTotalSalaryOnCheck = 0;
@@ -708,11 +710,13 @@ $(document).ready(function () {
 					loanDeduction          = 0,
 					totalMandates          = 0,
 					otherDeductions        = 0,
+					totalDeductions        = 0,
 					netPay                 = 0,
 					salaryWages            = 0,
 					salaryOnBank           = 0,
 					salaryOnCheck          = 0,
 					onHoldSalary           = 0,
+					salaryRelease          = 0,
 					totalSalary            = 0,
 				} = item;
 
@@ -742,11 +746,13 @@ $(document).ready(function () {
 				totalLoan                 += (+loanDeduction);
 				totalMandate              += (+totalMandates);
 				totalOtherDeduction       += (+otherDeductions);
+				totalTotalDeduction       += (+totalDeductions);
 				totalNetPay               += (+netPay);
 				totalSalaryWages          += (+salaryWages);
 				totalSalaryOnBank         += (+salaryOnBank);
 				totalOnHoldSalary         += (+onHoldSalary);
 				totalSalaryOnCheck        += (+salaryOnCheck);
+				totalSalaryRelease        += (+salaryRelease);
 
 				tbodyHTML += `
 				<tr payrollRegisterItemID="${payrollRegisterItemID}"
@@ -779,12 +785,14 @@ $(document).ready(function () {
 					<td class="text-right">${formatAmount(loanDeduction, true)}</td>
 					<td class="text-right totalMandates">${formatAmount(totalMandates, true)}</td>
 					<td class="text-right">${formatAmount(otherDeductions, true)}</td>
+					<td class="text-right">${formatAmount(totalDeductions, true)}</td>
 					<td class="text-right netPay">${formatAmount(netPay, true)}</td>
 					<td class="text-right salaryWages">${formatAmount(salaryWages, true)}</td>
 					<td class="text-right">${formatAmount(allowance, true)}</td>
 					<td class="text-right salaryOnBank">${formatAmount(salaryOnBank, true)}</td>
 					<td class="text-right onHoldSalary">${formatAmount(onHoldSalary, true)}</td>
 					<td class="text-right salaryOnCheck">${formatAmount(salaryOnCheck, true)}</td>
+					<td class="text-right salaryOnCheck">${formatAmount(salaryRelease, true)}</td>
 				</tr>`;
 			})
 		}
@@ -799,62 +807,66 @@ $(document).ready(function () {
 					<thead>
 						<tr>
 							<th style="z-index: 2;">Employee Name</th>
-							<th class="thPay">Total Days</th>
-							<th class="thPay">Basic Salary</th>
-							<th class="thPay">Holiday</th>
-							<th class="thPay">Allowance</th>
-							<th class="thPay">Paid Leave</th>
-							<th class="thPay">Overtime</th>
-							<th class="thAdjust2">Additional Adjustment</th>
-							<th class="thAdjust">Night Differential</th>
-							<th class="thPay">SUBTOTAL</th>
-							<th class="thPay">Late/Undertime</th>
-							<th class="thPay">LWOP</th>
-							<th class="thPay">GROSS PAY</th>
-							<th class="thPay">SSS</th>
-							<th class="thPay">PHIC</th>
-							<th class="thPay">HDMF</th>
-							<th class="thPay">VTAX</th>
-							<th class="thPay">LOANS</th>
-							<th class="thAdjust">TOTAL MANDATES</th>
-							<th class="thAdjust">Other Deductions</th>
-							<th class="thPay">NET PAY</th>
-							<th class="thAdjust">Salary and Wages</th>
-							<th class="thAdjust">Allowance</th>
-							<th class="thAdjust">Salary on Bank</th>
-							<th class="thAdjust">On Hold Salary</th>
-							<th class="thAdjust">Salary on Check</th>
+							<th class="thPay" style="background: #FBD773;">Total Days</th>
+							<th class="thPay" style="background: #C5E8B7;">Basic Salary</th>
+							<th class="thPay" style="background: #C5E8B7;">Holiday</th>
+							<th class="thPay" style="background: #C5E8B7;">Allowance</th>
+							<th class="thPay" style="background: #C5E8B7;">Paid Leave</th>
+							<th class="thPay" style="background: #C5E8B7;">Overtime</th>
+							<th class="thAdjust2" style="background: #C5E8B7;">Additional Adjustment</th>
+							<th class="thAdjust" style="background: #C5E8B7;">Night Differential</th>
+							<th class="thPay" style="background: #C5E8B7;">Subtotal</th>
+							<th class="thPay" style="background: #83D475;">Late/Undertime</th>
+							<th class="thPay" style="background: #83D475;">LWOP</th>
+							<th class="thPay" style="background: #57C84D;">GROSS PAY</th>
+							<th class="thPay" style="background: #FCAAB5;">SSS</th>
+							<th class="thPay" style="background: #FCAAB5;">PHIC</th>
+							<th class="thPay" style="background: #FCAAB5;">HDMF</th>
+							<th class="thAdjust" style="background: #FCAAB5;">Withholding Tax</th>
+							<th class="thPay" style="background: #FCAAB5;">Loans</th>
+							<th class="thAdjust" style="background: #FCAAB5;">Total Mandates</th>
+							<th class="thAdjust" style="background: #FB8797;">Other Deduction</th>
+							<th class="thAdjust" style="background: #FA657A;">Total Deduction</th>
+							<th class="thPay" style="background: #48C7C3;">NET PAY</th>
+							<th class="thAdjust" style="background: #CBD8F1;">Salary and Wages</th>
+							<th class="thAdjust" style="background: #BECEEE;">Allowance</th>
+							<th class="thAdjust" style="background: #A4BAE7;">Salary on Bank</th>
+							<th class="thAdjust" style="background: #A4BAE7;">On Hold Salary</th>
+							<th class="thAdjust" style="background: #8AA7E0;">Salary on Check</th>
+							<th class="thAdjust" style="background: #4598DA;">Salary Release</th>
 						</tr>
 					</thead>
 					<tbody>${tbodyHTML}</tbody>
 					<tfoot>
 						<tr class="font-weight-bold">
 							<th class="text-center" style="z-index: 2;">TOTAL</th>
-							<td class="text-right">&nbsp;</td>
-							<td class="text-right">${formatAmount(totalBasicSalary, true)}</td>
-							<td class="text-right">${formatAmount(totalHoliday, true)}</td>
-							<td class="text-right">${formatAmount(totalAllowance, true)}</td>
-							<td class="text-right">${formatAmount(totalPaidLeave, true)}</td>
-							<td class="text-right">${formatAmount(totalOvertime, true)}</td>
-							<td class="text-right">${formatAmount(totalAdditionalAdjustment, true)}</td>
-							<td class="text-right">${formatAmount(totalNightDifferential, true)}</td>
-							<td class="text-right">${formatAmount(totalSubtotal, true)}</td>
-							<td class="text-right">${formatAmount(totalLateUndertime, true)}</td>
-							<td class="text-right">${formatAmount(totalLwop, true)}</td>
-							<td class="text-right">${formatAmount(totalGrossPay, true)}</td>
-							<td class="text-right">${formatAmount(totalSss, true)}</td>
-							<td class="text-right">${formatAmount(totalPhic, true)}</td>
-							<td class="text-right">${formatAmount(totalHdmf, true)}</td>
-							<td class="text-right">${formatAmount(totalVtax, true)}</td>
-							<td class="text-right">${formatAmount(totalLoan, true)}</td>
-							<td class="text-right">${formatAmount(totalMandate, true)}</td>
-							<td class="text-right">${formatAmount(totalOtherDeduction, true)}</td>
-							<td class="text-right">${formatAmount(totalNetPay, true)}</td>
-							<td class="text-right">${formatAmount(totalSalaryWages, true)}</td>
-							<td class="text-right">${formatAmount(totalAllowance, true)}</td>
-							<td class="text-right">${formatAmount(totalSalaryOnBank, true)}</td>
-							<td class="text-right">${formatAmount(totalOnHoldSalary, true)}</td>
-							<td class="text-right">${formatAmount(totalSalaryOnCheck, true)}</td>
+							<td class="text-right" style="background: #FBD773;">&nbsp;</td>
+							<td class="text-right" style="background: #C5E8B7;">${formatAmount(totalBasicSalary, true)}</td>
+							<td class="text-right" style="background: #C5E8B7;">${formatAmount(totalHoliday, true)}</td>
+							<td class="text-right" style="background: #C5E8B7;">${formatAmount(totalAllowance, true)}</td>
+							<td class="text-right" style="background: #C5E8B7;">${formatAmount(totalPaidLeave, true)}</td>
+							<td class="text-right" style="background: #C5E8B7;">${formatAmount(totalOvertime, true)}</td>
+							<td class="text-right" style="background: #C5E8B7;">${formatAmount(totalAdditionalAdjustment, true)}</td>
+							<td class="text-right" style="background: #C5E8B7;">${formatAmount(totalNightDifferential, true)}</td>
+							<td class="text-right" style="background: #C5E8B7;">${formatAmount(totalSubtotal, true)}</td>
+							<td class="text-right" style="background: #83D475;">${formatAmount(totalLateUndertime, true)}</td>
+							<td class="text-right" style="background: #83D475;">${formatAmount(totalLwop, true)}</td>
+							<td class="text-right" style="background: #57C84D;">${formatAmount(totalGrossPay, true)}</td>
+							<td class="text-right" style="background: #FCAAB5;">${formatAmount(totalSss, true)}</td>
+							<td class="text-right" style="background: #FCAAB5;">${formatAmount(totalPhic, true)}</td>
+							<td class="text-right" style="background: #FCAAB5;">${formatAmount(totalHdmf, true)}</td>
+							<td class="text-right" style="background: #FCAAB5;">${formatAmount(totalVtax, true)}</td>
+							<td class="text-right" style="background: #FCAAB5;">${formatAmount(totalLoan, true)}</td>
+							<td class="text-right" style="background: #FCAAB5;">${formatAmount(totalMandate, true)}</td>
+							<td class="text-right" style="background: #FB8797;">${formatAmount(totalOtherDeduction, true)}</td>
+							<td class="text-right" style="background: #FA657A;">${formatAmount(totalTotalDeduction, true)}</td>
+							<td class="text-right" style="background: #48C7C3;">${formatAmount(totalNetPay, true)}</td>
+							<td class="text-right" style="background: #CBD8F1;">${formatAmount(totalSalaryWages, true)}</td>
+							<td class="text-right" style="background: #BECEEE;">${formatAmount(totalAllowance, true)}</td>
+							<td class="text-right" style="background: #A4BAE7;">${formatAmount(totalSalaryOnBank, true)}</td>
+							<td class="text-right" style="background: #A4BAE7;">${formatAmount(totalOnHoldSalary, true)}</td>
+							<td class="text-right" style="background: #8AA7E0;">${formatAmount(totalSalaryOnCheck, true)}</td>
+							<td class="text-right" style="background: #4598DA;">${formatAmount(totalSalaryRelease, true)}</td>
 						</tr>
 					</tfoot>
 				</table>
@@ -933,6 +945,8 @@ $(document).ready(function () {
 
 		let disabled = readOnly ? "disabled" : "";
 		let button = adjustment != 1 ? formButtons(data, isRevise, isFromCancelledDocument) : "";
+
+		let referenceNo = `<br><a href="${base_url}hris/payroll_module?view_id=${encryptString(payrollID)}" target="_blank">${payrollCode}</a>`;
 
 		let startDate   = moment(payrollStartDate).format("MMMM DD, YYYY");
 		let endDate     = moment(payrollEndDate).format("MMMM DD, YYYY");
@@ -1027,7 +1041,8 @@ $(document).ready(function () {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Reference No.</label>
-                    <input type="text" class="form-control" disabled value="${payrollCode}">
+                    <!-- <input type="text" class="form-control" disabled value="${payrollCode}"> -->
+					${referenceNo}
                 </div>
             </div>
             <div class="col-md-8 col-sm-12">

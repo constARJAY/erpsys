@@ -71,6 +71,7 @@ class Timekeeping_module extends CI_Controller {
         $timekeepingStartDate = $this->input->post("timekeepingStartDate") ?? null;
         $timekeepingEndDate   = $this->input->post("timekeepingEndDate") ?? null;
         $cutOff               = $this->input->post("cutOff") ?? null;
+        $deduction            = $this->input->post("deduction") ?? null;
         $payOut               = $this->input->post("payOut") ?? null;
         $timekeepingStatus    = $this->input->post("timekeepingStatus") ?? null;
         $approversID          = $this->input->post("approversID") ?? null;
@@ -90,6 +91,7 @@ class Timekeeping_module extends CI_Controller {
             "timekeepingStartDate" => $timekeepingStartDate,
             "timekeepingEndDate"   => $timekeepingEndDate,
             "cutOff"               => $cutOff,
+            "deduction"            => $deduction,
             "payOut"               => $payOut,
             "timekeepingStatus"    => $timekeepingStatus,
             "approversID"          => $approversID,
@@ -150,53 +152,62 @@ class Timekeeping_module extends CI_Controller {
 
                     $timekeepingProduction = [];
                     foreach($items as $item) {
-                        $employeeID            = $item["employeeID"] ?? null;
-                        $workingDays           = $item["workingDays"] ?? 0;
-                        $scheduleDate          = $item["scheduleDate"] ?? null;
-                        $scheduleIn            = $item["scheduleIn"] ?? null;
-                        $scheduleOut           = $item["scheduleOut"] ?? null;
-                        $scheduleBreakDuration = $item["scheduleBreakDuration"] ?? null;
-                        $scheduleDuration      = $item["scheduleDuration"] ?? 0;
-                        $restDay               = $item["restDay"];
-                        $finalCheckIn          = $item["finalCheckIn"] ?? null;
-                        $finalCheckOut         = $item["finalCheckOut"] ?? null;
-                        $checkIn               = $item["checkIn"] ?? null;
-                        $checkOut              = $item["checkOut"] ?? null;
-                        $noTimeIn              = $item["noTimeIn"] ?? null;
-                        $noTimeOut             = $item["noTimeOut"] ?? null;
-                        $noInOutID             = $item["noInOutID"] ?? null;
-                        $noInOutReference      = $item["noInOutReference"] ?? null;
-                        $overtimeIn            = $item["overtimeIn"] ?? null;
-                        $overtimeOut           = $item["overtimeOut"] ?? null;
-                        $overtimeBreakDuration = $item["overtimeBreakDuration"] ?? null;
-                        $overtimeID            = $item["overtimeID"] ?? null;
-                        $overtimeReference     = $item["overtimeReference"] ?? null;
-                        $leaveIn               = $item["leaveIn"] ?? null;
-                        $leaveOut              = $item["leaveOut"] ?? null;
-                        $leaveID               = $item["leaveID"] ?? null;
-                        $leaveReference        = $item["leaveReference"] ?? null;
-                        $leaveType             = $item["leaveType"] ?? null;
-                        $leaveWorkingDay       = $item["leaveWorkingDay"] ?? null;
-                        $leaveDuration         = $item["leaveDuration"] ?? null;
-                        $checkDuration         = $item["checkDuration"] ?? null;
-                        $basicHours            = $item["basicHours"] ?? null;
-                        $overtimeHours         = $item["overtimeHours"] ?? null;
-                        $nightDifferential     = $item["nightDifferential"] ?? null;
-                        $totalHours            = $item["totalHours"] ?? null;
-                        $status                = $item["status"] ?? null;
+                        $employeeID                     = $item["employeeID"] ?? null;
+                        $workingDays                    = $item["workingDays"] ?? 0;
+                        $scheduleDate                   = $item["scheduleDate"] ?? null;
+                        $scheduleIn                     = $item["scheduleIn"] ?? null;
+                        $scheduleOut                    = $item["scheduleOut"] ?? null;
+                        $scheduleBreakDuration          = $item["scheduleBreakDuration"] ?? null;
+                        $scheduleDuration               = $item["scheduleDuration"] ?? 0;
+                        $dayType                        = $item["dayType"];
+                        $restDay                        = $item["restDay"];
+                        $finalCheckIn                   = $item["finalCheckIn"] ?? null;
+                        $finalCheckOut                  = $item["finalCheckOut"] ?? null;
+                        $checkIn                        = $item["checkIn"] ?? null;
+                        $checkOut                       = $item["checkOut"] ?? null;
+                        $noTimeIn                       = $item["noTimeIn"] ?? null;
+                        $noTimeOut                      = $item["noTimeOut"] ?? null;
+                        $noInOutID                      = $item["noInOutID"] ?? null;
+                        $noInOutReference               = $item["noInOutReference"] ?? null;
+                        $overtimeIn                     = $item["overtimeIn"] ?? null;
+                        $overtimeOut                    = $item["overtimeOut"] ?? null;
+                        $overtimeBreakDuration          = $item["overtimeBreakDuration"] ?? null;
+                        $overtimeID                     = $item["overtimeID"] ?? null;
+                        $overtimeReference              = $item["overtimeReference"] ?? null;
+                        $leaveIn                        = $item["leaveIn"] ?? null;
+                        $leaveOut                       = $item["leaveOut"] ?? null;
+                        $leaveID                        = $item["leaveID"] ?? null;
+                        $leaveReference                 = $item["leaveReference"] ?? null;
+                        $leaveType                      = $item["leaveType"] ?? null;
+                        $leaveWorkingDay                = $item["leaveWorkingDay"] ?? null;
+                        $leaveDuration                  = $item["leaveDuration"] ?? null;
+                        $checkDuration                  = $item["checkDuration"] ?? null;
+                        $basicHours                     = $item["basicHours"] ?? null;
+                        $overtimeHours                  = $item["overtimeHours"] ?? null;
+                        $nightDifferentialHours         = $item["nightDifferentialHours"] ?? null;
+                        $overtimeNightDifferentialHours = $item["overtimeNightDifferentialHours"] ?? null;
+                        $totalHours                     = $item["totalHours"] ?? null;
+                        $status                         = $item["status"] ?? null;
 
-                        $averageDate     = $this->timekeeping->getAverageDate($scheduleIn, $scheduleOut, $scheduleBreakDuration);
-                        $isMorningLeave  = $this->timekeeping->isMorningLeave($scheduleIn, $scheduleOut, $scheduleBreakDuration, $checkIn);
-                        $tempScheduleIn  = $isMorningLeave ? $averageDate : $scheduleIn;
-                        $tempScheduleOut = $isMorningLeave ? $scheduleOut : $averageDate;
+                        $tempScheduleIn  = $scheduleIn;
+                        $tempScheduleOut = $scheduleOut;
+                        if ((float) $leaveDuration > 0) {
+                            $averageDate     = $this->timekeeping->getAverageDate($scheduleIn, $scheduleOut, $scheduleBreakDuration);
+                            $isMorningLeave  = $this->timekeeping->isMorningLeave($scheduleIn, $scheduleOut, $scheduleBreakDuration, $checkIn);
+                            $tempScheduleIn  = $isMorningLeave ? $averageDate : $scheduleIn;
+                            $tempScheduleOut = $isMorningLeave ? $scheduleOut : $averageDate;
+                        }
 
-                        $lateUndertimeDuration = $this->getLateUndertimeDuration($tempScheduleIn, $tempScheduleOut, $scheduleDuration, $finalCheckIn, $finalCheckOut);
-                        $lateDuration      = $lateUndertimeDuration["lateDuration"] ?? 0;
-                        $lateDuration      = $lateDuration > $scheduleBreakDuration ? $lateDuration - $scheduleBreakDuration : $lateDuration;
-                        $undertimeDuration = $lateUndertimeDuration["undertimeDuration"] ?? 0;
-                        
+                        $lateDuration = $undertimeDuration = 0;
 
-                        $dayType = $this->timekeeping->getDayType($scheduleDate);
+                        if (($status != "NO_SCHEDULE" || $status != "REST_DAY") && ((float) $basicHours) == 0) {
+                            $lateDuration = $scheduleDuration;
+                        } else {
+                            $lateUndertimeDuration = $this->getLateUndertimeDuration($tempScheduleIn, $tempScheduleOut, $scheduleDuration, $finalCheckIn, $finalCheckOut);
+                            $lateDuration          = $lateUndertimeDuration["lateDuration"] ?? 0;
+                            $lateDuration          = $lateDuration > $scheduleBreakDuration ? $lateDuration - $scheduleBreakDuration : $lateDuration;
+                            $undertimeDuration     = $lateUndertimeDuration["undertimeDuration"] ?? 0;
+                        }
 
                         $tempCheckDuration = getDuration($finalCheckIn, $finalCheckOut);
                         $tempBreakDuration = $tempCheckDuration > ($scheduleDuration / 2) ? $scheduleBreakDuration : 0;
@@ -231,131 +242,134 @@ class Timekeeping_module extends CI_Controller {
                             ];
                         }
 
-                        $production = $this->timekeeping->getProduction($dayType, $restDay == '1', $timeArray); // GET PRODUCTION
-
-                        $odBrHours    = $basicHours > 0 ? $production["odBrHours"]    ?? 0 : 0;
-						$odOrHours    = $basicHours > 0 ? $production["odOrHours"]    ?? 0 : 0;
-						$odNrHours    = $basicHours > 0 ? $production["odNrHours"]    ?? 0 : 0;
-						$odBrrHours   = $basicHours > 0 ? $production["odBrrHours"]   ?? 0 : 0;
-						$odOrrHours   = $basicHours > 0 ? $production["odOrrHours"]   ?? 0 : 0;
-						$odNrrHours   = $basicHours > 0 ? $production["odNrrHours"]   ?? 0 : 0;
-						$sdBrHours    = $basicHours > 0 ? $production["sdBrHours"]    ?? 0 : 0;
-						$sdOrHours    = $basicHours > 0 ? $production["sdOrHours"]    ?? 0 : 0;
-						$sdNrHours    = $basicHours > 0 ? $production["sdNrHours"]    ?? 0 : 0;
-						$sdBrrHours   = $basicHours > 0 ? $production["sdBrrHours"]   ?? 0 : 0;
-						$sdOrrHours   = $basicHours > 0 ? $production["sdOrrHours"]   ?? 0 : 0;
-						$sdNrrHours   = $basicHours > 0 ? $production["sdNrrHours"]   ?? 0 : 0;
-						$rhBrHours    = $basicHours > 0 ? $production["rhBrHours"]    ?? 0 : 0;
-						$rhOrHours    = $basicHours > 0 ? $production["rhOrHours"]    ?? 0 : 0;
-						$rhNrHours    = $basicHours > 0 ? $production["rhNrHours"]    ?? 0 : 0;
-						$rhBrrHours   = $basicHours > 0 ? $production["rhBrrHours"]   ?? 0 : 0;
-						$rhOrrHours   = $basicHours > 0 ? $production["rhOrrHours"]   ?? 0 : 0;
-						$rhNrrHours   = $basicHours > 0 ? $production["rhNrrHours"]   ?? 0 : 0;
-						$dhBrHours    = $basicHours > 0 ? $production["dhBrHours"]    ?? 0 : 0;
-						$dhOrHours    = $basicHours > 0 ? $production["dhOrHours"]    ?? 0 : 0;
-						$dhNrHours    = $basicHours > 0 ? $production["dhNrHours"]    ?? 0 : 0;
-						$dhBrrHours   = $basicHours > 0 ? $production["dhBrrHours"]   ?? 0 : 0;
-						$dhOrrHours   = $basicHours > 0 ? $production["dhOrrHours"]   ?? 0 : 0;
-						$dhNrrHours   = $basicHours > 0 ? $production["dhNrrHours"]   ?? 0 : 0;
-						$odOrNrHours  = $basicHours > 0 ? $production["odOrNrHours"]  ?? 0 : 0;
-						$odOrNrrHours = $basicHours > 0 ? $production["odOrNrrHours"] ?? 0 : 0;
-						$sdOrNrHours  = $basicHours > 0 ? $production["sdOrNrHours"]  ?? 0 : 0;
-						$sdOrNrrHours = $basicHours > 0 ? $production["sdOrNrrHours"] ?? 0 : 0;
-						$rhOrNrHours  = $basicHours > 0 ? $production["rhOrNrHours"]  ?? 0 : 0;
-						$rhOrNrrHours = $basicHours > 0 ? $production["rhOrNrrHours"] ?? 0 : 0;
-						$dhOrNrHours  = $basicHours > 0 ? $production["dhOrNrHours"]  ?? 0 : 0;
-						$dhOrNrrHours = $basicHours > 0 ? $production["dhOrNrrHours"] ?? 0 : 0;
-
                         $timekeepingItem = [
-                            "timekeepingID"         => $timekeepingID,
-                            "employeeID"            => $employeeID,
-                            "workingDays"           => $workingDays,
-                            "hourlyRate"            => getPayrollHourlyRate($employeeID, $cutOffCount, $workingDays, $scheduleDuration),
-                            "scheduleDate"          => $scheduleDate,
-                            "scheduleIn"            => $scheduleIn,
-                            "scheduleOut"           => $scheduleOut,
-                            "scheduleBreakDuration" => $scheduleBreakDuration,
-                            "scheduleDuration"      => $scheduleDuration,
-                            "restDay"               => $restDay,
-                            "finalCheckIn"          => $finalCheckIn,
-                            "finalCheckOut"         => $finalCheckOut,
-                            "checkIn"               => $checkIn,
-                            "checkOut"              => $checkOut,
-                            "noInOutID"             => $noInOutID,
-                            "noInOutReference"      => $noInOutReference,
-                            "noTimeIn"              => $noTimeIn,
-                            "noTimeOut"             => $noTimeOut,
-                            "overtimeID"            => $overtimeID,
-                            "overtimeReference"     => $overtimeReference,
-                            "overtimeIn"            => $overtimeIn,
-                            "overtimeOut"           => $overtimeOut,
-                            "overtimeBreakDuration" => $overtimeBreakDuration,
-                            "leaveID"               => $leaveID,
-                            "leaveReference"        => $leaveReference,
-                            "leaveType"             => $leaveType,
-                            "leaveIn"               => $leaveIn,
-                            "leaveOut"              => $leaveOut,
-                            "leaveDuration"         => $leaveDuration,
-                            "leaveWorkingDay"       => $leaveWorkingDay,
-                            "lateDuration"          => $lateDuration,
-                            "undertimeDuration"     => $undertimeDuration,
-                            "checkDuration"         => $checkDuration,
-                            "basicHours"            => $basicHours,
-                            "overtimeHours"         => $overtimeHours,
-                            "nightDifferential"     => $nightDifferential,
-                            "totalHours"            => $totalHours,
-                            "timekeepingItemStatus" => $status,
-                            "createdBy"             => $updatedBy,
-                            "updatedBy"             => $updatedBy,
-                            "createdAt"             => date('Y-m-d H:i:s')
+                            "timekeepingID"                  => $timekeepingID,
+                            "employeeID"                     => $employeeID,
+                            "workingDays"                    => $workingDays,
+                            "hourlyRate"                     => getPayrollHourlyRate($employeeID, $cutOffCount, $workingDays, $scheduleDuration),
+                            "scheduleDate"                   => $scheduleDate,
+                            "scheduleIn"                     => $scheduleIn,
+                            "scheduleOut"                    => $scheduleOut,
+                            "scheduleBreakDuration"          => $scheduleBreakDuration,
+                            "scheduleDuration"               => $scheduleDuration,
+                            "dayType"                        => $dayType,
+                            "restDay"                        => $restDay,
+                            "finalCheckIn"                   => $finalCheckIn,
+                            "finalCheckOut"                  => $finalCheckOut,
+                            "checkIn"                        => $checkIn,
+                            "checkOut"                       => $checkOut,
+                            "noInOutID"                      => $noInOutID,
+                            "noInOutReference"               => $noInOutReference,
+                            "noTimeIn"                       => $noTimeIn,
+                            "noTimeOut"                      => $noTimeOut,
+                            "overtimeID"                     => $overtimeID,
+                            "overtimeReference"              => $overtimeReference,
+                            "overtimeIn"                     => $overtimeIn,
+                            "overtimeOut"                    => $overtimeOut,
+                            "overtimeBreakDuration"          => $overtimeBreakDuration,
+                            "leaveID"                        => $leaveID,
+                            "leaveReference"                 => $leaveReference,
+                            "leaveType"                      => $leaveType,
+                            "leaveIn"                        => $leaveIn,
+                            "leaveOut"                       => $leaveOut,
+                            "leaveDuration"                  => $leaveDuration,
+                            "leaveWorkingDay"                => $leaveWorkingDay,
+                            "lateDuration"                   => $lateDuration,
+                            "undertimeDuration"              => $undertimeDuration,
+                            "checkDuration"                  => $checkDuration,
+                            "basicHours"                     => $basicHours,
+                            "overtimeHours"                  => $overtimeHours,
+                            "nightDifferentialHours"         => $nightDifferentialHours,
+                            "overtimeNightDifferentialHours" => $overtimeNightDifferentialHours,
+                            "totalHours"                     => $totalHours,
+                            "timekeepingItemStatus"          => $status,
+                            "createdBy"                      => $updatedBy,
+                            "updatedBy"                      => $updatedBy,
+                            "createdAt"                      => date('Y-m-d H:i:s')
                         ];
                         $saveTimekeepingItem = $this->timekeeping->saveTimekeepingItem($timekeepingID, $timekeepingItem);
 
-                        if ($saveTimekeepingItem) 
-                        {
-                            $timekeepingItemID = $saveTimekeepingItem;
-                            $temp = [
-                                "timekeepingID"     => $timekeepingID,
-                                "timekeepingItemID" => $timekeepingItemID,
-                                "employeeID"        => $employeeID,
-                                "scheduleDate"      => $scheduleDate,
-                                "dayType"           => $dayType, // Getting day type - Ordinary Day, Holiday
-                                "odBrHours"         => $odBrHours,
-                                "odOrHours"         => $odOrHours,
-                                "odNrHours"         => $odNrHours,
-                                "odBrrHours"        => $odBrrHours,
-                                "odOrrHours"        => $odOrrHours,
-                                "odNrrHours"        => $odNrrHours,
-                                "sdBrHours"         => $sdBrHours,
-                                "sdOrHours"         => $sdOrHours,
-                                "sdNrHours"         => $sdNrHours,
-                                "sdBrrHours"        => $sdBrrHours,
-                                "sdOrrHours"        => $sdOrrHours,
-                                "sdNrrHours"        => $sdNrrHours,
-                                "rhBrHours"         => $rhBrHours,
-                                "rhOrHours"         => $rhOrHours,
-                                "rhNrHours"         => $rhNrHours,
-                                "rhBrrHours"        => $rhBrrHours,
-                                "rhOrrHours"        => $rhOrrHours,
-                                "rhNrrHours"        => $rhNrrHours,
-                                "dhBrHours"         => $dhBrHours,
-                                "dhOrHours"         => $dhOrHours,
-                                "dhNrHours"         => $dhNrHours,
-                                "dhBrrHours"        => $dhBrrHours,
-                                "dhOrrHours"        => $dhOrrHours,
-                                "dhNrrHours"        => $dhNrrHours,
-                                "odOrNrHours"       => $odOrNrHours,
-                                "odOrNrrHours"      => $odOrNrrHours,
-                                "sdOrNrHours"       => $sdOrNrHours,
-                                "sdOrNrrHours"      => $sdOrNrrHours,
-                                "rhOrNrHours"       => $rhOrNrHours,
-                                "rhOrNrrHours"      => $rhOrNrrHours,
-                                "dhOrNrHours"       => $dhOrNrHours,
-                                "dhOrNrrHours"      => $dhOrNrrHours,
-                            ];
 
-                            array_push($timekeepingProduction, $temp);
-                        }
+                        // $production = $this->timekeeping->getProduction($dayType, $restDay == '1', $timeArray); // GET PRODUCTION
+
+                        // $odBrHours    = $basicHours > 0 ? $production["odBrHours"]    ?? 0 : 0;
+						// $odOrHours    = $basicHours > 0 ? $production["odOrHours"]    ?? 0 : 0;
+						// $odNrHours    = $basicHours > 0 ? $production["odNrHours"]    ?? 0 : 0;
+						// $odBrrHours   = $basicHours > 0 ? $production["odBrrHours"]   ?? 0 : 0;
+						// $odOrrHours   = $basicHours > 0 ? $production["odOrrHours"]   ?? 0 : 0;
+						// $odNrrHours   = $basicHours > 0 ? $production["odNrrHours"]   ?? 0 : 0;
+						// $sdBrHours    = $basicHours > 0 ? $production["sdBrHours"]    ?? 0 : 0;
+						// $sdOrHours    = $basicHours > 0 ? $production["sdOrHours"]    ?? 0 : 0;
+						// $sdNrHours    = $basicHours > 0 ? $production["sdNrHours"]    ?? 0 : 0;
+						// $sdBrrHours   = $basicHours > 0 ? $production["sdBrrHours"]   ?? 0 : 0;
+						// $sdOrrHours   = $basicHours > 0 ? $production["sdOrrHours"]   ?? 0 : 0;
+						// $sdNrrHours   = $basicHours > 0 ? $production["sdNrrHours"]   ?? 0 : 0;
+						// $rhBrHours    = $basicHours > 0 ? $production["rhBrHours"]    ?? 0 : 0;
+						// $rhOrHours    = $basicHours > 0 ? $production["rhOrHours"]    ?? 0 : 0;
+						// $rhNrHours    = $basicHours > 0 ? $production["rhNrHours"]    ?? 0 : 0;
+						// $rhBrrHours   = $basicHours > 0 ? $production["rhBrrHours"]   ?? 0 : 0;
+						// $rhOrrHours   = $basicHours > 0 ? $production["rhOrrHours"]   ?? 0 : 0;
+						// $rhNrrHours   = $basicHours > 0 ? $production["rhNrrHours"]   ?? 0 : 0;
+						// $dhBrHours    = $basicHours > 0 ? $production["dhBrHours"]    ?? 0 : 0;
+						// $dhOrHours    = $basicHours > 0 ? $production["dhOrHours"]    ?? 0 : 0;
+						// $dhNrHours    = $basicHours > 0 ? $production["dhNrHours"]    ?? 0 : 0;
+						// $dhBrrHours   = $basicHours > 0 ? $production["dhBrrHours"]   ?? 0 : 0;
+						// $dhOrrHours   = $basicHours > 0 ? $production["dhOrrHours"]   ?? 0 : 0;
+						// $dhNrrHours   = $basicHours > 0 ? $production["dhNrrHours"]   ?? 0 : 0;
+						// $odOrNrHours  = $basicHours > 0 ? $production["odOrNrHours"]  ?? 0 : 0;
+						// $odOrNrrHours = $basicHours > 0 ? $production["odOrNrrHours"] ?? 0 : 0;
+						// $sdOrNrHours  = $basicHours > 0 ? $production["sdOrNrHours"]  ?? 0 : 0;
+						// $sdOrNrrHours = $basicHours > 0 ? $production["sdOrNrrHours"] ?? 0 : 0;
+						// $rhOrNrHours  = $basicHours > 0 ? $production["rhOrNrHours"]  ?? 0 : 0;
+						// $rhOrNrrHours = $basicHours > 0 ? $production["rhOrNrrHours"] ?? 0 : 0;
+						// $dhOrNrHours  = $basicHours > 0 ? $production["dhOrNrHours"]  ?? 0 : 0;
+						// $dhOrNrrHours = $basicHours > 0 ? $production["dhOrNrrHours"] ?? 0 : 0;
+
+                        // if ($saveTimekeepingItem) 
+                        // {
+                        //     $timekeepingItemID = $saveTimekeepingItem;
+                        //     $temp = [
+                        //         "timekeepingID"     => $timekeepingID,
+                        //         "timekeepingItemID" => $timekeepingItemID,
+                        //         "employeeID"        => $employeeID,
+                        //         "scheduleDate"      => $scheduleDate,
+                        //         "dayType"           => $dayType, // Getting day type - Ordinary Day, Holiday
+                        //         "odBrHours"         => $odBrHours,
+                        //         "odOrHours"         => $odOrHours,
+                        //         "odNrHours"         => $odNrHours,
+                        //         "odBrrHours"        => $odBrrHours,
+                        //         "odOrrHours"        => $odOrrHours,
+                        //         "odNrrHours"        => $odNrrHours,
+                        //         "sdBrHours"         => $sdBrHours,
+                        //         "sdOrHours"         => $sdOrHours,
+                        //         "sdNrHours"         => $sdNrHours,
+                        //         "sdBrrHours"        => $sdBrrHours,
+                        //         "sdOrrHours"        => $sdOrrHours,
+                        //         "sdNrrHours"        => $sdNrrHours,
+                        //         "rhBrHours"         => $rhBrHours,
+                        //         "rhOrHours"         => $rhOrHours,
+                        //         "rhNrHours"         => $rhNrHours,
+                        //         "rhBrrHours"        => $rhBrrHours,
+                        //         "rhOrrHours"        => $rhOrrHours,
+                        //         "rhNrrHours"        => $rhNrrHours,
+                        //         "dhBrHours"         => $dhBrHours,
+                        //         "dhOrHours"         => $dhOrHours,
+                        //         "dhNrHours"         => $dhNrHours,
+                        //         "dhBrrHours"        => $dhBrrHours,
+                        //         "dhOrrHours"        => $dhOrrHours,
+                        //         "dhNrrHours"        => $dhNrrHours,
+                        //         "odOrNrHours"       => $odOrNrHours,
+                        //         "odOrNrrHours"      => $odOrNrrHours,
+                        //         "sdOrNrHours"       => $sdOrNrHours,
+                        //         "sdOrNrrHours"      => $sdOrNrrHours,
+                        //         "rhOrNrHours"       => $rhOrNrHours,
+                        //         "rhOrNrrHours"      => $rhOrNrrHours,
+                        //         "dhOrNrHours"       => $dhOrNrHours,
+                        //         "dhOrNrrHours"      => $dhOrNrrHours,
+                        //     ];
+
+                        //     array_push($timekeepingProduction, $temp);
+                        // }
                     }
 
                     $saveTimekeepingProduction = $this->timekeeping->saveTimekeepingProduction($timekeepingID, $timekeepingProduction);

@@ -257,7 +257,7 @@ class EmployeeAttendance_model extends CI_Model {
 
         $sql = "
         SELECT 
-            punch_time 
+            CONCAT(DATE(punch_time), ' ', SEC_TO_TIME((TIME_TO_SEC(punch_time) DIV 60) * 60)) AS punch_time 
         FROM 
             iclock_transaction 
         WHERE 
@@ -277,7 +277,7 @@ class EmployeeAttendance_model extends CI_Model {
 
         $sql = "
         SELECT 
-            punch_time 
+            CONCAT(DATE(punch_time), ' ', SEC_TO_TIME((TIME_TO_SEC(punch_time) DIV 60) * 60)) AS punch_time 
         FROM 
             iclock_transaction 
         WHERE 

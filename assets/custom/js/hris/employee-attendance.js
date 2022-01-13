@@ -577,6 +577,33 @@ $(document).ready(function() {
     // ----- END DATERANGEPICKER -----
 
 
+    // ----- OVERBREAK DISPLAY -----
+    function getOverbreakDisplay(employeeID = 0) {
+        let html = '';
+        $.ajax({
+            method: "POST",
+            url: `employee_attendance/getOverbreak`,
+            data: { employeeID },
+            async: false,
+            dataType: "json",
+            success: function(data) {
+                if (data && data.length) {
+                    let breakDuration = data[0].breakDuration ?? 0;
+                    html = `
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Warning!</strong> You have exceeded the allowed break time hours for today. <b>${breakDuration} hours</b>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>`;
+                }
+            }
+        })
+        return html;
+    }
+    // ----- END OVERBREAK DISPLAY -----
+
+
     // ----- PAGE CONTENT -----
     function pageContent() {
         $(`#page_content`).html(preloader);
@@ -607,6 +634,9 @@ $(document).ready(function() {
         let html = `
         <div class="row p-3">
             <div class="col-sm-12">
+                <div id="overbreakNotification">
+                    ${getOverbreakDisplay(employeeID)}
+                </div>
                 <div class="row">
                     <div class="col-md-4 col-sm-12">
                         ${getTimesheetDisplay(employeeAttendance)}

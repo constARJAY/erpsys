@@ -315,4 +315,80 @@
         return $query ? true : false;
     }
 
+
+
+    function getBreakOpposeData($inEmployeeID = 0){
+        $CI         =& get_instance();
+        $db2        = $CI->load->database("biotime", TRUE);
+        $date       = date_create();
+        $dateToday  = date_format($date,"Y/m/d");
+        $dayToday   = date_format($date,"d"); 
+        $monthToday = date_format($date,"m");
+
+        $where = $inEmployeeID ? "AND helt.employeeID = $inEmployeeID" : "";
+
+        $data   = [];
+        $sql    = "SELECT
+                    helt.employeeID AS employeeID, helt.employeeCode AS employeeCode, CONCAT(employeeLastname,', ', employeeFirstname,' ',employeeMiddlename) AS fullname, departmentName, designationName,
+                    scheduleBreakDuration
+                    FROM hris_employee_list_tbl AS helt 
+                        LEFT JOIN hris_department_tbl AS hdept USING(departmentID)
+                        LEFT JOIN hris_designation_tbl AS hdest ON hdept.departmentID = hdest.departmentID
+                        LEFT JOIN hris_employee_attendance_tbl AS heat ON helt.employeeID = heat.employeeID
+                    WHERE heat.scheduleDate = DATE(NOW()) $where GROUP BY helt.employeeID";
+        $query  = $CI->db->query($sql);
+
+        foreach ($query->result_array() as $key => $value) {
+            $employeeID = $value["employeeID"];
+
+            $sql2   = "SELECT SUM(breakDuration) AS breakDuration 
+                            FROM hris_attendance_break_tbl 
+                        WHERE employeeID = '$employeeID' AND MONTH(breakIn) = MONTH(NOW()) AND DAY(breakIn) = DAY(NOW())";
+            $query2   = $db2->query($sql2);
+            $result2  = $query2 ? $query2->row() : null;
+
+            if ($result2) {
+                $breakDuration  = $result2 ? $result2->breakDuration : 0;
+                if(floatval($breakDuration) > floatval($value["scheduleBreakDuration"]) && $employeeID != "1"  ){
+                    $temp = [
+                        "employeeCode"      => $value["employeeCode"],
+                        "fullname"          => $value["fullname"],
+                        "designationName"   => $value["designationName"],
+                        "departmentName"    => $value["departmentName"],
+                        "breakDuration"     => $breakDuration
+                    ];
+                    array_push($data, $temp);
+                }
+            }
+            
+        }
+
+        return $data;
+        // $sql    = "SELECT GROUP_CONCAT(emp_code) AS id FROM personnel_employee WHERE update_time IS NULL";
+        // $query  = $db2->query($sql);
+        // $result = $query ? $query->row() : false;
+        // $id     = $result ? $result->id : "";
+
+        // $sql2   = "SELECT * FROM hris_employee_list_tbl WHERE FIND_IN_SET(employeeID, '$id') AND employeeStatus IN (1,2,5) AND scheduleID <> 0";
+        // $query2 = $this->db->query($sql2);
+        // return $query2 ? $query2->result_array() : [];
+
+        // Employee Code
+
+        // Employee Name
+
+        // - Department 
+        // - Designation
+
+        // Duration
+
+
+
+
+        
+    }
+
+
+
+
 ?>

@@ -100,7 +100,6 @@ $(document).ready(function() {
         $('[data-toggle="tooltip"]').tooltip();
 
         const manipulateDataTables = (elementID = "") => {
-			console.log(elementID);
             if (elementID) {
                 if ($.fn.DataTable.isDataTable(elementID)) {
                     $(elementID).DataTable().destroy();
@@ -150,7 +149,7 @@ $(document).ready(function() {
                             { targets: -1,          width: "150px" },		
                         ],
                         fixedColumns: {
-                            leftColumns:  isReadOnly ? 1 : 3,
+                            leftColumns:  isReadOnly ? 1 : 2,
                             rightColumns: 1,
                         }
                     }
@@ -777,6 +776,7 @@ $(document).ready(function() {
 							ammortizationID,
 							otherAdjustment = 0,
 							netPay,
+							salaryReleaseAmount = 0,
                         } = item;
 
 						if (!readOnly) {
@@ -786,6 +786,9 @@ $(document).ready(function() {
 								phicAdjustment      = "${phicAdjustment || 0}"
 								hdmfAdjustment      = "${hdmfAdjustment || 0}"
 								loanAdjustment      = "${loanAdjustment || 0}"
+								sssDeduction        = "${sssDeduction || 0}"
+								phicDeduction       = "${phicDeduction || 0}"
+								hdmfDeduction       = "${hdmfDeduction || 0}"
 								allowance           = "${allowance || 0}"
 								allowanceAdjustment = "${allowanceAdjustment || 0}"
 								prevGrossPay        = "${prevGrossPay || 0}"
@@ -809,13 +812,6 @@ $(document).ready(function() {
 									<input type="checkbox" 
 										name="holdSalary" 
 										${holdSalary == 1 ? "checked" : ""}>
-								</td>
-								<td class="text-center"
-									style="z-index: 2;">
-									<input type="checkbox" 
-										name="deductMandates" 
-										mandates="parent"
-										${deductMandates == 1 ? "checked" : ""}>
 								</td>
 								<td class="text-right">${formatAmount(basicSalary, true)}</td>
 								<td class="text-right">${formatAmount(holidayPay, true)}</td>
@@ -851,92 +847,28 @@ $(document).ready(function() {
 								</td>
 								<td class="text-right">${formatAmount(grossPay, true)}</td>
 								<td style="z-index: 1;">
-									<div class="input-group">
-										<div class="input-group-prepend">
-											<span class="input-group-text">
-												<input type="checkbox" 
-													name="deductSss" 
-													mandates="child"
-													sssBasis="${sssBasis}"
-													${sssDeduction > 0 ? "checked" : ""}
-													${grossPay > 0 ? "" : "disabled"}>
-											</span>
-										</div>
-										<input type="text" 
-											class="form-control text-right" 
-											name="sssDeduction"
-											value="${formatAmount(sssDeduction, true)}"
-											disabled>
-									</div>
+                                    ${formatAmount(sssDeduction, true)}
 								</td>
 								<td class="text-right sssAdjustment
 									${sssAdjustment && sssAdjustment != 0 ? sssAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
 									${formatAmount(sssAdjustment, true)}
 								</td>
 								<td style="z-index: 1;">
-									<div class="input-group">
-										<div class="input-group-prepend">
-											<span class="input-group-text">
-												<input type="checkbox" 
-													name="deductPhic" 
-													mandates="child"
-													phicBasis="${phicBasis}"
-													${phicDeduction > 0 ? "checked" : ""}
-													${grossPay > 0 ? "" : "disabled"}>
-											</span>
-										</div>
-										<input type="text" 
-											class="form-control text-right" 
-											name="phicDeduction"
-											value="${formatAmount(phicDeduction, true)}"
-											disabled>
-									</div>
+                                    ${formatAmount(phicDeduction, true)}
 								</td>
 								<td class="text-right phicAdjustment
 									${phicAdjustment && phicAdjustment != 0 ? phicAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
 									${formatAmount(phicAdjustment, true)}
 								</td>
 								<td style="z-index: 1;">
-									<div class="input-group">
-										<div class="input-group-prepend">
-											<span class="input-group-text">
-												<input type="checkbox" 
-													name="deductHdmf" 
-													mandates="child"
-													hdmfBasis="${hdmfBasis}"
-													${hdmfDeduction > 0 ? "checked" : ""}
-													${grossPay > 0 ? "" : "disabled"}>
-											</span>
-										</div>
-										<input type="text" 
-											class="form-control text-right" 
-											name="hdmfDeduction"
-											value="${formatAmount(hdmfDeduction, true)}"
-											disabled>
-									</div>
+                                    ${formatAmount(hdmfDeduction, true)}
 								</td>
 								<td class="text-right hdmfAdjustment
 									${hdmfAdjustment && hdmfAdjustment != 0 ? hdmfAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
 									${formatAmount(hdmfAdjustment, true)}
 								</td>
 								<td style="z-index: 1;">
-									<div class="input-group">
-										<div class="input-group-prepend">
-											<span class="input-group-text">
-												<input type="checkbox" 
-													name="deductWithHolding" 
-													mandates="child"
-													withHoldingBasis="${withHoldingBasis}"
-													${withHoldingDeduction > 0 ? "checked" : ""}
-													${grossPay > 0 ? "" : "disabled"}>
-											</span>
-										</div>
-										<input type="text" 
-											class="form-control text-right" 
-											name="withHoldingDeduction"
-											value="${formatAmount(withHoldingDeduction, true)}"
-											disabled>
-									</div>
+                                    ${formatAmount(withHoldingDeduction, true)}
 								</td>
 								<td class="text-right withHoldingAdjustment
 									${withHoldingAdjustment && withHoldingAdjustment != 0 ? withHoldingAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
@@ -967,6 +899,7 @@ $(document).ready(function() {
 									${otherAdjustment && otherAdjustment != 0 ? otherAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
 									${formatAmount(otherAdjustment, true)}
 								</td>
+								<td class="text-right">${formatAmount(salaryReleaseAmount, true)}</td>
 								<td class="text-right netPay">${formatAmount(netPay, true)}</td>
 							</tr>`;
 						} else {
@@ -1061,6 +994,7 @@ $(document).ready(function() {
 									${otherAdjustment && otherAdjustment != 0 ? otherAdjustment.indexOf('-') != -1 ? 'text-danger' : 'text-success' : ''}">
 									${formatAmount(otherAdjustment, true)}
 								</td>
+								<td class="text-right">${formatAmount(salaryReleaseAmount, true)}</td>
 								<td class="text-right netPay">${formatAmount(netPay, true)}</td>
 							</tr>`;
 						}
@@ -1099,11 +1033,6 @@ $(document).ready(function() {
 					<input type="checkbox" name="checkAllHoldSalary">
 					<span class="ml-1">Hold Salary</span>
 				</th>
-				<th class="thPay"
-					style="z-index: 2;">
-					<input type="checkbox" name="checkAllDeductMandates">
-					<span class="ml-1">Mandates</span>
-				</th>
 				<th class="thPay">Basic Pay</th>
 				<th class="thPay">Holiday Pay</th>
 				<th class="thAdjust">Holiday Adjustment</th>
@@ -1119,32 +1048,18 @@ $(document).ready(function() {
 				<th class="thPay">LWOP</th>
 				<th class="thAdjust">Leave Adjustment</th>
 				<th class="thPay">GROSS PAY</th>
-				<th class="thMandate">
-					<input type="checkbox" name="checkAllSss">
-					<span class="ml-1">SSS</span>
-				</th>
+				<th class="thMandate">SSS</th>
 				<th class="thAdjust">SSS Adjustment</th>
-				<th class="thMandate">
-					<input type="checkbox" name="checkAllPhic">
-					<span class="ml-1">PHIC</span>
-				</th>
+				<th class="thMandate">PHIC</th>
 				<th class="thAdjust">PHIC Adjustment</th>
-				<th class="thMandate">
-					<input type="checkbox" name="checkAllHdmf">
-					<span class="ml-1">HDMF</span>
-				</th>
+				<th class="thMandate">HDMF</th>
 				<th class="thAdjust">HDMF Adjustment</th>
-				<th class="thAdjust">
-					<input type="checkbox" name="checkAllWithHolding">
-					<span class="ml-1">Withholding Tax</span>
-				</th>
+				<th class="thAdjust">Withholding Tax</th>
 				<th class="thAdjust3">Withholding Tax Adjustment</th>
-				<th class="thMandate">
-					<input type="checkbox" name="checkAllDeductLoan">
-					<span class="ml-1">Loan</span>
-				</th>
+				<th class="thMandate">Loan</th>
 				<th class="thAdjust">Loan Adjustment</th>
 				<th class="thAdjust">Other Adjustment</th>
+                <th class="thAdjust">Salary Release</th>
 				<th>NET PAY</th>
 			</tr>`;
 		} else {
@@ -1187,6 +1102,7 @@ $(document).ready(function() {
 				</th>
 				<th class="thAdjust">Loan Adjustment</th>
 				<th class="thAdjust">Other Adjustment</th>
+				<th class="thAdjust">Salary Release</th>
 				<th>NET PAY</th>
 			</tr>`;
 		}
@@ -1581,18 +1497,18 @@ $(document).ready(function() {
 	function getNonTaxableAmount($parent = '') {
 		let nonTaxable = 0;
 		if ($parent) {
-			let sssDeduction   = $parent.find(`[name="sssDeduction"]`).val();
-				sssDeduction   = getNonFormattedAmount(sssDeduction);
-			let phicDeduction  = $parent.find(`[name="phicDeduction"]`).val();
-				phicDeduction  = getNonFormattedAmount(phicDeduction);
-			let hdmfDeduction  = $parent.find(`[name="hdmfDeduction"]`).val();
-				hdmfDeduction  = getNonFormattedAmount(hdmfDeduction);
-			let sssAdjustment  = $parent.find(`.sssAdjustment`).text();
-				sssAdjustment  = getNonFormattedAmount(sssAdjustment);
-			let phicAdjustment = $parent.find(`.phicAdjustment`).text();
-				phicAdjustment = getNonFormattedAmount(phicAdjustment);
-			let hdmfAdjustment = $parent.find(`.hdmfAdjustment`).text();
-				hdmfAdjustment = getNonFormattedAmount(hdmfAdjustment);
+			let sssDeduction    = $parent.attr("sssDeduction");
+				sssDeduction    = getNonFormattedAmount(sssDeduction);
+			let phicDeduction   = $parent.attr("phicDeduction");
+				phicDeduction   = getNonFormattedAmount(phicDeduction);
+			let hdmfDeduction   = $parent.attr("hdmfDeduction");
+				hdmfDeduction   = getNonFormattedAmount(hdmfDeduction);
+			let sssAdjustment   = $parent.attr("sssAdjustment");
+				sssAdjustment   = getNonFormattedAmount(sssAdjustment);
+			let phicAdjustment  = $parent.attr("phicAdjustment");
+				phicAdjustment  = getNonFormattedAmount(phicAdjustment);
+			let hdmfAdjustment  = $parent.attr("hdmfAdjustment");
+				hdmfAdjustment  = getNonFormattedAmount(hdmfAdjustment);
 
 			nonTaxable = sssDeduction + phicDeduction + hdmfDeduction + sssAdjustment + phicAdjustment + hdmfAdjustment;
 		}
@@ -1628,7 +1544,7 @@ $(document).ready(function() {
 		let deduction = 0;
 		if ($parent) {
 			let nonTaxable     = getNonTaxableAmount($parent);
-			let withHolding    = $parent.find(`[name="withHoldingDeduction"]`).val();
+			let withHolding    = $parent.attr("withHoldingDeduction");
 				withHolding    = getNonFormattedAmount(withHolding);
 			let loanDeduction  = $parent.find(`[name="loanDeduction"]`).val();
 				loanDeduction  = getNonFormattedAmount(loanDeduction);
@@ -1713,15 +1629,15 @@ $(document).ready(function() {
 				const employeeID    = $(this).attr("employeeID");
 
 				const holdSalary         = $(`[name="holdSalary"]`, this).prop("checked") ? 1 : 0;
-				const deductMandates     = $(`[name="deductMandates"]`, this).prop("checked") ? 1 : 0;
-				let sssDeduction         = $(`[name="sssDeduction"]`, this).val();
-					sssDeduction         = getNonFormattedAmount(sssDeduction);
-				let phicDeduction        = $(`[name="phicDeduction"]`, this).val();
-					phicDeduction        = getNonFormattedAmount(phicDeduction);
-				let hdmfDeduction        = $(`[name="hdmfDeduction"]`, this).val();
-					hdmfDeduction        = getNonFormattedAmount(hdmfDeduction);
-				let withHoldingDeduction = $(`[name="withHoldingDeduction"]`, this).val();
-					withHoldingDeduction = getNonFormattedAmount(withHoldingDeduction);
+				// const deductMandates     = $(`[name="deductMandates"]`, this).prop("checked") ? 1 : 0;
+				// let sssDeduction         = $(`[name="sssDeduction"]`, this).val();
+				// 	sssDeduction         = getNonFormattedAmount(sssDeduction);
+				// let phicDeduction        = $(`[name="phicDeduction"]`, this).val();
+				// 	phicDeduction        = getNonFormattedAmount(phicDeduction);
+				// let hdmfDeduction        = $(`[name="hdmfDeduction"]`, this).val();
+				// 	hdmfDeduction        = getNonFormattedAmount(hdmfDeduction);
+				// let withHoldingDeduction = $(`[name="withHoldingDeduction"]`, this).val();
+				// 	withHoldingDeduction = getNonFormattedAmount(withHoldingDeduction);
 				let loanDeduction        = $(`[name="loanDeduction"]`, this).val();
 					loanDeduction        = getNonFormattedAmount(loanDeduction);
 				let netPay               = $(`.netPay`, this).text();
@@ -1731,11 +1647,11 @@ $(document).ready(function() {
 					payrollItemID,
 					employeeID,
 					holdSalary,
-					deductMandates,
-					sssDeduction,
-					phicDeduction,
-					hdmfDeduction,
-					withHoldingDeduction,
+					// deductMandates,
+					// sssDeduction,
+					// phicDeduction,
+					// hdmfDeduction,
+					// withHoldingDeduction,
 					loanDeduction,
 					netPay,
 				};
@@ -1750,53 +1666,53 @@ $(document).ready(function() {
 
 
 	// ----- APPLY MANDATES -----
-	$(document).on("change", `[name="deductSss"]`, function() {
-		$parent = $(this).closest(`tr`);
+	// $(document).on("change", `[name="deductSss"]`, function() {
+	// 	$parent = $(this).closest(`tr`);
 
-		const isChecked = $(this).prop("checked");
+	// 	const isChecked = $(this).prop("checked");
 
-		let deduction = $(this).attr("sssBasis") ?? 0;
-			deduction = isChecked ? deduction : 0;
-			deduction = formatAmount(deduction, true);
+	// 	let deduction = $(this).attr("sssBasis") ?? 0;
+	// 		deduction = isChecked ? deduction : 0;
+	// 		deduction = formatAmount(deduction, true);
 
-		$parent.find(`[name="sssDeduction"]`).val(deduction);
+	// 	$parent.find(`[name="sssDeduction"]`).val(deduction);
 
-		updateWithHoldingTax($parent);
-	})
+	// 	updateWithHoldingTax($parent);
+	// })
 
-	$(document).on("change", `[name="deductPhic"]`, function() {
-		$parent = $(this).closest(`tr`);
+	// $(document).on("change", `[name="deductPhic"]`, function() {
+	// 	$parent = $(this).closest(`tr`);
 
-		const isChecked = $(this).prop("checked");
+	// 	const isChecked = $(this).prop("checked");
 
-		let deduction = $(this).attr("phicBasis") ?? 0;
-			deduction = isChecked ? deduction : 0;
-			deduction = formatAmount(deduction, true);
+	// 	let deduction = $(this).attr("phicBasis") ?? 0;
+	// 		deduction = isChecked ? deduction : 0;
+	// 		deduction = formatAmount(deduction, true);
 
-		$parent.find(`[name="phicDeduction"]`).val(deduction);
+	// 	$parent.find(`[name="phicDeduction"]`).val(deduction);
 
-		updateWithHoldingTax($parent);
-	})
+	// 	updateWithHoldingTax($parent);
+	// })
 
-	$(document).on("change", `[name="deductHdmf"]`, function() {
-		$parent = $(this).closest(`tr`);
+	// $(document).on("change", `[name="deductHdmf"]`, function() {
+	// 	$parent = $(this).closest(`tr`);
 		
-		const isChecked = $(this).prop("checked");
+	// 	const isChecked = $(this).prop("checked");
 
-		let deduction = $(this).attr("hdmfBasis") ?? 0;
-			deduction = isChecked ? deduction : 0;
-			deduction = formatAmount(deduction, true);
+	// 	let deduction = $(this).attr("hdmfBasis") ?? 0;
+	// 		deduction = isChecked ? deduction : 0;
+	// 		deduction = formatAmount(deduction, true);
 
-		$parent.find(`[name="hdmfDeduction"]`).val(deduction);
+	// 	$parent.find(`[name="hdmfDeduction"]`).val(deduction);
 
-		updateWithHoldingTax($parent);
-	})
+	// 	updateWithHoldingTax($parent);
+	// })
 
-	$(document).on("change", `[name="deductWithHolding"]`, function() {
-		$parent = $(this).closest(`tr`);
+	// $(document).on("change", `[name="deductWithHolding"]`, function() {
+	// 	$parent = $(this).closest(`tr`);
 
-		updateWithHoldingTax($parent);
-	})
+	// 	updateWithHoldingTax($parent);
+	// })
 
 	// ----- CHECK DEDUCT LOAN -----
 	$(document).on("change", `[name="deductLoan"]`, function() {
@@ -1812,31 +1728,31 @@ $(document).ready(function() {
 	})
 	// ----- END CHECK DEDUCT LOAN -----
 
-	$(document).on("change", `[name="deductMandates"]`, function() {
-		$parent = $(this).closest(`tr`);
+	// $(document).on("change", `[name="deductMandates"]`, function() {
+	// 	$parent = $(this).closest(`tr`);
 
-		const isChecked = $(this).prop("checked");
-		$parent.find(`[name="deductSss"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-		$parent.find(`[name="deductPhic"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-		$parent.find(`[name="deductHdmf"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-		$parent.find(`[name="deductWithHolding"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+	// 	const isChecked = $(this).prop("checked");
+	// 	$parent.find(`[name="deductSss"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+	// 	$parent.find(`[name="deductPhic"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+	// 	$parent.find(`[name="deductHdmf"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+	// 	$parent.find(`[name="deductWithHolding"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 
-		const deductMandateLength  = $(`[name="deductMandates"]`).length;
-		const deductMandateChecked = $(`[name="deductMandates"]:checked`).length;
+	// 	const deductMandateLength  = $(`[name="deductMandates"]`).length;
+	// 	const deductMandateChecked = $(`[name="deductMandates"]:checked`).length;
 
-		let checkParent = deductMandateLength == deductMandateChecked;
-		$(`[name="checkAllDeductMandates"]`).prop("checked", checkParent);
-	})
+	// 	let checkParent = deductMandateLength == deductMandateChecked;
+	// 	$(`[name="checkAllDeductMandates"]`).prop("checked", checkParent);
+	// })
 
-	$(document).on("change", `[mandates="child"]`, function() {
-		$parent = $(this).closest(`tr`);
+	// $(document).on("change", `[mandates="child"]`, function() {
+	// 	$parent = $(this).closest(`tr`);
 
-		let mandatesLength  = $parent.find(`[mandates="child"]`).length;
-		let mandatesChecked = $parent.find(`[mandates="child"]:checked`).length;
+	// 	let mandatesLength  = $parent.find(`[mandates="child"]`).length;
+	// 	let mandatesChecked = $parent.find(`[mandates="child"]:checked`).length;
 
-		let isChecked = mandatesLength == mandatesChecked;
-		$parent.find(`[mandates="parent"]`).prop("checked", isChecked);
-	})
+	// 	let isChecked = mandatesLength == mandatesChecked;
+	// 	$parent.find(`[mandates="parent"]`).prop("checked", isChecked);
+	// })
 	// ----- END APPLY MANDATES -----
 
 
@@ -1857,35 +1773,35 @@ $(document).ready(function() {
 		$(`[name="holdSalary"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
 
-	$(document).on("change", `[name="checkAllDeductMandates"]`, function() { // MANDATES
-		const isChecked = $(this).prop("checked");
-		$(`[name="deductMandates"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	})
+	// $(document).on("change", `[name="checkAllDeductMandates"]`, function() { // MANDATES
+	// 	const isChecked = $(this).prop("checked");
+	// 	$(`[name="deductMandates"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+	// })
 
 	$(document).on("change", `[name="checkAllDeductLoan"]`, function() { // LOAN
 		const isChecked = $(this).prop("checked");
 		$(`[name="deductLoan"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
 
-	$(document).on("change", `[name="checkAllSss"]`, function() { // LOAN
-		const isChecked = $(this).prop("checked");
-		$(`[name="deductSss"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	})
+	// $(document).on("change", `[name="checkAllSss"]`, function() { // LOAN
+	// 	const isChecked = $(this).prop("checked");
+	// 	$(`[name="deductSss"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+	// })
 
-	$(document).on("change", `[name="checkAllPhic"]`, function() { // LOAN
-		const isChecked = $(this).prop("checked");
-		$(`[name="deductPhic"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	})
+	// $(document).on("change", `[name="checkAllPhic"]`, function() { // LOAN
+	// 	const isChecked = $(this).prop("checked");
+	// 	$(`[name="deductPhic"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+	// })
 
-	$(document).on("change", `[name="checkAllHdmf"]`, function() { // LOAN
-		const isChecked = $(this).prop("checked");
-		$(`[name="deductHdmf"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	})
+	// $(document).on("change", `[name="checkAllHdmf"]`, function() { // LOAN
+	// 	const isChecked = $(this).prop("checked");
+	// 	$(`[name="deductHdmf"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+	// })
 
-	$(document).on("change", `[name="checkAllWithHolding"]`, function() { // LOAN
-		const isChecked = $(this).prop("checked");
-		$(`[name="deductWithHolding"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	})
+	// $(document).on("change", `[name="checkAllWithHolding"]`, function() { // LOAN
+	// 	const isChecked = $(this).prop("checked");
+	// 	$(`[name="deductWithHolding"]:not([disabled])`).prop("checked", isChecked).trigger("change");
+	// })
 	// ----- END CHECK ALL -----
 
 

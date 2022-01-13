@@ -21,38 +21,27 @@ class SalaryRelease_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function saveCheckVoucherData($action, $data, $id = null) 
+    public function updatePayrollItem($payrollID = 0, $employeeID = 0, $salaryReleaseID = 0, $netPay = 0)
     {
-        if ($action == "insert") {
-            $query = $this->db->insert("fms_check_voucher_tbl", $data);
-        } else {
-            $where = ["voucherID" => $id];
-            $query = $this->db->update("fms_check_voucher_tbl", $data, $where);
-        }
+        $sql    = "SELECT payrollItemID, salaryReleaseID, salaryReleaseAmount FROM hris_payroll_items_tbl WHERE payrollID = $payrollID AND employeeID = $employeeID";
+        $query  = $this->db->query($sql);
+        $result = $query ? $query->row() : false;
+        if ($result) 
+        {
+            $payrollItemID           = $result->payrollItemID ?? 0;
+            $prevSalaryReleaseID     = $result->salaryReleaseID ?? null;
+            $prevSalaryReleaseAmount = $result->salaryReleaseAmount ?? 0;
 
-        if ($query) {
-            $insertID = $action == "insert" ? $this->db->insert_id() : $id;
-            return "true|Successfully submitted|$insertID|".date("Y-m-d");
+            $data = [
+                "salaryReleaseID"     => $prevSalaryReleaseID ? $prevSalaryReleaseID.'|'.$salaryReleaseID : $salaryReleaseID,
+                "salaryReleaseAmount" => ($prevSalaryReleaseAmount + $netPay)
+            ];
+            $where = ["payrollItemID" => $payrollItemID];
+            $queryUpdate = $this->db->update("hris_payroll_items_tbl", $data, $where);
+            return $queryUpdate ? true : false;
         }
-        return "false|System error: Please contact the system administrator for assistance!";
+        return false;
     }
 
-    public function deletePurchaseRequestItems($id) {
-        $query = $this->db->delete("fms_check_voucher_details_tbl", ["voucherID" => $id]);
-        return $query ? true : false;
-    }
-
-    public function savePurchaseRequestItems($data, $id = null)
-    {
-        if ($id) {
-            $deletePurchaseRequestItems = $this->deletePurchaseRequestItems($id);
-        }
-
-        $query = $this->db->insert_batch("fms_check_voucher_details_tbl", $data);
-        if ($query) {
-            return "true|Successfully submitted";
-        }
-        return "false|System error: Please contact the system administrator for assistance!";
-    }
 
 }

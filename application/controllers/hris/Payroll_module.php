@@ -61,7 +61,7 @@ class Payroll_module extends CI_Controller {
         $createdAt        = $this->input->post("createdAt") ?? null;
         $submittedAt      = $this->input->post("submittedAt") ?? null;
         $payrollRemarks   = $this->input->post("payrollRemarks") ?? null;
-        $items                = $this->input->post("items") ?? null;
+        $items            = $this->input->post("items") ?? null;
 
         $payrollData = [
             "revisePayrollID"  => $revisePayrollID,
@@ -122,6 +122,7 @@ class Payroll_module extends CI_Controller {
                 $payrollData["timekeepingCode"]   = $payroll->timekeepingCode;
                 $payrollData["cutOff"]            = $payroll->cutOff;
                 $payrollData["payOut"]            = $payroll->payOut;
+                $payrollData["deduction"]         = $payroll->deduction;
             }
         }
 
@@ -148,11 +149,6 @@ class Payroll_module extends CI_Controller {
                             'payrollItemID'        => $item['payrollItemID'],
                             'employeeID'           => $item['employeeID'],
                             'holdSalary'           => $item['holdSalary'],
-                            'deductMandates'       => $item['deductMandates'],
-                            'sssDeduction'         => $item['sssDeduction'],
-                            'phicDeduction'        => $item['phicDeduction'],
-                            'hdmfDeduction'        => $item['hdmfDeduction'],
-                            'withHoldingDeduction' => $item['withHoldingDeduction'],
                             'loanDeduction'        => $item['loanDeduction'],
                             'netPay'               => $item['netPay'],
                         ];

@@ -1,5 +1,69 @@
 $(document).ready(function() {
 
+    function getOverbreakData(){
+        let returnData = [];
+        let html;
+            $.ajax({
+            method:      "POST",
+            url:         `hr_dashboard/getOverbreakData`,
+            async:   false,
+            dataType:    "json",
+            beforeSend: function() {
+            
+            },
+            success: function(data) {
+                returnData = data;
+            },
+            error: function() {
+                setTimeout(() => {
+                    $("#loader").hide();
+                    showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                }, 500);
+            }
+        });
+    
+        let tbodyData = `<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
+                            <img src="${base_url}assets/modal/no-data.gif" style="max-width: 300px;
+                                width: auto;
+                                min-width: 100px;
+                                height: auto;" alt="No data available.">
+                            <span class="font-weight-bold">No data available.</span>
+                        </div>`;
+        if(returnData){
+            tbodyData = "";
+            returnData.map((value,index)=>{
+                tbodyData += `
+                            <tr>
+                                <td>${value.employeeCode}</td>
+                                <td>
+                                    <div>${value.fullname}</div>
+                                    <small>${value.departmentName} | ${value.designationName}</small>
+                                </td>
+                                <td class="text-center">${value.breakDuration}</td>
+                            </tr>
+                            `;
+            });
+        }
+        html = `
+        <table class="table table-bordered table-striped table-hover" id="overbreakTable" style="font-size:95%">
+            <thead>
+                <tr style="white-space: nowrap">
+                    <th>Employee No.</th>
+                    <th>Employee Name</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tbodyData}
+            </tbody>
+        </tbody>
+        `;  
+
+        return html;
+        
+    }
+    
+    
     //------ MODULE FUNCTION IS ALLOWED UPDATE-----
 
     const allowedUpdate = isUpdateAllowed(70);
@@ -515,6 +579,17 @@ let html = `        <div class="row clearfix row-deck">
                                 </div>
                             </div>    
                         </div>
+
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card" style="box-shadow:none !important;">
+                                <div class="header bg-primary">
+                                    <h2 class="font-weight-bold text-white">OVERBREAK MONITORING</h2>
+                                </div>
+                                <div class="body">
+                                    ${getOverbreakData()}
+                                </div>
+                            </div>    
+                        </div>
                     </div>`;
 
 
@@ -525,6 +600,17 @@ let html = `        <div class="row clearfix row-deck">
         noOfEmployeeChart();
         noOfEmployeeResignChart();
 
+        var table = $("#overbreakTable").css({"min-width": "100%"}).removeAttr('width').DataTable({
+            proccessing:    false,
+            serverSide:     false,
+            scrollX:        true,
+            scrollCollapse: true,
+            lengthMenu: [ 50, 75, 100, 150],
+            columnDefs: [
+                { targets: 0, width:  110 },
+                { targets: 2, width: 80 },
+            ],
+        });
         return html;
     }, 300);
 

@@ -894,6 +894,7 @@ $(document).ready(function() {
 						scheduleOut,     
 						scheduleBreakDuration, 
 						scheduleDuration, 
+						dayType,
 						restDay,
 						finalCheckIn,
 						finalCheckOut,
@@ -918,54 +919,57 @@ $(document).ready(function() {
 						checkDuration,   
 						basicHours,       
 						overtimeHours,    
-						nightDifferential, 
+						nightDifferentialHours, 
+						overtimeNightDifferentialHours, 
 						totalHours,      
 						status:scheduleStatus,           
 					} = data;
 	
 					const NO_TIME_IN_OUT = `${base_url}/assets/images/attendance/no-time-in-out.svg`;
-					const ABSENT  = `${base_url}/assets/images/attendance/absent.svg`;
-					const ONGOING = `${base_url}/assets/images/attendance/ongoing.svg`;
+					const ABSENT         = `${base_url}/assets/images/attendance/absent.svg`;
+					const ONGOING        = `${base_url}/assets/images/attendance/ongoing.svg`;
 	
 					// DISPLAY NG LEAVE WHILE HAVING PRODUCTION
 					const elementAttr = `
-						scheduleDate          = "${scheduleDate}"
-						scheduleIn            = "${scheduleIn}"
-						scheduleOut           = "${scheduleOut}"
-						scheduleBreakDuration = "${scheduleBreakDuration}"
-						scheduleDuration      = "${scheduleDuration}"
-						restDay				  = "${restDay}"
-						finalCheckIn          = "${finalCheckIn}"
-						finalCheckOut         = "${finalCheckOut}"
-						checkIn               = "${checkIn}"
-						checkOut              = "${checkOut}"
-						noTimeIn              = "${noTimeIn}"
-						noTimeOut             = "${noTimeOut}"
-						noInOutID             = "${noInOutID}"
-						noInOutReference      = "${noInOutReference}"
-						overtimeIn            = "${overtimeIn}"
-						overtimeOut           = "${overtimeOut}"
-						overtimeBreakDuration = "${overtimeBreakDuration}"
-						overtimeID            = "${overtimeID}"
-						overtimeReference     = "${overtimeReference}"
-						leaveIn               = "${leaveIn}"
-						leaveOut              = "${leaveOut}"
-						leaveID               = "${leaveID}"
-						leaveReference        = "${leaveReference}"
-						leaveType             = "${leaveType}"
-						leaveWorkingDay       = "${leaveWorkingDay}"
-						leaveDuration         = "${leaveDuration}"
-						checkDuration         = "${checkDuration}"
-						basicHours            = "${basicHours}"
-						overtimeHours         = "${overtimeHours}"
-						totalHours            = "${totalHours}"
-						nightDifferential     = "${nightDifferential}"
-						status                = "${status}"`;
+						scheduleDate                   = "${scheduleDate}"
+						scheduleIn                     = "${scheduleIn}"
+						scheduleOut                    = "${scheduleOut}"
+						scheduleBreakDuration          = "${scheduleBreakDuration}"
+						scheduleDuration               = "${scheduleDuration}"
+						dayType                        = "${dayType}"
+						restDay				           = "${restDay}"
+						finalCheckIn                   = "${finalCheckIn}"
+						finalCheckOut                  = "${finalCheckOut}"
+						checkIn                        = "${checkIn}"
+						checkOut                       = "${checkOut}"
+						noTimeIn                       = "${noTimeIn}"
+						noTimeOut                      = "${noTimeOut}"
+						noInOutID                      = "${noInOutID}"
+						noInOutReference               = "${noInOutReference}"
+						overtimeIn                     = "${overtimeIn}"
+						overtimeOut                    = "${overtimeOut}"
+						overtimeBreakDuration          = "${overtimeBreakDuration}"
+						overtimeID                     = "${overtimeID}"
+						overtimeReference              = "${overtimeReference}"
+						leaveIn                        = "${leaveIn}"
+						leaveOut                       = "${leaveOut}"
+						leaveID                        = "${leaveID}"
+						leaveReference                 = "${leaveReference}"
+						leaveType                      = "${leaveType}"
+						leaveWorkingDay                = "${leaveWorkingDay}"
+						leaveDuration                  = "${leaveDuration}"
+						checkDuration                  = "${checkDuration}"
+						basicHours                     = "${basicHours}"
+						overtimeHours                  = "${overtimeHours}"
+						totalHours                     = "${totalHours}"
+						nightDifferentialHours         = "${nightDifferentialHours}"
+						overtimeNightDifferentialHours = "${overtimeNightDifferentialHours}"
+						status                         = "${status}"`;
 	
 					if (status == "COMPLETE") {
 						html = `
 						<a href="javascript:void(0)"
-							class="viewAttendance"
+							class="viewAttendance text-success"
 							${elementAttr}>${decimalToHours(totalHours)}</a>`;
 					} else if (status == "REST_DAY" || status == "NO_SCHEDULE") {
 						html = `
@@ -1014,7 +1018,7 @@ $(document).ready(function() {
 					} else {
 						html = `
 						<a href="javascript:void(0)"
-							class="viewAttendance"
+							class="viewAttendance text-success"
 							${elementAttr}
 							style="color: #d8af32">${decimalToHours(totalHours)}</a>`;
 					}
@@ -1085,9 +1089,9 @@ $(document).ready(function() {
 							<div class="row">
 								<div class="col-md-6 col-sm-12">
 									<div class="d-flex justify-content-start align-items-center py-1">
-										<div style="text-align: right; width: 40px; color: #dc3450">00:00</div>
+										<div class="text-success" style="text-align: right; width: 40px;">00:00</div>
 										<div class="mx-2">-</div> 
-										<div class="font-weight-bold">Regular Hours</div>
+										<div class="font-weight-bold =">Regular Hours</div>
 									</div>
 									<div class="d-flex justify-content-start align-items-center py-1">
 										<div style="text-align: right; width: 40px; color: #132eca">00:00</div>
@@ -1203,54 +1207,60 @@ $(document).ready(function() {
 		if (cutoff) {
 			firstCutOff  = cutoff.firstCutOff ?? 0;
 			secondCutOff = cutoff.secondCutOff ?? 0;
-			thirdCutOff  = cutoff.fthirdutOff ?? 0;
-			fourthCutOff = cutoff.ffourthutOff ?? 0;
+			thirdCutOff  = cutoff.thirdutOff ?? 0;
+			fourthCutOff = cutoff.fourthutOff ?? 0;
+
 			if (firstCutOff) {
 				cutOffData.push({
-					cutoffID: 1,
+					cutoffID:   1,
 					cutoffName: "First Cut-Off",
-					start:  cutoff.firstCutOffDateStart,
-					end:    cutoff.firstCutOffDateEnd,
-					payOut: cutoff.firstCutOffPayOut,
+					start:      cutoff.firstCutOffDateStart,
+					end:        cutoff.firstCutOffDateEnd,
+					deduction:  cutoff.firstCutOffDeduction ?? 0,
+					payOut:     cutoff.firstCutOffPayOut,
 				})
 			}
 			if (secondCutOff) {
 				cutOffData.push({
-					cutoffID: 2,
+					cutoffID:   2,
 					cutoffName: "Second Cut-Off",
-					start:  cutoff.secondCutOffDateStart,
-					end:    cutoff.secondCutOffDateEnd,
-					payOut: cutoff.secondCutOffPayOut,
+					start:      cutoff.secondCutOffDateStart,
+					end:        cutoff.secondCutOffDateEnd,
+					deduction:  cutoff.secondCutOffDeduction ?? 0,
+					payOut:     cutoff.secondCutOffPayOut,
 				})
 			}
 			if (thirdCutOff) {
 				cutOffData.push({
-					cutoffID: 3,
+					cutoffID:   3,
 					cutoffName: "Third Cut-Off",
-					start:  cutoff.thirdCutOffDateStart,
-					end:    cutoff.thirdCutOffDateEnd,
-					payOut: cutoff.thirdCutOffPayOut,
+					start:      cutoff.thirdCutOffDateStart,
+					end:        cutoff.thirdCutOffDateEnd,
+					deduction:  cutoff.thirdCutOffDeduction ?? 0,
+					payOut:     cutoff.thirdCutOffPayOut,
 				})
 			}
 			if (fourthCutOff) {
 				cutOffData.push({
-					cutoffID: 4,
+					cutoffID:   4,
 					cutoffName: "Fourth Cut-Off",
-					start:  cutoff.fourthCutOffDateStart,
-					end:    cutoff.fourthCutOffDateEnd,
-					payOut: cutoff.fourthCutOffPayOut,
+					start:      cutoff.fourthCutOffDateStart,
+					end:        cutoff.fourthCutOffDateEnd,
+					deduction:  cutoff.fourthCutOffDeduction ?? 0,
+					payOut:     cutoff.fourthCutOffPayOut,
 				})
 			}
 		}
 
 		let cutoffHTML = '';
 		cutOffData.map(cod => {
-			let { cutoffID, cutoffName, start, end, payOut } = cod;
+			let { cutoffID, cutoffName, start, end, deduction, payOut } = cod;
 
 			cutoffHTML += `
 			<option value="${cutoffID}"
 				start="${start}"
 				end="${end}"
+				deduction="${deduction}"
 				payOut="${payOut}"
 				${cutoffID == cutOff ? "selected" : ""}>${cutoffName}</option>`;
 		})
@@ -1652,9 +1662,10 @@ $(document).ready(function() {
 
 		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
 			
-			data["employeeID"] = sessionID;
-			data["cutOff"]     = $(`[name="cutoff"]`).val();;
-			data["timekeepingReason"] = $("[name=timekeepingReason]").val()?.trim();
+			data["employeeID"]           = sessionID;
+			data["cutOff"]               = $(`[name="cutoff"]`).val();
+			data["deduction"]            = $(`[name="cutoff"] option:selected`).attr("deduction");
+			data["timekeepingReason"]    = $("[name=timekeepingReason]").val()?.trim();
 			data["timekeepingStartDate"] = $(`[name="timesheetDate"]`).attr("start");
 			data["timekeepingEndDate"]   = $(`[name="timesheetDate"]`).attr("end");
 			data["payOut"]               = $(`[name="timesheetDate"]`).attr("payOut");
@@ -1684,38 +1695,40 @@ $(document).ready(function() {
 				const workingDays = $(this).attr("workingDays");
 
 				$("td a.viewAttendance", this).each(function() {
-					const scheduleDate          = $(this).attr("scheduleDate");
-					const scheduleIn            = $(this).attr("scheduleIn");
-					const scheduleOut           = $(this).attr("scheduleOut");
-					const scheduleBreakDuration = $(this).attr("scheduleBreakDuration");
-					const scheduleDuration      = $(this).attr("scheduleDuration");
-					const restDay               = $(this).attr("restDay");
-					const finalCheckIn          = $(this).attr("finalCheckIn");
-					const finalCheckOut         = $(this).attr("finalCheckOut");
-					const checkIn               = $(this).attr("checkIn");
-					const checkOut              = $(this).attr("checkOut");
-					const noTimeIn              = $(this).attr("noTimeIn");
-					const noTimeOut             = $(this).attr("noTimeOut");
-					const noInOutID             = $(this).attr("noInOutID");
-					const noInOutReference      = $(this).attr("noInOutReference");
-					const overtimeIn            = $(this).attr("overtimeIn");
-					const overtimeOut           = $(this).attr("overtimeOut");
-					const overtimeBreakDuration = $(this).attr("overtimeBreakDuration");
-					const overtimeID            = $(this).attr("overtimeID");
-					const overtimeReference     = $(this).attr("overtimeReference");
-					const leaveIn               = $(this).attr("leaveIn");
-					const leaveOut              = $(this).attr("leaveOut");
-					const leaveID               = $(this).attr("leaveID");
-					const leaveReference        = $(this).attr("leaveReference");
-					const leaveType             = $(this).attr("leaveType");
-					const leaveWorkingDay       = $(this).attr("leaveWorkingDay");
-					const leaveDuration         = $(this).attr("leaveDuration");
-					const checkDuration         = $(this).attr("checkDuration");
-					const basicHours            = $(this).attr("basicHours");
-					const overtimeHours         = $(this).attr("overtimeHours");
-					const nightDifferential     = $(this).attr("nightDifferential");
-					const totalHours            = $(this).attr("totalHours");
-					const status                = $(this).attr("status");
+					const scheduleDate                   = $(this).attr("scheduleDate");
+					const scheduleIn                     = $(this).attr("scheduleIn");
+					const scheduleOut                    = $(this).attr("scheduleOut");
+					const scheduleBreakDuration          = $(this).attr("scheduleBreakDuration");
+					const scheduleDuration               = $(this).attr("scheduleDuration");
+					const dayType                        = $(this).attr("dayType");
+					const restDay                        = $(this).attr("restDay");
+					const finalCheckIn                   = $(this).attr("finalCheckIn");
+					const finalCheckOut                  = $(this).attr("finalCheckOut");
+					const checkIn                        = $(this).attr("checkIn");
+					const checkOut                       = $(this).attr("checkOut");
+					const noTimeIn                       = $(this).attr("noTimeIn");
+					const noTimeOut                      = $(this).attr("noTimeOut");
+					const noInOutID                      = $(this).attr("noInOutID");
+					const noInOutReference               = $(this).attr("noInOutReference");
+					const overtimeIn                     = $(this).attr("overtimeIn");
+					const overtimeOut                    = $(this).attr("overtimeOut");
+					const overtimeBreakDuration          = $(this).attr("overtimeBreakDuration");
+					const overtimeID                     = $(this).attr("overtimeID");
+					const overtimeReference              = $(this).attr("overtimeReference");
+					const leaveIn                        = $(this).attr("leaveIn");
+					const leaveOut                       = $(this).attr("leaveOut");
+					const leaveID                        = $(this).attr("leaveID");
+					const leaveReference                 = $(this).attr("leaveReference");
+					const leaveType                      = $(this).attr("leaveType");
+					const leaveWorkingDay                = $(this).attr("leaveWorkingDay");
+					const leaveDuration                  = $(this).attr("leaveDuration");
+					const checkDuration                  = $(this).attr("checkDuration");
+					const basicHours                     = $(this).attr("basicHours");
+					const overtimeHours                  = $(this).attr("overtimeHours");
+					const nightDifferentialHours         = $(this).attr("nightDifferentialHours");
+					const overtimeNightDifferentialHours = $(this).attr("overtimeNightDifferentialHours");
+					const totalHours                     = $(this).attr("totalHours");
+					const status                         = $(this).attr("status");
 
 					let temp = { 
 						employeeID,
@@ -1725,6 +1738,7 @@ $(document).ready(function() {
 						scheduleOut,     
 						scheduleBreakDuration,
 						scheduleDuration, 
+						dayType,
 						restDay,
 						finalCheckIn,          
 						finalCheckOut,          
@@ -1749,7 +1763,8 @@ $(document).ready(function() {
 						checkDuration,   
 						basicHours,       
 						overtimeHours,    
-						nightDifferential, 
+						nightDifferentialHours, 
+						overtimeNightDifferentialHours,
 						totalHours,      
 						status
 					}
@@ -1797,11 +1812,12 @@ $(document).ready(function() {
 		let checkDuration     = $(this).attr("checkDuration");    
 		let basicHours        = $(this).attr("basicHours");    
 		let overtimeHours     = $(this).attr("overtimeHours");   
-		let nightDifferential = $(this).attr("nightDifferential");    
+		let nightDifferentialHours = +$(this).attr("nightDifferentialHours");    
+		let overtimeNightDifferentialHours = +$(this).attr("overtimeNightDifferentialHours");    
 		let totalHours        = $(this).attr("totalHours");    
 		let status            = $(this).attr("status");    
 
-		const getDateFormat = (date = null, substitute = null, id = null, reference = "", type = "") => {
+		let getDateFormat = (date = null, substitute = null, id = null, reference = "", type = "") => {
 			if (date && date != "null" && moment(date).isValid()) {
 				if (type == "NO_TIME") {
 					if (substitute && substitute != "null" && moment(substitute).isValid()) {
@@ -1837,7 +1853,7 @@ $(document).ready(function() {
 			return "----";
 		}
 
-		const getTimeFormat = (time = "0", substitute = null, id = null, reference = "", type = "ordinary") => {
+		let getTimeFormat = (time = "0", substitute = null, id = null, reference = "", type = "ordinary") => {
 			if (time && time != "false" && time != "null" && time != "0") {
 				let html = "";
 				time = decimalToHours(time);
@@ -1957,7 +1973,7 @@ $(document).ready(function() {
 		let subReference = noInOutReference || leaveReference;
 		let subType = noInOutID ? "NO_TIME" : "LEAVE";
 
-		
+		let totalNightDifferential = nightDifferentialHours + overtimeNightDifferentialHours;
 		
 		let scheduleDataHTML = `
 		<table class="table table-striped mt-2">
@@ -1992,7 +2008,7 @@ $(document).ready(function() {
 				<tr>
 					<td class="text-left  p-1 m-2 font-weight-bold">Night Differential: </td>
 					<td class="text-right p-1 m-2 " style="font-style: italic">
-						<div>${totalHours > 0 ? getTimeFormat(nightDifferential) : "----"}</div>
+						<div>${totalHours > 0 ? getTimeFormat(totalNightDifferential) : "----"}</div>
 					</td>
 				</tr>
 			</tbody>

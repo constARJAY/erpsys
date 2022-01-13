@@ -413,7 +413,7 @@ class PayrollAdjustment_model extends CI_Model {
         return $query ? $query->result_array() : [];
     }
 
-    public function updatePayrollItemsComputation($payrollID = 0)
+    public function updatePayrollItemsComputation($payrollID = 0, $deduction = 0)
     {
         $data = [];
 
@@ -504,32 +504,27 @@ class PayrollAdjustment_model extends CI_Model {
                 $grossPay = $tempGrossPay - $tempGrossDeduction;
                 $totalGrossPay = $grossPay + $prevGrossPay;
 
-                if ($sssDeduction > 0)
+                if ($deduction)
                 {
                     $sss = getSssDeduction($totalGrossPay);
                     $sssBasis     = $sss["employee"] ?? 0;
                     $sssDeduction = $sss["employee"] ?? 0;
                     $sssEmployer  = $sss["employer"] ?? 0;
                     $sssTotal     = $sss["total"] ?? 0;
-                }
 
-                if ($phicDeduction > 0)
-                {
                     $phic = getPhicDeduction($totalGrossPay);
                     $phicBasis     = $phic["employee"] ?? 0;
                     $phicDeduction = $phic["employee"] ?? 0;
                     $phicEmployer  = $phic["employer"] ?? 0;
                     $phicTotal     = $phic["total"] ?? 0;
-                }
 
-                if ($hdmfDeduction > 0)
-                {
                     $hdmf = getHdmfDeduction($totalGrossPay);
                     $hdmfBasis     = $hdmf["employee"] ?? 0;
                     $hdmfDeduction = $hdmf["employee"] ?? 0;
                     $hdmfEmployer  = $hdmf["employer"] ?? 0;
                     $hdmfTotal     = $hdmf["total"] ?? 0;
                 }
+
 
                 $totalDeduction  = $sssDeduction + $phicDeduction + $hdmfDeduction;
                 if ($withHoldingDeduction > 0)
@@ -636,6 +631,7 @@ class PayrollAdjustment_model extends CI_Model {
     {
         $adjustment = $this->getPayrollAdjustmentData($payrollAdjustmentID);
         $payrollID  = $adjustment->payrollID ?? 0;
+        $deduction  = $adjustment->deduction ?? 0;
 
         $payrollAdjustmentItems = $this->getCheckedPayrollAdjustmentItems($payrollAdjustmentID);
         if ($payrollAdjustmentItems && !empty($payrollAdjustmentItems))
@@ -678,7 +674,7 @@ class PayrollAdjustment_model extends CI_Model {
                     $data,
                     'payrollItemID');
 
-                $this->updatePayrollItemsComputation($payrollID);
+                $this->updatePayrollItemsComputation($payrollID, $deduction);
 
                 return $query ? true : false;
             }

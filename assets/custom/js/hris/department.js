@@ -240,7 +240,7 @@ $(document).ready(function(){
     if (validate) {
 
         let data = getFormData("modal_hris_department", true);
-        data["tableData[departmentCode]"] = generateCode("DPT", false, "hris_department_tbl", "departmentCode");
+        data["tableData[departmentCode]"] = generateCode("DPT", false, "hris_department_tbl", "departmentID", "", true);
         data["tableData[createdBy]"] = sessionID;
         data["tableData[updatedBy]"] = sessionID;
         data["tableName"]            = "hris_department_tbl";

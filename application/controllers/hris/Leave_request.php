@@ -18,60 +18,151 @@ class Leave_request extends CI_Controller {
         $this->load->view("template/footer");
     }
 
-    public function updateEmployeeLeave()
-    {
-        // echo "<pre>";
-        // print_r($_POST);
-        // exit;
+    public function saveleaveRequest(){
+        $action                     = $this->input->post("action");
+        $method                     = $this->input->post("method");
+        $leaveRequestID             = $this->input->post("leaveRequestID") ?? null;
+        $reviseLeaveRequestID       = $this->input->post("reviseLeaveRequestID") ?? null;
+        $employeeID                 = $this->input->post("employeeID");
+        $leaveRequestReason         = $this->input->post("leaveRequestReason") ?? null;
 
-        $employeeID  = $this->input->post("employeeID");
-        $leaveID     = $this->input->post("leaveID");
-        $leaveCredit = $this->input->post("leaveCredit");
-  
-        echo $this->leaverequest->updateEmployeeLeave($employeeID, $leaveID, $leaveCredit);
-    }
+        $leaveRequestCode           = $this->input->post("leaveRequestCode") ?? null;
+        $leaveRequestDate           = $this->input->post("leaveRequestDate") ?? null;
+        $leaveRequestDateFrom       = $this->input->post("leaveRequestDateFrom") ?? null;
+        $leaveRequestDateTo         = $this->input->post("leaveRequestDateTo") ?? null;
+        $leaveRequestNumberOfDate   = $this->input->post("leaveRequestNumberOfDate") ?? null;
+        $leaveID                    = $this->input->post("leaveID") ?? null;
+        $leaveName                  = $this->input->post("leaveName") ?? null;
+        $leaveRequestRemainingLeave = $this->input->post("leaveRequestRemainingLeave") ?? null;
+        $leaveStatus                = $this->input->post("leaveStatus") ?? null;
+        $leaveWorkingDay            = $this->input->post("leaveWorkingDay") ?? null;
+        $timeIn                     = $this->input->post("timeIn") ?? null;
+        $timeOut                    = $this->input->post("timeOut") ?? null;
 
-    function decimal_to_time($decimal) {
-        $minutes = floor($decimal % 60);
-        $seconds = $decimal - (int)$decimal;
-        $seconds = round($seconds * 60);
-    
-        return str_pad($minutes, 2, "0", STR_PAD_LEFT) . ":" . str_pad($seconds, 2, "0", STR_PAD_LEFT);
-    }
+        $approversID                = $this->input->post("approversID") ?? null;
+        $approversStatus            = $this->input->post("approversStatus") ?? null;
+        $approversDate              = $this->input->post("approversDate") ?? null;
+        $leaveRequestStatus         = $this->input->post("leaveRequestStatus");
+        $leaveRequestRemarks        = $this->input->post("leaveRequestRemarks") ?? null;
+        $submittedAt                = $this->input->post("submittedAt") ?? null;
+        $createdBy                  = $this->input->post("createdBy");
+        $updatedBy                  = $this->input->post("updatedBy");
+        $createdAt                  = $this->input->post("createdAt");
+        $existLeaveDocuments          = $this->input->post("existLeaveDocuments") ?? null;
 
-    function computeHours($timeIn ="00:00",$timeOut ="00:00",$duration ="0")
-    {
-        $start = $timeIn; //started at 7 after midnight
-        $break = $this->decimal_to_time($duration); //1 hour and 30 minutes of brake
-        $finish = $timeOut; //finished at 3 afternoon
-        
-        //create the start and end date objects
-        $startDate = \DateTime::createFromFormat('H:i', $start);
-        $endDate =  \DateTime::createFromFormat('H:i', $finish);
-        
-        if ($endDate < $startDate) {
-            //end date is in the past, adjust to the next day
-            //this is only needed since the day the time was worked is not known
-            $endDate->add(new \DateInterval('PT24H'));
+        $leaveRequestData = [
+            "reviseLeaveRequestID" => $reviseLeaveRequestID,
+            "employeeID"              => $employeeID,
+
+            "leaveRequestCode"              => $leaveRequestCode,
+            "leaveRequestDate"              => $leaveRequestDate,
+            "leaveRequestDateFrom"          => $leaveRequestDateFrom,
+            "leaveRequestDateTo"            => $leaveRequestDateTo,
+            "leaveRequestNumberOfDate"      => $leaveRequestNumberOfDate,
+            "leaveID"                       => $leaveID,
+            "leaveName"                     => $leaveName,
+            "leaveRequestRemainingLeave"    => $leaveRequestRemainingLeave,
+            "leaveStatus"                   => $leaveStatus,
+            "leaveWorkingDay"               => $leaveWorkingDay,
+            "timeIn"                        => $timeIn,
+            "timeOut"                       => $timeOut,
+            "leaveRequestRemarks"           => $leaveRequestRemarks,
+            "approversID"                   => $approversID,
+            "approversStatus"               => $approversStatus,
+            "approversDate"                 => $approversDate,
+            "leaveRequestStatus"            => $leaveRequestStatus,
+            "leaveRequestReason"            => $leaveRequestReason,
+            "submittedAt"                   => $submittedAt,
+            "createdBy"                     => $createdBy,
+            "updatedBy"                     => $updatedBy,
+            "createdAt"                     => $createdAt
+        ];
+
+        if ($action == "update") {
+            unset($leaveRequestData["reviseLeaveRequestID"]);
+            unset($leaveRequestData["createdBy"]);
+            unset($leaveRequestData["createdAt"]);
+
+            if ($method == "cancelform") {
+                $leaveRequestData = [
+                    "leaveRequestStatus" => 4,
+                    "updatedBy"             => $updatedBy,
+                ];
+            } else if ($method == "approve") {
+                $leaveRequestData = [
+                    "approversStatus"       => $approversStatus,
+                    "approversDate"         => $approversDate,
+                    "leaveRequestStatus" => $leaveRequestStatus,
+                    "updatedBy"             => $updatedBy,
+                ];
+            } else if ($method == "deny") {
+                $leaveRequestData = [
+                    "approversStatus"        => $approversStatus,
+                    "approversDate"          => $approversDate,
+                    "leaveRequestStatus"  => 3,
+                    "leaveRequestRemarks" => $leaveRequestRemarks,
+                    "updatedBy"              => $updatedBy,
+                ];
+            }   else if ($method == "drop") {
+                $leaveRequestData = [
+                    "reviseLeaveRequestID" => $reviseLeaveRequestID,
+                    "leaveRequestStatus"   => 5,
+                    "updatedBy"            => $updatedBy,
+                ]; 
+            }
         }
+
+        $saveLeaveRequestData = $this->leaverequest->saveLeaveRequestData($action, $leaveRequestData, $leaveRequestID);
+       
+
         
-        //determine the number of hours and minutes during the break
-        $breakPeriod = new \DateInterval(vsprintf('PT%sH%sM', explode(':', $break)));
-        
-        //increase the start date by the amount of time taken during the break period
-        $startDate->add($breakPeriod);
-        
-        //determine how many minutes are between the start and end dates
-        $minutes = new \DateInterval('PT1M');
-        $datePeriods = new \DatePeriod($startDate, $minutes, $endDate);
-        
-        //count the number of minute date periods
-        $minutesWorked = iterator_count($datePeriods);
-        
-        //divide the number of minutes worked by 60 to display the fractional hours
-        return ($minutesWorked / 60); //6.5
+        if ($saveLeaveRequestData) {
+            $result     = explode("|", $saveLeaveRequestData);
+            $fileArray  = [];
+            if ($result[0] == "true") {
+                $leaveRequestID = $result[2];
+                // GETTING FILE (BINARY) DATA 
+                if($_FILES){
+                    $files = $_FILES["files"]["name"];
+                    
+                    for ($i=0; $i < count($files) ; $i++) { 
+                        $filesdata      =  $_FILES["files".$i];
+                        $filesname      =   $filesdata["name"];
+
+                        $leaveDocument =   "LRF-".date("y")."-".str_pad($leaveRequestID, 5, '0', STR_PAD_LEFT)."_".$filesname;
+                        array_push($fileArray, $leaveDocument);
+                        
+                        if(file_exists("assets/upload-files/leave-documents/".$leaveDocument)){
+                            unlink("assets/upload-files/leave-documents/".$leaveDocument);
+                        }
+
+                        move_uploaded_file($_FILES["files".$i]["tmp_name"], "assets/upload-files/leave-documents/".$leaveDocument);
+                       
+                    }
+                }
+                // END GETTING FILE (BINARY) DATA 
+
+                // GETTING EXISTING DATA 
+                if($existLeaveDocuments){
+                    $existLeaveDocumentsArr = explode("|", $existLeaveDocuments);
+                    for ($i=0; $i < count($existLeaveDocumentsArr) ; $i++) { 
+                        array_push($fileArray, $existLeaveDocumentsArr[$i]);
+                    }
+                }
+                // END GETTING EXISTING DATA 
+
+                // UPDATE TABLE - FILE COLUMN 
+                if($fileArray){
+                    $updateLeaveRequestData  = ["leaveDocument" => join("|", $fileArray)];
+                    $this->leaverequest->updateLeaveRequest("hris_leave_request_tbl", $updateLeaveRequestData, "leaveRequestID = ".$leaveRequestID);
+                }
+                // END UPDATE TABLE - FILE COLUMN 
+                
+            }
+            
+        }
+        echo json_encode($saveLeaveRequestData);
     }
-        
     
     
 

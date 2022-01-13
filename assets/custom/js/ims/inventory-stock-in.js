@@ -701,9 +701,14 @@ $(document).ready(function () {
                             </tr>
                         </thead>
                         <tbody class="">`;
-
+		let tableNeeded = services == "Item" ? "ims_inventory_item_tbl" : "ims_inventory_asset_tbl";
+		let whereNeeded = services == "Item" ? "itemID" : "assetID";
+		
 		let ItemData	= getUnionTableData(`
 											SELECT id, itemCode,recordCode AS referenceCode, recordID, employeeID, requestName, itemID, itemCode, name_Brand, IFNULL(classification_category,'') AS classification_category, requestQuantity,quantity, SUM(remaining) AS remaining, Brand, itemName, classificationName, categoryName,uom
+													, (SELECT masterfilData.brandName FROM ${tableNeeded} AS masterfilData WHERE ${whereNeeded} = itemID  LIMIT 1) AS fixBrandname
+											
+											
 											FROM
 											(
 											SELECT
@@ -837,7 +842,7 @@ $(document).ready(function () {
 							<div>
 							${item.itemName}
 							</div>
-							<small style="color:#848482;">${item.Brand}</small>
+							<small style="color:#848482;">${item.fixBrandname}</small>
 						</td>
 						<td>
 							<div>

@@ -202,8 +202,9 @@ class EmployeeModule_model extends CI_Model {
         if ($action == "insert") {
             $query      = $this->db->insert("hris_employee_list_tbl", $data);
             $employeeID = $this->db->insert_id();
+            $this->updateEmployeeCode($employeeID);
         } else if ($action == "update") {
-            $query = $this->db->update("hris_employee_list_tbl", $data, ["employeeID" => $id]);
+            $query = $this->db->update("hris_employee_list_tbl", $data, ["employeeID" => $employeeID]);
         }
         return $query ? "true|Success|$employeeID|".date("Y-m-d") : "false|System error: Please contact the system administrator for assistance!";
     }
@@ -249,5 +250,33 @@ class EmployeeModule_model extends CI_Model {
             return false;
         }
     }
+
+
+
+
+    // ----- ***** GENERATE EMPLOYEE CODE ***** -----
+    public function updateEmployeeCode($employeeID = 0, $createdAt = null)
+    {
+        $lastStr = $employeeID == 1 ? 999999999 : ($employeeID - 1);
+        $date    = $createdAt ?? date("Y-m-d");
+
+        $employeeCode = getFormCode("EMP", $date, $lastStr);
+        $this->db->update(
+            "hris_employee_list_tbl", 
+            ["employeeCode" => $employeeCode], 
+            ["employeeID"   => $employeeID]);
+    }
+
+    public function generateEmployeeCode()
+    {
+        $employees = $this->getAllEmployee();
+        foreach($employees as $employee)
+        {
+            $employeeID = $employee["employeeID"];
+            $createdAt  = $employee["createdAt"];
+            $this->updateEmployeeCode($employeeID, $createdAt);
+        }
+    }
+    // ----- ***** END GENERATE EMPLOYEE CODE ***** -----
 
 }
