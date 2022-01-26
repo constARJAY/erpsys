@@ -2321,7 +2321,7 @@ $(document).ready(function() {
 		if (cutOff == 1) {
 			if (cutOffStart > cutOffEnd) {
 				firstMonth = firstMonth == 1 ? 12 : (month - 1);
-				firstYear  = firstYear - 1;
+				firstYear  = firstMonth == 12 ? firstYear - 1 : firstYear;
 			}
 			secondMonth = month;
 		}

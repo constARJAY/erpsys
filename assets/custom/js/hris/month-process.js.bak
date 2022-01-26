@@ -660,9 +660,12 @@ function updateTableRows(){
 
         $("td [name=monthHoldStatus]", this).attr("id", `monthHoldStatus${monthID}${i}`);
         $("td [name=monthHoldStatus]", this).attr("index", i);
-    });
 
-    getTotalSummary();
+       
+
+
+
+    });
 }   
 // ----- END UPDATE TABLE ROWS -----
 
@@ -898,7 +901,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                     <td class="text-right" name="monthbasicSalary">${formatAmount(basicSalary,true)}</td>
                     <td>
                         <div class="btn-group w-100">
-                            <button type="button" class="btn btn-none dropdown-toggle gross-pay" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button type="button" class="btn btn-none dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             ${formatAmount(totalGrossPayAmount,true)}
                             </button>
                             <div class="dropdown-menu dropdown-menu-right grossPayData">
@@ -974,7 +977,7 @@ $(document).on("click","#generatePeriod",function(){
             setTimeout(() => {
                 $(".purchaseOrderItemsBody").html(generateData); 
                 updateTableRows();
-                
+            
             }, 300);
 
         Swal.fire({
@@ -1038,38 +1041,8 @@ $(document).on("click","#generatePeriod",function(){
         $(".purchaseOrderItemsBody > tr").each(function(i, obj) {
             $(".checkboxrow ",this).prop("checked", isChecked);
         });
-
-        getTotalSummary();
+   
     });
-
-    $(document).on("change","[name=monthHoldStatus]", function(){
-        getTotalSummary();
-    });
-
-    function getTotalSummary(){
-        let html = "";
-        let hasTableRow = $(".itemTableRow").length > 0 ? true : false;
-        if(hasTableRow){
-            let totalOnHold = 0, totalRelease = 0, grandTotal = 0;
-            $(".itemTableRow").each(function(){
-                let grossPayText    = $(this).find(".gross-pay").text().replace("₱ ","");
-                let grossPay        = grossPayText.replaceAll(",","") || grossPayText;
-                if($(this).find(".monthHoldStatus").prop("checked")){
-                    totalOnHold += parseFloat(grossPay);
-                }else{
-                    totalRelease += parseFloat(grossPay);
-                }
-                grandTotal += parseFloat(grossPay);
-            });
-            
-
-            $(".totalOnHold").text(formatAmount(totalOnHold, true));
-            $(".totalRelease").text(formatAmount(totalRelease, true));
-            $(".grandTotal").text(formatAmount(grandTotal, true));
-                            
-
-        }
-    }
 
 // ----- FORM CONTENT -----
 function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
@@ -1077,21 +1050,23 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
     readOnly = isRevise ? false : readOnly;
 
     let {
-        monthID             = "",
-        revisemonthID       = "",
-        monthCode           = "",
-        employeeID          = "",
-        monthRemarks	    = "",
-        monthDescription    = "",
-        monthDateStart      = "",
-        monthDateEnd        = "",
-        approversID         = "",
-        approversStatus     = "",
-        approversDate       = "",
-        monthStatus         = false,
-        submittedAt         = false,
-        createdAt           = false,
+        monthID        = "",
+        revisemonthID  = "",
+        monthCode ="",
+        employeeID              = "",
+        
+        monthRemarks	  = "",
+        monthDescription  = "",
+        monthDateStart  = "",
+        monthDateEnd  = "",
+        approversID             = "",
+        approversStatus         = "",
+        approversDate           = "",
+        monthStatus   = false,
+        submittedAt             = false,
+        createdAt               = false,
     } = data && data[0];
+    console.log(data)
 
     let purchaseOrderItems = "";
     if (monthID) {
@@ -1303,51 +1278,28 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                     </div>
 
                     <div class="card-body">
-                        <table class="table table-striped" id="${tableInventoryReceivingItems}">
-                            <thead>
-                                <tr style="white-space: nowrap">
-                                    
-                                    <th>Employee Code</th>
-                                    <th>Employee Name</th>
-                                    <th>Basic Salary</th>
-                                    <th>Gross Pay</th>
-                                    <th>Total 13th Month 
-                                            <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="13th MONTH COMPUTATION:
-                                                13th Month   =  Every CutOff( Basic Salary - Late - Absent(LWOP) ) ÷ No. of months for date period. "></i>
-                                    </th>
-                                    ${checkboxHoldStatus}
-                                </tr>
-                            </thead>
-                            <tbody class="purchaseOrderItemsBody">
-                                    ${purchaseOrderItems}
-                            </tbody>
-                        </table>
+                    <table class="table table-striped" id="${tableInventoryReceivingItems}">
+                    <thead>
+                        <tr style="white-space: nowrap">
+                            
+                            <th>Employee Code</th>
+                            <th>Employee Name</th>
+                            <th>Basic Salary</th>
+                            <th>Gross Pay</th>
+                            <th>Total 13th Month <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="13th MONTH COMPUTATION:
+                                                                                                                                                    13th Month   =  Every CutOff(Salary Earned for the month - Late - Absent(LWOP)) / No. of months for date period. "></i></th>
+                            ${checkboxHoldStatus}
+                        </tr>
+                    </thead>
+                    <tbody class="purchaseOrderItemsBody">
+                            ${purchaseOrderItems}
+                    </tbody>
+                </table>
                     </div>
                 </div>
 
             </div>
         </div>
-
-        <div class="col-12 row">
-            <div class="offset-md-7 col-md-5 col-sm-12">
-                <div class="row" style="font-size: 1.1rem;" id="totalSummary">
-
-                    <div class="col-6 text-left font-weight-bold">Total On Hold 13th month</div>
-                    <div class="col-6 text-right font-weight-bold totalOnHold">₱ 0.00</div>
-
-                    <div class="col-6 text-left font-weight-bold">Total On Release 13month</div>
-                    <div class="col-6 text-right font-weight-bold totalRelease">₱ 0.00</div>
-
-                    <div class="col-6 text-left font-weight-bold">
-                        <div style="font-size: 1.4rem;">Grand Total</div>
-                    </div>
-                    <div class="col-6 text-right font-weight-bold grandTotal">
-                        <div style="font-size: 1.4rem;" class="grandTotal">₱ 0.00</div>
-                    </div>
-
-                </div>
-            </div>
-		</div>
         
         
     </div>    
@@ -1364,8 +1316,6 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
         $("#page_content").html(html);
         initDataTables();
         initAll();
-        getTotalSummary();
-        
         // monthProcessDateRange();
         $('[data-toggle="tooltip"]').tooltip();
         monthDateStart ? $('#setDateFrom').val( moment(monthDateStart).format("YYYY-MM")) : '';

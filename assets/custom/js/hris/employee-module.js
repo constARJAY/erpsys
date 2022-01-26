@@ -2729,7 +2729,7 @@ $(document).ready(function() {
         const employeeBasicSalary     = +$("[name=employeeBasicSalary]").val().replaceAll(",", "");
         const employeeDailyRate       = +$("[name=employeeDailyRate]").val().replaceAll(",", "");
         const employeeHourlyRate      = employeeDailyRate / 8;
-        const employeeAllowance       = +$("[name=employeeAllowance]").val();
+        const employeeAllowance       = +$("[name=employeeAllowance]").val().replaceAll(",", "");
         const bankID                  = $("[name=bankID]").val();
         const employeeBankAccountName = $("[name=employeeBankAccountName]").val()?.trim();
         const employeeBankAccountNo   = $("[name=employeeBankAccountNo]").val();

@@ -296,13 +296,12 @@ function pageContent(isDetails = true){
                                                 `(employeeRanking = 'Managerial' OR employeeRanking = 'Officer') AND employeeStatus = '1' `);
         getApplicantStatus          =  [
                                             { type : "Pending" },
-                                            { type : "Passed" },
+                                            { type : "For Review" },
                                             { type : "Waitlisted" },
-                                            { type : "Re-evaluate" },
-                                            { type : "Failed" },
                                             { type : "Cancelled" },
-                                            { type : "For Review" }
-                                            
+                                            { type : "Passed" },
+                                            { type : "Failed" },
+                                            { type : "Re-evaluate" }
                                         ];
         getApplicantInterviewerData = getTableData("hris_applicant_interviewer_tbl","",`applicantID = '${getApplicantID}'`);
         getProfileTableData         = getProfileData(getApplicantID);

@@ -1,73 +1,8 @@
 $(document).ready(function() {
 
-    function getOverbreakData(){
-        let returnData = [];
-        let html;
-            $.ajax({
-            method:      "POST",
-            url:         `hr_dashboard/getOverbreakData`,
-            async:   false,
-            dataType:    "json",
-            beforeSend: function() {
-            
-            },
-            success: function(data) {
-                returnData = data;
-            },
-            error: function() {
-                setTimeout(() => {
-                    $("#loader").hide();
-                    showNotification("danger", "System error: Please contact the system administrator for assistance!");
-                }, 500);
-            }
-        });
-    
-        let tbodyData = `<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
-                            <img src="${base_url}assets/modal/no-data.gif" style="max-width: 300px;
-                                width: auto;
-                                min-width: 100px;
-                                height: auto;" alt="No data available.">
-                            <span class="font-weight-bold">No data available.</span>
-                        </div>`;
-        if(returnData){
-            tbodyData = "";
-            returnData.map((value,index)=>{
-                tbodyData += `
-                            <tr>
-                                <td>${value.employeeCode}</td>
-                                <td>
-                                    ${value.fullname}<br>
-                                    <small><strong>${value.departmentName}<strong/></small><br>
-                                    <small>${value.departmentName}</small>
-                                </td>
-                                <td class="text-center">${value.breakDuration}</td>
-                            </tr>
-                            `;
-            });
-        }
-        html = `
-        <table class="table table-bordered table-striped table-hover" id="overbreakTable" style="font-size:95%">
-            <thead>
-                <tr style="white-space: nowrap">
-                    <th>Employee No.</th>
-                    <th>Employee Name</th>
-                    <th>Duration</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${tbodyData}
-            </tbody>
-        </tbody>
-        `;  
-
-        return html;
-        
-    }
-    
-    
     //------ MODULE FUNCTION IS ALLOWED UPDATE-----
 
-    const allowedUpdate = isUpdateAllowed(70);
+    const allowedUpdate = isUpdateAllowed(67);
     if(!allowedUpdate){
         $("#page_content").find("input, select, textarea").each(function(){
             $(this).attr("disabled",true);
@@ -78,7 +13,7 @@ $(document).ready(function() {
     //------ END MODULE FUNCTION IS ALLOWED UPDATE-----
 
 // ----- MODULE APPROVER -----
-const moduleApprover = getModuleApprover("HR Dashboard");
+const moduleApprover = getModuleApprover("Project Dashboard");
 // ----- END MODULE APPROVER -----
 
 
@@ -185,15 +120,15 @@ function viewDocument(view_id = false, readOnly = false, isRevise = false, isFro
 
 function updateURL(view_id = 0, isAdd = false, isRevise = false) {
     if (view_id && !isAdd) {
-        window.history.pushState("", "", `${base_url}hris/hr_dashboard?view_id=${view_id}`);
+        window.history.pushState("", "", `${base_url}ims/inventory_dashboard?view_id=${view_id}`);
     } else if (isAdd) {
         if (view_id && isRevise) {
-            window.history.pushState("", "", `${base_url}hris/hr_dashboard?add=${view_id}`);
+            window.history.pushState("", "", `${base_url}ims/inventory_dashboard?add=${view_id}`);
         } else {
-            window.history.pushState("", "", `${base_url}hris/hr_dashboard?add`);
+            window.history.pushState("", "", `${base_url}ims/inventory_dashboard?add`);
         }
     } else {
-        window.history.pushState("", "", `${base_url}hris/hr_dashboard`);
+        window.history.pushState("", "", `${base_url}ims/inventory_dashboard`);
     }
 }
 // ----- END VIEW DOCUMENT -----
@@ -215,8 +150,12 @@ function initDataTables() {
     //     $("#tableForApprroval").DataTable().destroy();
     // }
 
-    if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-        $("#tableMyForms").DataTable().destroy();
+    if ($.fn.DataTable.isDataTable("#tableReservedItems")) {
+        $("#tableReservedItems").DataTable().destroy();
+    }
+
+    if ($.fn.DataTable.isDataTable("#tableWarehouse")) {
+        $("#tableWarehouse").DataTable().destroy();
     }
 
     // var table = $("#tableForApprroval")
@@ -240,7 +179,7 @@ function initDataTables() {
     //         ],
     //     });
 
-    var table = $("#tableMyForms")
+    var table = $("#tableReservedItems")
         .css({ "min-width": "100%" })
         .removeAttr("width")
         .DataTable({
@@ -250,13 +189,32 @@ function initDataTables() {
             sorting: [],
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 100 },
+                { targets: 0,  width: 200 },
                 { targets: 1,  width: 200 },
                 { targets: 2,  width: 200 },
                 { targets: 3,  width: 200 },
-                { targets: 4,  width: 80 },
+                { targets: 4,  width: 200 }
             ],
         });
+
+    var table = $("#tableWarehouse")
+    .css({ "min-width": "100%" })
+    .removeAttr("width")
+    .DataTable({
+        proccessing: false,
+        serverSide: false,
+        scrollX: true,
+        sorting: [],
+        scrollCollapse: true,
+        columnDefs: [
+            { targets: 0,  width: 200 },
+            { targets: 1,  width: 200 },
+            { targets: 2,  width: 200 },
+            { targets: 3,  width: 80 },
+            { targets: 4,  width: 80 },
+            { targets: 5,  width: 300 },
+        ],
+    });
 
     // var table = $("#tableInventoryReceivingItems")
     //     .css({ "min-width": "100%" })
@@ -313,17 +271,17 @@ function headerTabContent(display = true) {
         //     let count = getCountForApproval("hris_salary_release_tbl", "payrollHoldStatus");
         //     let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
             // <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
-            let html = `
-            <div class="bh_divider appendHeader"></div>
-            <div class="row clearfix appendHeader">
-                <div class="col-12">
-                    <ul class="nav nav-tabs">
-                        <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">Employee Management</a></li>
-                        <li class="nav-item"><a class="nav-link " data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">Recruitment Dashboard</a></li>
-                    </ul>
-                </div>
-            </div>`;
-            $("#headerContainer").append(html);
+            // let html = `
+            // <div class="bh_divider appendHeader"></div>
+            // <div class="row clearfix appendHeader">
+            //     <div class="col-12">
+            //         <ul class="nav nav-tabs">
+            //             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">Employee Management</a></li>
+            //             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">Recruitment Dashboard</a></li>
+            //         </ul>
+            //     </div>
+            // </div>`;
+            // $("#headerContainer").append(html);
         // }
     } else {
         $("#headerContainer").find(".appendHeader").remove();
@@ -331,12 +289,252 @@ function headerTabContent(display = true) {
 }
 // ----- END HEADER CONTENT -----
 
+// ----- TABLE CONTENT -----
+function tableContent(data = false) {  
+    // $("#tbodyProject").html('<tr><td colspan=4>'+preloader+'</td></tr>');
+    $("#tableWarehouse").html(preloader);
+
+    let tbodyHTML = "";
+    let html = "";
+    if (data && data.length > 0) {
+        data.map(stock => {
+            const {
+                assetID,
+                barcode,
+                assetCode,
+                assetName,
+                brand,
+                classificationName,
+                categoryName,
+                uom,
+                stockIN,
+                borrowedQuantity,
+                returned,
+                reOrderLevel,
+                reservedItem,
+                disposed,
+                transferquantity,
+                Available,
+                Total_Quantity,
+                totalequipmentBorrowing,
+                materiaWithdrawalQuantity,
+
+            } = stock;
+            // var itemTotalQuantity    =  parseFloat(data["item"][i].stockIN) - (parseFloat(data["item"][i].materiaWithdrawalQuantity + data["item"][i].totalStockOut));
+             var assetTotalQty = parseFloat(stockIN) - (parseFloat(totalequipmentBorrowing) + parseFloat(materiaWithdrawalQuantity) + parseFloat(disposed) );
+            if(assetTotalQty > 0){
+                tbodyHTML += `
+                <tr assetID="${assetID}">
+                    <td>${assetCode || "-"}</td>
+                    <td>${assetName || "-"}</td>
+                    <td>${classificationName || "-"}</td>
+                    <td>${uom || "-"}</td>
+                    <td>${formatAmount(assetTotalQty || 0)}</td>
+                    <td>${barcode || "-"}</td>
+                    
+                </tr>`;
+            }
+
+           
+    
+        });
+    }
+
+    html +=`
+    <table class="table table-bordered table-striped" id="tableWarehouse">
+    <thead>
+        <tr style="white-space: nowrap">
+            <th>Asset Code</th>
+            <th>Asset Name</th>
+            <th>Asset Classification</th>
+            <th>UOM</th>
+            <th>Quantity</th>
+            <th>Barcode</th>
+        </tr>
+    </thead>
+    <tbody id="tbodyProject">
+        ${tbodyHTML}
+    </tbody>
+</table>
+    `;
+
+   
+
+    setTimeout(() => {
+        // $("#tbodyProject").html(tbodyHTML);
+        $("#tableWarehouse").html(html);
+        initDataTables();   
+    }, 500);
+
+}
+// ----- END TABLE CONTENT -----
+
+ // ----- GET RESERVATION DATA -----
+ function getReservationData(inventoryStorageID = 0) {
+
+    const result = getTableData(`(
+        SELECT i.barcode, i.assetID, i.assetCode , brand, i.assetName, classificationName, categoryName, uom,stockIN,
+        ROUND(equipmentBorrowing,2) AS equipmentBorrowing,Transferred,
+
+        -- ROUND(IF((SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID),
+        --     (SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID),0) -  returnQuantity,2) AS returnQuantity, 
+        
+
+        ROUND(IF((SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID),
+            IFNULL(
+            IF((SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID) >  returnQuantity,
+            (SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID) -  returnQuantity,
+            returnQuantity - (SELECT SUM(stockreturnedIn.quantity) AS reservedAssetStockIn  FROM ims_stock_in_assets_tbl as stockreturnedIn WHERE stockreturnedIn.materialUsageID <>0 AND  stockreturnedIn.stockOutDate = '0000-00-00' AND stockreturnedIn.stockInDate IS NOT NULL AND assetID = i.assetID)),0),returnQuantity - 0) ,2) AS returnQuantity, 
+            
+        ROUND(disposed,2) as disposed,
+        reservedAsset, 
+        
+        CASE WHEN equipmentBorrowing <>0 THEN (IF((reservedAsset - equipmentBorrowing)<0,0,reservedAsset - equipmentBorrowing))
+        ELSE reservedAsset END reserved,
+        
+        ROUND(materiaWithdrawalQuantity  - returnQuantity,2)  AS materiaWithdrawalQuantity,
+        
+
+        IFNULL(iii.reOrderLevel,0) AS reOrderLevel,
+        
+        (IFNULL(equipmentBorrowing,2) - IFNULL(materiaWithdrawalQuantity,2)) totalequipmentBorrowing,
+
+        (stockIN - IFNULL(reOrderLevel,0) - materiaWithdrawalQuantity - returnQuantity - disposed - IF(equipmentBorrowing = 0,reservedAsset, IF(equipmentBorrowing = reservedAsset,equipmentBorrowing,reservedAsset - equipmentBorrowing))) AS available
+
+        FROM
+        (
+        SELECT barcode, assetID, assetCode, brand, assetName, classificationName,categoryName,uom,
+        IFNULL(SUM(stockIN),0) AS stockIN,IFNULL(SUM(equipmentBorrowing),0) AS equipmentBorrowing,
+        sum(Transferred) AS Transferred,
+         SUM(returnQuantity) AS returnQuantity,
+        IFNULL(SUM(disposed),0) AS disposed,IFNULL(SUM(reservedAsset),0) AS reservedAsset, IFNULL(SUM(materiaWithdrawalQuantity),0) AS materiaWithdrawalQuantity
+        FROM
+        (
+            SELECT 
+            sii.barcode,sii.assetID, 			sii.assetCode, 		sii.brand,		sii.assetName,
+            sii.classificationName, sii.categoryName,	sii.uom,  
+            SUM(sii.quantityForStockin) AS stockIN, -- Stock In Quantity
+            0 AS equipmentBorrowing,
+            0 AS returnQuantity,
+            0 AS Transferred,
+            '0.00'  AS disposed,
+            0 AS reservedAsset,
+            0 AS materiaWithdrawalQuantity
+            FROM  ims_stock_in_assets_tbl AS sii
+            WHERE (sii.inventoryReceivingID <>0 OR sii.materialUsageID <>0)   AND  sii.stockOutDate = '0000-00-00' AND sii.stockInDate IS NOT NULL AND sii.inventoryStorageID = ${inventoryStorageID}
+            GROUP BY sii.assetID
+            -- Get Stock In Quantity in  Stock In Assets Table
+            UNION ALL
+
+            SELECT 
+            sii.barcode, sii.assetID, 			sii.assetCode, 		sii.brand,		sii.assetName,
+            sii.classificationName, sii.categoryName,	sii.uom,  
+            0 AS stockIN,
+            sum(quantity) AS equipmentBorrowing, -- Equipment Borrowing Request Quantity
+            0 AS returnQuantity,
+            0 AS Transferred,
+            '0.00'  AS disposed,
+            0 AS reservedAsset,
+            0 AS materiaWithdrawalQuantity
+            FROM  ims_stock_in_assets_tbl AS sii
+            WHERE sii.equipmentBorrowingID <>0  AND  sii.stockOutDate IS NOT NULL AND sii.inventoryStorageID = ${inventoryStorageID}
+            GROUP BY sii.assetID
+            -- Get Equipment Borrowing Request Quantity in Stock In Assets Table
+            UNION ALL
+
+
+            SELECT 
+            "" AS barcode,sii.itemID as assetID, 			sii.itemCode as assetCode, 		sii.Brand as brand,		sii.itemName as assetName,
+            sii.classificationName, sii.categoryName,	sii.uom,  
+            0 AS stockIN,
+            0 AS equipmentBorrowing,
+            SUM(borrowedQuantity) AS returnQuantity, -- Return Quantity 
+            0 AS Transferred,
+            '0.00'  AS disposed,
+            0 AS reservedAsset,
+            0 AS materiaWithdrawalQuantity
+            FROM  ims_inventory_request_details_tbl AS sii
+            LEFT JOIN ims_return_item_tbl AS returnHeader 
+            ON  returnHeader.returnItemID = sii.returnItemID
+            WHERE sii.returnItemID <>0   AND
+            returnHeader.returnItemStatus = 2
+            GROUP BY sii.returnItemID
+            -- Get Return Quantity in Stock In Assets Table
+            UNION ALL
+
+            SELECT 
+            "" AS barcode,idd.assetID, 			idd.assetCode, 		idd.brand,		idd.assetName,
+            idd.assetClassification as classificationName, idd.assetCategory as categoryName,	idd.unitOfMeasurement AS uom,  
+            0 AS stockIN,
+            0 AS equipmentBorrowing,
+            0 returnQuantity,
+            0 AS Transferred,
+            SUM(quantity)  AS disposed, -- Disposed Quantity
+            0 AS reservedAsset,
+            0 AS materiaWithdrawalQuantity
+            FROM  ims_inventory_disposal_details_tbl AS idd
+            LEFT JOIN ims_inventory_disposal_tbl AS  id ON idd.disposalID = id.disposalID
+            WHERE  id.disposalStatus =2  
+            GROUP BY idd.assetID
+            -- Get Disposed Quantity in  Inventory Disposal Details Table
+            UNION ALL
+
+            SELECT "" AS barcode, sii.assetID, 		assetCode AS assetCode, 	assetBrandName AS  brand,	assetBrandName AS assetName,
+            assetClassification AS classificationName, 	assetCategory as categoryName,	assetCategory AS  uom,  
+            0 AS stockIN,
+            0 AS equipmentBorrowing,
+            0 AS returnQuantity,
+            0 AS Transferred,
+            '0.00'  AS disposed,
+            SUM(sii.requestQuantity) AS reservedAsset, -- Reserved Asset
+            0 AS materiaWithdrawalQuantity
+            FROM  ims_request_assets_tbl AS sii
+            LEFT JOIN ims_inventory_validation_tbl AS iiv ON sii.inventoryValidationID = iiv.inventoryValidationID
+            WHERE  sii.inventoryValidationID IS NOT NULL AND bidRecapID IS NULL AND iiv.inventoryValidationStatus = 2 AND reservedAsset IS NOT NULL
+            GROUP BY sii.assetID
+            -- Get Reserved Asset in Request Asset Table 
+            UNION ALL
+
+            SELECT 
+            "" AS barcode, mww.assetID, 0 AS assetCode, 0 AS brand, 0 AS assetName,
+            0 AS classificationName, 0 AS categoryName,
+            0 AS uom,  0 AS stockIN,
+            0 AS equipmentBorrowing,
+            0 AS returnQuantity,
+            0 AS Transferred,
+            '0.00'  AS disposed,
+            0 AS reservedAsset,
+            SUM(mww.received) AS materiaWithdrawalQuantity  -- Withdrawn Quantity
+            FROM  ims_material_withdrawal_tbl AS mw
+            LEFT JOIN ims_material_withdrawal_asset_tbl AS mww ON mw.materialWithdrawalID = mww.materialWithdrawalID 
+            WHERE  mw.inventoryAssetStatus = 9 AND mww.assetID IS NOT NULL
+            GROUP BY mww.assetID
+            -- Get Withdrawn Quantity in Material Withdrawal Table 
+        ) w
+        WHERE w.assetCode IS NOT NULL
+        GROUP BY assetID
+        )i
+        LEFT JOIN ims_inventory_asset_tbl AS iii ON i.assetID = iii.assetID
+       
+        GROUP BY i.assetID
+        )l GROUP BY assetID`,
+
+        `barcode,assetID, assetCode, brand, assetName, classificationName, categoryName, uom, totalequipmentBorrowing,
+        stockIN,equipmentBorrowing, ROUND(Transferred,2) AS Transferred, returnQuantity, ROUND(disposed,2) AS disposed, reservedAsset,reserved,materiaWithdrawalQuantity,IF(ROUND(available,2) <0,0,ROUND(available,2))  AS available,
+        ROUND(reOrderLevel,2) AS reOrderLevel, ROUND((available+ IFNULL(reOrderLevel,0) + reservedAsset),2) AS totalQuantity`
+        );
+
+
+    return result;
+}
+// ----- END GET RESERVATION DATA -----
+
 
 // // ----- HEADER BUTTON -----
 // function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 //     let html;
 //     if (isAdd) {
-//         if(isCreateAllowed(70)){
+//         if(isCreateAllowed(67)){
 
 //             html =``;
 //             // html = `
@@ -355,13 +553,9 @@ function headerTabContent(display = true) {
 function forApprovalContent() {
     $("#tableForApprovalParent").html(preloader);
 
-    const countActiveOrganicEmployee = getTableData(`hris_employee_list_tbl`,
-    `COUNT(employeeID) AS employeeActiveOrganic`,
-    `(employeeStatus = 1 OR employeeStatus = 2) AND scheduleID != 0  `);
-
-    const countActiveNonOrganicEmployee = getTableData(`hris_employee_list_tbl`,
-    `COUNT(employeeID) AS employeeActiveNonOrganic`,
-    `(employeeStatus = 1 OR employeeStatus = 2) AND scheduleID = 0  `);
+    const countActiveEmployee = getTableData(`hris_employee_list_tbl`,
+    `COUNT(employeeID) AS employeeActive`,
+    `employeeStatus = 1 OR employeeStatus = 2`);
 
     const countPendingLeave = getTableData(`hris_leave_request_tbl`,
     `COUNT(leaveRequestStatus) AS pendingleaves`,
@@ -377,21 +571,7 @@ function forApprovalContent() {
     WHEN year(eventCalendarDateFrom)=year(now()) THEN eventCalendarDateFrom
     WHEN year(eventCalendarDateTo)=year(now()) THEN eventCalendarDateTo
     END AS eventDate`,
-    `year(eventCalendarDateFrom)=year(now()) OR year(eventCalendarDateTo)=year(now())`,
-    `eventDate ASC`);
-
-
-
-    const getLate = getTableData(`hris_timekeeping_items_tbl`,
-    ` COUNT(lateDuration) as lates , scheduleDate`,
-    ` lateDuration > 0 AND day(scheduleDate)=day(now())`,
-    ``,
-    ``);
-  const getAbsent = getTableData(`hris_timekeeping_items_tbl`,
-    ` COUNT(timekeepingItemStatus) as absent,scheduleDate`,
-    `  timekeepingItemStatus = 'ABSENT' AND day(scheduleDate)=day(now())`,
-    ``,
-    ``);
+    `year(eventCalendarDateFrom)=year(now()) OR year(eventCalendarDateTo)=year(now())`);
 
 
     const task = getTableData(`pms_employeetaskoard_tbl as pet
@@ -416,31 +596,19 @@ function forApprovalContent() {
 
 
 
-
 let html = `        <div class="row clearfix row-deck">
-                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
+                        <div class="col-lg-4 col-md-4 col-sm-12">
                             <div class="card top_widget">
                                 <div class="body">
                                     <div class="icon"><i class="fas fa-users"></i> </div>
                                     <div class="content">
-                                        <div class="text mb-2 text-uppercase">Organic</div>
-                                        <h4 class="number mb-0">${countActiveOrganicEmployee[0].employeeActiveOrganic || 0}</h4>
+                                        <div class="text mb-2 text-uppercase">Head Count</div>
+                                        <h4 class="number mb-0">${countActiveEmployee[0].employeeActive || 0}</h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                         <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
-                            <div class="card top_widget">
-                                <div class="body">
-                                    <div class="icon"><i class="far fa-user-hard-hat"></i> </div>
-                                    <div class="content">
-                                        <div class="text mb-2 text-uppercase">Non-organic</div>
-                                        <h4 class="number mb-0">${countActiveNonOrganicEmployee[0].employeeActiveNonOrganic || 0}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
+                        <div class="col-lg-4 col-md-4 col-sm-12">
                             <div class="card top_widget">
                                 <div class="body">
                                     <div class="icon"><i class="fas fa-user-clock"></i> </div>
@@ -451,7 +619,7 @@ let html = `        <div class="row clearfix row-deck">
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
+                        <div class="col-lg-4 col-md-4 col-sm-12">
                             <div class="card top_widget">
                                 <div class="body">
                                     <div class="icon"><i class="fas fa-stopwatch"></i> </div>
@@ -462,39 +630,15 @@ let html = `        <div class="row clearfix row-deck">
                                 </div>
                             </div>
                         </div>
-
-                         <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
-                            <div class="card top_widget">
-                                <div class="body">
-                                    <div class="icon"><i class="fas fa-watch"></i> </div>
-                                    <div class="content">
-                                        <div class="text mb-2 text-uppercase">Late</div>
-                                        <h4 class="number mb-0">${getLate[0].late || 0}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                         <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
-                            <div class="card top_widget">
-                                <div class="body">
-                                    <div class="icon"><i class="fas fa-user-times"></i> </div>
-                                    <div class="content">
-                                        <div class="text mb-2 text-uppercase">Absent</div>
-                                        <h4 class="number mb-0">${getAbsent[0].absent || 0}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     
 
                     <div class="row clearfix row-deck">
                         <div class="col-xl-6 col-lg-12">
-                            <div class="card" style="box-shadow:none !important;">
+                            <div class="card">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO. OF EMPLOYEE (DEPARTMENT)</h2>
+                                    <h2 class="font-weight-bold text-white">NO OF EMPLOYEE (DEPARTMENT)</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-basic-employee"></div>
@@ -505,7 +649,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-xl-3 col-lg-6">
                             <div class="card">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO. OF EMPLOYEE (GENDER)</h2>
+                                    <h2 class="font-weight-bold text-white">NO OF EMPLOYEE (GENDER)</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-employee-gender"></div>
@@ -516,7 +660,7 @@ let html = `        <div class="row clearfix row-deck">
                         <div class="col-xl-3 col-lg-6">
                             <div class="card">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">YEARLY EVENTS</h2>
+                                    <h2 class="font-weight-bold text-white">EVENTS</h2>
                                 </div>
 
                                 <div class="card-body" style="color:black;height: 400px; overflow-y: auto;"> `;
@@ -528,17 +672,18 @@ let html = `        <div class="row clearfix row-deck">
                                             eventCalendarName,
                                             eventDate
                                         } = event;
-
-                                            html+=`<div class="container card"  style="box-shadow:none !important;">
-                                                <div class=" text-center mb-2 d-flex">
-                                                    <div class=" square rounded bg-secondary" style="
-                                                                            padding: 10px;
-                                                                            width: min-content;
-                                                                        "><small class="text-white font-weight-bolder m-0">${(moment(eventDate).format('MMM')).toUpperCase()}
-                                                                        <h1 class="text-white font-weight-bolder">${moment(eventDate).format('DD')}</h1></small></div>
-                                                                        <h6 class="font-weight-bolder p-0 pl-1 pt-3" style="width: fit-content;">${eventCalendarName}</h6>
-                                                </div>
-                                            </div>`;
+                                        html+=`<div class="row mt-1">
+                                                    <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2">
+                                                        <div class="square rounded bg-secondary" style="
+                                                                                padding: 10px;
+                                                                                width: min-content;
+                                                                            "><small class="text-white font-weight-bolder m-0">${(moment(eventDate).format('MMM')).toUpperCase()}<h1
+                                                                    class="text-white font-weight-bolder">${moment(eventDate).format('DD')}</h1></small></div>
+                                                    </div>
+                                                    <div class="col-sm-10 col-md-10 col-lg-10 col-xl-10">
+                                                        <h6 class="font-weight-bolder ">${eventCalendarName}</h6>
+                                                    </div>
+                                                </div>`;
                                     })
                                 }else{
                                     html +=`<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
@@ -560,9 +705,9 @@ let html = `        <div class="row clearfix row-deck">
                     
                     <div class="row clearfix row-deck">
                         <div class="col-xl-6 col-lg-12">
-                            <div class="card" style="box-shadow:none !important;">
+                            <div class="card">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO. OF RESIGNED EMPLOYEE</h2>
+                                    <h2 class="font-weight-bold text-white">NO OF RESIGN EMPLOYEE</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-basic-employeeResign"></div>
@@ -571,23 +716,12 @@ let html = `        <div class="row clearfix row-deck">
                         </div>
 
                         <div class="col-xl-6 col-lg-12">
-                            <div class="card" style="box-shadow:none !important;">
+                            <div class="card">
                                 <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO. OF EMPLOYEE (HIRED VS LEFT)</h2>
+                                    <h2 class="font-weight-bold text-white">NO OF EMPLOYEE (HIRED VS LEFT)</h2>
                                 </div>
                                 <div class="body">
                                     <div id="apex-employee-HiredAndLeft"></div>
-                                </div>
-                            </div>    
-                        </div>
-
-                        <div class="col-xl-12 col-lg-12">
-                            <div class="card" style="box-shadow:none !important;">
-                                <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">OVERBREAK MONITORING</h2>
-                                </div>
-                                <div class="body">
-                                    ${getOverbreakData()}
                                 </div>
                             </div>    
                         </div>
@@ -597,21 +731,10 @@ let html = `        <div class="row clearfix row-deck">
     setTimeout(() => {
         $("#tableForApprovalParent").html(html);
         noOfEmployeeHiredLeftChart();
-        noOfEmployeeGenderChart();
-        noOfEmployeeChart();
+        // noOfEmployeeGenderChart();
+        // noOfEmployeeChart();
         noOfEmployeeResignChart();
 
-        var table = $("#overbreakTable").css({"min-width": "100%"}).removeAttr('width').DataTable({
-            proccessing:    false,
-            serverSide:     false,
-            scrollX:        true,
-            scrollCollapse: true,
-            lengthMenu: [ 50, 75, 100, 150],
-            columnDefs: [
-                { targets: 0, width:  110 },
-                { targets: 2, width: 80 },
-            ],
-        });
         return html;
     }, 300);
 
@@ -619,141 +742,7 @@ let html = `        <div class="row clearfix row-deck">
 // ----- END FOR APPROVAL CONTENT -----
 
 
-// ---- FUNCIRON FOR EMPLOYEE PER DEPARTMENT CHART ------//
-function noOfEmployeeChart(){
 
-    const getListEmployeeData = getTableData(`hris_employee_list_tbl as employee`,
-    ` COUNT(employeeID) AS employee, 
-    (SELECT departmentName FROM hris_department_tbl WHERE departmentID = employee.departmentID)  AS departmentName`,
-    ` employeeStatus = 1 OR employeeStatus = 2`,
-    ``,
-    `departmentID`);
-
-    var listEmployee =[];
-    var listDepartment =[];
-    var listColorDepartment =[];
-
-    var seriesData = [];
-
-    
-    getListEmployeeData.map((employeeList,index)=>{
-        let obj ={};
-        var randomColor = Math.floor(Math.random()*16777215).toString(16);
-
-        let{
-            employee,
-            departmentName
-        }= employeeList;
-        
-        listColorDepartment[index] = ("#"+randomColor);
-        listDepartment[index] =departmentName; 
-        listEmployee[index] = employee;
-
-        obj['name'] =departmentName;
-        obj["data"] = [employee];
-
-        seriesData.push(obj);
-    
-
-    })
-
-
-    // console.log(seriesData)
-
-
-    // var options = {
-    //     chart: {
-    //         height: 300,
-    //         type: 'bar',
-    //     },
-    //     colors: listColorDepartment,
-    //     plotOptions: {
-    //         bar: {
-    //             horizontal: false,
-    //             columnWidth: '20%',
-    //             endingShape: 'flat'	
-    //         },
-    //     },
-    //     dataLabels: {
-    //         enabled: false,
-    //     },
-    //     stroke: {
-    //         show: true,
-    //         width: 2,
-    //         colors: ['transparent']
-    //     },
-    //     series: seriesData,
-    //     xaxis: {
-    //         categories: listDepartment,
-    //     },
-    //     yaxis: {
-    //         title: {
-    //             text: 'Department Record/s'
-    //         }
-    //     },
-    //     fill: {
-    //         opacity: 1
-
-    //     },
-    //     tooltip: {
-    //         y: {
-    //             formatter: function (val) {
-    //                 return  val + " employee/s"
-    //             }
-    //         }
-    //     }
-    // }
-
-    var options = {
-        chart: {
-            height: 350,
-            type: 'bar',
-            toolbar: {
-                show: false,
-            },
-        },
-        colors: listColorDepartment,
-        grid: {
-            yaxis: {
-                lines: {
-                    show: false,
-                }
-            },
-            padding: {
-                top: 0,
-                right: 0,
-                bottom: 0,
-                left: 0
-            },
-        },
-        plotOptions: {
-            bar: {
-                horizontal: true,
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        // series: [{
-        //     data: listEmployee
-        // }],
-        series:seriesData,
-        xaxis: {
-            categories: [''],
-        }
-    }
-
-    var chart = new ApexCharts(
-        document.querySelector("#apex-basic-employee"),
-        options
-    );
-
-    setTimeout(() => {
-    chart.render();
-     
-    }, 300);
-    
-}
 
 // ---- FUNCIRON FOR RESIGN EMPLOYEE CHART ------//
 function noOfEmployeeResignChart(){
@@ -815,7 +804,7 @@ function noOfEmployeeResignChart(){
         },
         series:seriesData,
         xaxis: {
-            categories: [''],
+            categories: listDepartment,
         },
         yaxis: {
             title: {
@@ -835,45 +824,6 @@ function noOfEmployeeResignChart(){
         }
     }
 
-    // var options = {
-    //     chart: {
-    //         height: 350,
-    //         type: 'bar',
-    //         toolbar: {
-    //             show: false,
-    //         },
-    //     },
-    //     colors: listColorDepartment,
-    //     grid: {
-    //         yaxis: {
-    //             lines: {
-    //                 show: false,
-    //             }
-    //         },
-    //         padding: {
-    //             top: 0,
-    //             right: 0,
-    //             bottom: 0,
-    //             left: 0
-    //         },
-    //     },
-    //     plotOptions: {
-    //         bar: {
-    //             horizontal: true,
-    //         }
-    //     },
-    //     dataLabels: {
-    //         enabled: false
-    //     },
-    //     // series: [{
-    //     //     data: listEmployee
-    //     // }],
-    //     series:seriesData,
-    //     xaxis: {
-    //         categories: [''],
-    //     }
-    // }
-
     var chart = new ApexCharts(
         document.querySelector("#apex-basic-employeeResign"),
         options
@@ -886,71 +836,7 @@ function noOfEmployeeResignChart(){
     
 }
 
-// --- NO OF EMPLOYEE GENDER ----//
-function noOfEmployeeGenderChart(){
 
-    const getMaleCount = getTableData(`hris_employee_list_tbl`,
-    `COUNT(employeeID) AS maleCount`,
-    `(employeeStatus = 1 OR employeeStatus = 2) AND employeeGender = 'Male'`);
-
-    const getFemaleCount = getTableData(`hris_employee_list_tbl`,
-    `COUNT(employeeID) AS femaleCount`,
-    `(employeeStatus = 1 OR employeeStatus = 2) AND employeeGender = 'Female'`);
-
-
-
-
-
-    if(getMaleCount.length > 0 || getFemaleCount.length > 0){
- 
-        var options = {
-            chart: {
-                height: 300,
-                type: 'donut',
-            },
-            labels: ["Male","Female"],
-            legend: {
-                position: 'bottom',
-                horizontalAlign: 'center',
-                show: true,
-            },
-            colors: ["#0db3d9","#cf64a6"],
-            // series: [getMaleCount[0].maleCount,getFemaleCount[0].femaleCount],
-            series: [parseFloat(getMaleCount[0].maleCount),parseFloat(getFemaleCount[0].femaleCount)],
-    
-            responsive: [{
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 200
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }]
-        }
-    
-       var chart = new ApexCharts(
-            document.querySelector("#apex-employee-gender"),
-            options
-        );
-        
-        chart.render();
-    }else{
-        let html =`<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
-                <img src="${base_url}assets/modal/no-data.gif" style="max-width: 300px;
-                    width: auto;
-                    min-width: 100px;
-                    height: auto;" alt="No event yet.">
-                <span class="font-weight-bold">No employee available.</span>
-            </div>`
-
-            $("#apex-employee-gender").html(html);
-    }
-
-    
-}
 
 // --- NO OF EMPLOYEE HIRED AND LEFT ----//
 function noOfEmployeeHiredLeftChart (){
@@ -1017,340 +903,595 @@ function noOfEmployeeHiredLeftChart (){
     
 }
 
-// // ---- EVENT FOR CHANGE YEAR PERIOD-----//
-// $(document).on("change",".btnYear",function(){
-//     let getYear = $(this).val(); 
+    // ----- SELECT PROJECT NAME -----
+    $(document).on("change", `[name="inventoryStorageID"]`, function() {
+        refreshTableContent();
+    })
+    // ----- END SELECT PROJECT NAME -----
 
+    // ----- GET PROJECT LIST -----
+    function getStorageList() {
 
-//     $("#apex-basic-column").html(preloader); 
-//     attendanceChart(getYear,getYear);
-// })
+        const storageList = getTableData(`ims_inventory_storage_tbl`,
+        `inventoryStorageID,
+        inventoryStorageOfficeName`,
+        `inventoryStorageStatus =1`);
 
-// // -----  FUNCTION OPEN POSITION CHART ----//
-function openPositionChart(){
-
-    const getPosition = getTableData(` pms_personnel_requisition_tbl AS requisition
-    LEFT JOIN hris_department_tbl AS dept
-    ON dept.departmentID = requisition.departmentID
-    LEFT JOIN hris_job_posting_tbl AS job
-    ON job.requisitionID = requisition.requisitionID`,
-    `  IFNULL(SUM(job.jobSlot),0) AS vacancy, dept.departmentName`,
-    ``,
-    ``,
-    `departmentName`);
-
-
-    // -- GET THE LENGTH OF DATA HAS VACANCY NUMBER----//
-        var totalVacancy = 0;
-        for (var i = 0; i < getPosition.length; i++) {
-            totalVacancy += getPosition[i].vacancy << 0;
-        }
-    // -- GET THE LENGTH OF DATA HAS VACANCY NUMBER----//
-
-
-
-    
-
-    var openPositionVacancyData =[];
-    var openPositionDepartmentData =[];
-    var openPositionColorData =[];
-
-    if(totalVacancy > 0){
-        getPosition.map((positionList)=>{
-
-            var randomColor = Math.floor(Math.random()*16777215).toString(16);
-
-            let{
-                vacancy,
-                departmentName
-            }= positionList;
-            
-
-            if(vacancy > 0 ){
-                openPositionVacancyData.push(parseFloat(vacancy));
-                openPositionDepartmentData.push(departmentName);
-                openPositionColorData.push("#"+randomColor);
-            }
-
-    
-        })
-
-        var options = {
-            chart: {
-                height: 300,
-                type: 'donut',
-            },
-            labels: openPositionDepartmentData.length > 0 ? openPositionDepartmentData : ["No open position available"],
-            legend: {
-                position: 'bottom',
-                horizontalAlign: 'center',
-                show: true,
-            },
-            colors: openPositionColorData.length > 0 ? openPositionColorData : ["#dc3450"],
-            series: openPositionVacancyData.length > 0 ? openPositionVacancyData : [0],
-    
-            responsive: [{
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 200
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }]
-        }
-    
-       var chart = new ApexCharts(
-            document.querySelector("#apex-applicant-openPosition"),
-            options
-        );
         
-        chart.render();
+        // const projectList = getTableData(
+        //     `pms_project_list_tbl`, 
+        //     `projectListID AS projectID, projectListName AS projectName`, 
+        //     `projectListStatus = 1`);
+        
+        let html = "";
+        storageList.map(storage => {
+            const {inventoryStorageID, inventoryStorageOfficeName } = storage;
+            html += `<option value="${inventoryStorageID}">${inventoryStorageOfficeName}</option>`
+        });
+        return html;
     }
-    else{
+    // ----- END GET PROJECT LIST -----
 
-        let html =`<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
-            <img src="${base_url}assets/modal/no-data.gif" style="max-width: 300px;
-                width: auto;
-                min-width: 100px;
-                height: auto;" alt="No event yet.">
-            <span class="font-weight-bold">No open position available.</span>
-        </div>`
-
-        $("#apex-applicant-openPosition").html(html);
+    // ----- FILTERING OPTIONS -----
+    function filteringOptions() {
+        let html = `
+        <div class="row">
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <select class="form-control select2"
+                        name="inventoryStorageID"
+                        style="width: 100%">
+                        <option disabled selected>Select Warehouse Name</option>
+                        ${getStorageList()}
+                    </select>
+                </div>
+            </div>
+        
+        </div>`;
+        return html;
     }
+    // ----- END FILTERING OPTIONS -----
+
+// // ---- EVENT FOR CHANGE DEPARTMENT-----//
+$(document).on("change",".btnDepartment",function(){
+    let getDepartmentID = $(this).val(); 
 
 
-}
-
-// --- NO OF APPLICANTS ----//
-function noOfApplicantChart(){
-
-    const getNumPosition = getTableData(`web_applicant_list_tbl AS applicant`,
-    `COUNT(applicantID) AS applicant, 
-    (SELECT designationName FROM hris_designation_tbl WHERE designationID = applicantDesignationID) AS designationName`,
-    `(applicantDesignationID != 0 AND applicantDesignationID IS NOT NULL)`,
-    ``,
-    `applicantDesignationID`);
-
-
-    // -- GET THE LENGTH OF DATA HAS APPLICANT NUMBER----//
-        var totalApplicantPosition = 0;
-        for (var i = 0; i < getNumPosition.length; i++) {
-            if(getNumPosition[i].designationName != null){
-            totalApplicantPosition += getNumPosition[i].applicant << 0;
-            }
-        }
-    // -- GET THE LENGTH OF DATA HAS APPLICANT NUMBER----//
+    // $("#apex-department-list").html(preloader); 
 
     
+    noOfEmployeeChart(getDepartmentID);
+})
 
-    var numPositionCountData =[];
-    var numPositionDesignationData =[];
-    var numPositionColorData =[];
+// // ---- EVENT FOR CHANGE DEPARTMENT-----//
+$(document).on("change",".btnProject",function(){
+    let getTimelineBuilderID = $(this).val(); 
 
-    if(totalApplicantPosition > 0){
-        getNumPosition.map((positionList,index)=>{
 
+    // $("#apex-employee-workLoad").html(preloader); 
+
+    
+    noOfEmployeeWorkloadChart(getTimelineBuilderID);
+})
+
+
+// ---- FUNCIRON FOR EMPLOYEE PER DEPARTMENT CHART ------//
+function noOfEmployeeChart(getDepartmentID = 0){
+
+    const countEmployeePerDesignation = getTableData(`hris_employee_list_tbl as employee`,
+    ` COUNT(employeeID) as listEmployee, 
+    (SELECT designationName FROM hris_designation_tbl WHERE designationID = employee.designationID) AS designationName`,
+    `employee.departmentID = ${getDepartmentID}`,
+    ``,
+    `designationID`);
+
+    var listEmployee =[];
+    var listDepartment =[];
+    var listColorDepartment =[];
+
+    var seriesData = [];
+
+    if(countEmployeePerDesignation.length > 0){
+        
+        countEmployeePerDesignation.map((employeeList,index)=>{
+            let obj ={};
             var randomColor = Math.floor(Math.random()*16777215).toString(16);
 
             let{
-                applicant,
+                listEmployee,
                 designationName
-            }= positionList;
+            }= employeeList;
             
+            listColorDepartment[index] = ("#"+randomColor);
+            listDepartment[index] =designationName; 
 
-            if(applicant > 0 ){
-                numPositionCountData.push(parseFloat(applicant));
-                numPositionDesignationData.push(designationName);
-                numPositionColorData.push("#"+randomColor);
-            }
+            obj["name"] = designationName;
+            obj["data"] = [listEmployee];
+
+            seriesData.push(obj);
+        
+
         })
+
 
         var options = {
             chart: {
                 height: 300,
-                type: 'donut',
+                type: 'bar',
             },
-            labels: numPositionDesignationData.length > 0 ? numPositionDesignationData : ["No  applicant available"],
-            legend: {
-                position: 'bottom',
-                horizontalAlign: 'center',
+            colors: listColorDepartment,
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '20%',
+                    endingShape: 'flat'	
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
                 show: true,
+                width: 2,
+                colors: ['transparent']
             },
-            colors: numPositionColorData.length > 0 ? numPositionColorData : ["#dc3450"],
-            series: numPositionCountData.length > 0 ? numPositionCountData : [0],
-    
-            responsive: [{
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 200
-                    },
-                    legend: {
-                        position: 'bottom'
+            series:seriesData,
+            xaxis: {
+                categories: listDepartment,
+            },
+            yaxis: {
+                title: {
+                    text: 'Designation Record/s'
+                }
+            },
+            fill: {
+                opacity: 1
+
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return  val + " employee/s"
                     }
                 }
-            }]
+            }
         }
-    
-       var chart = new ApexCharts(
-            document.querySelector("#apex-applicant-listApplicant"),
+
+        var chart = new ApexCharts(
+            document.querySelector("#apex-department-list"),
             options
         );
-        
+
+        setTimeout(() => {
         chart.render();
+        
+        }, 300);
+        chart.destroy();
+
     }else{
         let html =`<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
                 <img src="${base_url}assets/modal/no-data.gif" style="max-width: 300px;
                     width: auto;
                     min-width: 100px;
                     height: auto;" alt="No event yet.">
-                <span class="font-weight-bold">No applicant available.</span>
+                <span class="font-weight-bold">No employee available.</span>
             </div>`
 
-            $("#apex-applicant-listApplicant").html(html);
+            $("#apex-department-list").html(html);
+    }
+    
+}
+
+// --- NO OF EMPLOYEE WORK LOAD ----//
+function noOfEmployeeWorkloadChart(timelineBuilderID = 0){
+
+    const getAssignedEmployee = getTableData(`pms_timeline_builder_tbl`,
+    `timelineTeamMember`,
+    `timelineBuilderID = ${timelineBuilderID}`);
+
+
+    const getEmployeeTimelineManagement = getTableData(`pms_timeline_management_tbl`,
+    ``,
+    `timelineBuilderID = ${timelineBuilderID}`);
+
+    if(getAssignedEmployee.length > 0 || getEmployeeTimelineManagement.length > 0){
+
+            let assignedEmployeeData = getAssignedEmployee[0]?.timelineTeamMember;
+            let assignedSplit = assignedEmployeeData?.split("|") || [];
+            let getAssignedEmployeeName = [];
+
+            var listColorAssignedEmployee =[];
+
+            var employeeTotalManHours = 0;   
+            var employeeTotalManHoursArray =[];   
+
+            for(var loop =0; loop< assignedSplit.length;loop++){
+                var randomColor = Math.floor(Math.random()*16777215).toString(16);
+                let totalManhours = 0;
+
+                getEmployeeTimelineManagement.map((empTime, index) => {
+                    const {assignedManHours,assignedEmployee,assignedStartDate } = empTime;
+            
+                    if(assignedEmployee.includes(assignedSplit[loop])){
+            
+                        const getAssignEmployee = assignedEmployee.split("|");
+                        const employeeIndex  = getAssignEmployee.indexOf(assignedSplit[loop]);
+            
+                        const datesArr         = assignedStartDate?.split("|") || [];
+                        const manHoursArr      = assignedManHours?.split("|") || [];
+            
+                        const manHoursArr2      = manHoursArr[employeeIndex] ?? "";
+                        const datesArr2         = datesArr[employeeIndex] ?? "";
+            
+                        const datesArr3         = datesArr2?.split("~") ?? [];
+                        const manHoursArr3      = manHoursArr2?.split("~") ?? [];
+            
+                    
+                        
+                        
+                        datesArr3.map((arr, index) => {
+            
+                            const manHours      = manHoursArr3[index] ?? "";
+            
+                            employeeTotalManHours += ((+manHours) || 0);
+                            // console.log(assignedSplit[loop]+" |"+employeeTotalManHours);
+            
+                            totalManhours += parseFloat(employeeTotalManHoursArray[loop] || 0) + employeeTotalManHours;
+                        
+
+                        })
+                    
+                        employeeTotalManHours = 0;
+                    }
+                })
+                employeeTotalManHoursArray.push(totalManhours);
+                listColorAssignedEmployee[loop] = ("#"+randomColor);
+                getAssignedEmployeeName[loop] = employeeFullname(assignedSplit[loop]);
+            }
+            
+            // console.log(employeeTotalManHoursArray)
+            // console.log(assignedSplit)
+            // console.log(getAssignedEmployeeName)
+
+    
+ 
+        var options = {
+            chart: {
+                height: 300,
+                type: 'pie',
+            },
+            labels: getAssignedEmployeeName,
+            legend: {
+                position: 'bottom',
+                horizontalAlign: 'center',
+                show: true,
+            },
+            colors: listColorAssignedEmployee,
+            // series: [getMaleCount[0].maleCount,getFemaleCount[0].femaleCount],
+            series: employeeTotalManHoursArray,
+    
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 200
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }]
+        }
+    
+       var chart = new ApexCharts(
+            document.querySelector("#apex-employee-workLoad"),
+            options
+        );
+        
+        setTimeout(() => {
+            chart.render();
+            
+            }, 300);
+            chart.destroy();
+    }else{
+        let html =`<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
+                <img src="${base_url}assets/modal/no-data.gif" style="max-width: 300px;
+                    width: auto;
+                    min-width: 100px;
+                    height: auto;" alt="No event yet.">
+                <span class="font-weight-bold">No employee available.</span>
+            </div>`
+
+            $("#apex-employee-workLoad").html(html);
     }
 
     
 }
 
-
 // ----- MY FORMS CONTENT -----
 function myFormsContent() {
     $("#tableMyFormsParent").html(preloader);
 
-    const countVacancyPosition = getTableData(`hris_job_posting_tbl`,
-    ` IFNULL(SUM(jobSlot),0) AS vacancy`);
+    const countActiveVendor = getTableData(`ims_inventory_vendor_tbl`,
+    ` COUNT(inventoryVendorID) AS activeVendor`,
+    `inventoryVendorStatus =1`);
 
-    const countPendingApplicants = getTableData(`web_applicant_list_tbl`,
-    `COUNT(applicantStatus) as pendingApplicants`);
+    const countActiveItems = getTableData(`ims_inventory_item_tbl`,
+    ` COUNT(itemID) AS activeItem`,
+    `itemStatus =1`);
 
-    const countPendingOvertmine = getTableData(`hris_overtime_request_tbl`,
-    `COUNT(overtimeRequestStatus) AS pendingovertime`,
-    `employeeID =${sessionID} AND overtimeRequestStatus   =0`);
+    const countActiveAssets = getTableData(`ims_inventory_asset_tbl`,
+    ` COUNT(assetID) AS activeAsset`,
+    `assetStatus =1`);
 
-    const listApplicants = getTableData(    `web_applicant_list_tbl AS applicant`, 
-                                            `DISTINCT(applicant.applicantID),
-                                            CONCAT('APPL-',SUBSTR(applicant.createdAt,3,2),'-',LPAD(applicant.applicantID, 5, '0')) AS applicantCode,
-                                            CONCAT(applicant.applicantFirstname,' ', applicant.applicantLastname) AS fullname,
-                                            (SELECT designationName FROM hris_designation_tbl WHERE designationID = applicantDesignationID ) AS designationName,
-                                            (SELECT applicantInterviewerProgression FROM hris_applicant_interviewer_tbl AS subOne WHERE applicantID = applicant.applicantID AND 	applicantInterviewerNote IS NOT NULL ORDER BY subOne.applicantInterviewerID DESC LIMIT 1) as applicantInterviewerProgression,
-                                            (SELECT applicantInterviewerStatus FROM hris_applicant_interviewer_tbl AS subOne WHERE applicantID = applicant.applicantID AND 	applicantInterviewerNote IS NOT NULL ORDER BY subOne.applicantInterviewerID DESC LIMIT 1) as applicantStatus`, 
-                                            );
+    const countStockOutItems= getTableData(`ims_material_withdrawal_item_tbl`,
+    ` IFNULL(SUM(stockOut),0) AS countStockOut`);
+
+    const countDisposedAssets= getTableData(`ims_inventory_disposal_details_tbl AS details
+    LEFT JOIN ims_inventory_disposal_tbl AS header
+    ON header.disposalID = details.disposalID`,
+    `IFNULL(SUM(details.quantity),0) as countDisposed`,
+    `disposalStatus = 2`);
+
+    const getStockInData = getUnionTableData(`
+                        SELECT module,ID,referenceCode,purchaseID, fullname, SUM(quantity) AS  quantity, daterequest, inventoryStatus,IFNULL(SUM(RECORD),0) AS stockQuantity
+                        FROM (
+                        SELECT 
+                        '1' AS module, 
+                        iri.returnItemID as ID,
+                        '' AS purchaseID, 
+                        returnItemCode as referenceCode, 
+                        CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
+                        ird.receivedQuantity AS quantity,
+                        DATE_FORMAT(iri.createdAt,'%M% %d%, %Y') AS daterequest,
+                        returnItemStatus AS inventoryStatus,
+                        CASE WHEN sii.quantityForStockin IS NOT NULL  THEN IFNULL(SUM(sii.quantityForStockin),0)
+                        ELSE IFNULL(SUM(sia.quantityForStockin),0) END RECORD
+                        FROM ims_return_item_tbl AS iri
+                        LEFT JOIN ims_inventory_request_details_tbl AS ird ON iri.returnItemID = ird.returnItemID
+                        LEFT JOIN hris_employee_list_tbl AS empl ON iri.employeeID = empl.employeeID
+                        LEFT JOIN ims_stock_in_item_tbl AS sii ON iri.returnItemID = sii.returnItemID AND ird.itemid = sii.itemID
+                        LEFT JOIN ims_stock_in_assets_tbl AS sia ON iri.returnItemID = sia.returnItemID AND ird.itemID = sia.assetID
+                        WHERE returnItemStatus = 2  GROUP BY iri.returnItemID,sii.returnItemID,sia.returnItemID,ird.itemID,sii.itemID,sia.assetID
+                        UNION ALL
+                        SELECT '2' AS module,
+                        muf.materialUsageID AS ID,
+                        '' AS purchaseID,
+                        materialUsageCode as referenceCode,
+                        CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
+                        unused AS quantity,
+                        DATE_FORMAT(muf.createdAt,'%M% %d%, %Y') AS daterequest,
+                        materialUsageStatus as inventoryStatus,
+                        CASE WHEN sii.quantityForStockin IS NOT NULL THEN IFNULL(SUM(sii.quantityForStockin),0)
+                        ELSE IFNULL(SUM(sia.quantityForStockin),0) END RECORD  
+                        FROM ims_material_usage_tbl AS muf
+                        LEFT JOIN ims_inventory_request_details_tbl AS ird ON ird.materialUsageID = muf.materialUsageID
+                        LEFT JOIN hris_employee_list_tbl AS empl ON muf.employeeID = empl.employeeID
+                        LEFT JOIN ims_stock_in_item_tbl AS sii ON muf.materialUsageID = sii.materialUsageID AND ird.itemID = sii.itemID 
+                        LEFT JOIN ims_stock_in_assets_tbl AS sia ON muf.materialUsageID = sia.materialUsageID AND ird.itemID = sia.assetID
+                        WHERE materialUsageStatus = 2 GROUP BY muf.materialUsageID,sii.materialUsageID, sia.materialUsageID,ird.itemID,sii.itemID,sia.assetID
+                        UNION ALL
+                        SELECT '3' AS module,
+                        iir.inventoryReceivingID AS ID,
+                        purchaseOrderCode AS purchaseID,
+                        inventoryReceivingCode as referenceCode, 
+                        CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
+                        receivedQuantity AS quantity,
+                        DATE_FORMAT(iir.createdAt,'%M% %d%, %Y') AS daterequest,
+                        inventoryReceivingStatus as inventoryStatus,
+                        CASE WHEN sii.quantityForStockin IS NOT NULL  THEN SUM(sii.quantityForStockin)
+                        ELSE IFNULL(SUM(sia.quantityForStockin),0) END RECORD    
+                        FROM ims_inventory_receiving_tbl AS iir
+                        LEFT JOIN ims_inventory_request_details_tbl AS ird ON iir.inventoryReceivingID = ird.inventoryReceivingID
+                        LEFT JOIN hris_employee_list_tbl AS empl ON iir.employeeID = empl.employeeID
+                        LEFT JOIN ims_stock_in_item_tbl AS sii ON iir.inventoryReceivingID = sii.inventoryReceivingID AND ird.itemID = sii.itemID
+                        LEFT JOIN ims_stock_in_assets_tbl AS sia ON iir.inventoryReceivingID = sia.inventoryReceivingID AND ird.itemID = sia.assetID
+                        WHERE inventoryReceivingStatus = 2 GROUP BY iir.inventoryReceivingID,sia.inventoryReceivingID,sii.inventoryReceivingID,ird.itemID,sii.itemID,sia.assetID
+                        )a GROUP BY referenceCode`);
+
+                        var countStockIn = 0;
+
+                        getStockInData.map((item) => {
+                            let {
+                                ID,
+                                purchaseID,
+                                referenceCode,
+                                fullname,
+                                quantity,
+                                daterequest,
+                                inventoryStatus,
+                                stockQuantity,
+                            } = item;
+                         
+                            if(quantity != stockQuantity) {
+                                countStockIn++;
+                            }
+                           
+                    });
+
+    const countPendingCostEstimate = getTableData(`pms_cost_estimate_tbl`,
+    ` COUNT(costEstimateID ) AS costEstimateList`,
+    `employeeID = ${sessionID} AND costEstimateStatus =0`);
+
+    const countPendingMaterialRequest = getTableData(`ims_material_request_tbl`,
+    ` COUNT(materialRequestID) AS materialRequestList`,
+    `employeeID = ${sessionID} AND materialRequestStatus =0`);
+
+    const countPendingMaterialWithdrawal = getTableData(`ims_material_withdrawal_tbl`,
+    ` COUNT(materialWithdrawalID ) AS materialWithdrawalList`,
+    `employeeID = ${sessionID} AND (inventoryItemStatus =0 OR inventoryAssetStatus = 0 )`);
+
+
+    const getDepartment = getTableData(`hris_department_tbl`,
+    `departmentName,departmentID`,
+    `departmentStatus = 1 `);
+
+    const getProject = getTableData(`pms_timeline_builder_tbl as timelineBuilderID`,
+    `(SELECT projectListName FROM pms_project_list_tbl WHERE projectListID = timelineBuilderID.projectID) AS projectName,
+    timelineBuilderID`,
+    `timelineBuilderStatus = 2 `);
+
+    const getReservedItems = getTableData(`ims_inventory_validation_tbl`,
+    `inventoryValidationID,materialRequestCode,employeeID,projectName,projectCategory,dateNeeded`,
+    `week(dateNeeded)=week(now())  AND inventoryValidationStatus =2`);
+
+    const listApplicants = getTableData(`web_applicant_list_tbl AS applicant
+    LEFT JOIN hris_applicant_interviewer_tbl AS interviewer
+    ON applicant.applicantID = interviewer.applicantID`, 
+    `DISTINCT(applicant.applicantID),
+    CONCAT('APPL-',SUBSTR(applicant.createdAt,3,2),'-',LPAD(applicant.applicantID, 5, '0')) AS applicantCode,
+    CONCAT(applicant.applicantFirstname,' ', applicant.applicantLastname) AS fullname,
+    interviewer.applicantInterviewerProgression,
+    (SELECT designationName FROM hris_designation_tbl WHERE designationID = applicantDesignationID ) AS designationName,
+    IFNULL(interviewer.applicantInterviewerStatus,"Pending") as applicantStatus`, 
+    ` interviewer.applicantInterviewerStatus !="" OR interviewer.applicantInterviewerStatus  IS NULL`,
+    `interviewer.createdAt OR interviewer.updatedAt ASC`);
 
 
 
 
 let html = `        <div class="row clearfix row-deck">
-                        <div class="col-lg-4 col-md-4 col-sm-6">
+                        <div class="col-lg-3 col-md-3 col-sm-12">
                             <div class="card top_widget">
                                 <div class="body">
-                                    <div class="icon"><i class="far fa-user-plus"></i> </div>
+                                    <div class="icon"><i class="fas fa-truck"></i> </div>
                                     <div class="content">
-                                        <div class="text mb-2 text-uppercase">Vacant Position</div>
-                                        <h4 class="number mb-0">${countVacancyPosition[0].vacancy || 0}</h4>
+                                        <div class="text mb-2 text-uppercase">VENDOR</div>
+                                        <h4 class="number mb-0">${countActiveVendor[0].activeVendor || 0}</h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-4 col-sm-6">
+                        <div class="col-lg-3 col-md-3 col-sm-12">
                             <div class="card top_widget">
                                 <div class="body">
-                                    <div class="icon"><i class="far fa-file-search"></i> </div>
+                                    <div class="icon"><i class="fas fa-scanner"></i> </div>
                                     <div class="content">
-                                        <div class="text mb-2 text-uppercase">Applicants</div>
-                                        <h4 class="number mb-0">${countPendingApplicants[0].pendingApplicants || 0}</h4>
+                                        <div class="text mb-2 text-uppercase">ITEMS</div>
+                                        <h4 class="number mb-0">${countActiveItems[0].activeItem || 0}</h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-4 col-sm-6">
+                        <div class="col-lg-3 col-md-3 col-sm-12">
                             <div class="card top_widget">
                                 <div class="body">
-                                    <div class="icon"><i class="fas fa-users-class"></i> </div>
+                                    <div class="icon"><i class="fad fa-hammer"></i> </div>
                                     <div class="content">
-                                        <div class="text mb-2 text-uppercase">Currently Onboarding</div>
-                                        <h4 class="number mb-0">${countPendingOvertmine[0].pendingovertime || 0 }</h4>
+                                        <div class="text mb-2 text-uppercase">ASSETS</div>
+                                        <h4 class="number mb-0">${countActiveAssets[0].activeAsset || 0 }</h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                       
+                        <div class="col-lg-3 col-md-3 col-sm-12">
+                            <div class="card top_widget">
+                                <div class="body">
+                                    <div class="icon"><i class="fad fa-dolly-empty"></i> </div>
+                                    <div class="content">
+                                        <div class="text mb-2 text-uppercase">STOCK OUT ITEMS</div>
+                                        <h4 class="number mb-0">${formatAmount(countStockOutItems[0].countStockOut ||  0)}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="row clearfix row-deck">
-                    
-                        <div class="col-xl-6 col-lg-12">
-                            <div class="card" style="box-shadow:none !important;">
-                                <div class="header bg-primary ">
-                                    <h2 class="font-weight-bold text-white">OPEN POSITION</h2>
-                                    
-                                </div>
+                        <div class="col-lg-3 col-md-3 col-sm-12">
+                            <div class="card top_widget">
                                 <div class="body">
-                                    <div id="apex-applicant-openPosition"></div>
+                                    <div class="icon"><i class="fas fa-trash-alt"></i> </div>
+                                    <div class="content">
+                                        <div class="text mb-2 text-uppercase">DISPOSED ASSETS</div>
+                                        <h4 class="number mb-0">${formatAmount(countDisposedAssets[0].countDisposed || 0)}</h4>
+                                    </div>
                                 </div>
-                            </div>    
+                            </div>
                         </div>
-
-                        <div class="col-xl-6 col-lg-12">
-                            <div class="card" style="box-shadow:none !important;">
-                                <div class="header bg-primary">
-                                    <h2 class="font-weight-bold text-white">NO. OF APPLICANTS</h2>
-                                </div>
+                        <div class="col-lg-3 col-md-3 col-sm-12">
+                            <div class="card top_widget">
                                 <div class="body">
-                                    <div id="apex-applicant-listApplicant"></div>
+                                    <div class="icon"><i class="fas fa-inventory"></i> </div>
+                                    <div class="content">
+                                        <div class="text mb-2 text-uppercase">PENDING STOCK IN</div>
+                                        <h4 class="number mb-0">${countStockIn || 0}</h4>
+                                    </div>
                                 </div>
-                            </div>    
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="row ">
-                        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
-                            <div class="card" style="box-shadow:none !important;">
-                                <div class="card-header w-100 bg-primary text-white text-left">
-                                    <h6 class="font-weight-bold">APPLICANT PROGRESSION</h6>
+                        <div class="col-lg-3 col-md-3 col-sm-12">
+                            <div class="card top_widget">
+                                <div class="body">
+                                    <div class="icon"><i class="far fa-person-dolly-empty"></i> </div>
+                                    <div class="content">
+                                        <div class="text mb-2 text-uppercase">UNAVAILABLE ITEMS</div>
+                                        <h4 class="number mb-0">${countPendingMaterialWithdrawal[0].materialWithdrawalList || 0 }</h4>
+                                    </div>
                                 </div>
-
-                            `;
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-12">
+                            <div class="card top_widget">
+                                <div class="body">
+                                    <div class="icon"><i class="fas fa-truck-ramp"></i> </div>
+                                    <div class="content">
+                                        <div class="text mb-2 text-uppercase">UNAVAILABLE ASSETS</div>
+                                        <h4 class="number mb-0">${countPendingMaterialWithdrawal[0].materialWithdrawalList || 0 }</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
-                            html += `
-                                <div class="table table-responsive ">
-                                    <table class="table table-bordered table-striped" id="tableMyForms">
+                       
+                    </div>`;
+
+                    html += `
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6">
+                            <div class="card">
+                                
+                                    <div class="card-header w-100 bg-primary text-white text-left">
+                                        <h6 class="font-weight-bold">RESERVED ITEMS</h6>
+                                    </div>
+                                
+                                    
+                                
+                                <div class="card-body table">
+                                    <table class="table table-bordered table-striped" id="tableReservedItems">
                                         <thead>
                                             <tr style="white-space: nowrap">
-                                                <th>Applicant Code</th>
-                                                <th>Applicant Name</th>
-                                                <th>Applied Position</th>
-                                                <th>Progression</th>
-                                                <th>Status</th>
+                                                <th>Reference No.</th>
+                                                <th>Requestor Name</th>
+                                                <th>Project Name</th>
+                                                <th>Project Category</th>
+                                                <th>Date Needed</th>
                                             </tr>
                                         </thead>
                                         <tbody >`;
                                 
-                                    listApplicants.map((applicant) => {
-                                        let {
-                                            applicantCode,
-                                            fullname,
-                                            applicantInterviewerProgression,
-                                            designationName,
-                                            applicantStatus,
-                                        } = applicant;
-                                        if(applicantInterviewerProgression != "Job Order"){
-                                            if(applicantStatus != "Waitlisted" || applicantStatus != "Cancelled"  ){
-                                                html += `
-                                                        <tr class="">
-                                                            <td>${applicantCode || "-"}</td>
-                                                            <td>${fullname || "-"}</td>
-                                                            <td>${designationName || "-"}</td>
-                                                            <td>${applicantInterviewerProgression || "-"}</td>
-                                                            <td>${applicantStatus || "Pending"}</td>
-                                                        </tr>`;
-                                            }
-                                        }
-                                    });
+                                        getReservedItems.map((reserve) => {
+                                            let {
+                                                inventoryValidationID,
+                                                materialRequestCode,
+                                                employeeID,
+                                                projectName,
+                                                projectCategory,
+                                                dateNeeded
+                                            } = reserve;
+
+                                            let getDateNeeded = moment(dateNeeded).format("MMMM DD, YYYY");
+
+                                            html += `
+                                            <tr class="btnView" id="${encryptString(inventoryValidationID)}">
+                                                <td>${materialRequestCode || "-"}</td>
+                                                <td>${employeeFullname(employeeID) || "-"}</td>
+                                                <td>${projectName || "-"}</td>
+                                                <td>${projectCategory || "-"}</td>
+                                                <td>${getDateNeeded || "-"}</td>
+                                            </tr>`;
+                                        });
                                 
                                     html += `
                                         </tbody>
@@ -1358,21 +1499,62 @@ let html = `        <div class="row clearfix row-deck">
                                 </div>
                             </div>
                         </div>
-                    </div>
+                      `;
 
+                   
+                    html += `
+                        <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6">
+                            <div class="card">
+                                    <div class="card-header w-100 bg-primary text-white text-left">
+                                        <h6 class="font-weight-bold">TOTAL NO. OF ASSET</h6>
+                                    </div>
+
+                                
+                                <div class="card-body table">
+
+                                <div id="filterContent">
+                                    ${filteringOptions()}
+                                </div>
+                                    <table class="table table-bordered table-striped" id="tableWarehouse">
+                                        <thead>
+                                            <tr style="white-space: nowrap">
+                                                <th>Asset Code</th>
+                                                <th>Asset Name</th>
+                                                <th>Asset Classification</th>
+                                                <th>UOM</th>
+                                                <th>Quantity</th>
+                                                <th>Barcode</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodyProject">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                       `;
 
 
     setTimeout(() => {
         $("#tableMyFormsParent").html(html);
         initDataTables();
-        openPositionChart();
-        noOfApplicantChart();
-
+        noOfEmployeeWorkloadChart();
+        noOfEmployeeChart();
+        initAll();
         return html;
     }, 300);
 }
 // ----- END MY FORMS CONTENT -----
+
+// ----- REFRESH TABLE -----
+function refreshTableContent() {
+    const inventoryStorageID = $(`[name="inventoryStorageID"]`).val();
+
+    const data = getReservationData(inventoryStorageID);
+    tableContent(data);
+}
+// ----- END REFRESH TABLE -----
 
 
 // // ----- FORM BUTTONS -----
@@ -2553,11 +2735,11 @@ function pageContent(isForm = false, data = false, readOnly = false, isRevise = 
         preventRefresh(false);
         let html = `
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="forApprovalTab" aria-expanded="false">
+            <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                 <div class="" id="tableForApprovalParent">
                 </div>
             </div>
-            <div role="tabpanel" class="tab-pane " id="myFormsTab" aria-expanded="false">
+            <div role="tabpanel" class="tab-pane active" id="myFormsTab" aria-expanded="false">
                 <div class="" id="tableMyFormsParent">
                 </div>
             </div>
@@ -2567,8 +2749,7 @@ function pageContent(isForm = false, data = false, readOnly = false, isRevise = 
 
         // headerButton(true, "Add Check Voucher");
         headerTabContent();
-        forApprovalContent();
-        // myFormsContent();
+        myFormsContent();
         updateURL();
     } else {
         // headerButton(false, "", isRevise, isFromCancelledDocument);
@@ -2735,12 +2916,12 @@ $("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE
 // // ----- END OPEN EDIT FORM -----
 
 
-// // ----- VIEW DOCUMENT -----
-// $(document).on("click", ".btnView", function () {
-//     const id = $(this).attr("id");
-//     viewDocument(id, true);
-// });
-// // ----- END VIEW DOCUMENT -----
+// ----- VIEW DOCUMENT -----
+$(document).on("click", ".btnView", function () {
+    const id = $(this).attr("id");
+    window.open(`${base_url}ims/inventory_validation?view_id=${id}`);
+});
+// ----- END VIEW DOCUMENT -----
 
 
 // // ----- VIEW DOCUMENT -----
@@ -3110,7 +3291,7 @@ $("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE
 //                    let notificationData = false;
 //                    if (employeeID != sessionID) {
 //                        notificationData = {
-//                            moduleID:                70,
+//                            moduleID:                67,
 //                            notificationTitle:       "Check Voucher",
 //                            notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 //                            notificationType:        2,
@@ -3163,7 +3344,7 @@ $("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE
 //         if (isImLastApprover(approversID, approversDate)) {
 //             status = 2;
 //             notificationData = {
-//                 moduleID:                70,
+//                 moduleID:                67,
 //                 tableID:                 id,
 //                 notificationTitle:       "Check Voucher",
 //                 notificationDescription: `${feedback}: Your request has been approved.`,
@@ -3175,7 +3356,7 @@ $("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE
 //         } else {
 //             status = 1;
 //             notificationData = {
-//                 moduleID:                70,
+//                 moduleID:                67,
 //                 tableID:                 id,
 //                 notificationTitle:       "Check Voucher",
 //                 notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -3257,7 +3438,7 @@ $("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE
 //             data.append("updatedBy", sessionID);
 
 //             let notificationData = {
-//                 moduleID:                70,
+//                 moduleID:                67,
 //                 tableID: 				 id,
 //                 notificationTitle:       "Check Voucher",
 //                 notificationDescription: `${feedback}: Your request has been denied.`,

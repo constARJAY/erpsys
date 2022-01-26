@@ -13,14 +13,14 @@
 		border-right: 1px solid rgb(222 226 230);
 	}
 
-	/* table thead tr.theadheader th:hover {
+	table thead tr.theadheader th:hover {
 		background-color: var(--bg-primary);
 		color: white !important;
 	}
 	
 	table thead tr.theadlabel th:hover {
 		color: black !important;
-	} */
+	}
 
 	table.dataTable thead th, table.dataTable thead td {
 		border-bottom: none;

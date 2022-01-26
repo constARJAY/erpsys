@@ -90,17 +90,16 @@ class Leave_request extends CI_Controller {
                 ];
             } else if ($method == "approve") {
                 $leaveRequestData = [
-                    "leaveStatus"           => $leaveStatus,
                     "approversStatus"       => $approversStatus,
                     "approversDate"         => $approversDate,
-                    "leaveRequestStatus"    => $leaveRequestStatus,
+                    "leaveRequestStatus" => $leaveRequestStatus,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "deny") {
                 $leaveRequestData = [
                     "approversStatus"        => $approversStatus,
                     "approversDate"          => $approversDate,
-                    "leaveRequestStatus"    => 3,
+                    "leaveRequestStatus"  => 3,
                     "leaveRequestRemarks" => $leaveRequestRemarks,
                     "updatedBy"              => $updatedBy,
                 ];

@@ -7,7 +7,7 @@ class Service extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
-        isAllowed(131);
+        isAllowed(18);
     }
 
     public function index()

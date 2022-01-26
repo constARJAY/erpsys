@@ -381,9 +381,6 @@ $(document).ready(function() {
                                                             (SELECT applicantInterviewerProgression FROM hris_applicant_interviewer_tbl AS sub_hait 
                                                                     WHERE sub_hait.applicantInterviewerStatus IS NOT NULL AND sub_hait.applicantID = '${applicantID}' ORDER BY sub_hait.applicantInterviewerID DESC LIMIT 1) 
                                                                 AS appJobStatus,
-                                                            (SELECT applicantInterviewerStatus FROM hris_applicant_interviewer_tbl AS sub_hait 
-                                                                    WHERE sub_hait.applicantInterviewerStatus IS NOT NULL AND sub_hait.applicantID = '${applicantID}' ORDER BY sub_hait.applicantInterviewerID DESC LIMIT 1) 
-                                                                AS applicantInterviewerStatus,
                                                             salaryPackage as salaryRange`, 
                                                         `applicantID = ${applicantID}` );
               
@@ -2495,28 +2492,17 @@ $(document).ready(function() {
             // 4 = PASSED
             // 5 = FAILED
             // 6 = RE-EVALUATE
-                if(applied.applicantInterviewerStatus == "" || !applied.applicantInterviewerStatus){
-                        statusText  = "Pending"; 
-                        statusBadge = "warning"
-                }else{
-                    if(applied.appJobStatus=="0"){ statusBadge='warning'}
-                    else if(applied.appJobStatus=="For Review"){ statusBadge='info'}
-                    else if(applied.appJobStatus=="Initial Interview"){statusBadge='info'}
-                    else if(applied.appJobStatus=="Technical Exam"){statusBadge='info'}
-                    else if(applied.appJobStatus=="Technical Interview"){statusBadge='info'}
-                    else if(applied.appJobStatus=="Exam"){statusBadge='info'}
-                    else if(applied.appJobStatus=="Final Interview"){statusBadge='info'}
-                    else if(applied.appJobStatus=="Initial Interview"){statusBadge='info'}
-                    else if(applied.appJobStatus=="Technical Exam"){statusBadge='primary'}
-                    else if(applied.appJobStatus=="Job Order"){statusBadge='success'}
-                    else{
-                        statusText  = "Pending"; 
-                        statusBadge = "warning"
-                    }
-                }
 
-
-                 
+                 if(applied.appJobStatus=="0"){ statusBadge='warning'}
+            else if(applied.appJobStatus=="For Review"){ statusBadge='info'}
+            else if(applied.appJobStatus=="Initial Interview"){statusBadge='info'}
+            else if(applied.appJobStatus=="Technical Exam"){statusBadge='info'}
+            else if(applied.appJobStatus=="Technical Interview"){statusBadge='info'}
+            else if(applied.appJobStatus=="Exam"){statusBadge='info'}
+            else if(applied.appJobStatus=="Final Interview"){statusBadge='info'}
+            else if(applied.appJobStatus=="Initial Interview"){statusBadge='info'}
+            else if(applied.appJobStatus=="Technical Exam"){statusBadge='primary'}
+            else if(applied.appJobStatus=="Job Order"){statusBadge='success'}
             // else if(applied.appJobStatus=="asdasdasdasd"){statusBadge='danger'}
             // else if(applied.appJobStatus=="asdasdasdasd"){statusBadge='info'}                
 

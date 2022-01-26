@@ -1332,7 +1332,7 @@ function myFormsContent() {
     `timelineBuilderStatus = 2 `);
 
     const getReservedItems = getTableData(`ims_inventory_validation_tbl`,
-    `inventoryValidationID,materialRequestCode,employeeID,projectName,projectCategory,dateNeeded`,
+    `inventoryValidationID,materialRequestCode,employeeID,projectName,projectCategory,dateNeeded,createdBy`,
     `week(dateNeeded)=week(now())  AND inventoryValidationStatus =2`);
 
     const listApplicants = getTableData(`web_applicant_list_tbl AS applicant
@@ -1478,7 +1478,8 @@ let html = `        <div class="row clearfix row-deck">
                                                 employeeID,
                                                 projectName,
                                                 projectCategory,
-                                                dateNeeded
+                                                dateNeeded,
+                                                createdBy
                                             } = reserve;
 
                                             let getDateNeeded = moment(dateNeeded).format("MMMM DD, YYYY");
@@ -1486,7 +1487,7 @@ let html = `        <div class="row clearfix row-deck">
                                             html += `
                                             <tr class="btnView" id="${encryptString(inventoryValidationID)}">
                                                 <td>${materialRequestCode || "-"}</td>
-                                                <td>${employeeFullname(employeeID) || "-"}</td>
+                                                <td>${employeeFullname(employeeID != "0" ? employeeID : createdBy ) || "-"}</td>
                                                 <td>${projectName || "-"}</td>
                                                 <td>${projectCategory || "-"}</td>
                                                 <td>${getDateNeeded || "-"}</td>

@@ -1026,10 +1026,11 @@ $(document).ready(function () {
 			updateProjectOptions();
 			if (data) {
 				initInputmaskTime(false);
-				disabled != "disabled" ? overtimeRequestDateRange(overtimeRequestDate) : "";
+				overtimeRequestDateRange(overtimeRequestDate);
 			} else {
 				initInputmaskTime();
-				disabled != "disabled" ? overtimeRequestDateRange(moment()) : "";
+				
+				overtimeRequestDateRange(moment());
 			}
 
 			(!overtimeRequestID || overtimeRequestDate == "0000-00-00") && $("#overtimeRequestDate").val("");

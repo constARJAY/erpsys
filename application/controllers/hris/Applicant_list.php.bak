@@ -76,7 +76,7 @@ class Applicant_list extends CI_Controller {
         $examDate       = $this->input->post("examDate");
         
         $code   =   $applicantID."|".$designationID."|".$examDate;
-        $url    =   $this->encryption->encrypt($code);
+        $url    =   $this->encryption->encrypt(str_replace("slash","/",$code));
 
         echo json_encode($url);
     }

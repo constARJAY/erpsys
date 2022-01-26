@@ -4,6 +4,7 @@ body {
 
 .container {
     padding: 0 .5rem;
+    position: relative;
 }
 
 .text-center {
@@ -121,8 +122,43 @@ table {
 }
 /* ----- END TABLE FOOTER ----- */
 
+.table-body-centered{
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.table-footer-left{
+    margin-right: 10px;
+}
+
+.table-footer-right{
+    margin-left: 10px;
+}
+
+.table-body{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.demo-wrap {
+    overflow: hidden;
+    position: relative;
+    margin-top: -345px;
+  }
+  
+  .demo-bg {
+    opacity: 0.09;
+    /* position: absolute; */
+    left: 0;
+    top: 0;
+    width: 20%;
+    height: auto;
+    margin: 0 10px;
+  }
 
 @page { 
     size:  auto; 
     margin: 0; 
 }
+
+

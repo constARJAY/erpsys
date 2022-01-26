@@ -25,7 +25,6 @@ class Liquidation extends CI_Controller {
         $method                                             = $this->input->post("method");
         $liquidationID                                      = $this->input->post("liquidationID") ?? null;
         $pettyCashRequestID                                 = $this->input->post("pettyCashRequestID") ?? null;
-        $voucherID                                          = $this->input->post("voucherID") ?? null;
         $reviseLiquidationID                                = $this->input->post("reviseLiquidationID") ?? null;
         $liquidationDate                                    = $this->input->post("liquidationDate") ?? null;
         $chartOfAccountID                                   = $this->input->post("chartOfAccountID") ?? null;
@@ -53,7 +52,6 @@ class Liquidation extends CI_Controller {
             "reviseLiquidationID"                               => $reviseLiquidationID,
             "employeeID"                                        => $employeeID,
             "pettyCashRequestID"                                => $pettyCashRequestID,
-            "voucherID"                                         => $voucherID,
             "liquidationDate"                                   => $liquidationDate,
             "liquidationReferenceNumber"                        => $liquidationReferenceNumber,
             "approversID"                                       => $approversID,
@@ -110,7 +108,7 @@ class Liquidation extends CI_Controller {
             }
         }
 
-        $saveliquidationData = $this->liquidation->saveliquidationData($action, $liquidationData, $liquidationID, $pettyCashRequestID, $voucherID);
+        $saveliquidationData = $this->liquidation->saveliquidationData($action, $liquidationData, $liquidationID, $pettyCashRequestID);
         if ($saveliquidationData) {
             $result = explode("|", $saveliquidationData);
 
@@ -125,14 +123,14 @@ class Liquidation extends CI_Controller {
                             "liquidationID" => $liquidationID,
                            // "chartOfAccountID"  => $item["chartOfAccountID"] != "null" ? $item["chartOfAccountID"] : null,
                             "description"         => $item["description"] != "null" ? $item["description"] : null,
-                            "quantity"            => $item["quantity"] != "null" ? $item["quantity"] : null,
+                            "quantity"         => $item["quantity"] != "null" ? $item["quantity"] : null,
                             "amount"              => $item["amount"] != "null" ? $item["amount"] : null,
-                            "clientID"            => $item["clientID"] != "null" ? $item["clientID"] : null,
+                            "clientID"              => $item["clientID"] != "null" ? $item["clientID"] : null,
                             "srfNumber"           => $item["srfNumber"] != "null" ? $item["srfNumber"] : null,
                             "remark"              => $item["remark"] != "null" ? $item["remark"] : null,
                             "receiptNumber"       => $item["receiptNumber"] != "null" ? $item["receiptNumber"] : null,
-                            "createdBy"           => $item["createdBy"],
-                            "updatedBy"           => $item["updatedBy"],
+                            "createdBy"         => $item["createdBy"],
+                            "updatedBy"         => $item["updatedBy"],
                         ];
                         array_push($liquidationItems, $temp);
                     }

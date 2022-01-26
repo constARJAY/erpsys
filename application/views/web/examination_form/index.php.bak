@@ -100,7 +100,6 @@
  $(document).ready(function(){
 	$(".body_area").attr('applicantID',encryptString(String("<?= $applicantID ?>")));
 	 $(".body_area").attr('applicantSchedule',encryptString(String("<?= $applicantSchedule ?>")));
-	 $(".body_area").attr('designationID',encryptString(String("<?= $designationID ?>")));
  })
 
 </script>

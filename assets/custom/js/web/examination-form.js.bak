@@ -61,7 +61,7 @@ $(document).ready(function () {
 
 			let tmpApplicant = applicantAnswer[index] || "";
 
-			if(tmpApplicant){
+			if(tmpApplicant ){
 				tmpApplicant =  tmpApplicant.toLowerCase();
 			}
 	
@@ -72,7 +72,7 @@ $(document).ready(function () {
 				getPoints[index] = "0.00";
 			}
 	
-			if(!applicantAnswer[index]){
+			if(applicantAnswer[index]== null){
 			
 				applicantAnswer[index] = "";
 			}

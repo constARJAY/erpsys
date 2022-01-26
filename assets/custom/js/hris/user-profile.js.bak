@@ -155,7 +155,7 @@ $(document).ready(function(){
                         <ul class="nav nav-tabs">                                
                             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tab-basic-information">Basic Information</a></li>
                             <li class="nav-item"><a class="nav-link px-5" data-toggle="tab" href="#tab-account-information">Account</a></li>
-                            <li class="nav-item"><a class="nav-link px-5" data-toggle="tab" href="#tab-pay-roll">Payroll</a></li>
+                            <li class="nav-item"><a class="nav-link px-5" data-toggle="tab" href="#tab-pay-roll">Pay Roll</a></li>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-leave-balance">Leave Balance</a></li>
                             <li class="nav-item"><a class="nav-link px-5" data-toggle="tab" href="#tab-schedule">Schedule</a></li>
                             <li class="nav-item"><a class="nav-link px-5" data-toggle="tab" href="#tab-documents">Documents</a></li>

@@ -36,9 +36,8 @@ $(document).ready(function() {
                             <tr>
                                 <td>${value.employeeCode}</td>
                                 <td>
-                                    ${value.fullname}<br>
-                                    <small><strong>${value.departmentName}<strong/></small><br>
-                                    <small>${value.departmentName}</small>
+                                    <div>${value.fullname}</div>
+                                    <small>${value.departmentName} | ${value.designationName}</small>
                                 </td>
                                 <td class="text-center">${value.breakDuration}</td>
                             </tr>
@@ -1232,14 +1231,18 @@ function myFormsContent() {
     `COUNT(overtimeRequestStatus) AS pendingovertime`,
     `employeeID =${sessionID} AND overtimeRequestStatus   =0`);
 
-    const listApplicants = getTableData(    `web_applicant_list_tbl AS applicant`, 
-                                            `DISTINCT(applicant.applicantID),
-                                            CONCAT('APPL-',SUBSTR(applicant.createdAt,3,2),'-',LPAD(applicant.applicantID, 5, '0')) AS applicantCode,
-                                            CONCAT(applicant.applicantFirstname,' ', applicant.applicantLastname) AS fullname,
-                                            (SELECT designationName FROM hris_designation_tbl WHERE designationID = applicantDesignationID ) AS designationName,
-                                            (SELECT applicantInterviewerProgression FROM hris_applicant_interviewer_tbl AS subOne WHERE applicantID = applicant.applicantID AND 	applicantInterviewerNote IS NOT NULL ORDER BY subOne.applicantInterviewerID DESC LIMIT 1) as applicantInterviewerProgression,
-                                            (SELECT applicantInterviewerStatus FROM hris_applicant_interviewer_tbl AS subOne WHERE applicantID = applicant.applicantID AND 	applicantInterviewerNote IS NOT NULL ORDER BY subOne.applicantInterviewerID DESC LIMIT 1) as applicantStatus`, 
-                                            );
+    const listApplicants = getTableData(`web_applicant_list_tbl AS applicant
+    LEFT JOIN hris_applicant_interviewer_tbl AS interviewer
+    ON applicant.applicantID = interviewer.applicantID`, 
+    `DISTINCT(applicant.applicantID),
+    CONCAT('APPL-',SUBSTR(applicant.createdAt,3,2),'-',LPAD(applicant.applicantID, 5, '0')) AS applicantCode,
+    CONCAT(applicant.applicantFirstname,' ', applicant.applicantLastname) AS fullname,
+    interviewer.applicantInterviewerProgression,
+    (SELECT designationName FROM hris_designation_tbl WHERE designationID = applicantDesignationID ) AS designationName,
+    IFNULL(interviewer.applicantInterviewerStatus,"Pending") as applicantStatus`, 
+    ` interviewer.applicantInterviewerStatus !="" OR interviewer.applicantInterviewerStatus  IS NULL 
+    GROUP BY applicant.applicantID ASC
+ORDER BY interviewer.updatedAt ASC  `);
 
 
 
@@ -1338,18 +1341,15 @@ let html = `        <div class="row clearfix row-deck">
                                             designationName,
                                             applicantStatus,
                                         } = applicant;
-                                        if(applicantInterviewerProgression != "Job Order"){
-                                            if(applicantStatus != "Waitlisted" || applicantStatus != "Cancelled"  ){
-                                                html += `
-                                                        <tr class="">
-                                                            <td>${applicantCode || "-"}</td>
-                                                            <td>${fullname || "-"}</td>
-                                                            <td>${designationName || "-"}</td>
-                                                            <td>${applicantInterviewerProgression || "-"}</td>
-                                                            <td>${applicantStatus || "Pending"}</td>
-                                                        </tr>`;
-                                            }
-                                        }
+
+                                        html += `
+                                        <tr class="">
+                                            <td>${applicantCode || "-"}</td>
+                                            <td>${fullname || "-"}</td>
+                                            <td>${designationName || "-"}</td>
+                                            <td>${applicantInterviewerProgression || "-"}</td>
+                                            <td>${applicantStatus || "-"}</td>
+                                        </tr>`;
                                     });
                                 
                                     html += `

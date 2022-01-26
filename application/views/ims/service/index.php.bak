@@ -13,7 +13,7 @@
 					<span>This module is used to manage the service details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-						<?php if(isCreateAllowed(131)){ ?>
+						<?php if(isCreateAllowed(18)){ ?>
 							<button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Service</button>
 						<?php  } ?>
                     </ul>
