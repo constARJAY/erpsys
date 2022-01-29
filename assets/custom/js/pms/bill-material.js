@@ -2742,7 +2742,7 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-	// ----- GET PURCHASE REQUEST DATA -----
+	// ----- GET BILL MATERIAL DATA -----
 	function getBillMaterialData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
@@ -2902,7 +2902,7 @@ $(document).ready(function() {
 
 		return isObject ? data : formData;
 	}
-	// ----- END GET PURCHASE REQUEST DATA -----
+	// ----- END GET BILL MATERIAL DATA -----
 
 	// ----- GENERATE COST SHEET -----
 	$(document).on("click", "#btnExcel", function(){
@@ -2993,12 +2993,12 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = decryptString($(this).attr("billMaterialID"));
+		const id       				  = decryptString($(this).attr("billMaterialID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
-		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("BOM", dateToday(), id);
-		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-		const data     = getBillMaterialData(action, "save", "0", id);
+		const revise   				  = $(this).attr("revise") == "true";
+		const feedback 				  = $(this).attr("code") || getFormCode("BOM", dateToday(), id);
+		const action   				  = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+		const data     				  = getBillMaterialData(action, "save", "0", id);
 		data.append("billMaterialStatus", 0);
 
 		if (revise) {
@@ -3207,7 +3207,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("BOM", dateToday(), id);
 
 		$("#modal_bill_material_content").html(preloader);
-		$("#modal_bill_material .page-title").text("DENY PURCHASE REQUEST");
+		$("#modal_bill_material .page-title").text("DENY BILL MATERIAL");
 		$("#modal_bill_material").modal("show");
 		let html = `
 		<div class="modal-body">

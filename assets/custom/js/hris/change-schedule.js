@@ -747,7 +747,7 @@ $(document).ready(function () {
                         required
                         id="changeScheduleDate"
                         name="changeScheduleDate"
-                        value="${changeScheduleDate && moment(changeScheduleDate).format("MMMM DD, YYYY")}"
+                        value="${moment(changeScheduleDate || new Date).format("MMMM DD, YYYY")}"
 						${disabled}
 						unique="${encryptString(changeScheduleID)}"
 						title="Date">
@@ -757,8 +757,8 @@ $(document).ready(function () {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" 
-                        class="form-control timeIn" 
+                    <input type="time" 
+                        class="form-control" 
                         id="changeScheduleTimeIn" 
                         name="changeScheduleTimeIn" 
                         required
@@ -770,8 +770,8 @@ $(document).ready(function () {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Time Out ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" 
-                        class="form-control timeOut" 
+                    <input type="time" 
+                        class="form-control" 
                         id="changeScheduleTimeOut" 
                         name="changeScheduleTimeOut" 
                         required
@@ -817,9 +817,7 @@ $(document).ready(function () {
 				singleDatePicker: true,
 				showDropdowns: true,
 				autoApply: true,
-				// startDate: moment(changeScheduleDate || new Date).format("YYYY-MM-DD"),
 				minDate: moment(),
-				// maxDate: moment().add(80, 'days'),
 				locale: {
 					format: "MMMM DD, YYYY",
 				},

@@ -14,6 +14,31 @@ class BillMaterial_model extends CI_Model {
         return $query ? $query->row() : [];
     }
 
+    public function getCostSheetData($costSheetID = null){
+        $sql    = "SELECT * FROM fms_cost_sheet_tbl WHERE costSheetID = '$costSheetID'";
+        $query  = $this->db->query($sql);
+        return $query ? $query->row() : [];
+    }
+
+    public function saveCostSheetData($action, $data, $id = null){
+        if ($action == "insert") {
+            $query = $this->db->insert("fms_cost_sheet_tbl", $data);
+        } else {
+            $where = ["costSheetID" => $id];
+            $query = $this->db->update("fms_cost_sheet_tbl", $data, $where);
+        }
+
+        if ($query) {
+            $insertID           = $action == "insert" ? $this->db->insert_id() : $id;
+            $costSheetData      = $this->getCostSheetData($insertID);
+            $costSheetCode      = "CTS-".date_format(date_create($costSheetData->createdAt),"y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
+            $updateArr          = ["costSheetCode"=> $costSheetCode ];
+            $this->db->update("fms_cost_sheet_tbl", $updateArr, ["costSheetID" => $insertID]);
+            return "true|Successfully submitted|$insertID|".date("Y-m-d");
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
     public function saveBillMaterialData($action, $data, $id = null){
         if ($action == "insert") {
             $query = $this->db->insert("pms_bill_material_tbl", $data);

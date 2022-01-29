@@ -76,11 +76,45 @@ class Applicant_list extends CI_Controller {
         $examDate       = $this->input->post("examDate");
         
         $code   =   $applicantID."|".$designationID."|".$examDate;
-        $url    =   $this->encryption->encrypt($code);
+
+        $url = $this->encryption->encrypt(str_replace("slash","/",$code));
+        while (strpos($url, "+")) {
+            $url = $this->encryption->encrypt(str_replace("slash","/",$code));
+        }
 
         echo json_encode($url);
     }
 
+    public function saveOnBoarding(){
+        $hasProgress        = $this->input->post("hasProgress");
+        $orientationData    = $this->input->post("orientationData");
+        $applicantID        = $this->input->post("applicantID");
+        $progressionID      = $this->input->post("progressionID") ?? false;
+        if($orientationData){
+            $progressionData = [];
+            foreach ($orientationData as $key => $row) {
+                $employeeID         = $row["employeeID"];
+                $employeeName       = $row["employeeName"];
+                $applicantID        = $row["applicantID"];
+                $orientationName    = $row["orientationName"];
+                $orientationDate    = $row["orientationDate"];
+                $orientationStatus  = $row["orientationStatus"];
+
+                $temp = [
+                    "employeeID"         => $employeeID,
+                    "employeeName"       => $employeeName,
+                    "applicantID"        => $applicantID,
+                    "orientationName"    => $orientationName,
+                    "orientationDate"    => $orientationDate,
+                    "orientationStatus"  => $orientationStatus
+                ];
+                array_push($progressionData, $temp);
+            }
+
+            $result = $this->applicant->saveOnBoarding($applicantID, $progressionData, $progressionID);
+            echo json_encode($result);
+        }
+    }
 }
 
 

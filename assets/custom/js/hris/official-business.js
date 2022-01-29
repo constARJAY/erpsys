@@ -754,7 +754,7 @@ $(document).ready(function () {
                         required
                         id="officialBusinessDate"
                         name="officialBusinessDate"
-                        value="${officialBusinessDate && moment(officialBusinessDate).format("MMMM DD, YYYY")}"
+                        value="${moment(officialBusinessDate || new Date).format("MMMM DD, YYYY")}"
 						${disabled}
 						unique="${officialBusinessDate}"
 						title="Date">
@@ -764,7 +764,7 @@ $(document).ready(function () {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" 
+                    <input type="time" 
                         class="form-control timeIn" 
                         id="officialBusinessTimeIn" 
                         name="officialBusinessTimeIn" 
@@ -780,7 +780,7 @@ $(document).ready(function () {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Time Out ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" 
+                    <input type="time" 
                         class="form-control timeOut" 
                         id="officialBusinessTimeOut" 
                         name="officialBusinessTimeOut" 
@@ -821,15 +821,14 @@ $(document).ready(function () {
 			initAll();
 			initDataTables();
 			
-			if(data){
-				initInputmaskTime(false) 
-			}else{
-				initInputmaskTime();
-			$("#officialBusinessDate").val(moment(new Date).format("MMMM DD, YYYY"));
-			}
-			var totalminDate = moment().subtract(7,'d').format('YYYY-MM-DD');
-			$("#officialBusinessDate").data("daterangepicker").minDate = moment(totalminDate);
-			//data ? initInputmaskTime(false) : initInputmaskTime();
+			// if(data){
+			// 	initInputmaskTime(false) 
+			// }else{
+			// 	initInputmaskTime();
+			// $("#officialBusinessDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			// }
+			// var totalminDate = moment().subtract(7,'d').format('YYYY-MM-DD');
+			// $("#officialBusinessDate").data("daterangepicker").minDate = moment(totalminDate);
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {

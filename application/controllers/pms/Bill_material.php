@@ -61,18 +61,23 @@ class Bill_material extends CI_Controller{
         ];
 
         if ($action == "update") {
+            $getBOM    =   $this->billmaterial->getBillMaterialData($billMaterialID);
             unset($billMaterialData["reviseBillMaterialID"]);
              unset($billMaterialData["reviseBillMaterialCode"]);
             unset($billMaterialData["createdBy"]);
             unset($billMaterialData["createdAt"]);
 
             if ($method == "cancelform") {
+                
                 $billMaterialData = [
                     "billMaterialStatus"    => 4,
+                    "submittedAt"           => $getBOM->submittedAt,
                     "updatedBy"             => $updatedBy,
+                    
                 ];
             } else if ($method == "approve") {
                 $billMaterialData = [
+                    "submittedAt"           => $getBOM->submittedAt,
                     "approversStatus"       => $approversStatus,
                     "approversDate"         => $approversDate,
                     "billMaterialStatus"    => $billMaterialStatus,
@@ -81,6 +86,7 @@ class Bill_material extends CI_Controller{
                 
             } else if ($method == "deny") {
                 $billMaterialData = [
+                    "submittedAt"            => $getBOM->submittedAt,
                     "approversStatus"        => $approversStatus,
                     "approversDate"          => $approversDate,
                     "billMaterialStatus"     => 3,
@@ -89,6 +95,7 @@ class Bill_material extends CI_Controller{
                 ];
             } else if ($method == "drop") {
                 $billMaterialData = [
+                    "submittedAt"               => $getBOM->submittedAt,
                     "reviseBillMaterialID"      => $reviseBillMaterialID,
                     "billMaterialStatus"        => 5,
                     "updatedBy"                 => $updatedBy,
@@ -118,7 +125,26 @@ class Bill_material extends CI_Controller{
                         "createdBy"                 => $billMaterialResultData->createdBy,
                         "updatedBy"                 => $billMaterialResultData->createdBy
                     ];
+
+                    $costSheetData = [
+                        "billMaterialID"            => $billMaterialResultData->billMaterialID,
+                        "billMaterialCode"          => $billMaterialResultData->billMaterialCode,  
+                        "costEstimateID"            => $billMaterialResultData->costEstimateID,
+                        "costEstimateCode"          => $billMaterialResultData->costEstimateCode, 
+                        "employeeID"                => $billMaterialResultData->createdBy,
+                        "timelineBuilderID"         => $billMaterialResultData->timelineBuilderID,
+                        "projectCode"               => $billMaterialResultData->projectCode,
+                        "projectName"               => $billMaterialResultData->projectName,
+                        "projectCategory"           => $billMaterialResultData->projectCategory,
+                        "clientCode"                => $billMaterialResultData->clientCode,
+                        "clientName"                => $billMaterialResultData->clientName,
+                        "clientAddress"             => $billMaterialResultData->clientAddress,
+                        "dateNeeded"                => $billMaterialResultData->dateNeeded,
+                        "createdBy"                 => $billMaterialResultData->createdBy
+                    ];
+
                 $this->materialrequest->saveMaterialRequestData("insert", $materialRequestData);
+                $this->billmaterial->saveCostSheetData("insert", $costSheetData);
             }
         if($saveBillMaterialData){
             $error      = 0;

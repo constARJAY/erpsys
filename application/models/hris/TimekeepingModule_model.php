@@ -57,9 +57,9 @@ class TimekeepingModule_model extends CI_Model {
             foreach($result1 as $res1) $idArr[] = $res1["employeeID"];
             $idStr = implode(",", $idArr);
 
-            $sql = "SELECT * FROM hris_employee_list_tbl WHERE FIND_IN_SET(employeeID, '$idStr') AND scheduleID <> 0 AND employeeID <> 1";
+            $sql = "SELECT * FROM hris_employee_list_tbl WHERE FIND_IN_SET(employeeID, '$idStr') AND isNonOrganic = 0 AND employeeID <> 1";
         } else {
-            $sql = "SELECT * FROM hris_employee_list_tbl WHERE employeeStatus IN (1,2,5,7) AND scheduleID <> 0 AND employeeID <> 1";
+            $sql = "SELECT * FROM hris_employee_list_tbl WHERE employeeStatus IN (1,2,5,7) AND isNonOrganic = 0 AND employeeID <> 1";
         }
 
         $query = $this->db->query($sql);

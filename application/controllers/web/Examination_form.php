@@ -64,6 +64,7 @@ class Examination_form extends CI_Controller {
         // print_r($_POST);
         // exit;
 
+        $examinationID = $this->input->post("examinationID");
         $applicantID = $this->input->post("applicantID");
         $applicantAnswer = $this->input->post("applicantAnswer");
         $examinationQAID = $this->input->post("examinationQAID");
@@ -75,7 +76,7 @@ class Examination_form extends CI_Controller {
         // exit;
 
               
-        $saveExam = $this->examinationForm->saveExam($applicantID, $applicantAnswer, $examinationQAID,$getPoints,$totalPoints,$percent);
+        $saveExam = $this->examinationForm->saveExam($examinationID, $applicantID, $applicantAnswer, $examinationQAID,$getPoints,$totalPoints);
         echo json_encode($saveExam);
     }
 

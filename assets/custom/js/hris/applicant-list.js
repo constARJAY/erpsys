@@ -1,5 +1,5 @@
 let getProfileTableData, getExamData, getProgressionData, getApplicantStatus, getPersonInCharge, getApplicantID, designationID;
-let getApplicantInterviewerData;
+let getApplicantInterviewerData, getOrientationData ,getOnBoardingStatus, getOrientationProgressData;
 $(document).ready(function(){
 
     pageContent();
@@ -18,6 +18,7 @@ $(document).ready(function(){
 
     $(document).on("click", ".main-tab", function(){
         let thisEvent   = $(this);
+        let category    = $(this).attr("category");
         let thisParent  = thisEvent.closest(".parent-main-tab");
         let redirectTo  = thisEvent.attr("redirect");
         let html;
@@ -26,29 +27,257 @@ $(document).ready(function(){
             $(this).removeClass("active");
         });
         thisEvent.addClass("active");
-        $("#applicant_details_content").html(preloader);
-        switch (redirectTo) {
-            case "application":
-                    html = getCardApplication(getApplicantInterviewerData || false);
-                break;
-            case "examination":
-                   html = getCardExamination();
-                break;
-            case "interview":
-                   html = getCardInterview();
-                break;
-            default:
-                html = getDetailsContent(getProfileTableData);
-                break;
+        if(!category){
+            $("#applicant_details_content").html(preloader);
+            switch (redirectTo) {
+                case "application":
+                        html = getCardApplication(getApplicantInterviewerData || false);
+                    break;
+                case "examination":
+                       html = getCardExamination();
+                    break;
+                case "interview":
+                       html = getCardInterview();
+                    break;
+                case "onboarding":
+                        html = getCardOnBoarding();
+                    break;
+                default:
+                    html = getDetailsContent(getProfileTableData);
+                    break;
+            }
+            setTimeout(() => {
+                $("#applicant_details_content").html(html);
+                updateAttr();
+                initDataTables();
+                initAll();
+                initExamDate();
+                initOrientationDate();
+            }, 500);  
+        }else{
+                if(redirectTo == "applicant-list"){
+                    pageContent();
+                }else{
+                    myChecklist();
+                }
         }
-        setTimeout(() => {
-            $("#applicant_details_content").html(html);
-            updateAttr();
-            initDataTables();
-            initAll();
-            initExamDate();
-        }, 500);    
     });
+    
+
+    function checkListData(){
+        let checkListData   =  getTableData("hris_checklist_tbl");
+        let html = ``;
+        checkListData.map((value,index)=>{
+            html +=  `
+                    <div class="card text-white mb-3 btnEditChecklist pointer" id="${value.checklistID}" style="cursor:pointer;max-width: 36.5rem; background-color: #697179;">
+                        <div class="card-body pointer" style="min-height: 20rem;max-height: 20rem;">
+                            <h3 class="card-title">#${value.checklistID}: ${value.checklistTitle}</h3>
+                            <div class="overflow-auto mb-3" style="min-height: 15rem;max-height: 15rem;text-align:justify">
+                            <p class="card-text">${value.checklistDescription}</p>
+                            </div>
+                        </div>
+                    </div>`;
+        });
+        return html;
+    }
+
+    function modalContent(data = false) {
+		let checklistID = data ? (data[0].checklistID ? data[0].checklistID : "") : "",
+			checklistTitle = data ? (data[0].checklistTitle ? data[0].checklistTitle : "") : "",
+			checklistDescription = data ? (data[0] ? data[0].checklistDescription : "") : "";
+		let button = checklistID ? `
+    <button 
+        class="btn btn-update px-5 p-2" 
+        id="btnChecklistUpdate" 
+        rowID="${checklistID}">
+        <i class="fas fa-save"></i>
+        Update
+    </button>` : `
+    <button 
+        class="btn btn-save px-5 p-2" 
+        id="btnSave"><i class="fas fa-save"></i>
+        Save
+    </button>`;
+		let html = `
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <div class="form-group">
+                    <label>Checklist Title <code>*</code></label>
+                    <input 
+                    type="text" 
+                    class="form-control validate" 
+                    name="checklistTitle" 
+                    id="checklistTitle" 
+                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:]['']['][-][_][(][)][%][&][*]" 
+                    minlength="2" 
+                    maxlength="100" 
+                    required 
+                    unique="${checklistID}"  
+                    value="${checklistTitle}"
+                    autocomplete="off">
+                <div class="invalid-feedback d-block" id="invalid-input_checklistTitle"></div>
+                </div>
+            </div>
+        </div>
+        </div class="row">    
+            <div class="col-md-12 col-sm-12">
+                <div class="form-group">
+                    <label>Checklist Description <code>*</code></label>
+                    <textarea class="form-control validate"
+					minlength="1"
+                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:]['']['][-][_][(][)][%][&][*]"
+					id="checklistDescription"
+					name="checklistDescription"
+					required
+					rows="4"
+					style="resize:none;"
+                    required
+					>${checklistDescription}</textarea>
+                <div class="invalid-feedback d-block" id="invalid-input_checklistDescription"></div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+    ${button}
+    <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> Cancel</button>
+    </div>`;
+		return html;
+	}
+
+    function myChecklist() {
+    $("#page_content").html(`<div class="col-lg-12 p-0">
+                                <div class="card">
+                                    <div class="body">
+                                        <div class="row clearfix row-deck">
+                                        ${preloader}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`);
+        let pageContentHtml = `
+            <div class="col-lg-12 p-0">
+                <div class="card">
+                    <div class="body">
+                        <div class="row clearfix row-deck">
+                            ${checkListData()}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            `;
+        setTimeout(() => {
+            preventRefresh(false);
+            $("#btnAdd").addClass("d-block").removeClass("d-none");
+            $("#page_content").html(pageContentHtml);
+            initDataTables();
+        }, 1000);
+	}
+
+
+    // ----- OPEN ADD MODAL -----
+    $(document).on("click", "#btnAdd", function () {
+		$("#checklist_modalheader").text("ADD CHECKLIST");
+		$("#modal_checklist_module").modal("show");
+		$("#modal_checklist_module_content").html(preloader);
+		const content = modalContent();
+		$("#modal_checklist_module_content").html(content);
+		initAll();
+	});
+
+    $(document).on("click", "#btnSave", function () {
+
+		const validate = validateForm("modal_checklist_module");
+		if (validate) {
+			let data = getFormData("modal_checklist_module", true);
+			//data["tableData[departmentCode]"] = generateCode("DPT", false, "hris_department_tbl", "departmentCode");
+			data["tableData[createdBy]"] = sessionID;
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"] = "hris_checklist_tbl";
+			data["feedback"] = $("[name=checklistTitle]").val();
+
+			sweetAlertConfirmation("add", "Checklist", "modal_checklist_module", null, data, true, myChecklist);
+		}
+	});
+
+    // ----- OPEN EDIT MODAL -----
+	$(document).on("click", ".btnEditChecklist", function () {
+		const id        = $(this).attr("id");
+		const feedback  = $(this).attr("feedback");
+		$("#checklist_modalheader").text("EDIT CHECKLIST");
+		$("#modal_checklist_module").modal("show");
+
+		// Display preloader while waiting for the completion of getting the data
+		$("#modal_checklist_module_content").html(preloader);
+
+		const tableData = getTableData("hris_checklist_tbl", "*", "checklistID =" + id, "");
+		if (tableData) {
+			const content = modalContent(tableData);
+			setTimeout(() => {
+				$("#modal_checklist_module_content").html(content);
+				// departmentContent(tableData);
+				$("#btnSaveConfirmationEdit").attr("rowID", id);
+				$("#btnSaveConfirmationEdit").attr("feedback", feedback);
+				initAll();
+			}, 500);
+		}
+	});
+
+    // ----- UPDATE MODAL -----
+	$(document).on("click", "#btnChecklistUpdate", function () {
+		const validate = validateForm("modal_checklist_module");
+		const id = $(this).attr("rowID");
+		if (validate) {
+
+			let data = getFormData("modal_checklist_module", true);
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"] = "hris_checklist_tbl";   
+			data["whereFilter"] = "checklistID =" + id;
+			data["feedback"] = $("[name=checklistTitle]").val();
+
+			sweetAlertConfirmation(
+				"update",
+				"Checklist",
+				"modal_checklist_module",
+				"",
+				data,
+				true,
+				myChecklist
+
+			);
+		}
+
+	});
+	// ----- END UPDATE MODAL --
+
+	// ----- CLOSE FORM -----
+	$(document).on("click", "#btnBack", function () {
+		const id = $(this).attr("checklistID");
+		// /const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
+		const status = $(this).attr("status");
+
+		if (status != "false" && status != 0) {
+			//alert("1");
+			$("#page_content").html(preloader);
+			$("#btnBack").hide();
+
+			pageContent();
+			$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+
+		}
+
+	});
+	// ----- END CLOSE FORM -----
+
+
+
+
+
+
+
 
     $(document).on("click", ".btnAddRow", function(){
         let thisEvent   = $(this);
@@ -128,12 +357,24 @@ $(document).ready(function(){
         let data = {applicantID, designationID, examDate};
         let link = generateExamURL(data);
         let html =   `<label>Exam URL:</label>
-                            <textarea class="form-control" style="resize:none; height: 90px" readonly>${link}</textarea>`;
+                    <textarea class="form-control" name="examUrl" style="resize:none; height: 90px; cursor: pointer;" readonly title="Copy exam URL">${link}</textarea>`;
         setTimeout(() => {
             $("#showUrl").html(html);
         }, 500);
 
     });
+
+    // ----- COPY LINK -----
+    $(document).on("click", `[name="examUrl"]`, function() {
+        if (this.value?.trim()) {
+            this.select();
+            this.setSelectionRange(0, 99999); 
+            navigator.clipboard.writeText(this.value);
+            
+            showNotification("success", "Link copied to clipboard.");
+        }
+    })
+    // ----- END COPY LINK -----
 
     $(document).on("click",".filename-table", function(e){
         e.stopPropagation();
@@ -167,6 +408,11 @@ function initDataTables() {
         serverSide:     false,
         scrollX:        true,
         sorting:        [],
+        order: [
+                [10, 
+                        ["Pending","Passed","Waitlisted","Re-evaluate","Job Order","Failed","Cancelled"]
+                    ]
+                ],
         scrollCollapse: true,
         columnDefs: [
             { targets: 0,  width: 100 },
@@ -180,6 +426,7 @@ function initDataTables() {
             { targets: 8,  width: 130 },
             { targets: 9,  width: 130 },
             { targets: 10,  width: 100 },
+            { targets: 11,  width: 100 },
         ],
     };
 
@@ -250,8 +497,16 @@ function pageContent(isDetails = true){
                                     </div>
                                 </div>`);
     let pageContentHtml = ``;
-    let applicantNav    = ``;
-    let headerButton    = ``;
+    let applicantNav    = `<div class="bh_divider appendHeader"></div>
+                            <div class="row clearfix appendHeader">
+                                <div class="col-12">
+                                    <ul class="nav nav-tabs parent-main-tab">
+                                        <li class="nav-item "><a class="nav-link main-tab active" data-toggle="tab" href="#" category="parent-display" redirect="applicant-list">Applicant List</a></li>
+                                        <li class="nav-item "><a class="nav-link main-tab" data-toggle="tab" href="#" category="parent-display" redirect="check-list">Check List</a></li>
+                                    </ul>
+                                </div>
+                            </div>`;
+    let headerButton    = `<button type="button" class="btn btn-default btn-add d-none" id="btnAdd"><i class="icon-plus"></i> &nbsp;Add Checklist</button>`;
     if(!isDetails){
         headerButton    =  `<button type="button" class="btn btn-default btn-light" id="btnBack">
         <i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -264,7 +519,7 @@ function pageContent(isDetails = true){
                                             <li class="nav-item "><a class="nav-link main-tab" data-toggle="tab" href="#" redirect="application">Application</a></li>
                                             <li class="nav-item "><a class="nav-link main-tab" data-toggle="tab" href="#" redirect="examination">Examination</a></li>
                                             <li class="nav-item "><a class="nav-link main-tab" data-toggle="tab" href="#" redirect="interview">Interview</a></li>
-                                            
+                                            <li class="nav-item "><a class="nav-link main-tab" data-toggle="tab" href="#" redirect="onboarding">Onboarding</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -304,8 +559,18 @@ function pageContent(isDetails = true){
                                             { type : "For Review" }
                                             
                                         ];
+        getOnBoardingStatus          =  [
+                                            {type:"Pending"},
+                                            {type:"Ongoing"},
+                                            {type:"Accomplish"}
+                                        ];
         getApplicantInterviewerData = getTableData("hris_applicant_interviewer_tbl","",`applicantID = '${getApplicantID}'`);
         getProfileTableData         = getProfileData(getApplicantID);
+        
+        getOrientationData          = getTableData(`hris_orientation_setup_tbl AS host LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+                                                    `OrientationName as orientationName, CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) AS trainerName, host.employeeID AS traineeID`,
+                                                    `host.designationID = '${designationID}'`);
+        getOrientationProgressData  = getTableData(`hris_onboarding_progress_tbl`,`*, employeeName AS trainerName, employeeID AS traineeID`,`applicantID = '${getApplicantID}'`); 
         
         setTimeout(() => {
             preventRefresh(true);
@@ -317,7 +582,18 @@ function pageContent(isDetails = true){
         }, 500);
     }else{
         let tableData   = getTableData(`web_applicant_list_tbl AS wall LEFT JOIN hris_designation_tbl AS hdt ON hdt.designationID = wall.applicantDesignationID`,
-                                        `wall.*, designationName, CONCAT(wall.applicantLastname,', ',wall.applicantFirstname,' ',wall.applicantMiddlename) as fullname`,
+                                        `wall.*, designationName, CONCAT(wall.applicantLastname,', ',wall.applicantFirstname,' ',wall.applicantMiddlename) as fullname,
+                                        
+                                        ROUND(
+                                             (
+                                                
+                                                    (SELECT COUNT(sub_hopt.onboardingProgressID) FROM hris_onboarding_progress_tbl AS sub_hopt WHERE sub_hopt.applicantID = wall.applicantID AND sub_hopt.orientationStatus = 'Accomplish')
+                                                    /(SELECT COUNT(sub_hopt.onboardingProgressID) FROM hris_onboarding_progress_tbl AS sub_hopt WHERE sub_hopt.applicantID = wall.applicantID)
+                                                 * 100 
+                                            ), 2
+                                        )
+                                         AS progression
+                                        `,
                                         `applicantDesignationID != '0' `);
         pageContentHtml = ` 
                             <div class="col-lg-12 p-0">
@@ -334,6 +610,7 @@ function pageContent(isDetails = true){
                                 </div>
                             </div>`;
         setTimeout(() => {
+            $("#btnAdd").removeClass("d-block").addClass("d-none");
             preventRefresh(false);
             $("#headerButton").html(headerButton);
             $(".div-applicant-nav").html(applicantNav);
@@ -390,6 +667,11 @@ function tableContent(data = false){
                             <td class="text-center">${personInCharge || "-"}</td>
                             <td class="text-left">${applicantUpdatedAt ? moment(applicantUpdatedAt).format("MMMM DD, YYYY") : "-"}</td>
                             <td class="text-center">${getStatusStyle(applicantInterviewerStatus)}</td>
+                            <td>
+                                <div class="progress w-100" style="width:100px;height:20px;">
+                                    <div class="progress-bar" role="progressbar" style="width: ${value.progression || "0"}%;" aria-valuenow="${value.progression || "0"}" aria-valuemin="${value.progression || "0"}" aria-valuemax="100">${value.progression || "0"}%</div>
+                                </div>
+                            </td>
                         </tr>`;
     }); 
     let html =  `   
@@ -407,6 +689,7 @@ function tableContent(data = false){
                             <th>Person In-Charge</th>
                             <th>Date</th>
                             <th>Status</th>
+                            <th>Orientation</th>
                         </tr>
                     </thead>
                             ${tableDataRow}
@@ -469,6 +752,16 @@ function getApplicationStatusOption(id, isLastOption = false){
         html += `<option value="Job Order" ${id == "Job Order" ? "selected" : ""}>Job Order</option>`;
     }
     
+    return html;
+}
+
+function getOnBoardingStatusOption(id){
+    let html = `<option value="Pending" disabled ${ id=="Pending" ? "selected" : ""}>Pending</option>`;
+    
+    getOnBoardingStatus.map((value,index)=>{
+        html +=  index > 0 ? 
+        `<option value="${value.type}" ${value.type == id ? "selected" : ""}>${value.type}</option>`: ``;
+    });
     return html;
 }
 
@@ -546,6 +839,25 @@ function updateAttr(){
     // updateSelect();
 
 }
+
+function initOrientationDate(){
+    $(`.orientation-date`).each(function(){
+        let startDate = $(this).val() || moment();
+        $(this).daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoApply: true,
+            minDate: moment(),
+            startDate,
+            endDate: startDate,
+            locale: {
+                format: 'MMMM DD, YYYY'
+            },
+        });
+    });
+    
+}
+
 
 function updateSelect(){
     // FOR PROGRESSION
@@ -1372,16 +1684,26 @@ function getExamination(){
     let tableRow    = ""; 
     let percentage  = 0;
             tableData.map((value,index)=>{
+
+                let {
+                    applicantID,
+                    totalPoints,
+                    overPoints,
+                    percent,
+                    overPercent,
+                } = value;
+                let totalPercent = (totalPoints / overPoints) * overPercent;
+
                tableRow +=  `   
                                 <tr>
                                     <td>
                                         ${value.examinationName}<br>
                                         <small>${value.examinationType}</small>
                                     </td>
-                                    <td class="text-right">${value.percent} %</td>
+                                    <td class="text-right">${formatAmount(totalPercent)} %</td>
                                 </tr>
                             `; 
-                percentage += parseFloat(value.percent);
+                percentage += parseFloat(totalPercent);
             });
 
             tableRow += `
@@ -1389,7 +1711,7 @@ function getExamination(){
                                 <td>
                                    Total Percentage :
                                 </td>
-                                <td class="text-right"><strong>${percentage} %</strong></td>
+                                <td class="text-right"><strong>${formatAmount(percentage)} %</strong></td>
                             </tr>
                         `;
 
@@ -1442,108 +1764,210 @@ function getExaminationResult(){
 }
 
 
+// FOR CARD INTERVIEW 
+    function getCardInterview(){
+        let html = `
+            <div class="body">                        
+                <div class="tab-content mt-3">
+                    ${getInfo_InterviewTab()}
+                </div>
+            </div>`;
+            return html;
+    }
 
-function getCardInterview(){
-    let html = `
-        <div class="body">                        
-            <div class="tab-content mt-3">
-                ${getInfo_InterviewTab()}
-            </div>
-        </div>`;
-        return html;
-}
+    function getInfo_InterviewTab(){
+        let tableData = getTableData( `web_applicant_job_tbl AS appJob
+                                                        INNER JOIN hris_job_posting_tbl as postJob ON postJob.jobID = appJob.jobID
+                                                        LEFT JOIN pms_personnel_requisition_tbl AS pprt ON postJob.requisitionID = pprt.requisitionID
+                                                        LEFT JOIN hris_employee_list_tbl AS helt ON helt.employeeID = pprt.personnelReportByID`, 
+                                        `	pprt.requisitionID AS requisitionID , CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) as reportBy, personnelDateNeeded, pprt.createdAt AS createdAt`, 
+                                        `applicantID = ${getApplicantID}` );
+                
+        let html = `
+                        <div class="card">
+                            <div class="body">
+                                <div class="row clearfix">
+                                    <div class="col-lg-4 col-md-12">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">PRF Number</label>                                                
+                                            <div class="border-bottom w-100">${getFormCode("PRF",tableData[0].createdAt,tableData[0].requisitionID)}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-md-12">
+                                        <div class="form-group">  
+                                            <label class="font-weight-bold">Date Required</label>                                              
+                                            <div class="border-bottom w-100">${moment(tableData[0].personnelDateNeeded).format("MMMM DD, YYYY")}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-md-12">
+                                        <div class="form-group">   
+                                            <label class="font-weight-bold">Requesting Manager</label>                                             
+                                            <div class="border-bottom w-100">${tableData[0].reportBy}</div>
+                                        </div>
+                                    </div>
+                                </div>  
 
-function getInfo_InterviewTab(){
-    let tableData = getTableData( `web_applicant_job_tbl AS appJob
-                                                       INNER JOIN hris_job_posting_tbl as postJob ON postJob.jobID = appJob.jobID
-                                                       LEFT JOIN pms_personnel_requisition_tbl AS pprt ON postJob.requisitionID = pprt.requisitionID
-                                                       LEFT JOIN hris_employee_list_tbl AS helt ON helt.employeeID = pprt.personnelReportByID`, 
-                                    `	pprt.requisitionID AS requisitionID , CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) as reportBy, personnelDateNeeded, pprt.createdAt AS createdAt`, 
-                                    `applicantID = ${getApplicantID}` );
-            
-      let html = `
-                    <div class="card">
-                        <div class="body">
-                            <div class="row clearfix">
-                                <div class="col-lg-4 col-md-12">
-                                    <div class="form-group">
-                                        <label class="font-weight-bold">PRF Number</label>                                                
-                                        <div class="border-bottom w-100">${getFormCode("PRF",tableData[0].createdAt,tableData[0].requisitionID)}</div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4 col-md-12">
-                                    <div class="form-group">  
-                                        <label class="font-weight-bold">Date Required</label>                                              
-                                        <div class="border-bottom w-100">${moment(tableData[0].personnelDateNeeded).format("MMMM DD, YYYY")}</div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4 col-md-12">
-                                    <div class="form-group">   
-                                        <label class="font-weight-bold">Requesting Manager</label>                                             
-                                        <div class="border-bottom w-100">${tableData[0].reportBy}</div>
-                                    </div>
-                                </div>
-                            </div>  
-
-                            <div id="tableInterviewer">
-                                ${getLevelInterviewer()}
-                            </div>    
-                        </div>
-                    </div> `;
-        return html;
-}
-
-function getLevelInterviewer(){
-    let html      = "";
-    let lastIndex = parseInt(getApplicantInterviewerData.length) - 1;
-    getApplicantInterviewerData.map((value,index)=>{
-        let row         = value;
-        let isDisabled  = sessionID == row.employeeID ? "required" : "disabled";   
-        let hasUpdate   = sessionID == row.employeeID ? `<button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="interview" tableid="${row.applicantInterviewerID}">
-                                                            <i class="fas fa-save"></i> Update</button>`:``;
-        html += `
-                    <div class="card" >
-                        <h2 class="text-danger font-weight-bold p-2">${row.applicantInterviewerProgression}</h2>
-                        <div class="body">
-                            <div class="row clearfix table-row-interview" tableid="${row.applicantInterviewerID}">
-                                <div class="col-lg-6 col-md-12">
-                                    <div class="form-group">
-                                        <label class="font-weight-bold">Interviewer</label>   
-                                        <input type="text" class="form-control" disabled value="${row.personInCharge}" placeholder="Username">
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-md-12">
-                                    <div class="form-group">
-                                        <label class="font-weight-bold">Status ${row.applicantInterviewerNote ? `` : `<code>*</code>`} </label>                                                
-                                        <select class="form-control validate select2 w-100" tabtype="interview"
-                                            name="applicationStatus"  ${row.applicantInterviewerNote ? "disabled" : isDisabled}>
-                                            ${getApplicationStatusOption(row.applicantInterviewerStatus, lastIndex == index)}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-lg-12 col-md-12">
-                                    <div class="form-group">
-                                        <label class="font-weight-bold">Notes ${row.applicantInterviewerNote ? `` : `<code>*</code>`} </label>                                                
-                                        <textarea rows="2" class="form-control no-resize validate" 
-                                            tabtype="interview" name="interviewerNote" placeholder="Please type what you want..." 
-                                            ${row.applicantInterviewerNote ? "disabled" : isDisabled}>${row.applicantInterviewerNote || ""}</textarea>
-                                    </div>
-                                </div>
-                                
+                                <div id="tableInterviewer">
+                                    ${getLevelInterviewer()}
+                                </div>    
                             </div>
-                            <div class="text-right">
-                                ${row.applicantInterviewerNote ? "":hasUpdate}
+                        </div> `;
+            return html;
+    }
+
+    function getLevelInterviewer(){
+        let html      = "";
+        let lastIndex = parseInt(getApplicantInterviewerData.length) - 1;
+        getApplicantInterviewerData.map((value,index)=>{
+            let row         = value;
+            let isDisabled  = sessionID == row.employeeID ? "required" : "disabled";   
+            let hasUpdate   = sessionID == row.employeeID ? `<button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="interview" tableid="${row.applicantInterviewerID}">
+                                                                <i class="fas fa-save"></i> Update</button>`:``;
+            html += `
+                        <div class="card" >
+                            <h2 class="text-danger font-weight-bold p-2">${row.applicantInterviewerProgression}</h2>
+                            <div class="body">
+                                <div class="row clearfix table-row-interview" tableid="${row.applicantInterviewerID}">
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Interviewer</label>   
+                                            <input type="text" class="form-control" disabled value="${row.personInCharge}" placeholder="Username">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Status ${row.applicantInterviewerNote ? `` : `<code>*</code>`} </label>                                                
+                                            <select class="form-control validate select2 w-100" tabtype="interview"
+                                                name="applicationStatus"  ${row.applicantInterviewerNote ? "disabled" : isDisabled}>
+                                                ${getApplicationStatusOption(row.applicantInterviewerStatus, lastIndex == index)}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Notes ${row.applicantInterviewerNote ? `` : `<code>*</code>`} </label>                                                
+                                            <textarea rows="2" class="form-control no-resize validate" 
+                                                tabtype="interview" name="interviewerNote" placeholder="Please type what you want..." 
+                                                ${row.applicantInterviewerNote ? "disabled" : isDisabled}>${row.applicantInterviewerNote || ""}</textarea>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <div class="text-right">
+                                    ${row.applicantInterviewerNote ? "": hasUpdate}
+                                </div>
                             </div>
                         </div>
-                    </div>
-            `;
+                `;
+        });
+        return html;
+    }
+
+    function updateApplicantInterviewer(){
+
+    }
+// END FOR CARD INTERVIEW 
+
+// FOR CARD ONBOARDING 
+    function getCardOnBoarding(){
+        let html = "";
+        dataArray = getOrientationProgressData.length > 0 ? getOrientationProgressData : getOrientationData;
+        dataArray.map((value,index)=>{
+            let row                 = value;
+            let progressid          = row.onboardingProgressID || "";
+            let orientationDate     = !row.orientationStatus || row.orientationStatus == "null" ? moment().format("MMMM DD, YYYY") : row.orientationDate;
+            let orientationStatus   = !row.orientationStatus || row.orientationStatus == "null" ? "Pending" : row.orientationStatus;
+            let isDisabled          = sessionID   == row.traineeID ? "required" : "disabled";
+            let hasProgress         = getOrientationProgressData.length ? true: false;
+            let hasUpdate           = sessionID   == row.traineeID ? `<button type="button" class="btn btn-danger px-5 p-2 btn-onboarding" 
+                                                                        givenaction="onboarding" tableid="" hasprogress="${hasProgress}" applicantid="${encryptString(getApplicantID)}"progressid="${encryptString(progressid)}">
+                                                                    <i class="fas fa-save"></i> Update</button>`:``;
+            let showUpdateBtn       = hasProgress ? hasUpdate : (index == 0 ? hasUpdate : ``); 
+            html += `
+                        <div class="card my-4 mx-3 orientation-card" id="orientationCard${index}">
+                            <h2 class="text-danger font-weight-bold p-2 orientation-name">${row.orientationName}</h2>
+                            <div class="body">
+                                <div class="row clearfix table-row-onboarding">
+                                    <div class="col-lg-4 col-md-12">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Trainee</label>   
+                                            <input type="text" class="form-control trainee-information" disabled value="${row.trainerName}" traineeid="${encryptString(row.traineeID)}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-md-12">
+                                        <div class="form-group">  
+                                            <label>Orientation Date</label>
+                                            <input type="button" class="form-control orientation-date validate text-left"
+                                                id  ="orientationDate${index}" name="" value="${orientationDate}" ${orientationStatus == "Accomplish" ? "disabled" : isDisabled}>
+                                            <div class="d-block invalid-feedback" id="invalid-orientationDate${index}"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-md-12">
+                                       <div class="form-group">  
+                                            <label>Status</label>
+                                            <select 
+                                                class="form-control select2 validate orientation-status" 
+                                                id="orientationStatus${index}" name="" autocomplete="off" ${orientationStatus == "Accomplish" ? "disabled" : isDisabled}>
+                                                ${getOnBoardingStatusOption(orientationStatus)} 
+                                            </select>
+                                            <div class="d-block invalid-feedback" id="invalid-orientationStatus${index}"></div>
+                                        </div>
+                                    
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    ${orientationStatus == "Accomplish" ?  "" : showUpdateBtn}
+                                </div>
+                            </div>
+                        </div>
+                `;
+        });
+        return html;
+    }
+
+
+    $(document).on("click",".btn-onboarding", function(){
+        let argData = {}, thisEvent = $(this), hasProgress = $(this).attr("hasprogress"), progressID = decryptString($(this).attr("progressid"));
+        let applicantID = decryptString($(this).attr("applicantid"));
+        let condition   = validateForm($(this).closest(".orientation-card").attr("id"));
+        if(condition){
+            let data = new FormData;
+            let attr = hasProgress != "false" ? `#${$(this).closest(".orientation-card").attr("id")}` : `.orientation-card`;
+            data.append(`hasProgress`, hasProgress);
+            data.append(`applicantID`, applicantID);
+
+            if(progressID){
+                data.append(`progressionID`, progressID);
+            }
+
+            $(attr).each(function(i){
+                let employeeID          = decryptString($(this).find(".trainee-information").attr("traineeid"));
+                let employeeName        = $(this).find(".trainee-information").val();
+                let applicantID         = getApplicantID;
+                let orientationName     = $(this).find(".orientation-name").text();
+                let orientationStatus   = $(this).find(".orientation-status").val();
+                let orientationDate     = orientationStatus ? $(this).find(".orientation-date").val() : null;
+                
+                data.append(`orientationData[${i}][employeeID]`,         employeeID);
+                data.append(`orientationData[${i}][employeeName]`,       employeeName);
+                data.append(`orientationData[${i}][applicantID]`,        applicantID);
+                data.append(`orientationData[${i}][orientationName]`,    orientationName);
+                data.append(`orientationData[${i}][orientationDate]`,    orientationDate);
+                data.append(`orientationData[${i}][orientationStatus]`,  orientationStatus);
+            });
+
+
+            argData["condition"]   = hasProgress ? "update" : "add";
+            argData["moduleName"]  = "Onboarding";
+            argData["thisEvent"]   = thisEvent;
+            argData["data"]        = data;
+            updateConfirmation(argData,false,true);
+        }
     });
-    return html;
-}
+    
+// END FOR CARD ONBOARDING
 
-function updateApplicantInterviewer(){
 
-}
 
 function getApplicantListFormData(tabType = false, btnEvent = false){
     let formData    = new FormData;
@@ -1567,14 +1991,6 @@ function getApplicantListFormData(tabType = false, btnEvent = false){
             formData.append(`applicantInterviewerData[${i}][personInCharge]`, 		                personInCharge);
             formData.append(`applicantInterviewerData[${i}][applicantInterviewerDateTime]`, 		applicantInterviewerDateTime);
             formData.append(`applicantInterviewerData[${i}][applicantInterviewerStatus]`, 		    applicantInterviewerStatus);
-            // let temp = {
-            //     applicantInterviewerProgression,	
-            //     employeeID                      ,
-            //     personInCharge                  ,
-            //     applicantInterviewerDateTime    ,
-            //     applicantInterviewerStatus      ,
-            // }
-            // data["applicantInterviewerData"].push(temp);
         });
     }else if(tabType){
         let applicantInterviewerID      = btnEvent.attr("tableid");
@@ -1594,7 +2010,7 @@ function getApplicantListFormData(tabType = false, btnEvent = false){
 }
 
 // ----- SWEET ALERT CONFIRMATION -----
-const updateConfirmation = ( argData = false, isUpdate = false) => {
+const updateConfirmation = ( argData = false, isUpdate = false, isOnboarding = false) => {
 
     let {
         condition   = "add",                // add|update|cancel
@@ -1605,7 +2021,7 @@ const updateConfirmation = ( argData = false, isUpdate = false) => {
         data        = false,                 // REQUIRED TO BE OBJECT
     } = argData;
 
-    let url =   !isUpdate ? `applicant_list/applicantInterviewer` : `applicant_list/updateApplicantInterviewer`;
+    let url =   !isOnboarding ? !isUpdate ? `applicant_list/applicantInterviewer` : `applicant_list/updateApplicantInterviewer` : `applicant_list/saveOnBoarding`;
     let returnCardArray,returnCondition;
     let lowerCase 	      = moduleName.toLowerCase();
     let upperCase	      = moduleName.toUpperCase();
@@ -1692,13 +2108,11 @@ const updateConfirmation = ( argData = false, isUpdate = false) => {
 				}).done(function() {
                     let html;
 					if(returnCondition){
-                        // if(thisCard == "application"){  
-                        //     getApplicantInterviewerData = returnCardArray;
-                        //     html = getCardApplication(returnCardArray);
-                        // }else{
-                        //     html = "";
-                        // }
-
+                        if(isOnboarding){
+                            preventRefresh(false);
+                            location.reload();
+                        }
+    
                         if(thisEvent){
                             thisEvent.prop("disabled", false);
                             buttonIcon.removeClass("zmdi zmdi-rotate-right zmdi-hc-spin zmdi-hc-lg").addClass("fas fa-save");
@@ -1712,13 +2126,10 @@ const updateConfirmation = ( argData = false, isUpdate = false) => {
                         $("#tableApplication").find(".validated").each(function(){
                             $(this).removeClass("is-valid");
                         });
-                        
-                        setTimeout(() => {
-                            // updateAttr();
-                            // initDataTables();
-                            // initAll();
-                        }, 500);   
                     }  
+
+                    
+                    
 				});
                 Swal.fire({
                     icon:  'success',

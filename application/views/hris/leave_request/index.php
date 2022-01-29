@@ -1,4 +1,12 @@
 
+<style>
+    .select2-selection--multiple{
+        min-height: 123px!important;
+    }
+    .select2-selection__rendered{
+        width: unset !important;
+    }
+</style>
 <div class="body_area after_bg">
     <div class="block-header pb-0">
         <div class="container" id="headerContainer">

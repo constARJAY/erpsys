@@ -26,7 +26,7 @@ $(document).ready(function(){
             lengthMenu: [ 50, 75, 100, 150],
             columnDefs: [
                 { targets: 0, width: 100 },
-                { targets: 1, width: 150 },
+                { targets: 1, width: 200 },
                 { targets: 2, width: 250 },
                 { targets: 3, width: 150 },
                 { targets: 4, width: 150 },
@@ -56,28 +56,15 @@ $(document).ready(function(){
             dataType: 'json',
             data:     {tableName: "ims_inventory_asset_tbl as asset INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID)",
                         columnName: `
-                                    asset.assetID,
-                                    asset.assetName,
-                                    asset.assetCode,
-                                    asset.unitOfMeasurementID,
-                                    asset.brandName,
+                                    asset.*,
                                     category.categoryName,
-                                    classification.classificationName,
-                                    asset.assetDescription,
-                                    asset.reOrderLevel,
-                                    asset.assetCost,
-                                    asset.assetSalvageValue,
-                                    asset.assetHourRate,
-                                    asset.assetUsefulLife,
-                                    asset.acquisitionDate,
-                                    asset.assetStatus`,
+                                    classification.classificationName`,
                         tableWhere: "categoryStatus=1"},
             beforeSend: function() {
                 $("#table_content").html(preloader);
                 // $("#inv_headerID").text("List of Inventory Item");
             },
             success: function(data) {
-                console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover nowrap" id="tableInventoryItem">
                     <thead style="white-space:nowrap">
@@ -109,24 +96,20 @@ $(document).ready(function(){
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                    
-                    if(asset.assetStatus == 1){
-                       var status=`<span class="badge badge-outline-success w-100">Active</span>`;
-                    }   
-                    if(asset.assetStatus == 0){
-                       var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
-                    }
+                    let status = asset.assetStatus == 1 ? `<span class="badge badge-outline-success w-100">Active</span>` : `<span class="badge badge-outline-danger w-100">Inactive</span>`;
+                    let image = asset.assetImage || "noimage.jpg";
                     var unitOfMeasurementValue =  asset.unitOfMeasurementID; 
                     html += `
-                    <tr
-                    class="btnEdit" 
-                    id="${asset.assetID}"
-                    feedback="${asset.assetName}">
+                    <tr class="btnEdit"  id="${asset.assetID}" feedback="${asset.assetName}">
                         <td>${asset.assetCode}</td>
                         <td>
-                            <div>
-                                ${asset.assetName}
+                            <div class="d-flex justify-content-start align-items-center">
+                                <img src="${base_url}assets/upload-files/inventory-asset/${image}" alt="Item Image" title="${asset.assetName}" class="rounded rounded-circle" style="width: 50px; height: 50px">
+                                <div class="ml-2">
+                                    <div>${asset.assetName}</div>
+                                    <small style="color:#848482;">${asset.brandName}</small>
+                                </div>
                             </div>
-                            <small style="color:#848482;">${asset.brandName}</small>
                            
                         </td>
                         <td>${asset.classificationName}</td>
@@ -895,7 +878,7 @@ $(document).ready(function(){
     $(document).on("change","#input_classificationID",function(){
         let thisValue   =   $(this).val();
         categoryContent("add", thisValue);
-        initAll();
+        // initSelect2();
     });
 
 

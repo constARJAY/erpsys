@@ -50,18 +50,9 @@ $(document).ready(function(){
             async:    false,
             dataType: 'json',
             data:     {tableName: "ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID)",
-                        columnName: `
-                                    item.itemID,
-                                    item.itemName,
-                                    item.itemCode,
-                                    item.unitOfMeasurementID,
-                                    item.brandName,
+                        columnName: `item.*,
                                     category.categoryName,
-                                    classification.classificationName,
-                                    item.itemSize,
-                                    item.itemDescription,
-                                    item.reOrderLevel,
-                                    item.itemStatus`,
+                                    classification.classificationName`,
                         tableWhere: "categoryStatus=1"},
             beforeSend: function() {
                 $("#table_content").html(preloader);
@@ -85,40 +76,52 @@ $(document).ready(function(){
                     <tbody>`;
 
                 data.map((item, index, array) => {
-                    // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
+
+                    let {
+                        itemID,
+                        itemCode,
+                        itemName,
+                        brandName,
+                        classificationID,
+                        categoryID,
+                        itemSize,
+                        unitOfMeasurementID,
+                        basePrice,
+                        reOrderLevel,
+                        vatType,
+                        itemDescription,
+                        itemImage,
+                        itemStatus,
+                        categoryName,
+                        classificationName,
+                    } = item;
+
                     let unique = {
-                        id:       item.itemID, // Required
-                        itemName: item.itemName,
-                        // email:    item.email,
+                        id:       itemID, 
+                        itemName: itemName,
                     }
                     uniqueData.push(unique);
-                    // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                    
-                    if(item.itemStatus == 1){
-                       var status=`<span class="badge badge-outline-success w-100">Active</span>`;
-                    }   
-                    if(item.itemStatus == 0){
-                       var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
-                    }
-                    var unitOfMeasurementValue =  item.unitOfMeasurementID; 
+                    let status = itemStatus == 1 ? `<span class="badge badge-outline-success w-100">Active</span>` : `<span class="badge badge-outline-danger w-100">Inactive</span>`;
+                    let image = itemImage || "noimage.jpg";
+    
                     html += `
-                    <tr
-                    class="btnEdit" 
-                    id="${item.itemID}"
-                    feedback="${item.itemName}">
-                        <td>${item.itemCode}</td>
+                    <tr class="btnEdit" id="${itemID}" feedback="${itemName}">
+                        <td>${itemCode}</td>
                         <td>
-                            <div>
-                                ${item.itemName}
+                            <div class="d-flex justify-content-start align-items-center">
+                                <img src="${base_url}assets/upload-files/inventory-items/${image}" alt="Item Image" title="${itemName}" class="rounded rounded-circle" style="width: 50px; height: 50px">
+                                <div class="ml-2">
+                                    <div>${itemName}</div>
+                                    <small style="color:#848482;">${brandName}</small>
+                                </div>
                             </div>
-                            <small style="color:#848482;">${item.brandName}</small>
-                           
                         </td>
-                        <td>${item.classificationName}</td>
-                        <td>${item.categoryName}</td>
-                        <td>${unitOfMeasurementValue.charAt(0).toUpperCase() + unitOfMeasurementValue.slice(1)}</td>
-                        <td style="white-space: normal;">${item.itemDescription}</td>
-                        <td>${item.reOrderLevel}</td>
+                        <td>${classificationName}</td>
+                        <td>${categoryName}</td>
+                        <td>${unitOfMeasurementID.charAt(0).toUpperCase() + unitOfMeasurementID.slice(1)}</td>
+                        <td style="white-space: normal;">${itemDescription}</td>
+                        <td>${reOrderLevel}</td>
                         <td class="text-center">${status}</td>
                     </tr>`;
                 })

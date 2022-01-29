@@ -100,7 +100,7 @@ $(document).ready(function () {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					const isAllowed = isCreateAllowed(46);
+					const isAllowed = isCreateAllowed(123);
 					pageContent(isAllowed);
 				}
 			}
@@ -155,11 +155,11 @@ $(document).ready(function () {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 300 },
-					{ targets: 4,  width: 130  },
-					{ targets: 5,  width: 90 },
+					{ targets: 4,  width: 130 },
+					{ targets: 5,  width: 90  },
                     { targets: 6,  width: 150 },
-                    { targets: 7,  width: 240 },
-                    { targets: 8,  width: 80 },
+                    { targets: 7,  width: 300 },
+                    { targets: 8,  width: 80  },
                     { targets: 9,  width: 200 },
 				],
 			});
@@ -180,11 +180,11 @@ $(document).ready(function () {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 300 },
-					{ targets: 4,  width: 130  },
+					{ targets: 4,  width: 130 },
 					{ targets: 5,  width: 90  },
                     { targets: 6,  width: 150 },
-                    { targets: 7,  width: 240 },
-                    { targets: 8,  width: 80 },
+                    { targets: 7,  width: 300 },
+                    { targets: 8,  width: 80  },
                     { targets: 9,  width: 200 },
 				],
 			});
@@ -653,6 +653,8 @@ $(document).ready(function () {
 		// /let disabled
 		//let button = formButtons(data);
 
+		let src = `${base_url}assets/upload-files/training-development-setup/${trainingDevelopmentModuleFile}`;
+
 		let html = `
         <div class="row px-2">
 			${documentReviseNo}
@@ -844,7 +846,7 @@ $(document).ready(function () {
 				<div class="form-group">
 					<label>Training module</label>
 					<input class="form-group" type="hidden" id="trainingDevelopmentModuleFile1">
-					<a class="form-control record" style="background : #e9ecef;" id="trainingDevelopmentModuleFile" name="trainingDevelopmentModuleFile" target="_blank">${trainingDevelopmentModuleFile}</a>
+					<a class="form-control record" style="background : #e9ecef;" href="${trainingDevelopmentModuleFile ? src : "#"}" id="trainingDevelopmentModuleFile" name="trainingDevelopmentModuleFile" target="_blank">${trainingDevelopmentModuleFile}</a>
 				</div>
 			   </div>
 			   <div class="col-md-4 col-sm-12">
@@ -891,9 +893,7 @@ $(document).ready(function () {
 			let start = dateFrom || new Date;
             let end   = dateTo   || new Date;
             dateRangePicker(start, end); 
-			
-			//$("#trainingDevelopmentModuleDate").data("daterangepicker").minDate = moment();
-			//data ? initInputmaskTime(false) : initInputmaskTime();
+
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
 				$("#page_content").find(`input, select, textarea`).each(function() {
@@ -905,8 +905,7 @@ $(document).ready(function () {
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
-
-			return html;
+			
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
@@ -950,17 +949,20 @@ $(document).ready(function () {
                     </div>
                 </div>
             </div>`;
-			$("#page_content").html(html);
-
-			headerButton(true, "Add Training and Development");
-			headerTabContent();
-			//forApprovalContent();
-			myFormsContent();
-			updateURL();
+			
+			setTimeout(() => {
+				$("#page_content").html(html);
+				headerButton(true, "Add Training and Development");
+				headerTabContent();
+				myFormsContent();
+				updateURL();
+			}, 100);
 		} else {
-			headerButton(false, "", isRevise, isFromCancelledDocument);
-			headerTabContent(false);
-			formContent(data, readOnly, isRevise, isFromCancelledDocument);
+			setTimeout(() => {
+				headerButton(false, "", isRevise, isFromCancelledDocument);
+				headerTabContent(false);
+				formContent(data, readOnly, isRevise, isFromCancelledDocument);
+			}, 100);
 		}
 	}
 	viewDocument();
@@ -1057,6 +1059,7 @@ $(document).ready(function () {
 
 		if (action && method != "" && feedback != "") {
 			data["tableData[trainingDevelopmentModuleStatus]"] 	= status;
+			data["tableData[trainingDevelopmentModuleFile]"] 	= $(`[name="trainingDevelopmentModuleFile"]`).text()?.trim();
 			data["tableData[dateFrom]"] = $("#dateFilter").attr("dateFrom");
 			data["tableData[dateTo]"] = $("#dateFilter").attr("dateTo");
 			data["tableData[updatedBy]"] 				= sessionID;
@@ -1121,7 +1124,9 @@ $(document).ready(function () {
 
 		if (status != "false" && status != 0) {
 			$("#page_content").html(preloader);
-			pageContent();
+			setTimeout(() => {
+				pageContent();
+			}, 100);
 
 			if (employeeID != sessionID) {
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
@@ -1154,17 +1159,6 @@ $(document).ready(function () {
 	$(document).on("click", ".btnEdit", function () {
 		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
-		// const code = $(this).attr("code");
-
-		// const tableData = getTableData(
-		// 	"hris_training_development_module",
-		// 	"*",
-		// 	"trainingDevelopmentModuleID=" + id,
-		// 	""
-		// );
-
-		// pageContent(true, tableData);
-		// getTrainingSetupContent(tableData);
 	});
 	// ----- END OPEN EDIT MODAL -----
 
@@ -1173,13 +1167,6 @@ $(document).ready(function () {
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
-		// const tableData = getTableData(
-		// 	"hris_training_development_module",
-		// 	"*",
-		// 	"trainingDevelopmentModuleID=" + id,
-		// 	""
-		// );
-		// pageContent(true, tableData, true);
 	});
 	// ----- END VIEW DOCUMENT -----
 

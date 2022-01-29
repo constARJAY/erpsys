@@ -5,21 +5,22 @@ $(document).ready(function () {
 	const employeeData = (id) => {
 		const allEmployeeData = getAllEmployeeData(id);
 		if (id) {
-			let data = allEmployeeData.filter(employee => employee.employeeID == id);
+			let data = allEmployeeData.filter(
+				(employee) => employee.employeeID == id
+			);
 			let { employeeID, fullname, designation, department } = data && data[0];
 			return { employeeID, fullname, designation, department };
 		}
 		return {};
-	}
+	};
 	const employeeFullname = (id) => {
 		if (id != "-") {
 			let data = employeeData(id);
 			return data.fullname || "-";
 		}
 		return "-";
-	}
+	};
 	// ---- END GET EMPLOYEE DATA -----
-
 
 	// ----- DATATABLES -----
 	function initDataTables() {
@@ -35,20 +36,19 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
-				lengthMenu: [ 50, 75, 100, 150],
+				lengthMenu: [50, 75, 100, 150],
 				columnDefs: [
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 200 },
 					{ targets: 2, width: 350 },
 					{ targets: 3, width: 180 },
-					{ targets: 4, width: 80  },
-                    { targets: 5, width: 80  },
+					{ targets: 4, width: 80 },
+					{ targets: 5, width: 80 },
 				],
 			});
 	}
 	initDataTables();
 	// ----- END DATATABLES -----
-
 
 	// ----- TABLE CONTENT -----
 	function tableContent() {
@@ -60,10 +60,11 @@ $(document).ready(function () {
 			method: "POST",
 			async: false,
 			dataType: "json",
-			data: { 
+			data: {
 				tableName: `hris_training_development_setup_tbl AS tdst 
                             LEFT JOIN hris_employee_list_tbl AS elt USING(employeeID)`,
-				columnName: "tdst.*, CONCAT(elt.employeeFirstname, ' ',elt.employeeLastname) AS fullname"
+				columnName:
+					"tdst.*, CONCAT(elt.employeeFirstname, ' ',elt.employeeLastname) AS fullname",
 			},
 			beforeSend: function () {
 				$("#table_content").html(preloader);
@@ -86,18 +87,18 @@ $(document).ready(function () {
 				data.map((item, index, array) => {
 					// ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 					let unique = {
-						id:                           item.trainingDevelopmentSetupID, // Required
+						id: item.trainingDevelopmentSetupID, // Required
 						trainingDevelopmentSetupName: item.trainingDevelopmentSetupName,
 					};
 					uniqueData.push(unique);
 					// ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
-					if(item.trainingDevelopmentSetupStatus == 1){
-                        var status=`<span class="badge badge-outline-success w-100">Active</span>`;
-                     }   
-                     if(item.trainingDevelopmentSetupStatus == 0){
-                        var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
-                     }
+					if (item.trainingDevelopmentSetupStatus == 1) {
+						var status = `<span class="badge badge-outline-success w-100">Active</span>`;
+					}
+					if (item.trainingDevelopmentSetupStatus == 0) {
+						var status = `<span class="badge badge-outline-danger w-100">Inactive</span>`;
+					}
 
 					html += `
                     <tr class="btnEdit" id="${item.trainingDevelopmentSetupID}">
@@ -129,29 +130,35 @@ $(document).ready(function () {
 	tableContent();
 	// ----- END TABLE CONTENT -----
 
-
 	// ----- PROJECT CATEGORY -----
-	const employeeFile = getTableData("hris_employee_list_tbl", "employeeID, CONCAT(employeeFirstname,' ',employeeLastname) AS Fullname", "employeeStatus = 1");
+	const employeeFile = getTableData(
+		"hris_employee_list_tbl",
+		"employeeID, CONCAT(employeeFirstname,' ',employeeLastname) AS Fullname",
+		"employeeStatus = 1"
+	);
 	function employeeList(id = null) {
-		return employeeFile.map(employee => {
-			let { employeeID, Fullname} = employee;
-			return `<option value="${employeeID}" ${employeeID == id ? "selected" : ""}>${Fullname}</option>`;
-		}).join("");
+		return employeeFile
+			.map((employee) => {
+				let { employeeID, Fullname } = employee;
+				return `<option value="${employeeID}" ${
+					employeeID == id ? "selected" : ""
+				}>${Fullname}</option>`;
+			})
+			.join("");
 	}
 	// ----- END PROJECT CATEGORY -----
-
 
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false) {
 		let {
-			trainingDevelopmentSetupID                       = "",
-			trainingDevelopmentSetupName                     = "",
-			trainingDevelopmentSetupTopic                    = "",
-            trainingDevelopmentSetupType                     = "",
-            trainingDevelopmentSetupModuleFile               = "",
-            trainingDevelopmentSetupDifficulty               = "",    
-			trainingDevelopmentSetupStatus                   = 1,
-			employeeID                                       = null
+			trainingDevelopmentSetupID = "",
+			trainingDevelopmentSetupName = "",
+			trainingDevelopmentSetupTopic = "",
+			trainingDevelopmentSetupType = "",
+			trainingDevelopmentSetupModuleFile = "",
+			trainingDevelopmentSetupDifficulty = "",
+			trainingDevelopmentSetupStatus = 1,
+			employeeID = null,
 		} = data && data[0];
 
 		let button = trainingDevelopmentSetupID
@@ -168,7 +175,43 @@ $(document).ready(function () {
 		let html = `
             <div class="modal-body">
                 <div class="row">
-					<div class="col-sm-6">
+					<div class="col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Training Name <code>*</code></label>
+							<input type="text"
+								class="form-control validate"
+								name="trainingDevelopmentSetupName"
+								id="trainingDevelopmentSetupName"
+								data-allowcharacters="[a-z][A-Z][0-9][.][,][ ][-][(][)]['][/]"
+								minlength="2"
+								maxlength="76"
+								required
+								value="${trainingDevelopmentSetupName}"
+                                unique="${trainingDevelopmentSetupID}"
+                                title="Training Name">
+							<div class="d-block invalid-feedback" id="invalid-trainingDevelopmentSetupName"></div>
+						</div>
+					</div>
+					<div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Topic <code>*</code></label>
+                            <textarea 
+                                type="text" 
+                                class="form-control validate" 
+                                name="trainingDevelopmentSetupTopic" 
+                                id="trainingDevelopmentSetupTopic" 
+                                data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][-][()]['][/]" 
+                                minlength="2" 
+                                maxlength="100" 
+                                rows="4"
+                                style="resize: none"
+								required
+                                autocomplete="off">${trainingDevelopmentSetupTopic}</textarea>
+                            <div class="invalid-feedback d-block" id="invalid-projectListDescription"></div>
+                        </div>
+                    </div>
+
+					<!-- <div class="col-sm-6">
                         <div class="form-group">
                             <label>Training Name <code>*</code></label>
                             <input 
@@ -182,7 +225,7 @@ $(document).ready(function () {
                                 required 
                                 value="${trainingDevelopmentSetupName}"
                                 unique="${trainingDevelopmentSetupID}"
-                                title="Project Name"
+                                title="Training Name"
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-trainingDevelopmentSetupName"></div>
                         </div>
@@ -204,36 +247,51 @@ $(document).ready(function () {
                                 autocomplete="off">${trainingDevelopmentSetupTopic}</textarea>
                             <div class="invalid-feedback d-block" id="invalid-projectListDescription"></div>
                         </div>
-                    </div>
+                    </div> -->
+
 					<div class="col-sm-6">
 						<div class="form-group">
-						<label>Type of Training <code>*</code></label>
+							<label>Type of Training <code>*</code></label>
 							<select class="form-control select2 validate"
-							name="trainingDevelopmentSetupType" 
-							id="trainingDevelopmentSetupType">
-								<option value="Internal" ${data && trainingDevelopmentSetupType == "Internal" && "selected"}>Internal</option>
-								<option value="External" ${data && trainingDevelopmentSetupType == "External" && "selected"}>External</option>
+								name="trainingDevelopmentSetupType" 
+								id="trainingDevelopmentSetupType">
+									<option value="Internal" ${
+										data &&
+										trainingDevelopmentSetupType == "Internal" &&
+										"selected"
+									}>Internal</option>
+									<option value="External" ${
+										data &&
+										trainingDevelopmentSetupType == "External" &&
+										"selected"
+									}>External</option>
 							</select>
+							<div class="invalid-feedback d-block" id="invalid-trainingDevelopmentSetupType"></div>
 						</div>
 				  	</div>
-					  <div class="col-md-6">
-					  <div class="form-group">
-						  <label>Training Module </label>
-						  
-						  <input 
-							  type="file" 
-							  class="form-control file" 
-							  name="trainingDevelopmentSetupModuleFile|training-development-setup" 
-							  id="trainingDevelopmentSetupModuleFile"
-							  accept=".xlsx,.xls,.doc, .docx,.ppt, .pptx,.txt,.pdf"
-							  file="${trainingDevelopmentSetupModuleFile}"
-							  autocomplete="off">
-								<div class="displayfile" id="displaytrainingDevelopmentSetupModuleFile">
-									${trainingDevelopmentSetupModuleFile ? getFileDisplay(trainingDevelopmentSetupModuleFile) : ""}
-								</div>
-								<div class="invalid-feedback d-block" id="invalid-files"></div>
-					  </div>
-				  </div>
+
+					<div class="col-md-6">
+						<div class="form-group">
+							<label>Training Module </label>
+							<input 
+								type="file" 
+								class="form-control file" 
+								name="trainingDevelopmentSetupModuleFile|training-development-setup" 
+								id="trainingDevelopmentSetupModuleFile"
+								accept=".xlsx,.xls,.doc, .docx,.ppt, .pptx,.txt,.pdf"
+								file="${trainingDevelopmentSetupModuleFile}"
+								autocomplete="off">
+							<div class="displayfile" id="displaytrainingDevelopmentSetupModuleFile">
+								${
+									trainingDevelopmentSetupModuleFile
+										? getFileDisplay(trainingDevelopmentSetupModuleFile)
+										: ""
+								}
+							</div>
+							<div class="invalid-feedback d-block" id="invalid-files"></div>
+						</div>
+					</div>
+
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label>Speaker Name <code>*</code></label>
@@ -247,19 +305,33 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-employeeID"></div>
                         </div>
                     </div>
+
 					<div class="col-sm-6">
 						<div class="form-group">
-						<label>Difficulty <code>*</code></label>
+							<label>Difficulty <code>*</code></label>
 							<select class="form-control select2 validate"
-							name="trainingDevelopmentSetupDifficulty" 
-							id="trainingDevelopmentSetupDifficulty">
-								<option value="Beginner" ${data && trainingDevelopmentSetupDifficulty == "Beginner" && "selected"}>Beginner</option>
-								<option value="Intermediate" ${data && trainingDevelopmentSetupDifficulty == "Intermediate" && "selected"}>Intermediate</option>
-								<option value="Difficult" ${data && trainingDevelopmentSetupDifficulty == "Difficult" && "selected"}>Difficult</option>
+								name="trainingDevelopmentSetupDifficulty" 
+								id="trainingDevelopmentSetupDifficulty">
+									<option value="Beginner" ${
+										data &&
+										trainingDevelopmentSetupDifficulty == "Beginner" &&
+										"selected"
+									}>Beginner</option>
+									<option value="Intermediate" ${
+										data &&
+										trainingDevelopmentSetupDifficulty == "Intermediate" &&
+										"selected"
+									}>Intermediate</option>
+									<option value="Difficult" ${
+										data &&
+										trainingDevelopmentSetupDifficulty == "Difficult" &&
+										"selected"
+									}>Difficult</option>
 							</select>
 							<div class="invalid-feedback d-block" id="invalid-trainingDevelopmentSetupDifficulty"></div>
 						</div>
 				  	</div>
+
 					<div class="col-sm-6">
                         <div class="form-group">
                             <label>Status</label>
@@ -268,12 +340,19 @@ $(document).ready(function () {
 								id="trainingDevelopmentSetupStatus" 
 								trainingDevelopmentSetupID="${trainingDevelopmentSetupID}"
 								autocomplete="off">
-                                <option value="1" ${trainingDevelopmentSetupStatus == 1 && "selected"}>Active</option>   
-                                <option value="0" ${trainingDevelopmentSetupStatus == 0 && "selected"}>Inactive</option>
+                                <option value="1" ${
+																	trainingDevelopmentSetupStatus == 1 &&
+																	"selected"
+																}>Active</option>   
+                                <option value="0" ${
+																	trainingDevelopmentSetupStatus == 0 &&
+																	"selected"
+																}>Inactive</option>
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-trainingDevelopmentSetupStatus"></div>
                         </div>
                     </div>
+
                 </div>
             </div>
             <div class="modal-footer">
@@ -284,9 +363,10 @@ $(document).ready(function () {
 	}
 	// ----- END MODAL CONTENT -----
 
-	 // ----- CHOOSE FILE -----
-	 function getFileDisplay(filename = null, link = true) {
-        let text = link ? `
+	// ----- CHOOSE FILE -----
+	function getFileDisplay(filename = null, link = true) {
+		let text = link
+			? `
         <a class="filename" title="${filename}" style="display: block;
 			font-size: 12px; border: 1px solid black; border-radius: 5px; background: #d1ffe0; padding: 2px 10px;
             width: 100%;
@@ -295,7 +375,8 @@ $(document).ready(function () {
 			color:black;
             text-overflow: ellipsis;" href="${base_url}assets/upload-files/training-development-setup/${filename}" target="_blank">
             ${filename}
-        </a>` : `
+        </a>`
+			: `
         <span class="filename" title="${filename}" style="display: block;
             width: 100%;
             overflow: hidden;
@@ -308,68 +389,89 @@ $(document).ready(function () {
             ${filename}
         </span>`;
 
-        let html = `
+		let html = `
         <div class="d-flex justify-content-start align-items-center p-0">
             
             ${text}
         </div>`;
 
-        return html;
-    }
-
-	function fileValidation(){
-		var path     	= document.getElementById('trainingDevelopmentSetupModuleFile').value.toLowerCase();
-		var splitPath 	= path.split(".");
-		var fileName 	= splitPath.pop();
-		
-		if(fileName == 'xlsx' || fileName == 'xls' || fileName == 'pptx' || fileName == 'pdf' || fileName == 'docs' || fileName == 'jpg' || fileName == 'png'){
-			$("#trainingDevelopmentSetupModuleFile").removeClass("is-invalid");
-			$("#invalid-files").text("");
-			return true;
-		}else{
-			//showNotification("danger", "Pleased upload excel, powerpoint, docs and pdf");
-			setTimeout(() => {
-				$("#trainingDevelopmentSetupModuleFile").addClass("is-invalid");
-				$("#invalid-files").text("Invalid file extension.");
-			}, 500);
-			return false;
-			
-		}		
+		return html;
 	}
 
-	$(document).on("change", `[type="file"]`, function() {
-		fileValidation();
-        $parent = $(this).closest(".form-group");
-		
-			if (this.files && this.files[0]) {
-				const filesize = this.files[0].size/1024/1024; // Size in MB
-				const filetype = this.files[0].type;
-				const filename = this.files[0].name;
-				if (filesize > 10) {
-					$(this).val("");
-					showNotification("danger", "File size must be less than or equal to 10mb");
-				} else {
-					
-					$parent.find(`[type="file"]`).attr("file", filename);
-					$parent.find(".displayfile").html(getFileDisplay(filename, false));
-				}
-			}
-		
-    })
-    // ----- END CHOOSE FILE -----
-	// ----- REMOVE FILE -----
-    $(document).on("click", `.btnRemoveFile`, function() {
-        $parent = $(this).closest(".form-group");
+	function fileValidation() {
+		// var path = document
+		// 	.getElementById("trainingDevelopmentSetupModuleFile")
+		// 	.value.toLowerCase();
+		// var splitPath = path.split(".");
+		// var fileName = splitPath.pop();
 
-        $parent.find(`[type="file"]`).val("");
-        $parent.find(`[type="file"]`).removeAttr("file");
-        $parent.find(".displayfile").children().remove();
-    })
-    // ----- END REMOVE FILE -----
+		// if (
+		// 	fileName == "xlsx" ||
+		// 	fileName == "xls" ||
+		// 	fileName == "pptx" ||
+		// 	fileName == "pdf" ||
+		// 	fileName == "docs" ||
+		// 	fileName == "jpg" ||
+		// 	fileName == "png"
+		// ) {
+		// 	$("#trainingDevelopmentSetupModuleFile")
+		// 		.removeClass("is-valid")
+		// 		.removeClass("is-invalid");
+		// 	$("#invalid-files").text("");
+		// 	return true;
+		// } else {
+		// 	$("#trainingDevelopmentSetupModuleFile")
+		// 		.removeClass("is-valid")
+		// 		.addClass("is-invalid");
+		// 	$("#invalid-files").text("Invalid file extension.");
+		// 	return false;
+		// }
+	}
+
+	$(document).on("change", `[type="file"]`, function () {
+		// fileValidation();
+		$parent = $(this).closest(".form-group");
+
+		if (this.files && this.files[0]) {
+			const filesize = this.files[0].size / 1024 / 1024; // Size in MB
+			const filename = this.files[0].name;
+			let filetype = filename.split(".");
+				filetype = filetype[filetype.length - 1];
+			if (filesize > 10) {
+				$(this).val("");
+				showNotification(
+					"danger",
+					"File size must be less than or equal to 10mb"
+				);
+			} else if (!["xlsx", "xls", "pptx", "pdf" , "docs", "jpg" , "png"].includes(filetype)) {
+				$(this).val("");
+				showNotification(
+					"danger",
+					"Invalid file extension."
+				);
+			} else {
+				$parent.find(`[type="file"]`).attr("file", filename);
+				$parent.find(".displayfile").html(getFileDisplay(filename, false));
+			}
+		}
+	});
+	// ----- END CHOOSE FILE -----
+
+	// ----- REMOVE FILE -----
+	$(document).on("click", `.btnRemoveFile`, function () {
+		$parent = $(this).closest(".form-group");
+
+		$parent.find(`[type="file"]`).val("");
+		$parent.find(`[type="file"]`).removeAttr("file");
+		$parent.find(".displayfile").children().remove();
+	});
+	// ----- END REMOVE FILE -----
 
 	// ----- OPEN ADD MODAL -----
 	$(document).on("click", "#btnAdd", function () {
-		$("#modal_training_development_setup .page-title").text("ADD TRAINING AND DEVELOPMENT");
+		$("#modal_training_development_setup .page-title").text(
+			"ADD TRAINING AND DEVELOPMENT"
+		);
 		$("#modal_training_development_setup").modal("show");
 		$("#modal_training_development_setup_content").html(preloader);
 		const content = modalContent();
@@ -378,45 +480,51 @@ $(document).ready(function () {
 	});
 	// ----- END OPEN ADD MODAL -----
 
-
 	// ----- SAVE MODAL -----
 	$(document).on("click", "#btnSave", function () {
-		const filevalidate  = fileValidation();
 		const validate = validateForm("modal_training_development_setup");
-		if (validate && filevalidate) {
-			//alert(sessionID);
+		if (validate) {
 			let data = getFormData("modal_training_development_setup");
-            data.append(`tableData[trainingDevelopmentSetupCode]`, generateCode("TRC", false, "hris_training_development_setup_tbl", "trainingDevelopmentSetupCode"));
-            data.append(`tableData[createdBy]`, sessionID);
-            data.append(`tableName`, `hris_training_development_setup_tbl`);
-            data.append(`feedback`, $("[name=trainingDevelopmentSetupName]").val()?.trim());
-			const trainingDevelopmentSetupModuleFile = $("#trainingDevelopmentSetupModuleFile").attr("file");
-			!trainingDevelopmentSetupModuleFile && data.append(`tableData[trainingDevelopmentSetupModuleFile]`, "");
+			data.append(
+				`tableData[trainingDevelopmentSetupCode]`,
+				generateCode(
+					"TRC",
+					false,
+					"hris_training_development_setup_tbl",
+					"trainingDevelopmentSetupCode"
+				)
+			);
+			data.append(`tableData[createdBy]`, sessionID);
+			data.append(`tableName`, `hris_training_development_setup_tbl`);
+			data.append(
+				`feedback`,
+				$("[name=trainingDevelopmentSetupName]").val()?.trim()
+			);
+			const trainingDevelopmentSetupModuleFile = $(
+				"#trainingDevelopmentSetupModuleFile"
+			).attr("file");
+			!trainingDevelopmentSetupModuleFile &&
+				data.append(`tableData[trainingDevelopmentSetupModuleFile]`, "");
 
-			sweetAlertConfirmation("add", "Training and Development", "modal_training_development_setup", null, data, false, tableContent);
-			// sweetAlertConfirmation(
-			// 	"add", "Training and Development", "modal_training_development_setup", null, data, true, tableContent
-			// );
-			// let data = getFormData("modal_training_development_setup", true);
-			// data["tableData[trainingDevelopmentSetupCode]"] = generateCode("TRC", false, "hris_training_development_setup_tbl", "trainingDevelopmentSetupCode");
-			// data["tableData[createdBy]"] = sessionID;
-			// data["tableName"] = "hris_training_development_setup_tbl";
-			// data["feedback"] = $("[name=trainingDevelopmentSetupName]").val();
-
-			// const trainingDevelopmentSetupModuleFile = $("#trainingDevelopmentSetupModuleFile").attr("file");
-			// !trainingDevelopmentSetupModuleFile && data["tableData[trainingDevelopmentSetupModuleFile]"], "";
-			// sweetAlertConfirmation(
-			// 	"add", "Training and Development", "modal_training_development_setup", null, data, true, tableContent
-			// );
+			sweetAlertConfirmation(
+				"add",
+				"Training and Development",
+				"modal_training_development_setup",
+				null,
+				data,
+				false,
+				tableContent
+			);
 		}
 	});
 	// ----- END SAVE MODAL -----
 
-
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
 		const id = $(this).attr("id");
-		$("#modal_training_development_setup .page-title").text("EDIT TRAINING AND DEVELOPMENT");
+		$("#modal_training_development_setup .page-title").text(
+			"EDIT TRAINING AND DEVELOPMENT"
+		);
 		$("#modal_training_development_setup").modal("show");
 		$("#modal_training_development_setup_content").html(preloader);
 
@@ -432,9 +540,11 @@ $(document).ready(function () {
 				initAll();
 
 				if (!allowedUpdate) {
-					$("#modal_training_development_setup_content").find("input, select, textarea").each(function() {
-						$(this).attr("disabled", true);
-					})
+					$("#modal_training_development_setup_content")
+						.find("input, select, textarea")
+						.each(function () {
+							$(this).attr("disabled", true);
+						});
 					$("code").hide();
 					$("#btnUpdate").hide();
 				}
@@ -443,20 +553,25 @@ $(document).ready(function () {
 	});
 	// ----- END OPEN EDIT MODAL -----
 
-
 	// ----- UPDATE MODAL -----
 	$(document).on("click", "#btnUpdate", function () {
 		const id = $(this).attr("trainingDevelopmentSetupID");
 		const validate = validateForm("modal_training_development_setup");
 		if (validate) {
 			let data = getFormData("modal_training_development_setup");
-            data.append(`tableData[updatedBy]`, sessionID);
-            data.append(`tableName`, `hris_training_development_setup_tbl`);
-            data.append(`whereFilter`, `trainingDevelopmentSetupID=${id}`);
-            data.append(`feedback`, $("[name=trainingDevelopmentSetupName]").val()?.trim());
+			data.append(`tableData[updatedBy]`, sessionID);
+			data.append(`tableName`, `hris_training_development_setup_tbl`);
+			data.append(`whereFilter`, `trainingDevelopmentSetupID=${id}`);
+			data.append(
+				`feedback`,
+				$("[name=trainingDevelopmentSetupName]").val()?.trim()
+			);
 
-            const trainingDevelopmentSetupModuleFile = $("#trainingDevelopmentSetupModuleFile").attr("file");
-            !trainingDevelopmentSetupModuleFile && data.append(`tableData[trainingDevelopmentSetupModuleFile]`, "");
+			const trainingDevelopmentSetupModuleFile = $(
+				"#trainingDevelopmentSetupModuleFile"
+			).attr("file");
+			!trainingDevelopmentSetupModuleFile &&
+				data.append(`tableData[trainingDevelopmentSetupModuleFile]`, "");
 			sweetAlertConfirmation(
 				"update",
 				"Training and Development",
@@ -485,42 +600,57 @@ $(document).ready(function () {
 	});
 	// ----- END UPDATE MODAL -----
 
-
 	// ------- CANCEL MODAL--------
 	$(document).on("click", ".btnCancel", function () {
 		let formEmpty = isFormEmpty("modal_training_development_setup");
 		if (!formEmpty) {
-			sweetAlertConfirmation("cancel", "Project", "modal_training_development_setup");
+			sweetAlertConfirmation(
+				"cancel",
+				"Project",
+				"modal_training_development_setup"
+			);
 		} else {
 			$("#modal_training_development_setup").modal("hide");
 		}
 	});
 	// -------- END CANCEL MODAL-----------
 
-
 	// ----- CHANGE STATUS -----
-	$(document).on("change", "#projectListStatus", function() {
-		const status    = $(this).val();
+	$(document).on("change", "#projectListStatus", function () {
+		const status = $(this).val();
 		const projectID = $(this).attr("trainingDevelopmentSetupID");
 		if (projectID) {
 			if (status == "0") {
-				const usedData = getTableData(`pms_timeline_builder_tbl`, `projectID`, `projectID = ${projectID} AND timelineBuilderStatus <> 0 AND timelineBuilderStatus <> 4`);
+				const usedData = getTableData(
+					`pms_timeline_builder_tbl`,
+					`projectID`,
+					`projectID = ${projectID} AND timelineBuilderStatus <> 0 AND timelineBuilderStatus <> 4`
+				);
 				if (usedData && usedData.length > 0) {
 					setTimeout(() => {
-						$(this).closest(".form-group").find(".selection").removeClass("no-error is-valid").addClass("has-error is-invalid");
-						$("#invalid-projectListStatus").text('This record is currently in use!');
+						$(this)
+							.closest(".form-group")
+							.find(".selection")
+							.removeClass("no-error is-valid")
+							.addClass("has-error is-invalid");
+						$("#invalid-projectListStatus").text(
+							"This record is currently in use!"
+						);
 						document.getElementById("btnUpdate").disabled = true;
 					}, 0);
 				}
 			} else {
 				setTimeout(() => {
-					$(this).closest(".form-group").find(".selection").removeClass("has-error is-invalid").addClass("no-error is-valid");
-					$("#invalid-projectListStatus").text('');
+					$(this)
+						.closest(".form-group")
+						.find(".selection")
+						.removeClass("has-error is-invalid")
+						.addClass("no-error is-valid");
+					$("#invalid-projectListStatus").text("");
 					document.getElementById("btnUpdate").disabled = false;
 				}, 0);
 			}
-
 		}
-	})
+	});
 	// ----- END CHANGE STATUS -----
 });

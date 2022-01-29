@@ -288,7 +288,7 @@ $(document).ready(function() {
             employeeHourlyRate,
             employeeStatus,
             hris_employee_list_tbl.createdAt AS createdAt`,
-            `scheduleID <> 0 AND employeeID <> 1`
+            `isNonOrganic = 0 AND employeeID <> 1`
         );
 
 		let html = `
@@ -411,7 +411,7 @@ $(document).ready(function() {
             designationName,
             employeeStatus,
             hris_employee_list_tbl.createdAt AS createdAt`,
-            `scheduleID = 0 AND employeeID <> 0`
+            `isNonOrganic = 1 AND employeeID <> 0`
         );
 
 		let html = `
@@ -2939,6 +2939,7 @@ $(document).ready(function() {
             if (validate) {
                 let data = getFormData("modal_employee_module", true);
                 data[`tableData[employeeProfile]`] = "default.jpg";
+                data[`tableData[isNonOrganic]`]    = 1;
                 data[`tableData[createdAt]`]       = moment().format("YYYY-MM-DD HH:mm:ss");
                 data[`tableData[createdBy]`]       = sessionID;
                 data[`tableData[updatedBy]`]       = sessionID;
@@ -3170,13 +3171,13 @@ $(document).ready(function() {
 
                                 const employeeFirstname = $("[name=employeeFirstname]").val()?.trim();
                                 const employeeLastname  = $("[name=employeeLastname]").val()?.trim();
-                                const employeeID        = insertedID;
+                                const employeeID        = insertedID && insertedID > 1 ? 999999999 : (insertedID - 1);
         
                                 let swalTitle;
                                 if (method == "add") {
-                                    swalTitle = `${getFormCode("EMP", dateCreated, insertedID)} added successfully!`;
+                                    swalTitle = `${getFormCode("EMP", dateCreated, employeeID)} added successfully!`;
                                 } else if (method == "edit") {
-                                    swalTitle = `${getFormCode("EMP", dateCreated, insertedID)} updated successfully!`;
+                                    swalTitle = `${getFormCode("EMP", dateCreated, employeeID)} updated successfully!`;
                                 } 
                 
                                 if (isSuccess == "true") {

@@ -96,12 +96,13 @@ class Leave_request extends CI_Controller {
                     "leaveRequestStatus"    => $leaveRequestStatus,
                     "updatedBy"             => $updatedBy,
                 ];
+                $this->leaverequest->updateEmployeeLeave($leaveRequestID);
             } else if ($method == "deny") {
                 $leaveRequestData = [
                     "approversStatus"        => $approversStatus,
                     "approversDate"          => $approversDate,
                     "leaveRequestStatus"    => 3,
-                    "leaveRequestRemarks" => $leaveRequestRemarks,
+                    "leaveRequestRemarks"   => $leaveRequestRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
             }   else if ($method == "drop") {

@@ -48,8 +48,8 @@ class Applicant_model extends CI_Model {
         }
     }
 
-    public function getTableData($table = null, $where = null, $isRow = false){
-        $sql        = "SELECT * FROM $table WHERE $where";
+    public function getTableData($table = null, $where = null, $isRow = false, $column = "*"){
+        $sql        = "SELECT $column FROM $table WHERE $where";
         $query      = $this->db->query($sql);
         $isArray    = !$isRow ? $query->result_array() : $query->row() ;
         return $query ? $isArray : [];
@@ -116,6 +116,65 @@ class Applicant_model extends CI_Model {
         return $query ? $query->result_array() : [];
     }
 
+    public function saveOnBoarding($applicantID, $data, $progressionID = false){
+        if($progressionID){
+            // print_r($data);
+            // exit;
+            $query = $this->db->update("hris_onboarding_progress_tbl", $data[0], ["onboardingProgressID" => $progressionID] );
+        }else{
+            $query = $this->db->insert_batch("hris_onboarding_progress_tbl", $data);
+            if($query){
+                $this->saveEmployeeData($applicantID);
+            }
+        }
+        return $query ? "true|Success|$applicantID|".date("Y-m-d") : "false|System error: Please contact the system administrator for assistance!";
+    }
+
+    public function saveEmployeeData($applicantID ) {
+        $applicantData      = $this->getTableData("web_applicant_list_tbl AS walt LEFT JOIN hris_designation_tbl AS hdt ON hdt.designationID = walt.applicantDesignationID LEFT JOIN hris_department_tbl AS hdept ON hdept.departmentID = hdt.departmentID",
+                                                    "walt.applicantID = '$applicantID'", false, "walt.*,hdt.departmentID AS departmentID, hdt.designationID AS designationID ");
+        $applicantDataRow   = $applicantData[0];
+        $employeeData       = [
+                                "departmentID"              => $applicantDataRow["departmentID"],
+                                "designationID"             => $applicantDataRow["designationID"],
+                                "employeeProfile"           => $applicantDataRow["applicantProfile"],
+                                "employeeSignature"         => "",
+                                "employeeFirstname"         => $applicantDataRow["applicantFirstname"],
+                                "employeeMiddlename"        => $applicantDataRow["applicantMiddlename"],
+                                "employeeLastname"          => $applicantDataRow["applicantLastname"],
+                                "employeeRanking"           => "",
+                                "employeeRankingCredit"     => "",
+                                "employeeBirthday"          => $applicantDataRow["applicantBirthday"],
+                                "employeeGender"            => $applicantDataRow["applicantGender"],
+                                "employeeCitizenship"       => $applicantDataRow["applicantCitizenship"],
+                                "employeeCivilStatus"       => $applicantDataRow["applicantCivilStatus"],
+                                "employeeHiredDate"         => date("Y-m-d"),
+                                "employeeRegion"            => $applicantDataRow["applicantRegion"],
+                                "employeeProvince"          => $applicantDataRow["applicantProvince"],
+                                "employeeCity"              => $applicantDataRow["applicantCity"],
+                                "employeeBarangay"          => $applicantDataRow["applicantBarangay"],
+                                "employeeUnit"              => $applicantDataRow["applicantUnit"],
+                                "employeeBuilding"          => $applicantDataRow["applicantBuilding"],
+                                "employeeStreet"            => $applicantDataRow["applicantStreet"],
+                                "employeeSubdivision"       => $applicantDataRow["applicantSubdivision"],
+                                "employeeCountry"           => $applicantDataRow["applicantCountry"],
+                                "employeeZipCode"           => $applicantDataRow["applicantZipCode"],
+                                "employeeEmail"             => $applicantDataRow["applicantEmail"],
+                                "employeeMobile"            => $applicantDataRow["applicantMobile"],
+                                "employeeStatus"            => "1",
+                                "employeeTIN"               => $applicantDataRow["applicantTIN"],
+                                "employeeSSS"               => $applicantDataRow["applicantSSS"],
+                                "employeePhilHealth"        => $applicantDataRow["applicantPhilHealth"],
+                                "employeePagibig"           => $applicantDataRow["applicantPagibig"] 
+                            ];
+
+
+        $this->db->insert("hris_employee_list_tbl", $employeeData);
+        $insertID           = $this->db->insert_id();
+        $employeeCode       = "EMP-".date("y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
+        $updateArr          = ["employeeCode"=> $employeeCode ];
+        $this->db->update("hris_employee_list_tbl", $updateArr, ["employeeID" => $insertID]);
+    }
 
 
 

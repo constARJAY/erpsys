@@ -47,11 +47,7 @@ $(document).ready(function () {
 		var defaultPoints = 0;
 		var percent =0;
 	
-		let data = getTableData(`hris_examination_qa_tbl
-		LEFT JOIN hris_examination_setup_tbl USING(examinationID)`,"",`examinationID=${examinationID}`);
-		
-		// console.log(data)
-		// return false;
+		let data = getTableData(`hris_examination_qa_tbl WHERE examinationID=${examinationID}`);
 	
 		data.map((item, index) => {
 		
@@ -60,10 +56,7 @@ $(document).ready(function () {
 			let examAnswer = item.answer || ""; 
 
 			let tmpApplicant = applicantAnswer[index] || "";
-
-			if(tmpApplicant){
-				tmpApplicant =  tmpApplicant.toLowerCase();
-			}
+				tmpApplicant =  tmpApplicant?.toLowerCase();
 	
 			if(examAnswer.toLowerCase() == tmpApplicant || examAnswer == ""){
 				getPoints[index] = item.points;
@@ -85,7 +78,7 @@ $(document).ready(function () {
 	
 		$.ajax({
 			method:      "POST",
-			url:         `Examination_form/saveExam`,
+			url:         `examination_form/saveExam`,
 			data:{ examinationID,
 				applicantID,
 				applicantAnswer,
@@ -810,7 +803,6 @@ $(document).ready(function () {
 			let examinationID = data[0].examinationID
 			let nextLevel = parseFloat(level) + 1;
 			let html='';
-			console.log(data)
 			if (data) {
 				html = `
 				<div class="col-sm-7 col-lg-8 col-xl-9 mb-4">
@@ -900,7 +892,6 @@ $(document).ready(function () {
 		// }
 	
 		$(".item").each(function(){
-			console.log($(this).css("background-color"))
 			if($(this).css("background-color") === "rgba(46, 147, 255, 0.66)"){
 				let id  = $(this).attr("id");
 				$("#"+id).css("background-color","#ffc107a3");

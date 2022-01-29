@@ -10,22 +10,25 @@ $(document).ready(function () {
 			.removeAttr("width")
 			.DataTable({
 				proccessing: false,
-			serverSide: false,
-			scrollX: true,
-			sorting: [],
-			scrollCollapse: true,
-			columnDefs: [
-				{ targets: 0, width: 10 },
-				{ targets: 1, width: 250 },
-				{ targets: 2, width: 100 },
-				{ targets: 3, width: 80 },
-		
-			],
+				serverSide: false,
+				scrollX: true,
+				sorting: [],
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0, width: 10 },
+					{ targets: 1, width: 250 },
+					{ targets: 2, width: 100 },
+					{ targets: 3, width: 80 },
+				],
 			});
 	}
 	// ----- END DATATABLES -----
 
-	const examiantionListData = getTableData("hris_examination_tbl","","examinationStatus =1")
+	const examiantionListData = getTableData(
+		"hris_examination_tbl",
+		"",
+		"examinationStatus =1"
+	);
 
 	// ----- PAGE CONTENT -----
 	function getUserRoleContent(data) {
@@ -73,42 +76,40 @@ $(document).ready(function () {
             </tbody>
         </table>`;
 
-		
 		return html;
 	}
-	
+
 	function getModuleAccessContent(roleID = 1) {
-       
 		let data;
-	
-			data = getTableData(
-				`hris_examination_setup_tbl as hest
+
+		data = getTableData(
+			`hris_examination_setup_tbl as hest
 				LEFT JOIN hris_examination_tbl AS het ON het.examinationID  = hest.examinationID
 				LEFT JOIN hris_designation_tbl as dsg ON dsg.designationID = hest.designationID`,
-				"",
-				"hest.designationID=" + roleID
-			);
-			
-	
-		
+			"",
+			"hest.designationID=" + roleID
+		);
+
 		let html = `
         <div class="col-12 col-lg-8 col-xl-12 text-left">
         <h6 class="bg-primary text-light p-3"><strong>LIST OF EXAMINATIONS</strong></h6>
         <div class="card my-0 p-2 approval-list" style='box-shadow:none;'>`;
-        count = 0;
-		
-		if (data.length > 0) {
-		
-			data.map((item, index) => {
+		count = 0;
 
+		if (data.length > 0) {
+			data.map((item, index) => {
 				html += `
 
                 <div class="row border rounded m-2 py-1">
 				
 					<div class="col-5 col-lg-6 col-xl-9 d-flex justify-content-start align-items-center">
-						<span class="mt-1 mb-1"><h5 class="font-weight-bolder">${item.examinationName}</span></h5> 
+						<span class="mt-1 mb-1"><h5 class="font-weight-bolder">${
+							item.examinationName
+						}</span></h5> 
 						
-						<span class="ml-2">Time Limit: ${item.timeLimit}</span> | <span class="ml-2">Percentage: ${item.percentage} %    
+						<span class="ml-2">Time Limit: ${
+							item.timeLimit
+						}</span> | <span class="ml-2">Percentage: ${item.percentage} %    
 						</span>
 
 					</div>
@@ -116,13 +117,11 @@ $(document).ready(function () {
 						<h5><small class="text-primary"> Part ${index + 1} </small></h5>
 					</div>
 				</div>`;
-
 			});
-            html += ` <div class="py-2 border-top d-flex justify-content-end align-items-end">
+			html += ` <div class="py-2 border-top d-flex justify-content-end align-items-end">
             <button class="btn btn-primary btn-approval-setup" method="update"" designation="${roleID}" designationName="${data[0].designationName}" >Update Examination Setup</button>
         </div>`;
 		} else {
-			
 			html += `
             <div class="text-center" style="height: 500px;">
 			<td>
@@ -138,7 +137,6 @@ $(document).ready(function () {
 				<div class="py-2 border-top d-flex justify-content-end align-items-end">
 					<button class="btn btn-primary btn-approval-setup" method="save" designation="${roleID}" >Add Examination Setup</button>
 				</div>`;
-          
 		}
 
 		html += `
@@ -148,7 +146,11 @@ $(document).ready(function () {
 
 	function pageContent() {
 		$("#roles_permission_content").html(preloader);
-		const userRoleData = getTableData("hris_designation_tbl","","designationStatus = 1");
+		const userRoleData = getTableData(
+			"hris_designation_tbl",
+			"",
+			"designationStatus = 1"
+		);
 		let html = "";
 		if (userRoleData) {
 			html = `
@@ -182,19 +184,19 @@ $(document).ready(function () {
 
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false) {
-	
-		let {
-			examSetupID   = "",
-			designationID = ""
-		} = data.length > 0 ? data[0] : false;
+		let { examSetupID = "", designationID = "" } =
+			data.length > 0 ? data[0] : false;
 
 		let requestExamList = "";
 		if (examSetupID) {
-			let RequestExaminationData = getTableData("hris_examination_setup_tbl ",""," designationID ="+ designationID);
-			RequestExaminationData.map(item => {
+			let RequestExaminationData = getTableData(
+				"hris_examination_setup_tbl ",
+				"",
+				" designationID =" + designationID
+			);
+			RequestExaminationData.map((item) => {
 				requestExamList += getItemRow(item);
-			})
-		
+			});
 		} else {
 			requestExamList += getItemRow();
 		}
@@ -250,49 +252,47 @@ $(document).ready(function () {
 	}
 	// ----- END MODAL CONTENT -----
 
-	
-
-// ----- GET INVENTORY ITEM -----
-    function getExaminationList(id = null, isProject = true, display = true ,storageID = null) {
-        let html   = `<option selected disabled>Select Examination Name</option>`;
+	// ----- GET INVENTORY ITEM -----
+	function getExaminationList(
+		id = null,
+		isProject = true,
+		display = true,
+		storageID = null
+	) {
+		let html = `<option selected disabled>Select Examination Name</option>`;
 		const attr = isProject ? "[project=true]" : "";
 
 		let examIDArr = []; // 0 IS THE DEFAULT VALUE
-		$(`[name=examinationID]`).each(function(i, obj) {
+		$(`[name=examinationID]`).each(function (i, obj) {
 			examIDArr.push($(this).val());
-		}) 
-		
+		});
+
 		let itemList = [...examiantionListData];
-		
-		html += itemList.filter(item => !examIDArr.includes(item.examinationID) || item.examinationID == id).map(item => {
+
+		html += itemList
+			.filter(
+				(item) =>
+					!examIDArr.includes(item.examinationID) || item.examinationID == id
+			)
+			.map((item) => {
 				return `
 				<option 
 					value        = "${item.examinationID}" 
 					${item.examinationID == id && "selected"}>
 					${item.examinationName}
 				</option>`;
-		
-		})
-        return display ? html : examiantionListData;
-    }
-    // ----- END GET INVENTORY ITEM -----
+			});
+		return display ? html : examiantionListData;
+	}
+	// ----- END GET INVENTORY ITEM -----
 
+	// ----- GET ITEM ROW -----
 
-// ----- GET ITEM ROW -----
+	function getItemRow(exam = {}) {
+		let { examinationID = "", timeLimit = "", percentage = "" } = exam;
 
-function getItemRow(exam = {}) {
+		let html = "";
 
-	let {
-			
-		examinationID     = "",
-		timeLimit ="",
-		percentage =""
-	} = exam;
-
-  
-	let html = "";
-
-	
 		html += `
 		<tr class="itemTableRow">
 			<td class="text-center">
@@ -356,312 +356,307 @@ function getItemRow(exam = {}) {
 
 		
 		</tr>`;
-	
 
-	return html;
-}
-// ----- END GET ITEM ROW -----
+		return html;
+	}
+	// ----- END GET ITEM ROW -----
 
-// ----- UPDATE TABLE ITEMS -----
-function updateTableItems() {
-	$(".tableExaminationSetupTableBody tr").each(function(i) {
-		// ROW ID
-		$(this).attr("id", `tableRow${i}`);
-		$(this).attr("index", `${i}`);
-
-		// CHECKBOX
-		$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-		$("td .action .checkboxrow", this).attr("project", `true`);
-
-		// EXAMNAME
-		$(this).find("select").each(function(j) {
-			const examID = $(this).val();
+	// ----- UPDATE TABLE ITEMS -----
+	function updateTableItems() {
+		$(".tableExaminationSetupTableBody tr").each(function (i) {
+			// ROW ID
+			$(this).attr("id", `tableRow${i}`);
 			$(this).attr("index", `${i}`);
-			$(this).attr("project", `true`);
-			$(this).attr("id", `projectitemid${i}`)
-			if (!$(this).attr("data-select2-id")) {
-				$(this).select2({ theme: "bootstrap" });
+
+			// CHECKBOX
+			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
+			$("td .action .checkboxrow", this).attr("project", `true`);
+
+			// EXAMNAME
+			$(this)
+				.find("select")
+				.each(function (j) {
+					const examID = $(this).val();
+					$(this).attr("index", `${i}`);
+					$(this).attr("project", `true`);
+					$(this).attr("id", `projectitemid${i}`);
+					if (!$(this).attr("data-select2-id")) {
+						$(this).select2({ theme: "bootstrap" });
+					}
+				});
+
+			// BARCODE
+			$("td .timeLimit [name=timeLimit]", this).attr("id", `timeLimit${i}`);
+			$("td .timeLimit [name=timeLimit]", this).attr("project", `true`);
+			$("td .timeLimit [name=timeLimit]", this).addClass("inputmask");
+
+			// PERCENTAGE
+			$("td [name=percentage]", this).attr("id", `percentage${i}`);
+			$("td [name=percentage]", this).attr("project", `true`);
+
+			$("td [name=percentage]", this)
+				.closest("tr")
+				.find("td .invalid-percentage")
+				.attr("id", `invalid_percentage${i}`);
+
+			// $("td .disposalDetailRemarks", this).attr("id", `disposalDetailRemarks${i}`);
+		});
+	}
+	// ----- END UPDATE TABLE ITEMS -----
+
+	// ----- COMPUTE PERCENTAGE-----
+	function computePercent() {
+		var getLength = 0;
+		var totalPercent = 0;
+		var rate = parseFloat(100);
+
+		getLength = $("[name=percentage]").length - 1;
+
+		$("[name=percentage]").each(function (i) {
+			totalPercent += parseFloat($(this).val().replaceAll(",", "")) || 0;
+		});
+
+		$("[name=percentage]").each(function (i) {
+			// console.log(getLength);
+
+			if (getLength == i) {
+				// if(totalPercent != 0){
+				// console.log( totalPercent+ " > "+ rate)
+				if (totalPercent > rate || totalPercent < rate) {
+					// console.log("pasok "+i )
+					// $("#invalid_percentage"+i).html("Must equate the total percentage to 100%");
+					// $('#percentage'+i).addClass("has-error").removeClass("no-error");
+					$(".percentage").addClass("has-error").removeClass("no-error");
+					$(".invalid-percentage").text(
+						"Must equate the total percentage to 100%"
+					);
+					$("#btnSave").prop("disabled", "true");
+					$("#btnUpdate").prop("disabled", "true");
+
+					// return false;
+				} else {
+					$("#invalid_percentage" + i).html("");
+					// $('#percentage'+i).addClass("no-error").removeClass("has-error");
+					$(".percentage").removeClass("has-error");
+					$(".invalid-percentage").text("");
+
+					$("#btnSave").removeAttr("disabled");
+					$("#btnUpdate").removeAttr("disabled");
+
+					return true;
+				}
+				// }
+			} else {
+				$("#invalid_percentage" + i).html("");
+				// $('#percentage'+i).addClass("no-error").removeClass("has-error");
+				$(".percentage").removeClass("has-error");
+
+				// return true;
 			}
 		});
 
-		// BARCODE
-		$("td .timeLimit [name=timeLimit]", this).attr("id", `timeLimit${i}`);
-		$("td .timeLimit [name=timeLimit]", this).attr("project", `true`);
-		$("td .timeLimit [name=timeLimit]", this).addClass("inputmask");
-		
-		// PERCENTAGE
-		$("td [name=percentage]", this).attr("id", `percentage${i}`);
-		$("td [name=percentage]", this).attr("project", `true`);
-
-		$("td [name=percentage]", this).closest("tr").find("td .invalid-percentage").attr("id",`invalid_percentage${i}`);
-
-		// $("td .disposalDetailRemarks", this).attr("id", `disposalDetailRemarks${i}`);
-		
-	})
-}
-// ----- END UPDATE TABLE ITEMS -----
-
-// ----- COMPUTE PERCENTAGE-----
-function computePercent() {
-	var getLength= 0;
-	var totalPercent= 0;
-	var rate= parseFloat(100);
-	
-	getLength =$("[name=percentage]").length-1;
-	
-
-	$("[name=percentage]").each(function(i) {
-		totalPercent += parseFloat($(this).val().replaceAll(",","")) ||0;
-	})
-
-	$("[name=percentage]").each(function(i) {
-	
-		// console.log(getLength);
-	
-	if( getLength == i ){
-		// if(totalPercent != 0){
-			// console.log( totalPercent+ " > "+ rate)
-			if(totalPercent > rate || totalPercent < rate){
-				// console.log("pasok "+i )
-					// $("#invalid_percentage"+i).html("Must equate the total percentage to 100%");
-					// $('#percentage'+i).addClass("has-error").removeClass("no-error");
-					$('.percentage').addClass("has-error").removeClass("no-error");
-					$('.invalid-percentage').text("Must equate the total percentage to 100%");
-					$("#btnSave").prop('disabled','true');
-					$("#btnUpdate").prop('disabled','true');
-				
-				// return false;
-			}else{
-			
-				$("#invalid_percentage"+i).html("");
-				// $('#percentage'+i).addClass("no-error").removeClass("has-error");
-				$('.percentage').removeClass("has-error");
-				$('.invalid-percentage').text("");
-
-				$("#btnSave").removeAttr('disabled');
-				$("#btnUpdate").removeAttr('disabled');
-				
-				return true;
-			}
-		// }			
-	}else{
-		$("#invalid_percentage"+i).html("");
-		// $('#percentage'+i).addClass("no-error").removeClass("has-error");
-		$('.percentage').removeClass("has-error");
-
+		$("#percent").text(formatAmount(totalPercent) + "%");
 		// return true;
-
 	}
-	})
+	// ----- END COMPUTE PERCENTAGE-----
 
-	
+	// ----- CHECKBOX EVENT -----
+	$(document).on("keyup", "[name=percentage]", function () {
+		computePercent();
+	});
 
-	$("#percent").text(formatAmount(totalPercent)+"%");
-	// return true;
-}
-// ----- END COMPUTE PERCENTAGE-----
-
-// ----- CHECKBOX EVENT -----
-$(document).on("keyup", "[name=percentage]", function() {
-	computePercent();
-})
-
- // ----- INSERT ROW ITEM -----
- $(document).on("click", ".btnAddRow", function() {
-	let row = getItemRow();
+	// ----- INSERT ROW ITEM -----
+	$(document).on("click", ".btnAddRow", function () {
+		let row = getItemRow();
 		$(".tableExaminationSetupTableBody").append(row);
 		updateTableItems();
 		initInputmask();
 		computePercent();
 		initPercentage();
-})
-// ----- END INSERT ROW ITEM -----
+	});
+	// ----- END INSERT ROW ITEM -----
 
-// ----- CLICK DELETE ROW -----
-$(document).on("click", ".btnDeleteRow", function(){
-	deleteTableRow();
-	computePercent();
-})
-// ----- END CLICK DELETE ROW -----
+	// ----- CLICK DELETE ROW -----
+	$(document).on("click", ".btnDeleteRow", function () {
+		deleteTableRow();
+		computePercent();
+	});
+	// ----- END CLICK DELETE ROW -----
 
-// ----- CHECKBOX EVENT -----
-$(document).on("click", "[type=checkbox]", function() {
-	updateDeleteButton();
-})
-// ----- END CHECKBOX EVENT -----
+	// ----- CHECKBOX EVENT -----
+	$(document).on("click", "[type=checkbox]", function () {
+		updateDeleteButton();
+	});
+	// ----- END CHECKBOX EVENT -----
 
-// ----- CHECK ALL -----
-$(document).on("change", ".checkboxall", function() {
-	const isChecked = $(this).prop("checked");
-	const isProject = "true";
-	
-		$(".checkboxrow[project=true]").each(function(i, obj) {
+	// ----- CHECK ALL -----
+	$(document).on("change", ".checkboxall", function () {
+		const isChecked = $(this).prop("checked");
+		const isProject = "true";
+
+		$(".checkboxrow[project=true]").each(function (i, obj) {
 			$(this).prop("checked", isChecked);
 		});
-	updateDeleteButton();
-})
-// ----- END CHECK ALL -----
+		updateDeleteButton();
+	});
+	// ----- END CHECK ALL -----
 
-// ----- UPDATE DELETE BUTTON -----
-function updateDeleteButton() {
-	let projectCount = 0, companyCount = 0;
-	$(".checkboxrow[project=true]").each(function() {
-		this.checked && projectCount++;
-	})
-	$(".btnDeleteRow[project=true]").attr("disabled", projectCount == 0);
-}
-// ----- END UPDATE DELETE BUTTON -----
-
-// ----- DELETE TABLE ROW -----
-function deleteTableRow(isProject = true) {
-	const attr = "[project=true]";
-	if ($(`.checkboxrow${attr}:checked`).length != $(`.checkboxrow${attr}`).length) {
-		Swal.fire({
-			title:              "DELETE ROWS",
-			text:               "Are you sure to delete these rows?",
-			imageUrl:           `${base_url}assets/modal/delete.svg`,
-			imageWidth:         200,
-			imageHeight:        200,
-			imageAlt:           "Custom image",
-			showCancelButton:   true,
-			confirmButtonColor: "#dc3545",
-			cancelButtonColor:  "#1a1a1a",
-			cancelButtonText:   "No",
-			confirmButtonText:  "Yes"
-		}).then((result) => {
-			if (result.isConfirmed) {
-				$(`.checkboxrow${attr}:checked`).each(function(i, obj) {
-					var tableRow = $(this).closest('tr');
-					tableRow.fadeOut(500, function (){
-						$(this).closest("tr").remove();
-						updateTableItems();
-						$(`[name=examinationID]${attr}`).each(function(i, obj) {
-							let itemID = $(this).val();
-							// $(this).html(getInventoryItem(itemID, isProject));
-						}) 
-						updateDeleteButton();
-					});
-				})
-			}
+	// ----- UPDATE DELETE BUTTON -----
+	function updateDeleteButton() {
+		let projectCount = 0,
+			companyCount = 0;
+		$(".checkboxrow[project=true]").each(function () {
+			this.checked && projectCount++;
 		});
-		
-	} else {
-		showNotification("danger", "You must have atleast one or more items.");
+		$(".btnDeleteRow[project=true]").attr("disabled", projectCount == 0);
 	}
-}
-// ----- END DELETE TABLE ROW -----
+	// ----- END UPDATE DELETE BUTTON -----
+
+	// ----- DELETE TABLE ROW -----
+	function deleteTableRow(isProject = true) {
+		const attr = "[project=true]";
+		if (
+			$(`.checkboxrow${attr}:checked`).length != $(`.checkboxrow${attr}`).length
+		) {
+			Swal.fire({
+				title: "DELETE ROWS",
+				text: "Are you sure that you want to delete the examination for this setup?",
+				imageUrl: `${base_url}assets/modal/delete.svg`,
+				imageWidth: 200,
+				imageHeight: 200,
+				imageAlt: "Custom image",
+				showCancelButton: true,
+				confirmButtonColor: "#dc3545",
+				cancelButtonColor: "#1a1a1a",
+				cancelButtonText: "No",
+				confirmButtonText: "Yes",
+			}).then((result) => {
+				if (result.isConfirmed) {
+					$(`.checkboxrow${attr}:checked`).each(function (i, obj) {
+						var tableRow = $(this).closest("tr");
+						tableRow.fadeOut(500, function () {
+							$(this).closest("tr").remove();
+							updateTableItems();
+							$(`[name=examinationID]${attr}`).each(function (i, obj) {
+								let itemID = $(this).val();
+								// $(this).html(getInventoryItem(itemID, isProject));
+							});
+							updateDeleteButton();
+						});
+					});
+				}
+			});
+		} else {
+			showNotification("danger", "You must have atleast one or more items.");
+		}
+	}
+	// ----- END DELETE TABLE ROW -----
 
 	// ----- SAVE ADD -----
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_examination_setup");
 		var designationID = $(this).attr("designationID");
 		var designationName = $(this).attr("designationName");
-		
+
 		if (validate) {
-			saveExaminationData(designationID,designationName);
+			saveExaminationData(designationID, designationName);
 		}
 	});
 	// ----- END SAVE ADD -----
 
 	// ----- SAVE UPDATE -----
 	$(document).on("click", "#btnUpdate", function () {
-	
-			const validate = validateForm("modal_examination_setup");
-			var designationID = $(this).attr("roleID");
-			var designationName = $(this).attr("designationName");
-			if (validate) {
-				saveExaminationData(designationID,designationName);
-			}
-
+		const validate = validateForm("modal_examination_setup");
+		var designationID = $(this).attr("roleID");
+		var designationName = $(this).attr("designationName");
+		if (validate) {
+			saveExaminationData(designationID, designationName);
+		}
 	});
 	// ----- END SAVE UPDATE -----
 
 	//  GET EXAMINATION SETUP DATA //
-		function saveExaminationData(designationID = "",designationName="")
-		{
-			let data = { exams: [] }, formData = new FormData;
-	
-				$(".tableExaminationSetupTableBody tr").each(function(i, obj) {
-			
-	
-					const examinationID    = $("td [name=examinationID]", this).val();	
-					const timeLimit    = $("td [name=timeLimit]", this).val();	
-					const percentage    = $("td [name=percentage]", this).val();	
-					
-				
-	
-					let temp = {
-						examinationID,timeLimit,percentage,designationID
-						
-					};
-	
-					formData.append(`exams[${i}][examinationID]`, examinationID);
-					formData.append(`exams[${i}][timeLimit]`, timeLimit);
-					formData.append(`exams[${i}][percentage]`, percentage);
-					formData.append(`exams[${i}][designationID]`, designationID);
-				
-					data["exams"].push(temp);
-				});
-	
-				let condition           = validateForm("modal_examination_setup");
-				if(condition == true){
-				   var employeeID = [];
-				
-				   Swal.fire({
-					   title: 'UPDATE EXAMINATION SETUP',
-					   text: 'Are you sure that you want to update the examination setup for this designation?',
-					   imageUrl: `${base_url}assets/modal/update.svg`,
-					   imageWidth: 200,
-					   imageHeight: 200,
-					   imageAlt: 'Custom image',
-					   showCancelButton: true,
-					   confirmButtonColor: '#dc3545',
-					   cancelButtonColor: '#1a1a1a',
-					   cancelButtonText: 'No',
-					   confirmButtonText: 'Yes',
-					   allowOutsideClick: false
-				   }).then((result) => {
-					   if (result.isConfirmed) {
-						   preventRefresh(false);
-						   $.ajax({
-							   url: `${base_url}hris/Examination_setup/updaterecord`,
-							   method: "POST",
-							   data:formData,
-							   processData: false,
-							   contentType: false,
-							   global:      false,
-							   cache:       false,
-							   async:       false,
-							   dataType:    "json",
-							   beforeSend: function () {
-								   $("#loader").show();
-							   },
-							   success: function (data) {
-								   $("#loader").hide();
-								   $("#modal_examination_setup").hide();
+	function saveExaminationData(designationID = "", designationName = "") {
+		let data = { exams: [] },
+			formData = new FormData();
 
-									   let swalTitle = "Examination setup for "+designationName+" updated successfully!";
-									   Swal.fire({
-										   icon: "success",
-										   title: swalTitle,
-										   showConfirmButton: false,
-										   timer: 200,
-									   }).then(() => {
-										   $("#loader").show();
-										   window.location.reload();
-									   })
+		$(".tableExaminationSetupTableBody tr").each(function (i, obj) {
+			const examinationID = $("td [name=examinationID]", this).val();
+			const timeLimit = $("td [name=timeLimit]", this).val();
+			const percentage = $("td [name=percentage]", this).val();
 
-	   
-							   },
-						   });	
-	   
-					   } else {
-						   preventRefresh(false);
-					   }	
-				   })
+			let temp = {
+				examinationID,
+				timeLimit,
+				percentage,
+				designationID,
+			};
+
+			formData.append(`exams[${i}][examinationID]`, examinationID);
+			formData.append(`exams[${i}][timeLimit]`, timeLimit);
+			formData.append(`exams[${i}][percentage]`, percentage);
+			formData.append(`exams[${i}][designationID]`, designationID);
+
+			data["exams"].push(temp);
+		});
+
+		let condition = validateForm("modal_examination_setup");
+		if (condition == true) {
+			var employeeID = [];
+
+			Swal.fire({
+				title: "UPDATE EXAMINATION SETUP",
+				text: "Are you sure that you want to update the examination setup for this designation?",
+				imageUrl: `${base_url}assets/modal/update.svg`,
+				imageWidth: 200,
+				imageHeight: 200,
+				imageAlt: "Custom image",
+				showCancelButton: true,
+				confirmButtonColor: "#dc3545",
+				cancelButtonColor: "#1a1a1a",
+				cancelButtonText: "No",
+				confirmButtonText: "Yes",
+				allowOutsideClick: false,
+			}).then((result) => {
+				if (result.isConfirmed) {
+					preventRefresh(false);
+					$.ajax({
+						url: `${base_url}hris/Examination_setup/updaterecord`,
+						method: "POST",
+						data: formData,
+						processData: false,
+						contentType: false,
+						global: false,
+						cache: false,
+						async: false,
+						dataType: "json",
+						beforeSend: function () {
+							$("#loader").show();
+						},
+						success: function (data) {
+							$("#loader").hide();
+							$("#modal_examination_setup").hide();
+
+							let swalTitle = `Examination setup form ${designationName} updated successfully!`;
+
+							Swal.fire({
+								icon: "success",
+								title: swalTitle,
+								showConfirmButton: false,
+								timer: 2000,
+							}).then(() => {
+								$("#loader p").text("Please wait...");
+								$("#loader").show();
+								window.location.reload();
+							});
+						},
+					});
+				} else {
+					preventRefresh(false);
 				}
-				
+			});
 		}
+	}
 	//  GET EXAMINATION SETUP DATA //
 
 	// ----- SELECT USER ROLE -----
@@ -677,13 +672,11 @@ function deleteTableRow(isProject = true) {
 		$("#module_access_content").html(preloader);
 		setTimeout(() => {
 			$("#module_access_content").html(moduleData);
-			$(".btn-approval-setup").attr("designationName",$(this).text().trim());
+			$(".btn-approval-setup").attr("designationName", $(this).text().trim());
 			initDataTables();
-			
 		}, 500);
 	});
 	// ----- END SELECT USER ROLE -----
-	
 
 	// ----- CLOSE CONFIRMATION -----
 	$(document).on(
@@ -698,46 +691,46 @@ function deleteTableRow(isProject = true) {
 	);
 	// ----- END CLOSE CONFIRMATION -----
 
-
-
 	// ------- CANCEL MODAL--------
 	$(document).on("click", ".btnCancel", function () {
-
 		let formEmpty = isFormEmpty("modal_examination_setup");
 		if (!formEmpty) {
-			sweetAlertConfirmation("cancel", "Examination Setup", "modal_roles_permission");
+			sweetAlertConfirmation(
+				"cancel",
+				"Examination Setup",
+				"modal_roles_permission"
+			);
 		} else {
 			$("#modal_roles_permission").modal("hide");
 		}
 	});
 	// -------- END CANCEL MODAL-----------
 
-    // BTN SETTING UP THE APPROVERS
-$(document).on("click", ".btn-approval-setup", function(){
-    let designationID    =   $(this).attr("designation");
-    let designationName    =   $(this).attr("designationName");
-    let method    =   $(this).attr("method");
-    $("#modal_examination_setup").modal("show");
-    $(".modal_examination_setup_content").html(preloader);
-    // $(modalFooter).html("");
-	let ExaminationData = getTableData("hris_examination_setup_tbl ",""," designationID ="+ designationID);
-    setTimeout(function(){
-		$(".modal_examination_setup_content").html(modalContent(ExaminationData));
-		
-		updateTableItems();
-		initInputmask();
-		initPercentage();
-		method == "update" ? computePercent() :"";
-		// computePercent();
-		$("#btnSave").attr("designationID",designationID);	
-		$("#btnUpdate").attr("designationID",designationID);
-		$("#btnSave").attr("designationName",designationName);	
-		$("#btnUpdate").attr("designationName",designationName);		
-	 }, 500);
-});
+	// BTN SETTING UP THE APPROVERS
+	$(document).on("click", ".btn-approval-setup", function () {
+		let designationID = $(this).attr("designation");
+		let designationName = $(this).attr("designationName");
+		let method = $(this).attr("method");
+		$("#modal_examination_setup").modal("show");
+		$(".modal_examination_setup_content").html(preloader);
+		// $(modalFooter).html("");
+		let ExaminationData = getTableData(
+			"hris_examination_setup_tbl ",
+			"",
+			" designationID =" + designationID
+		);
+		setTimeout(function () {
+			$(".modal_examination_setup_content").html(modalContent(ExaminationData));
 
-
-
-
-
+			updateTableItems();
+			initInputmask();
+			initPercentage();
+			method == "update" ? computePercent() : "";
+			// computePercent();
+			$("#btnSave").attr("designationID", designationID);
+			$("#btnUpdate").attr("designationID", designationID);
+			$("#btnSave").attr("designationName", designationName);
+			$("#btnUpdate").attr("designationName", designationName);
+		}, 500);
+	});
 });

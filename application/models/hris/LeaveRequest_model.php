@@ -42,6 +42,31 @@ class LeaveRequest_model extends CI_Model {
         }
     }
 
+    public function getLeaveRequestData($leaveRequestID){
+        $sql    = "SELECT * FROM  hris_leave_request_tbl WHERE leaveRequestID = '$leaveRequestID'";
+        $query  = $this->db->query($sql);
+        return $query ? $query->result_array() : false;
+    }
+
+    public function updateEmployeeLeave($leaveRequestID){
+        $leaveRequestData   = $this->getLeaveRequestData($leaveRequestID);
+        if($leaveRequestID){
+            $leaveID    = $leaveRequestData[0]["leaveID"];
+            $employeeID = $leaveRequestData[0]["employeeID"];
+            $sql        = "SELECT leaveCredit FROM hris_employee_leave_tbl WHERE leaveID = '$leaveID' AND employeeID = '$employeeID' ";
+            $query      = $this->db->query($sql);
+            $result     = $query->result_array();
+            
+            $leaveCredit    = $result[0]["leaveCredit"]; 
+            $leaveDiff      = floatval($leaveCredit) - floatval(1);      
+
+            $updateSql = "UPDATE hris_employee_leave_tbl SET leaveCredit = '$leaveDiff'WHERE leaveID = '$leaveID' AND employeeID = '$employeeID' ";
+            $this->db->query($updateSql);
+        
+        }
+
+    }
+
 
 
 }

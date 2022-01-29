@@ -109,6 +109,7 @@ $(document).ready(function(){
             designationName     =  "",
             employeeHiredDate   =  "",
             employeeMobile      =  "",
+            employeeEmail       =  "",
             employeeBirthday    =  "",
             employeeSignature   =  ""
         } = employeeData[0];
@@ -135,7 +136,7 @@ $(document).ready(function(){
                             </li>
                             <li class="list-group-item">
                                 <small class="text-muted">Email:</small>
-                                <p class="mb-0">sample.email@gmail.com</p>
+                                <p class="mb-0">${employeeEmail}</p>
                             </li>
                             <li class="list-group-item">
                                 <small class="text-muted">Birthdate:</small>

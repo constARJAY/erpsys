@@ -3,7 +3,7 @@ $(document).ready(function() {
 
 
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("material request");
+	const moduleApprover = getModuleApprover(137);
 	// ----- END MODULE APPROVER -----
 
 

@@ -45,9 +45,9 @@ $(document).ready(function () {
 		`employeeID = ${sessionID}`
 	);
 	// ----- END REUSABLE FUNCTIONS -----
-console.log(`${sessionID}`);
 
-// ----- IS DOCUMENT REVISED -----
+
+	// ----- IS DOCUMENT REVISED -----
 	function isDocumentRevised(id = null) {
 		if (id) {
 			const revisedDocumentsID = getTableData(
@@ -628,7 +628,7 @@ console.log(`${sessionID}`);
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("noTimeinTimeoutID", noTimeinTimeoutID);
+		$("#btnBack").attr("noTimeinTimeoutID", encryptString(noTimeinTimeoutID));
 		$("#btnBack").attr("code", getFormCode("NTI", moment(createdAt), noTimeinTimeoutID));
 		$("#btnBack").attr("status", noTimeinTimeoutStatus);
 		$("#btnBack").attr("employeeID", employeeID);
@@ -765,15 +765,14 @@ console.log(`${sessionID}`);
                 <div class="form-group">
                     <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
-                        class="form-control validate daterange text-left"
+                        class="form-control validate text-left"
                         required
                         id="noTimeinTimeoutDate"
                         name="noTimeinTimeoutDate"
                         value="${noTimeinTimeoutDate ? moment(noTimeinTimeoutDate).format("MMMM DD, YYYY") : ""}"
 						${disabled}
 						unique="${noTimeinTimeoutID}"
-						title="Date"
-						>
+						title="Date">
                     <div class="d-block invalid-feedback" id="invalid-noTimeinTimeoutDate"></div>
                 </div>
             </div>
@@ -799,24 +798,26 @@ console.log(`${sessionID}`);
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Time In ${!timeInNegligence ? "<code>*</code>" : ""}</label>
-                    <input type="text" 
-                        class="form-control timeIn" 
+                    <input type="time" 
+                        class="form-control" 
                         id="noTimeinTimeoutTimeIn" 
                         name="noTimeinTimeoutTimeIn" 
-                        value="${noTimeinTimeoutTimeIn}"
-						${timeInNegligence}>
+                        value="${['1','3'].includes(noTimeinTimeoutNegligence) && noTimeinTimeoutTimeIn || ""}"
+						${['1','3'].includes(noTimeinTimeoutNegligence) ? "" : "disabled"}
+						${disabled}>
                     <div class="d-block invalid-feedback" id="invalid-noTimeinTimeoutTimeIn"></div>
                 </div>
             </div>
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Time Out ${!timeOutNegligence ? "<code>*</code>" : ""}</label>
-                    <input type="text" 
-                        class="form-control timeOut" 
+                    <input type="time" 
+                        class="form-control" 
                         id="noTimeinTimeoutTimeOut" 
                         name="noTimeinTimeoutTimeOut" 
-                        value="${noTimeinTimeoutTimeOut}"
-						${timeOutNegligence}>
+                        value="${['2','3'].includes(noTimeinTimeoutNegligence) && noTimeinTimeoutTimeOut || ""}"
+						${['2','3'].includes(noTimeinTimeoutNegligence) ? "" : "disabled"}
+						${disabled}>
                     <div class="d-block invalid-feedback" id="invalid-noTimeinTimeoutTimeOut"></div>
                 </div>
             </div>
@@ -849,17 +850,14 @@ console.log(`${sessionID}`);
 			initAll();
 			initDataTables();
 			if(disabled != "disabled"){
-				$("#noTimeinTimeoutDate").val(moment().format("MMMM DD, YYYY"));
 				$("#noTimeinTimeoutDate").daterangepicker({
-					autoUpdateInput: false,
+					autoUpdateInput:  false,
 					singleDatePicker: true,
-					showDropdowns: true,
-					autoApply: true,
-						minDate:moment().subtract(10, 'days'),
-					startDate: moment(),
-					maxDate: moment(),
-
-					// maxDate: moment().add(80, 'days'),
+					showDropdowns:    true,
+					autoApply:        true,
+					minDate:          moment().subtract(10, 'days'),
+					startDate:        moment(noTimeinTimeoutDate || new Date),
+					maxDate:          moment(),
 					locale: {
 						format: "MMMM DD, YYYY",
 					},
@@ -868,13 +866,13 @@ console.log(`${sessionID}`);
 
 						let isActive = '1';
 						employeeSchedule.map(schedule => {
-								if (optionDay == 0) isActive = schedule.sunday ?? '1';
-							else if (optionDay == 1) isActive = schedule.monday ?? '1';
-							else if (optionDay == 2) isActive = schedule.tuesday ?? '1';
+								 if (optionDay == 0) isActive = schedule.sunday    ?? '1';
+							else if (optionDay == 1) isActive = schedule.monday    ?? '1';
+							else if (optionDay == 2) isActive = schedule.tuesday   ?? '1';
 							else if (optionDay == 3) isActive = schedule.wednesday ?? '1';
-							else if (optionDay == 4) isActive = schedule.thursday ?? '1';
-							else if (optionDay == 5) isActive = schedule.friday ?? '1';
-							else if (optionDay == 6) isActive = schedule.saturday ?? '1';
+							else if (optionDay == 4) isActive = schedule.thursday  ?? '1';
+							else if (optionDay == 5) isActive = schedule.friday    ?? '1';
+							else if (optionDay == 6) isActive = schedule.saturday  ?? '1';
 						});
 
 						let optionDate = moment(date).format("YYYY-MM-DD");
@@ -886,21 +884,6 @@ console.log(`${sessionID}`);
 				})
 			}
 
-			if(data){
-				initInputmaskTime(false);
-			}else{
-				initInputmaskTime();
-			}
-
-			// if(data){
-			// 	initInputmaskTime(false);
-			// 	$("#noTimeinTimeoutDate").data("daterangepicker").startDate = moment(noTimeinTimeoutDate, "YYYY-MM-DD");
-			// 	$("#noTimeinTimeoutDate").data("daterangepicker").endDate   = moment(noTimeinTimeoutDate, "YYYY-MM-DD");
-			// }else{
-			// 	initInputmaskTime();
-			// 	$("#noTimeinTimeoutDate").val(moment(new Date).format("MMMM DD, YYYY"));
-			// }
-
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
 				$("#page_content").find(`input, select, textarea`).each(function() {
@@ -911,10 +894,8 @@ console.log(`${sessionID}`);
 				$('#btnBack').attr("status", "2");
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
-			
-			//$("#noTimeinTimeoutDate").data("daterangepicker").maxDate = moment();
+			// ----- END NOT ALLOWED FOR UPDATE -----
 		
-			return html;
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
@@ -1089,6 +1070,7 @@ console.log(`${sessionID}`);
 	});
 	// ----- END OPEN ADD FORM -----
 
+
 	// ----- REVISE DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
 		const id                    = decryptString($(this).attr("noTimeinTimeoutID"));
@@ -1096,6 +1078,8 @@ console.log(`${sessionID}`);
 		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END REVISE DOCUMENT -----
+
+
 	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
 		const id         = decryptString($(this).attr("noTimeinTimeoutID"));
@@ -1150,7 +1134,7 @@ console.log(`${sessionID}`);
 				cancelForm(
 					"save",
 					action,
-					"CHANGE SCHEDULE",
+					"NO TIME-IN / TIME-OUT",
 					"",
 					"form_no_timein_timeout",
 					data,
@@ -1358,27 +1342,6 @@ console.log(`${sessionID}`);
 	// ----- END CANCEL DOCUMENT -----
 
 
-// '	// ----- CANCEL DOCUMENT -----
-// 	$(document).on("click", "#btnCancel", function () {
-// 		const id	   = $(this).attr("noTimeinTimeoutID");
-// 		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
-// 		const action   = id && feedback ? "update" : "insert";
-// 		const data     = getData(action, 0, "save", feedback, id);
-
-// 		cancelForm(
-// 			"save",
-// 			action,
-// 			"NO TIME-IN / TIME-OUT",
-// 			"",
-// 			"form_no_timein_timeout",
-// 			data,
-// 			true,
-// 			pageContent
-// 		);
-// 	});'
-	// ----- END CANCEL DOCUMENT -----
-
-
 	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function() {
 		const id       = decryptString($(this).attr("noTimeinTimeoutID"));
@@ -1445,36 +1408,36 @@ console.log(`${sessionID}`);
 		if(negligenceValue == "2"){
 			$("#noTimeinTimeoutTimeIn").prop("disabled",true);
 			$("#noTimeinTimeoutTimeIn").removeAttr("required");
-			$("#noTimeinTimeoutTimeIn").val("00:00");
+			$("#noTimeinTimeoutTimeIn").val("");
 			$("#noTimeinTimeoutTimeIn").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
 			$("#invalid-noTimeinTimeoutTimeIn").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
 
 
 			$("#noTimeinTimeoutTimeOut").prop("disabled",false);
 			$("#noTimeinTimeoutTimeOut").attr("required","");
-			$("#noTimeinTimeoutTimeOut").val("00:00");
+			$("#noTimeinTimeoutTimeOut").val("16:00");
 		}
 		if(negligenceValue == "1"){
 			$("#noTimeinTimeoutTimeOut").prop("disabled",true);
 			$("#noTimeinTimeoutTimeOut").removeAttr("required");
-			$("#noTimeinTimeoutTimeOut").val("00:00");
+			$("#noTimeinTimeoutTimeOut").val("");
 			$("#noTimeinTimeoutTimeOut").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
 			$("#invalid-noTimeinTimeoutTimeOut").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
 
 			$("#noTimeinTimeoutTimeIn").prop("disabled",false);
 			$("#noTimeinTimeoutTimeIn").attr("required","");
-			$("#noTimeinTimeoutTimeIn").val("00:00");
+			$("#noTimeinTimeoutTimeIn").val("07:00");
 			
 		}
 		if(negligenceValue == "3"){
-			$("#noTimeinTimeoutTimeIn").val("00:00");
+			$("#noTimeinTimeoutTimeIn").val("07:00");
 			$("#noTimeinTimeoutTimeIn").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
 			$("#invalid-noTimeinTimeoutTimeIn").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
 			$("#noTimeinTimeoutTimeIn").prop("disabled",false);
 			$("#noTimeinTimeoutTimeIn").attr("required","");
 
 
-			$("#noTimeinTimeoutTimeOut").val("00:00");
+			$("#noTimeinTimeoutTimeOut").val("16:00");
 			$("#noTimeinTimeoutTimeOut").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
 			$("#invalid-noTimeinTimeoutTimeOut").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
 			$("#noTimeinTimeoutTimeOut").prop("disabled",false);
