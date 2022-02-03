@@ -8,7 +8,7 @@
 						<li class="breadcrumb-item"><i class="zmdi zmdi-settings"></i>&nbsp;System Setup</li>
                         <li class="breadcrumb-item active">Company Profile</li>
                     </ul>
-                    <h1 class="mt-3">Company Profile</h1>
+                    <h1 class="mt-3">Companys Profile</h1>
                     <span>This module is used to manage company profile.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
