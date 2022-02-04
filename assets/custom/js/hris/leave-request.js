@@ -1,12 +1,136 @@
-let FILE_ARRAY 			= [];
-let EXIST_FILE_ARRAY 	= [];
+let DATE_ARRAY = [];
+let oldLRFilename = [], newLRFilename = [], newLRFiles = [];
 
 $(document).ready(function() {
-	const allowedUpdate = isUpdateAllowed(55);
+
+	const MODULE_ID = 55;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover(55);
+
+
+	const moduleApprover = getModuleApprover(MODULE_ID);
 	// ----- END MODULE APPROVER -----
 
+
+	// ----- REUSABLE FUNCTION ------
+	const dateToday = () => {
+		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
+	};
+
+	let holidayData = getTableData(
+        "hris_holiday_tbl",
+        `*`,
+        `holidayStatus = 1`
+    )?.map(holiday => holiday.holidayDate);
+
+	let employeeSchedule = getTableData(
+		`hris_employee_list_tbl as helt
+			LEFT JOIN hris_schedule_setup_tbl AS hsst USING(scheduleID)`,
+		`IF(mondayStatus = 1, 1, 0) AS monday,
+		IF(tuesdayStatus = 1, 1, 0) AS tuesday,
+		IF(wednesdayStatus = 1, 1, 0) AS wednesday,
+		IF(thursdayStatus = 1, 1, 0) AS thursday,
+		IF(fridayStatus = 1, 1, 0) AS friday,
+		IF(saturdayStatus = 1, 1, 0) AS saturday,
+		IF(sundayStatus = 1, 1, 0) AS sunday`,
+		`employeeID = ${sessionID}`
+	);
+
+	let leaveType = getTableData(
+		`hris_leave_tbl AS hlt
+			LEFT JOIN hris_employee_leave_tbl AS helt USING(leaveID) 
+		WHERE hlt.leaveStatus = 1
+			AND helt.employeeID = ${sessionID}`,
+		`hlt.*, helt.leaveCredit`);
+
+	function getDateInRange(dateFrom = '', dateTo = '') {
+		let result = [];
+		if (dateFrom && dateTo) {
+			let tempFrom = moment(dateFrom).format("YYYY-MM-DD");
+			let tempTo   = moment(dateTo).format("YYYY-MM-DD");
+
+			do {
+				!result.includes(tempFrom) && result.push(tempFrom);
+				tempFrom = moment(tempFrom).add(1, 'days').format("YYYY-MM-DD");
+			} while (tempFrom != tempTo && moment.duration(moment(tempTo).diff(moment(tempFrom))).asDays() > 0);
+		}
+		return result;
+	}
+
+	function getApprovedLeave() {
+		let approvedLeaves = getTableData(
+			`hris_leave_request_tbl WHERE employeeID = ${sessionID} AND leaveRequestStatus IN(1,2)`,
+			`leaveRequestDateFrom AS dateFrom, leaveRequestDateTo AS dateTo`
+		);
+
+		let result = [];
+		if (approvedLeaves && approvedLeaves.length) {
+			approvedLeaves.map(lv => {
+				let { dateFrom, dateTo } = lv;
+
+				if (moment(dateFrom).isValid() && moment(dateTo).isValid()) {
+					result = [...result, ...getDateInRange(dateFrom, dateTo)];
+				}
+			})
+		}
+		return result.length ? result.filter((v, i, a) => a.indexOf(v) === i) : [];
+	}
+	// ----- END REUSABLE FUNCTION ------
+
+
+	// ----- DATATABLES -----
+	function initDataTables() {
+		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
+			$("#tableForApprroval").DataTable().destroy();
+		}
+
+		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
+			$("#tableMyForms").DataTable().destroy();
+		}
+
+		var table = $("#tableForApprroval")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				sorting: [],
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0,  width: 100 },
+					{ targets: 1,  width: 150 },
+					{ targets: 2,  width: 150 },	
+					{ targets: 3,  width: 250 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 300 },
+					{ targets: 6,  width: 80  },
+					{ targets: 7,  width: 200 }
+				],
+			});
+
+		var table = $("#tableMyForms")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				sorting: [],
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0,  width: 100 },
+					{ targets: 1,  width: 150 },
+					{ targets: 2,  width: 150 },	
+					{ targets: 3,  width: 250 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 300 },
+					{ targets: 6,  width: 80  },
+					{ targets: 7,  width: 200 }
+				],
+			});
+	}
+	// ----- END DATATABLES -----
 
 
 	// ---- GET EMPLOYEE DATA -----
@@ -28,6 +152,7 @@ $(document).ready(function() {
 	}
 	// ---- END GET EMPLOYEE DATA -----
 
+
 	// ----- IS DOCUMENT REVISED -----
 	function isDocumentRevised(id = null) {
 		if (id) {
@@ -42,9 +167,7 @@ $(document).ready(function() {
 	// ----- END IS DOCUMENT REVISED -----
 
 
-
-
-    // ----- VIEW DOCUMENT -----
+	// ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("hris_leave_request_tbl", "", "leaveRequestID=" + id);
@@ -95,7 +218,6 @@ $(document).ready(function() {
 		}
 
 		if (view_id) {
-			// let id = decryptString(view_id);
 			let id = view_id;
 				id && isFinite(id) && loadData(id, isRevise,isFromCancelledDocument);
 		} else {
@@ -134,90 +256,39 @@ $(document).ready(function() {
 	// ----- END VIEW DOCUMENT -----
 
 
-    // GLOBAL VARIABLE - REUSABLE 
-	const dateToday = () => {
-		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
-	};
-
-	const employeeList = getTableData("hris_employee_list_tbl LEFT JOIN hris_designation_tbl USING (designationID)", 
-										`employeeLastname, employeeFirstname, employeeMiddlename, employeeID, employeeRanking,
-										 hris_designation_tbl.designationName AS designationName, employeeRankingCredit,
-											CASE employeeLastname WHEN "" THEN employeeFirstname
-											ELSE CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) 
-											END  "employeeFullname" `,
-										`employeeID != "1" AND employeeStatus != 0 AND employeeStatus != 3 AND employeeStatus != 4 AND employeeStatus != 5 AND employeeStatus != 6`);
-	
-	const leaveType		= getTableData(`hris_leave_tbl AS hlt LEFT JOIN hris_employee_leave_tbl AS helt USING(leaveID)`, 
-										`hlt.*, leaveCredit`, `leaveStatus = '1' AND employeeID = '${sessionID}' `);
-
-	// END GLOBAL VARIABLE - REUSABLE 
-
-
-    // ----- DATATABLES -----
-	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
+	// ----- HEADER BUTTON -----
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
+		let html;
+		if (isAdd) {
+			if(isCreateAllowed(MODULE_ID)){
+				html = `
+           	 	<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
+		} else {
+			html = `
+            <button type="button" class="btn btn-default btn-light" 
+				id="btnBack" 
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}">
+			<i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
-
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
-
-		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 350 },
-					{ targets: 3,  width: 100 },	
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 220 },
-					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 350 }
-				],
-			});
-
-		var table = $("#tableMyForms")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 350 },
-					{ targets: 3,  width: 100 },	
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 220 },
-					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 350 }
-				],
-			});
+		$("#headerButton").html(html);
 	}
-	// ----- END DATATABLES -----
-   
+	// ----- END HEADER BUTTON -----
 
-    // ----- HEADER CONTENT -----
+
+	// ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("hris_leave_request_tbl", "approversID")) {
+				let count = getCountForApproval("hris_leave_request_tbl", "leaveRequestStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
                             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
                     </div>
@@ -231,26 +302,7 @@ $(document).ready(function() {
 	// ----- END HEADER CONTENT -----
 
 
-    // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
-		let html;
-		if (isAdd) {
-			if(isCreateAllowed(55)){
-				html = `
-           	 	<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
-			}
-		} else {
-			html = `
-            <button type="button" class="btn btn-default btn-light" 
-					id="btnBack" 
-					revise="${isRevise}" cancel="${isFromCancelledDocument}">
-				<i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
-		}
-		$("#headerButton").html(html);
-	}
-	// ----- END HEADER BUTTON -----
-
-    // ----- FOR APPROVAL CONTENT -----
+	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let leaveRequestData = getTableData(
@@ -261,20 +313,20 @@ $(document).ready(function() {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
-            <thead>
-                <tr style="white-space: nowrap">
+		<table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+			<thead>
+				<tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Employee Name</th>
 					<th>Leave Type</th>
-					<th>Leave Date/s</th>
+					<th>Reason</th>
 					<th>Current Approver</th>
 					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
-                </tr>
-            </thead>
-            <tbody>`;
+				</tr>
+			</thead>
+			<tbody>`;
 
 		leaveRequestData.map((item) => {
 			let {
@@ -316,31 +368,19 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, leaveRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-							<tr class="${btnClass}" id="${encryptString(leaveRequestID )}">
-								<td>${getFormCode("LRF", createdAt, leaveRequestID )}</td>
-								<td>${fullname}</td>
-								<td>${leaveName}</td>
-								<td>${leaveRequestDate}</td>
-								<td>
-									${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}
-								</td>
-								<td>
-									${dateCreated ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
-															<b>Created: </b><span style="color:#000;">${dateCreated}</span>
-														</div>` : ``}
-										${dateSubmitted ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
-															<b>Submitted: </b><span style="color:#000;">${dateSubmitted}</span>
-														</div>` : ``}
-										${dateApproved != "-" ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
-															<b>Approved: </b><span style="color:#000;">${dateApproved}</span>
-														</div>` : ``}
-								</td>
-								<td class="text-center">
-									${getStatusStyle(leaveRequestStatus)}
-								</td>
-								<td>${remarks}</td>
-							</tr>
-						`;
+				<tr class="${btnClass}" id="${encryptString(leaveRequestID )}">
+					<td>${getFormCode("LRF", createdAt, leaveRequestID )}</td>
+					<td>${fullname}</td>
+					<td>${leaveName || "-"}</td>
+					<td>
+						<div>${leaveRequestDate || "-"}</div>
+						<small>${leaveRequestReason || ""}</small>
+					</td>
+					<td>${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+					<td class="text-center">${getStatusStyle(leaveRequestStatus)}</td>
+					<td>${remarks}</td>
+				</tr>`;
 			}
 		});
 
@@ -351,13 +391,12 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$("#tableForApprovalParent").html(html);
 			initDataTables();
-			return html;
 		}, 300);
 	}
 	// ----- END FOR APPROVAL CONTENT -----
 
 
-    // ----- MY FORMS CONTENT -----
+	// ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let leaveRequestData = getTableData(
@@ -373,7 +412,7 @@ $(document).ready(function() {
 					<th>Document No.</th>
 					<th>Employee Name</th>
 					<th>Leave Type</th>
-					<th>Leave Date/s</th>
+					<th>Reason</th>
 					<th>Current Approver</th>
 					<th>Date</th>
 					<th>Status</th>
@@ -424,25 +463,14 @@ $(document).ready(function() {
 			<tr class="${btnClass}" id="${encryptString(leaveRequestID )}">
 				<td>${getFormCode("LRF", createdAt, leaveRequestID )}</td>
 				<td>${fullname}</td>
-				<td>${leaveName}</td>
-				<td>${leaveRequestDate}</td>
+				<td>${leaveName || "-"}</td>
 				<td>
-					${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}
+					<div>${leaveRequestDate || ""}</div>
+					<small>${leaveRequestReason || ""}</small>
 				</td>
-				<td>
-					${dateCreated ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
-											<b>Created: </b><span style="color:#000;">${dateCreated}</span>
-										</div>` : ``}
-						${dateSubmitted ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
-											<b>Submitted: </b><span style="color:#000;">${dateSubmitted}</span>
-										</div>` : ``}
-						${dateApproved != "-" ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
-											<b>Approved: </b><span style="color:#000;">${dateApproved}</span>
-										</div>` : ``}
-				</td>
-				<td class="text-center">
-					${getStatusStyle(leaveRequestStatus)}
-				</td>
+				<td>${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">${getStatusStyle(leaveRequestStatus)}</td>
 				<td>${remarks}</td>
 			</tr>`;
 		});
@@ -454,13 +482,69 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
-			return html;
 		}, 300);
 	}
 	// ----- END MY FORMS CONTENT -----
 
 
-    // ----- FORM BUTTONS -----
+	// ----- PAGE CONTENT -----
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		$("#page_content").html(preloader);
+
+		if (!isForm) {
+			preventRefresh(false);
+			let html = `
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForApprovalParent">
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane active" id="myFormsTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableMyFormsParent">
+                    </div>
+                </div>
+            </div>`;
+			$("#page_content").html(html);
+
+			headerButton(true, "Add Leave Request");
+			headerTabContent();
+			myFormsContent();
+			updateURL();
+		} else {
+			headerButton(false, "", isRevise, isFromCancelledDocument);
+			headerTabContent(false);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
+		}
+	}
+	viewDocument();
+	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
+	// ----- END PAGE CONTENT -----
+
+
+	// ----- GET LEAVE TYPE OPTION -----
+	function getLeaveTypeOption(inLeaveID = null){
+		let html = `<option value="" disabled selected>Select Leave Type</option>`;
+		
+		leaveType.map((value, index)=>{
+			let {
+				leaveID,
+				leaveName,
+				leaveCredit
+			} = value;
+
+			html += `
+			<option value   = "${leaveID}"
+				leavename   = "${leaveName}"
+				leavecredit	= "${leaveCredit}"
+				${leaveID == inLeaveID ? "selected" : "" }>${leaveName}</option>`;
+		});
+
+		return html;
+	}
+	// ----- END GET LEAVE TYPE OPTION -----
+
+
+	// ----- FORM BUTTONS -----
 	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
@@ -527,15 +611,15 @@ $(document).ready(function() {
 					}
 				} else if(leaveRequestStatus == 2){
 					// DROP
-					button = `
-					<button type="button" 
-						class="btn btn-cancel px-5 p-2"
-						id="btnDrop" 
-						leaveRequestID="${encryptString(leaveRequestID)}"
-						code="${getFormCode("LRF", createdAt, leaveRequestID)}"
-						status="${leaveRequestStatus}"><i class="fas fa-ban"></i> 
-						Drop
-					</button>`;
+					// button = `
+					// <button type="button" 
+					// 	class="btn btn-cancel px-5 p-2"
+					// 	id="btnDrop" 
+					// 	leaveRequestID="${encryptString(leaveRequestID)}"
+					// 	code="${getFormCode("LRF", createdAt, leaveRequestID)}"
+					// 	status="${leaveRequestStatus}"><i class="fas fa-ban"></i> 
+					// 	Drop
+					// </button>`;
 				} else if (leaveRequestStatus == 3) {
 					// DENIED - FOR REVISE
 					if(!isDocumentRevised(leaveRequestID)){
@@ -603,94 +687,138 @@ $(document).ready(function() {
 	// ----- END FORM BUTTONS -----
 
 
-	// ----- SELECT FILE -----
-	$(document).on("change", "[name=files]", function(e) {
-		const filename = this.files[0].name;
-		const filesize = this.files[0].size/1024/1024; // Size in MB
-		if (filesize > 10) {
-			$(this).val("");
-			$(this).parent().parent().find(".displayfile").empty();
-			showNotification("danger", "File size must be less than or equal to 10mb");
-		} else {
-			let html = `
-			<div class="d-flex justify-content-between align-items-center py-2">
-				<span class="filename">${filename}</span>
-				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>`;
-			$(this).parent().find(".displayfile").first().html(html);
-		}
-	})
-	// ----- END SELECT FILE -----
+	// ----- INIT DATERANGEPICKER -----
+	function initDateRangePicker(inLeaveID = 0, dateFrom = '', dateTo = '') {
 
-	// ----- REMOVE FILE -----
-	$(document).on("click", ".btnRemoveFile", function() {
-		$(this).parent().parent().parent().find("[name=files]").first().val("");
-		$(this).closest(".displayfile").empty();
-	})
-	// ----- END REMOVE FILE -----
+		/* ----- LEAVE ----
+		1 - Sick Leave
+		2 - Vacation Leave
+		3... - etc.
+		----- END LEAVE ---- */
 
+		let leaveID        = inLeaveID ? $(`[name="leaveID"]`).val() : 0;
+		let approvedLeaves = getApprovedLeave();
+		DATE_ARRAY = [...holidayData, ...approvedLeaves];
 
-	$(document).on("change",`[name=leaveWorkingDay]`, function(){
-		let thisValue 		= $(this).val();
-		let numberOfDays	= thisValue == "0" ? "0.5" : "1";
-		$(`[name=timeIn]`).prop("disabled",thisValue != "0" ? true:false);
-		$(`[name=timeOut]`).prop("disabled",thisValue != "0" ? true:false);  
+		let isSickLeave = leaveID == 1;
+		let minDate   = isSickLeave ? moment().subtract(10, "d").format("MMMM DD, YYYY") : moment();
+		let maxDate   = isSickLeave ? moment() : false;
+		let startDate = moment(dateFrom || minDate);
+		let endDate   = moment(dateTo || minDate);
 
-		$(`[name=leaveRequestNumberOfDate]`).val(numberOfDays);
-	});
-
-	$(document).on("change",`[name=leaveID]`, function(){
-		let thisValue 		= $(this).val();
-		let leaveCredit 	= $(`option:selected`, this).attr("leaveCredit");
-		$("[name=leaveCredit]").val(leaveCredit);
-		initLeaveDate(thisValue == "1");
-	});
-
-
-
-	function getLeaveType(leaveID = null){
-		let html = `<option disabled ${!leaveID && "selected"} >Select Leave Type</option>`;
-		
-		leaveType.map((value, index)=>{
-			html += `<option
-						value			= "${value.leaveID}"
-						leavename 		= "${value.leaveName}"
-						leavecredit	= "${value.leaveCredit}"
-						${value.leaveID == leaveID ? "selected" : "" }
-						>${value.leaveName}</option>`;
-		});
-
-		return html;
-	}
-
-	function initLeaveDate(isSickLeave = false, value = "", isDisabled = false ){
-		let minDate = moment(isDisabled ? value : "").subtract(10, "d").format("MMMM DD, YYYY");
-		
-		$(`[name=leaveRequestDate]`).daterangepicker({
-			datesDisabled:["January 24, 2022", "January 25, 2022"],
-			// startDate: moment(value).format("MMMM DD, YYYY"),
+		$(`[name="leaveRequestDate"]`).daterangepicker({
+			autoUpdateInput: false,
+			showDropdowns:   true,
+			autoApply:       true,
+			startDate,
+			endDate,
 			minDate,
-			maxDate: isSickLeave ? moment().format("MMMM DD, YYYY") : false,
-			singleDatePicker: true,
-			showDropdowns: true,
-			autoApply: true,
+			maxDate,
 			locale: {
-				format: 'MMMM DD, YYYY'
+				format: "MMMM DD, YYYY"
 			},
 			isInvalidDate: function(date) {
-				if (moment(date).format("MMMM DD, YYYY") == 'January 24, 2022') {
-					 return true; 
+				let optionDay  = moment(date).day();
+
+				let isActive = '1';
+				employeeSchedule.map(schedule => {
+						if (optionDay == 0)  isActive = schedule.sunday    ?? '1';
+					else if (optionDay == 1) isActive = schedule.monday    ?? '1';
+					else if (optionDay == 2) isActive = schedule.tuesday   ?? '1';
+					else if (optionDay == 3) isActive = schedule.wednesday ?? '1';
+					else if (optionDay == 4) isActive = schedule.thursday  ?? '1';
+					else if (optionDay == 5) isActive = schedule.friday    ?? '1';
+					else if (optionDay == 6) isActive = schedule.saturday  ?? '1';
+				});
+
+				let optionDate = moment(date).format("YYYY-MM-DD");
+
+				isActive == '0' && !DATE_ARRAY.includes(optionDate) && DATE_ARRAY.push(optionDate);
+				return holidayData.includes(optionDate) || approvedLeaves.includes(optionDate) || isActive == '0';
+			}
+		}, function(start, end) {
+			let oldDateFrom =  moment($(`[name="leaveRequestDate"]`).attr("dateFrom") ?? new Date).format("YYYY-MM-DD");
+			let oldDateTo   =  moment($(`[name="leaveRequestDate"]`).attr("dateTo") ?? new Date).format("YYYY-MM-DD");
+
+			let dateFrom  = start.format("YYYY-MM-DD");
+			let dateTo    = end.format("YYYY-MM-DD");
+			let dateRange = getDateInRange(dateFrom, dateTo);
+
+			$(`[name="leaveRequestDate"]`).val(start.format('MMMM DD, YYYY') + ' - ' + end.format('MMMM DD, YYYY'));
+			$(`[name="leaveRequestDate"]`).attr("dateFrom", dateFrom);
+			$(`[name="leaveRequestDate"]`).attr("dateTo", dateTo);
+
+			let displayError = () => {
+				/**
+				 * ----- ERROR TYPE -----
+				 * 'invalid'      - Invalid date
+				 * 'insufficient' - Invalid credit
+				 * ----- END ERROR TYPE -----
+				 */
+
+				showNotification("danger", "Invalid date range.");
+	
+				$(`[name="leaveRequestDate"]`).val(moment(oldDateFrom).format('MMMM DD, YYYY') + ' - ' + moment(oldDateTo).format('MMMM DD, YYYY'));
+				$(`[name="leaveRequestDate"]`).attr("dateFrom", oldDateFrom);
+				$(`[name="leaveRequestDate"]`).attr("dateTo", oldDateTo);
+
+				$("#leaveRequestDate").data('daterangepicker').setStartDate(moment(oldDateFrom).format("MMMM DD, YYYY"));
+				$("#leaveRequestDate").data('daterangepicker').setEndDate(moment(oldDateTo).format("MMMM DD, YYYY"));
+
+				let dayCount = +moment.duration(moment(oldDateTo).diff(moment(oldDateFrom))).asDays() || 0;
+					dayCount += 1;
+				$(`[name="leaveRequestNumberOfDate"]`).val(dayCount);
+				$(`[name="leaveRequestDate"]`).attr("dayCount", dayCount);
+			}
+
+			let flag = true;
+			DATE_ARRAY.map(date => {
+				if (dateRange.includes(date)) {
+					if (flag) {
+						displayError();
+						flag = false;
+					}
 				}
-			 }
-		});	
+			})
 
+			if (flag) {
+				let dayCount = +moment.duration(moment(dateTo).diff(moment(dateFrom))).asDays() || 0;
+					dayCount += 1;
+				let isDisabled = dayCount == 1;
+				$(`[name="leaveWorkingDay"]`).val('1').trigger('change').attr("disabled", !isDisabled);
+				$(`[name="leaveRequestNumberOfDate"]`).val(dayCount);
+				$(`[name="leaveRequestDate"]`).attr("dayCount", dayCount);
 
+				if (isSickLeave && dayCount >= 3) {
+					$(`#supportDocument`).html(`Support Documents <code>*</code>`);
+				} else {
+					$(`#supportDocument`).html(`Support Documents`);
+				}
+			}
+
+			$(`[name="leaveRequestDate"]`).removeClass("is-invalid").removeClass("is-valid");
+			$(`#invalid-leaveRequestDate`).text("");
+		});
+
+		if (leaveID) {
+			$(`[name="leaveRequestDate"]`).val(startDate.format('MMMM DD, YYYY') + ' - ' + endDate.format('MMMM DD, YYYY'));
+			$(`[name="leaveRequestDate"]`).attr("dateFrom", moment(startDate).format("YYYY-MM-DD"));
+			$(`[name="leaveRequestDate"]`).attr("dateTo", moment(endDate).format("YYYY-MM-DD"));
+
+			let dayCount = +moment.duration(moment(endDate).diff(moment(startDate))).asDays() || 0;
+				dayCount += 1;
+			$(`[name="leaveRequestNumberOfDate"]`).val(dayCount);
+			$(`[name="leaveRequestDate"]`).attr("dayCount", dayCount);
+			$(`[name="leaveWorkingDay"]`).val('1').trigger("change").attr("disabled", false);
+		}
 	}
+	// ----- END INIT DATERANGEPICKER -----
 
 
-
-    // ----- FORM CONTENT -----
+	// ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		oldLRFilename = [], newLRFilename = [], newLRFiles = [];
+
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 		let {
@@ -701,7 +829,7 @@ $(document).ready(function() {
 			leaveRequestDate			= "",
 			leaveRequestDateFrom		= "",
 			leaveRequestDateTo			= "",
-			leaveRequestNumberOfDate	= "",
+			leaveRequestNumberOfDate	= 0,
 			leaveID						= "",
 			leaveName					= "",
 			leaveRequestRemainingLeave	= "",
@@ -728,22 +856,15 @@ $(document).ready(function() {
 		} = employeeData(data ? employeeID : sessionID);
 		// ----- END GET EMPLOYEE DATA -----
 
-
-		if(leaveDocument){
-			let leaveDocumentsArr = leaveDocument.split("|");
-			leaveDocumentsArr.map(file=>{
-					EXIST_FILE_ARRAY.push(file);
-			});
-		}
-
 		let disabledFileLeave = "disabled";
-		if(leaveRequestStatus=="1" || leaveRequestStatus=="0" ){
-			let approversArray  = approversID.split("|");
+		let isLastApprover = false;
+		if(approversID && leaveRequestStatus == "1") {
+			let approversArray  = approversID?.split("|");
 			let lastlength 		= approversArray.length;
 			let lastApproverID 	= approversArray[parseInt(lastlength) - 1];
 			disabledFileLeave 	= lastApproverID == sessionID ? "" : "disabled";
+			isLastApprover      = disabledFileLeave ? false : true;
 		}
-
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
@@ -751,11 +872,13 @@ $(document).ready(function() {
 		$("#btnBack").attr("status", leaveRequestStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
+		$("#btnBack").attr("lastApprover", isLastApprover);
 
 		let disabled = readOnly ? "disabled" : ``;
 		
-		let button = formButtons(data, isRevise, isFromCancelledDocument);
-
+		let button            = formButtons(data, isRevise, isFromCancelledDocument);
+		let disabledTime      = !disabled && leaveWorkingDay != "0" ? "disabled" : disabled;
+		let disableWorkingDay = !disabled && (leaveWorkingDay == "1" || parseFloat(leaveRequestNumberOfDate) > 1) ? "disabled" : disabled;
 
 
 		let reviseDocumentNo    = isRevise ? leaveRequestID : reviseLeaveRequestID;
@@ -865,9 +988,10 @@ $(document).ready(function() {
 			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
 					<label>Leave Type <code>*</code> </label>
-					<select class="form-control validate select2 w-100" name="leaveID" required ${disabled}>
-						${getLeaveType(leaveID)}
+					<select class="form-control validate select2 w-100" name="leaveID" id="leaveID" required ${disabled}>
+						${getLeaveTypeOption(leaveID)}
 					</select>
+					<div class="d-block invalid-feedback" id="invalid-leaveID"></div>
 				</div>
 			</div>
 			<div class="col-md-4 col-sm-12">
@@ -879,7 +1003,7 @@ $(document).ready(function() {
 			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
 					<label>Status</label>
-					<select class="form-control validate select2 w-100" name="leaveStatus" ${disabledFileLeave}>
+					<select class="form-control validate select2 w-100" name="leaveStatus" style="width: 100%" ${disabledFileLeave}>
 							<option value="0" ${leaveStatus == "0" ? "selected" : ""}>Unpaid</option>
 							<option value="1" ${leaveStatus == "1" ? "selected" : ""}>Paid</option>
 					</select>
@@ -889,31 +1013,8 @@ $(document).ready(function() {
 			<div class="col-md-3 col-sm-12">
 				<div class="form-group">
 					<label>Date <code>*</code> </label>
-					<input type="button" class="form-control text-left" name="leaveRequestDate" value="" required ${disabled}>
-				</div>
-			</div>
-
-			<div class="col-md-3 col-sm-12">
-				<div class="form-group">
-					<label>Working Day <code>*</code> </label>
-					<select class="form-control validate select2 w-100" name="leaveWorkingDay" required ${disabled}>
-							<option value="1" ${leaveWorkingDay == "1" ? "selected" : ""}>Whole-day</option>
-							<option value="0" ${leaveWorkingDay == "0" ? "selected" : ""}>Half-day</option>
-					</select>
-				</div>
-			</div>
-
-			<div class="col-md-2 col-sm-12">
-				<div class="form-group">
-					<label>Time In <code>*</code></label>
-					<input type="time" class="form-control" name="timeIn" ${disabled} value="${timeIn}">
-				</div>
-			</div>
-
-			<div class="col-md-2 col-sm-12">
-				<div class="form-group">
-					<label>Time Out <code>*</code></label>
-					<input type="time" class="form-control" name="timeOut" ${disabled} value="${timeOut}">
+					<input type="button" class="form-control text-left validate" name="leaveRequestDate" id="leaveRequestDate" value="${leaveRequestDate || ""}" required ${disabled}>
+					<div class="d-block invalid-feedback" id="invalid-leaveRequestDate"></div>
 				</div>
 			</div>
 
@@ -921,6 +1022,33 @@ $(document).ready(function() {
 				<div class="form-group">
 					<label>Number of Day/s </label>
 					<input type="text" class="form-control" name="leaveRequestNumberOfDate" disabled value="${leaveRequestNumberOfDate || "1" }">
+				</div>
+			</div>
+
+			<div class="col-md-3 col-sm-12">
+				<div class="form-group">
+					<label>Working Day ${!disabled ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2 w-100" name="leaveWorkingDay" id="leaveWorkingDay" required ${disableWorkingDay}>
+							<option value="1" ${leaveWorkingDay == "1" ? "selected" : ""}>Whole-day</option>
+							<option value="0" ${leaveWorkingDay == "0" ? "selected" : ""}>Half-day</option>
+					</select>
+					<div class="d-block invalid-feedback" id="invalid-leaveWorkingDay"></div>
+				</div>
+			</div>
+
+			<div class="col-md-2 col-sm-12">
+				<div class="form-group">
+					<label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
+					<input type="time" class="form-control validate" name="timeIn" id="timeIn" ${disabledTime} value="${timeIn}">
+					<div class="d-block invalid-feedback" id="invalid-timeIn"></div>
+				</div>
+			</div>
+
+			<div class="col-md-2 col-sm-12">
+				<div class="form-group">
+					<label>Time Out ${!disabled ? "<code>*</code>" : ""}</label>
+					<input type="time" class="form-control validate" name="timeOut" id="timeOut" ${disabledTime} value="${timeOut}">
+					<div class="d-block invalid-feedback" id="invalid-timeOut"></div>
 				</div>
 			</div>
 
@@ -937,12 +1065,19 @@ $(document).ready(function() {
 				<div class="row">
 					<div class="col-md-12 col-sm-12">
 						<div class="form-group">
-							<label>Support Documents </label>
+							<label id="supportDocument">Support Documents </label>
 						 	<input  type="file" 
 								class="form-control" 
 								name="leaveDocuments" 
 								id="leaveDocuments"
-								accept="image/*, .pdf, .doc, .docx"  multiple ${disabled}>
+								accept="image/*, .pdf, .doc, .docx"  
+								multiple="multiple"
+								filename="${leaveDocument}"
+								${disabled}>
+							<div class="d-block invalid-feedback" id="invalid-leaveDocuments"></div>
+							<div class="row display-image-parent" id="displayFile">
+								${displayFile(leaveDocument)}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -950,7 +1085,6 @@ $(document).ready(function() {
 
 			<div class="col-12">
 				<div class="row row-display-image">
-					${displayImage(false , readOnly, "assets/upload-files/leave-documents")}
 				</div>
 				
 			</div>
@@ -968,8 +1102,8 @@ $(document).ready(function() {
 			$("#page_content").html(html);
 			initDataTables();
 			initAll();
-			initHours();
-			initLeaveDate( leaveID== "1", leaveRequestDateFrom, disabled == "disabled");
+			!disabled && initDateRangePicker(leaveID, leaveRequestDateFrom, leaveRequestDateTo);
+
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
 				$("#page_content").find(`input, select, textarea`).each(function() {
@@ -980,57 +1114,67 @@ $(document).ready(function() {
 				$('#btnBack').attr("status", "2");
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
-			// ----- END NOT ALLOWED FOR UPDATE -----
-			
-			if($(`[name=leaveWorkingDay]`).val() != "0.5"){
-				$(`[name=timeIn]`).prop("disabled",true);
-				$(`[name=timeOut]`).prop("disabled",true); 
-			}
 
-			$(`[name=leaveStatus]`).prop("disabled", leaveRequestStatus == "2");
-
-			return html;
 		}, 200);
 	}
 	// ----- END FORM CONTENT -----
 
-    // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
-		$("#page_content").html(preloader);
-		FILE_ARRAY 		 = [];
-		EXIST_FILE_ARRAY = [];
-		if (!isForm) {
-			preventRefresh(false);
-			let html = `
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
-                    <div class="table-responsive" id="tableForApprovalParent">
-                    </div>
-                </div>
-                <div role="tabpanel" class="tab-pane active" id="myFormsTab" aria-expanded="false">
-                    <div class="table-responsive" id="tableMyFormsParent">
-                    </div>
-                </div>
-            </div>`;
-			$("#page_content").html(html);
 
-			headerButton(true, "Add Leave Request");
-			headerTabContent();
-			myFormsContent();
-			updateURL();
-		} else {
-			headerButton(false, "", isRevise, isFromCancelledDocument);
-			headerTabContent(false);
-			formContent(data, readOnly, isRevise, isFromCancelledDocument);
+	// ----- CHECK FILE LENGTH -----
+	function checkFileLength() {
+		let count = oldLRFilename.length + newLRFilename.length;
+		if (count > 10) {
+			showNotification("danger", "Only 10 files are allowed to upload.");
+			return false;
 		}
+		return true;
 	}
-	viewDocument();
-	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
-	// ----- END PAGE CONTENT -----
+	// ----- END CHECK FILE LENGTH -----
 
 
-	// ----- GET Leave Request DATA -----
-	function getleaveRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	// ----- DISPLAY FILE -----
+    function displayFile(file = null, blob = "", link = true, oldFiles = true) {
+        let html = ``;
+        if (file && file != null && file != "null") {
+			let fileArr = file.split("|");
+			fileArr.forEach(rlFile => {
+				if (oldFiles) oldLRFilename.push(rlFile);
+				
+				let fileType = rlFile.split(".");
+					fileType = fileType[fileType.length-1].toLowerCase();
+				let imageExtensions = ["jpg", "png", "jpeg", "gif"];
+				let isFileImage = imageExtensions.includes(fileType);
+				let targetAttr = isFileImage ? `display="true" blob="${blob}"` : 
+					(oldFiles ? `target="_blank"` : "");
+
+				let otherAttr = link ? `
+				href="${base_url+"assets/upload-files/leave-documents/"+rlFile}"` : `href="javascript:void(0)"`;
+				html += `
+				<div class="col-md-4 col-sm-12 display-image-content">
+					<div class="display-image">
+						<div class="d-flex justify-content-start align-items-center p-0">
+							<span class="btnRemoveFile pr-2 display-image-remove"
+								filename="${rlFile}">
+								<i class="fas fa-close"></i>
+							</span>
+							<a class="filename display-image-filename"
+								title="${rlFile}"
+								${otherAttr}
+								${targetAttr}>
+								${rlFile}
+							</a>
+						</div>
+					</div>
+				</div>`;
+			})
+        }
+        return html;
+    }
+    // ----- END DISPLAY FILE -----
+
+
+	// ----- GET LEAVE REQUEST DATA -----
+	function getleaveRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0") {
 
 		/**
 		 * ----- ACTION ---------
@@ -1058,132 +1202,174 @@ $(document).ready(function() {
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
-			data["leaveRequestID"] = id;
 			formData.append("leaveRequestID", id);
 
 			if (status != "2") {
-				data["leaveRequestStatus"] = status;
 				formData.append("leaveRequestStatus", status);
 			}
 		}
-
-		data["action"]                = action;
-		data["method"]                = method;
-		data["updatedBy"]             = sessionID;
 
 		formData.append("action", action);
 		formData.append("method", method);
 		formData.append("updatedBy", sessionID);
 
 		if (currentStatus == "0" && method != "approve") {
+			let leaveRequestCode		   = $(`[name=leaveRequestCode]`).val();
+			let leaveRequestDate		   = $(`[name=leaveRequestDate]`).val();
+			let leaveRequestDateFrom	   = $(`[name=leaveRequestDate]`).attr("dateFrom");
+			let leaveRequestDateTo		   = $(`[name=leaveRequestDate]`).attr("dateTo");
+			let leaveRequestNumberOfDate   = $(`[name=leaveRequestNumberOfDate]`).val();
+			let leaveID					   = $(`[name=leaveID]`).val();
+			let leaveName				   = $(`[name=leaveID] option:selected`).attr("leavename") || "";
+			let leaveRequestRemainingLeave = $(`[name=leaveCredit]`).val();
+			let leaveStatus				   = $(`[name=leaveStatus]`).val();
+			let leaveWorkingDay			   = $(`[name=leaveWorkingDay]`).val();
+			let timeIn					   = $(`[name=timeIn]`).val();
+			let timeOut					   = $(`[name=timeOut]`).val();
 
-			var existLeaveDocuments 			= EXIST_FILE_ARRAY.join("|");
-
-			let leaveRequestCode			= $(`[name=leaveRequestCode]`).val();
-			let leaveRequestDate			= $(`[name=leaveRequestDate]`).val();
-			let leaveRequestDateFrom		= moment($(`[name=leaveRequestDate]`).val()).format("YYYY-MM-DD");
-			let leaveRequestDateTo			= moment($(`[name=leaveRequestDate]`).val()).format("YYYY-MM-DD");
-			let leaveRequestNumberOfDate	= $(`[name=leaveRequestNumberOfDate]`).val();
-			let leaveID						= $(`[name=leaveID]`).val();
-			let leaveName					= $(`[name=leaveID] option:selected`).attr("leavename");
-			let leaveRequestRemainingLeave	= $(`[name=leaveCredit]`).val();
-			let leaveStatus					= $(`[name=leaveStatus]`).val();
-			let leaveWorkingDay				= $(`[name=leaveWorkingDay]`).val();
-			let timeIn						= $(`[name=timeIn]`).val();
-			let timeOut						= $(`[name=timeOut]`).val();
-
-
-
-			data["leaveRequestCode"]			= leaveRequestCode;
-			data["leaveRequestDate"]			= leaveRequestDate;
-			data["leaveRequestDateFrom"]		= leaveRequestDateFrom;
-			data["leaveRequestDateTo"]			= leaveRequestDateTo;
-			data["leaveRequestNumberOfDate"]	= leaveRequestNumberOfDate;
-			data["leaveID"]						= leaveID;
-			data["leaveName"]					= leaveName;
-			data["leaveRequestRemainingLeave"]	= leaveRequestRemainingLeave;
-			data["leaveStatus"]					= leaveStatus;
-			data["leaveWorkingDay"]				= leaveWorkingDay;
-			data["timeIn"]						= timeIn;
-			data["timeOut"]						= timeOut;
-
-
-			formData.append("leaveRequestCode", 			leaveRequestCode);
-			formData.append("leaveRequestDate", 			leaveRequestDate);
-			formData.append("leaveRequestDateFrom", 		leaveRequestDateFrom);
-			formData.append("leaveRequestDateTo", 			leaveRequestDateTo);
-			formData.append("leaveRequestNumberOfDate", 	leaveRequestNumberOfDate);
-			formData.append("leaveID", 						leaveID);
-			formData.append("leaveName", 					leaveName);
-			formData.append("leaveRequestRemainingLeave", 	leaveRequestRemainingLeave);
-			formData.append("leaveStatus", 					leaveStatus);
-			formData.append("leaveWorkingDay", 				leaveWorkingDay);
-			formData.append("timeIn", 						timeIn);
-			formData.append("timeOut", 						timeOut);
-
-
-
-
-
-			data["employeeID"]            		= sessionID;
-			data["leaveRequestReason"]       	= $("[name=leaveRequestReason]").val() || null;
-			data["existLeaveDocuments"] 		= existLeaveDocuments;
-		
+			formData.append("leaveRequestCode", leaveRequestCode);
+			formData.append("leaveRequestDate", leaveRequestDate);
+			leaveRequestDateFrom && formData.append("leaveRequestDateFrom", leaveRequestDateFrom);
+			leaveRequestDateTo && formData.append("leaveRequestDateTo", leaveRequestDateTo);
+			formData.append("leaveRequestNumberOfDate", leaveRequestNumberOfDate);
+			formData.append("leaveID", leaveID);
+			formData.append("leaveName", leaveName);
+			formData.append("leaveRequestRemainingLeave", leaveRequestRemainingLeave);
+			formData.append("leaveStatus", leaveStatus);
+			formData.append("leaveWorkingDay", leaveWorkingDay);
+			formData.append("timeIn", timeIn);
+			formData.append("timeOut", timeOut);
 
 			formData.append("employeeID", sessionID);
-			formData.append("leaveRequestReason", $("[name=leaveRequestReason]").val() || null);
-			formData.append("existLeaveDocuments", existLeaveDocuments);
+			formData.append("leaveRequestReason", $("[name=leaveRequestReason]").val()?.trim() || "");
 			
 			if (action == "insert") {
-				data["createdBy"]   = sessionID;
-				data["createdAt"]   = dateToday();
-
 				formData.append("createdBy", sessionID);
 				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
-				data["leaveRequestID"] = id;
 				formData.append("leaveRequestID", id);
 			}
 
 			if (method == "submit") {
-				data["submittedAt"] = dateToday();
 				formData.append("submittedAt", dateToday());
 				if (approversID) {
-					data["approversID"]           	=  approversID;
-					data["leaveRequestStatus"] 		=  1;
-
-					formData.append("approversID",  		approversID);
-					formData.append("leaveRequestStatus",  	1);
+					formData.append("approversID", approversID);
+					formData.append("leaveRequestStatus",   	1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-				
-					data["approversID"]           	=  sessionID;
-					data["approversStatus"]       	=  2;
-					data["approversDate"]         	=  dateToday();
-					data["leaveRequestStatus"] 		=  2;
-
-					formData.append("approversID",  		sessionID);
-					formData.append("approversStatus",  	2);
-					formData.append("approversDate",  		dateToday());
-					formData.append("leaveRequestStatus",  	2);
+					formData.append("approversID", sessionID);
+					formData.append("approversStatus", 2);
+					formData.append("approversDate", dateToday());
+					formData.append("leaveRequestStatus", 2);
 				}
-			}
-
-			for (let index = 0; index < FILE_ARRAY.length; index++){
-				formData.append(`files[${index}]`, FILE_ARRAY[index]);
-				data["files"].push(FILE_ARRAY[index]);
-				
-				formData.append(`files${index}`, FILE_ARRAY[index]);
 			}
 		} 
 
-		
+		// ----- FILES -----
+		formData.append("uploadFileFolder", "leave-documents");
+		formData.append("uploadFileColumnName[0]", "leaveDocument");
+		formData.append("uploadFileNewFilename[0]", newLRFilename.join("|"));
+		formData.append("uploadFileOldFilename[0]", oldLRFilename.join("|"));
+		newLRFiles.map((file, index) => {
+			formData.append(`uploadFiles[0][${index}]`, file);
+		})
+		// ----- FILES -----
 
-		return isObject ? data : formData;
+		return formData;
 	}
-	// ----- END GET Leave Request DATA -----
+	// ----- END GET LEAVE REQUEST DATA -----
 
 
-    // ----- OPEN ADD FORM -----
+	// ----- MODAL IMAGE -----
+	$(document).on("click", `.display-image-filename`, function(e) {
+		let display = $(this).attr("display") == "true";
+		let source  = $(this).attr("blob") || $(this).attr("href");
+		if (display) {
+			e.preventDefault();
+			$("#display-image-preview").attr("src", source);
+			$("#display-image-modal").modal("show");
+		}
+	})
+	// ----- END MODAL IMAGE -----
+
+
+	// ----- SELECT FILE -----
+	$(document).on("change", `[name="leaveDocuments"]`, function() {
+		let countFiles = oldLRFilename.length + newLRFilename.length;
+		if (this.files && this.files[0]) {
+			let files = this.files;
+			let filesLength = this.files.length;
+			for (var i=0; i<filesLength; i++) {
+				countFiles++;
+
+				const filesize = files[i].size/1024/1024; // Size in MB
+				const filetype = files[i].type;
+				const filename = files[i].name;
+				const fileArr  = filename.split(".");
+				const name     = fileArr?.[0];
+				const type     = fileArr?.[fileArr.length-1]?.toLowerCase();
+				const displayName = `${name}${countFiles}.${type}`;
+				if (filesize > 10) {
+					showNotification("danger", `${filename} - File size must be less than or equal to <b>10mb</b>`);
+				} else if (!["png", "jpg", "jpeg", "doc", "docx", "pdf"].includes(type)) {
+					showNotification("danger", `${filename} - <b>Invalid file type</b>`);
+				} else {
+					newLRFilename.push(displayName);
+					newLRFiles.push(files[i]);
+					let blob = URL.createObjectURL(files[i]);
+					$(`#displayFile`).append(displayFile(displayName, blob, true, false));
+				}
+			}
+			$(this).val("");
+        }
+	})
+	// ----- END SELECT FILE -----
+
+
+	// ----- REMOVE FILE -----
+	$(document).on("click", `.btnRemoveFile`, function() {
+		const filename     = $(this).attr("filename");
+		const newFileIndex = newLRFilename.indexOf(filename);
+		const oldFileIndex = oldLRFilename.indexOf(filename);
+
+		newFileIndex != -1 && newLRFilename.splice(newFileIndex, 1);
+		newFileIndex != -1 && newLRFiles.splice(newFileIndex, 1);
+		oldFileIndex != -1 && oldLRFilename.splice(oldFileIndex, 1);
+
+		$display = $(this).closest(".display-image-content");
+		$display.fadeOut(500, function() {
+			$display.remove();
+		})
+    })
+    // ----- END REMOVE FILE -----
+
+
+	// ----- SELECT LEAVE TYPE -----
+	$(document).on("change",`[name="leaveID"]`, function() {
+		let leaveID     = $(this).val();
+		let leaveCredit = +$(`option:selected`, this).attr("leaveCredit");
+		leaveCredit = leaveCredit > 0 ? leaveCredit : 0;
+		$(`[name="leaveCredit"]`).val(leaveCredit);
+		initDateRangePicker(leaveID);
+	});
+	// ----- END SELECT LEAVE TYPE -----
+
+
+	// ----- SELECT WORKING DAY -----
+	$(document).on("change",`[name="leaveWorkingDay"]`, function(){
+		let workingDay   = $(this).val();
+		let dayCount     = +$(`[name="leaveRequestDate"]`).attr("dayCount") || 1;
+		let numberOfDays = workingDay == "0" ? "0.5" : dayCount;
+
+		let disabled = workingDay != "0" ? true : false;
+		$(`[name=timeIn], [name=timeOut]`).prop("disabled", disabled);
+		$(`[name=timeIn], [name=timeOut]`).prop("required", !disabled);
+		$(`[name=timeIn], [name=timeOut]`).val("");
+		$(`[name=leaveRequestNumberOfDate]`).val(numberOfDays);
+	});
+	// ----- END SELECT WORKING DAY -----
+
+
+	// ----- OPEN ADD FORM -----
 	$(document).on("click", "#btnAdd", function () {
 		pageContent(true);
 		updateURL(null, true);
@@ -1191,7 +1377,7 @@ $(document).ready(function() {
 	// ----- END OPEN ADD FORM -----
 
 
-    // ----- OPEN EDIT FORM -----
+	// ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
 		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
@@ -1207,7 +1393,7 @@ $(document).ready(function() {
 	// ----- END VIEW DOCUMENT -----
 
 
-    // ----- VIEW DOCUMENT -----
+	// ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
 		const id 					= decryptString($(this).attr("leaveRequestID"));
 		const fromCancelledDocument = $(this).attr("cancel" ) == "true";
@@ -1261,7 +1447,7 @@ $(document).ready(function() {
 	// ----- END SAVE CLOSE FORM -----
 
 
-    // ----- SAVE DOCUMENT -----
+	// ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
 		const id       					= decryptString($(this).attr("leaveRequestID"));
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
@@ -1282,64 +1468,21 @@ $(document).ready(function() {
 				data.append("action", "update");
 			}
 		} 
+		saveleaveRequest(data, "save", null, pageContent);
 
-		let btnBackCondition = $("#btnBack").attr("status");
-
-		if(btnBackCondition != "7"){
-			saveleaveRequest(data, "save", null, pageContent);
-		}else{ 
-			$("#page_content").html(preloader);
-			pageContent();
-		}
 		
+		// let btnBackCondition = $("#btnBack").attr("status");
+		// if(btnBackCondition != "7"){
+		// 	saveleaveRequest(data, "save", null, pageContent);
+		// }else{ 
+		// 	$("#page_content").html(preloader);
+		// 	pageContent();
+		// }
 	});
 	// ----- END SAVE DOCUMENT -----
 
 
-    // ----- SUBMIT DOCUMENT -----
-	$(document).on("click", "#btnSubmit", function () {
-		const id           				= decryptString($(this).attr("leaveRequestID"));
-		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
-		const revise       				= $(this).attr("revise") == "true";
-		const validate     				= validateForm("form_leave_request");
-			if (validate) {
-					const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-					const data   = getleaveRequestData(action, "submit", "1", id);
-		
-					if (revise) {
-						if(!isFromCancelledDocument){
-							data.append("reviseLeaveRequestID", id);
-							data.delete("leaveRequestID");
-						}
-					}
-	
-					let approversID = "", approversDate = "";
-					for (var i of data) {
-						if (i[0] == "approversID")   approversID   = i[1];
-						if (i[0] == "approversDate") approversDate = i[1];
-					}
-		
-					const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-					let notificationData = false;
-					if (employeeID != sessionID) {
-						notificationData = {
-							moduleID:                55,
-							notificationTitle:       "Leave Request",
-							notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-							notificationType:        2,
-							employeeID,
-						};
-					}
-					saveleaveRequest(data, "submit", notificationData, pageContent);
-				
-			}
-		
-		
-	});
-	// ----- END SUBMIT DOCUMENT -----
-
-
-    // ----- CANCEL DOCUMENT -----
+	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
 		const id     = decryptString($(this).attr("leaveRequestID"));
 		const status = $(this).attr("status");
@@ -1351,11 +1494,77 @@ $(document).ready(function() {
 	// ----- END CANCEL DOCUMENT -----
 
 
-    // ----- APPROVE DOCUMENT -----
+	// ----- SUBMIT DOCUMENT -----
+	function validateDate() {
+		let dateFrom  = moment($(`[name="leaveRequestDate"]`).attr("dateFrom") || new Date).format("YYYY-MM-DD");
+		let dateTo    = moment($(`[name="leaveRequestDate"]`).attr("dateTo") || new Date).format("YYYY-MM-DD");
+		let dateRange = getDateInRange(dateFrom, dateTo);
+		let flag = true;
+		DATE_ARRAY.map(date => {
+			if (dateRange.includes(date)) {
+				if (flag) {
+					showNotification("danger", "Please select valid date.");
+					flag = false;
+				}
+			}
+		})
+		return flag;
+	}
+
+	$(document).on("click", "#btnSubmit", function () {
+		const id           				= decryptString($(this).attr("leaveRequestID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise       				= $(this).attr("revise") == "true";
+		const validate     				= validateForm("form_leave_request");
+
+		if (validate && validateDate()) {
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+			const data   = getleaveRequestData(action, "submit", "1", id);
+
+			if (revise) {
+				if(!isFromCancelledDocument){
+					data.append("reviseLeaveRequestID", id);
+					data.delete("leaveRequestID");
+				}
+			}
+
+			let approversID = "", approversDate = "";
+			for (var i of data) {
+				if (i[0] == "approversID")   approversID   = i[1];
+				if (i[0] == "approversDate") approversDate = i[1];
+			}
+
+			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+			let notificationData = false;
+			if (employeeID != sessionID) {
+				notificationData = {
+					moduleID:                55,
+					notificationTitle:       "Leave Request",
+					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+					notificationType:        2,
+					employeeID,
+				};
+			}
+			saveleaveRequest(data, "submit", notificationData, pageContent);
+		}
+		
+	});
+	// ----- END SUBMIT DOCUMENT -----
+
+
+	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
 		const id       		= decryptString($(this).attr("leaveRequestID"));
 		const feedback 		= $(this).attr("code") || getFormCode("LRF", dateToday(), id);
-		let tableData  		= getTableData("hris_leave_request_tbl", "", "leaveRequestID = " + id);
+		let isLastApprover  = $(`#btnBack`).attr("lastApprover") == "true";
+		let leaveCredit     = +$(`[name="leaveCredit"]`).val();
+		let dayCount        = +$(`[name="leaveRequestNumberOfDate"]`).val();
+		let leaveStatus     = $(`[name="leaveStatus"]`).val();
+
+		if (isLastApprover && leaveStatus == '1' && dayCount > leaveCredit) {
+			showNotification("danger", "Insufficient leave credits.")
+		} else {
+			let tableData  		= getTableData("hris_leave_request_tbl", "", "leaveRequestID = " + id);
 		
 			let leaveRequestID  = tableData[0].leaveRequestID;
 			let approversID     = tableData[0].approversID;
@@ -1364,17 +1573,17 @@ $(document).ready(function() {
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 			let leaveStatus 	= $(`[name=leaveStatus]`).val();
-
-			let data 						= getleaveRequestData("update", "approve", "2", id);
-			data.append("approversStatus", 	updateApproveStatus(approversStatus, 2));
-			let dateApproved 				= updateApproveDate(approversDate)
-			data.append("approversDate", 	dateApproved);
-
+	
+			let data = getleaveRequestData("update", "approve", "2", id);
+			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
+			let dateApproved = updateApproveDate(approversDate)
+			data.append("approversDate", dateApproved);
+	
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                55,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Leave Request",
 					notificationDescription: `${feedback}: Your request has been approved.`,
@@ -1384,7 +1593,7 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                55,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Leave Request",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -1392,22 +1601,24 @@ $(document).ready(function() {
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
 				};
 			}
-
+	
 			data.append("leaveRequestStatus", status);
 			data.append("leaveStatus", leaveStatus);
 			saveleaveRequest(data, "approve", notificationData, pageContent, leaveRequestID);
+		}
+
 		
 	});
 	// ----- END APPROVE DOCUMENT -----
 
 
-    // ----- REJECT DOCUMENT -----
+	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
 		const id       = decryptString($(this).attr("leaveRequestID"));
 		const feedback = $(this).attr("code") || getFormCode("LRF", dateToday(), id);
 
 		$("#modal_leave_request_content").html(preloader);
-		$("#modal_leave_request .page-title").text("DENY Leave Request");
+		$("#modal_leave_request .page-title").text("DENY LEAVE REQUEST");
 		$("#modal_leave_request").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -1471,26 +1682,11 @@ $(document).ready(function() {
 	});
 	// ----- END REJECT DOCUMENT -----
 
-	// ----- DROP DOCUMENT -----
-	$(document).on("click", "#btnDrop", function() {
-		const leaveRequestID = decryptString($(this).attr("leaveRequestID"));
-		const feedback       = $(this).attr("code") || getFormCode("LRF", dateToday(), id);
-
-		const id = decryptString($(this).attr("leaveRequestID"));
-		let data = new FormData;
-		data.append("leaveRequestID", 	leaveRequestID);
-		data.append("action", 			"update");
-		data.append("method", 			"drop");
-		data.append("updatedBy", 		sessionID);
-
-		saveleaveRequest(data, "drop", null, pageContent);
-	})
-	// ----- END DROP DOCUMENT -----
-	
 
 
 
-    // ----- NAV LINK -----
+
+	// ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
 		if (tab == "#forApprovalTab") {
@@ -1503,346 +1699,187 @@ $(document).ready(function() {
 	// ----- END NAV LINK -----
 
 
-    // ----- APPROVER STATUS -----
-	function getApproversStatus(approversID, approversStatus, approversDate) {
-		let html = "";
-		if (approversID) {
-			let idArr = approversID.split("|");
-			let statusArr = approversStatus ? approversStatus.split("|") : [];
-			let dateArr = approversDate ? approversDate.split("|") : [];
-			html += `<div class="row mt-4">`;
 	
-			idArr && idArr.map((item, index) => {
-				let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
-				let status = statusArr[index] ? statusArr[index] : "";
-				let statusBadge = "";
-				if (date && status) {
-					if (status == 2) {
-						statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
-					} else if (status == 3) {
-						statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
-					}
+
+	// --------------- DATABASE RELATION ---------------
+	function getConfirmation(method = "submit") {
+		const title = "Leave Request";
+		let swalText, swalImg;
+
+		$("#modal_leave_request").text().length > 0 && $("#modal_leave_request").modal("hide");
+
+		switch (method) {
+			case "save":
+				swalTitle = `SAVE DRAFT`;
+				swalText  = "Are you sure to save this document?";
+				swalImg   = `${base_url}assets/modal/draft.svg`;
+				break;
+			case "submit":
+				var condition = $("[name=timelineProposedBudget]").attr("timelineBudgetStatus");
+				if(condition != 0){
+					swalTitle = `SUBMIT ${title.toUpperCase()}`;
+					swalText  = "Are you sure to submit this document?";
+					swalImg   = `${base_url}assets/modal/add.svg`;
+				}else{
+					swalTitle = `PROPOSE ${title.toUpperCase()}`;
+					swalText  = "Are you sure to submit the project timeline for proposal";
+					swalImg   = `${base_url}assets/modal/add.svg`;
 				}
-	
-				html += `
-				<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
-					<div class="d-flex justify-content-start align-items-center">
-						<span class="font-weight-bold">
-							${employeeFullname(item)}
-						</span>
-						<small>&nbsp;- Level ${index + 1} Approver</small>
-					</div>
-					${statusBadge}
-				</div>`;
-			});
-			html += `</div>`;
+				break;
+			case "approve":
+				swalTitle = `APPROVE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to approve this document?";
+				swalImg   = `${base_url}assets/modal/approve.svg`;
+				break;
+			case "deny":
+				swalTitle = `DENY ${title.toUpperCase()}`;
+				swalText  = "Are you sure to deny this document?";
+				swalImg   = `${base_url}assets/modal/reject.svg`;
+				break;
+			case "cancelform":
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
+				swalText  = "Are you sure to cancel this document?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
+			case "drop":
+				swalTitle = `DROP ${title.toUpperCase()}`;
+				swalText  = "Are you sure to drop this document?";
+				swalImg   = `${base_url}assets/modal/drop.svg`;
+				break;
+			default:
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
+				swalText  = "Are you sure that you want to cancel this process?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
 		}
-		return html;
+		return Swal.fire({
+			title:              swalTitle,
+			text:               swalText,
+			imageUrl:           swalImg,
+			imageWidth:         200,
+			imageHeight:        200,
+			imageAlt:           "Custom image",
+			showCancelButton:   true,
+			confirmButtonColor: "#dc3545",
+			cancelButtonColor:  "#1a1a1a",
+			cancelButtonText:   "No",
+			confirmButtonText:  "Yes"
+		})
 	}
-	// ----- END APPROVER STATUS --
 
+	function saveleaveRequest(data = null, method = "submit", notificationData = null, callback = null, lastApproverID = 0) {
+		let thisReturnData = false;
+		if (data) {
+			const confirmation = getConfirmation(method);
+			confirmation.then(res => {
+				if (res.isConfirmed) {
+					$.ajax({
+						method:      "POST",
+						url:         `leave_request/saveleaveRequest`,
+						data,
+						processData: false,
+						contentType: false,
+						global:      false,
+						cache:       false,
+						async:       false,
+						dataType:    "json",
+						beforeSend: function() {
+							$("#loader").show();
+						},
+						success: function(data) {
+							let result = data.split("|");
+			
+							let isSuccess   = result[0];
+							let message     = result[1];
+							let insertedID  = result[2];
+							let dateCreated = result[3];
 
-	// CHECK IF THE DOCUMENT IS ALREADY REVISED
-	function isRevised(id = null){
-		let revised = false;
-		var tableData = getTableData("hris_leave_request_tbl","reviseLeaveRequestID",`reviseLeaveRequestID=`+id);
-
-		revised = tableData.length > 0 ? true : false;
-		return revised; 
-	}
-	// END CHECK IF THE DOCUMENT IS ALREADY REVISED
-
-
-})
-
-
-// --------------- DATABASE RELATION ---------------
-function getConfirmation(method = "submit") {
-	const title = "Leave Request";
-	let swalText, swalImg;
-
-	$("#modal_leave_request").text().length > 0 && $("#modal_leave_request").modal("hide");
-
-	switch (method) {
-		case "save":
-			swalTitle = `SAVE DRAFT`;
-			swalText  = "Are you sure to save this document?";
-			swalImg   = `${base_url}assets/modal/draft.svg`;
-			break;
-		case "submit":
-			var condition = $("[name=timelineProposedBudget]").attr("timelineBudgetStatus");
-			console.log(condition);
-			if(condition != 0){
-				swalTitle = `SUBMIT ${title.toUpperCase()}`;
-				swalText  = "Are you sure to submit this document?";
-				swalImg   = `${base_url}assets/modal/add.svg`;
-			}else{
-				swalTitle = `PROPOSE ${title.toUpperCase()}`;
-				swalText  = "Are you sure to submit the project timeline for proposal";
-				swalImg   = `${base_url}assets/modal/add.svg`;
-			}
-			break;
-		case "approve":
-			swalTitle = `APPROVE ${title.toUpperCase()}`;
-			swalText  = "Are you sure to approve this document?";
-			swalImg   = `${base_url}assets/modal/approve.svg`;
-			break;
-		case "deny":
-			swalTitle = `DENY ${title.toUpperCase()}`;
-			swalText  = "Are you sure to deny this document?";
-			swalImg   = `${base_url}assets/modal/reject.svg`;
-			break;
-		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()}`;
-			swalText  = "Are you sure to cancel this document?";
-			swalImg   = `${base_url}assets/modal/cancel.svg`;
-			break;
-		case "drop":
-			swalTitle = `DROP ${title.toUpperCase()}`;
-			swalText  = "Are you sure to drop this document?";
-			swalImg   = `${base_url}assets/modal/drop.svg`;
-			break;
-		default:
-			swalTitle = `CANCEL ${title.toUpperCase()}`;
-			swalText  = "Are you sure that you want to cancel this process?";
-			swalImg   = `${base_url}assets/modal/cancel.svg`;
-			break;
-	}
-	return Swal.fire({
-		title:              swalTitle,
-		text:               swalText,
-		imageUrl:           swalImg,
-		imageWidth:         200,
-		imageHeight:        200,
-		imageAlt:           "Custom image",
-		showCancelButton:   true,
-		confirmButtonColor: "#dc3545",
-		cancelButtonColor:  "#1a1a1a",
-		cancelButtonText:   "No",
-		confirmButtonText:  "Yes"
-	})
-}
-
-function saveleaveRequest(data = null, method = "submit", notificationData = null, callback = null, lastApproverID = 0) {
-	let thisReturnData = false;
-	if (data) {
-		const confirmation = getConfirmation(method);
-		confirmation.then(res => {
-			if (res.isConfirmed) {
-				$.ajax({
-					method:      "POST",
-					url:         `leave_request/saveleaveRequest`,
-					data,
-					processData: false,
-					contentType: false,
-					global:      false,
-					cache:       false,
-					async:       false,
-					dataType:    "json",
-					beforeSend: function() {
-						$("#loader").show();
-					},
-					success: function(data) {
-						let result = data.split("|");
-		
-						let isSuccess   = result[0];
-						let message     = result[1];
-						let insertedID  = result[2];
-						let dateCreated = result[3];
-
-						let swalTitle;
-						if (method == "submit") {
-							swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} submitted successfully!`;
-						} else if (method == "save") {
-							swalTitle = `Leave Request saved successfully!`;
-						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} cancelled successfully!`;
-						} else if (method == "approve") {
-							swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} approved successfully!`;
-						} else if (method == "deny") {
-							swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} denied successfully!`;
-						} else if (method == "drop") {
-							swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} dropped successfully!`;
-						}
-		
-						if (isSuccess == "true") {
-							setTimeout(() => {
-								$("#loader").hide();
-								closeModals();
-								Swal.fire({
-									icon:              "success",
-									title:             swalTitle,
-									showConfirmButton: false,
-									timer:             2000,
-								});
-								callback && callback();
-								
-								if (method == "approve" || method == "deny") {
-									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-								}
-
-								// ----- SAVE NOTIFICATION -----
-								if (notificationData) {
-									if (Object.keys(notificationData).includes("tableID")) {
-										insertNotificationData(notificationData);
-									} else {
-										notificationData["tableID"] = insertedID;
-										insertNotificationData(notificationData);
+							let swalTitle;
+							if (method == "submit") {
+								swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} submitted successfully!`;
+							} else if (method == "save") {
+								swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} saved successfully!`;
+							} else if (method == "cancelform") {
+								swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} cancelled successfully!`;
+							} else if (method == "approve") {
+								swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} approved successfully!`;
+							} else if (method == "deny") {
+								swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} denied successfully!`;
+							} else if (method == "drop") {
+								swalTitle = `${getFormCode("LRF", dateCreated, insertedID)} dropped successfully!`;
+							}
+			
+							if (isSuccess == "true") {
+								setTimeout(() => {
+									$("#loader").hide();
+									closeModals();
+									Swal.fire({
+										icon:              "success",
+										title:             swalTitle,
+										showConfirmButton: false,
+										timer:             2000,
+									});
+									callback && callback();
+									
+									if (method == "approve" || method == "deny") {
+										$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
 									}
-								}
-								// ----- END SAVE NOTIFICATION -----
-							}, 500);
-						} else {
+
+									// ----- SAVE NOTIFICATION -----
+									if (notificationData) {
+										if (Object.keys(notificationData).includes("tableID")) {
+											insertNotificationData(notificationData);
+										} else {
+											notificationData["tableID"] = insertedID;
+											insertNotificationData(notificationData);
+										}
+									}
+									// ----- END SAVE NOTIFICATION -----
+								}, 500);
+							} else {
+								setTimeout(() => {
+									$("#loader").hide();
+									Swal.fire({
+										icon:              "danger",
+										title:             message,
+										showConfirmButton: false,
+										timer:             2000,
+									});
+								}, 500);
+							}
+						},
+						error: function() {
 							setTimeout(() => {
 								$("#loader").hide();
-								Swal.fire({
-									icon:              "danger",
-									title:             message,
-									showConfirmButton: false,
-									timer:             2000,
-								});
+								showNotification("danger", "System error: Please contact the system administrator for assistance!");
 							}, 500);
 						}
-					},
-					error: function() {
+					}).done(function() {
 						setTimeout(() => {
 							$("#loader").hide();
-							showNotification("danger", "System error: Please contact the system administrator for assistance!");
 						}, 500);
-					}
-				}).done(function() {
-					setTimeout(() => {
-						$("#loader").hide();
-					}, 500);
-				})
-			} else {
-				if (res.dismiss === "cancel") {
-					if(method != "submit"){
-						if (method != "deny") {
-							callback && callback();
-						} else {
+					})
+				} else {
+					if (res.dismiss === "cancel") {
+						if(method != "submit"){
+							if (method != "deny") {
+								callback && callback();
+							} else {
+								$("#modal_leave_request").text().length > 0 && $("#modal_leave_request").modal("show");
+							}
+						}
+								
+					} else if (res.isDismissed) {
+						if (method == "deny") {
 							$("#modal_leave_request").text().length > 0 && $("#modal_leave_request").modal("show");
 						}
 					}
-							
-				} else if (res.isDismissed) {
-					if (method == "deny") {
-						$("#modal_leave_request").text().length > 0 && $("#modal_leave_request").modal("show");
-					}
 				}
-			}
-		});
-	}
-	return thisReturnData;
-}
-
-// --------------- END DATABASE RELATION ---------------
-
-
-function triggerItemQty(){
-	$("[name=quantity]").each(function(i, obj) {
-		$("#"+this.id).val($("#"+this.id).attr("value"));
-	}) 
-}
-
-
-function displayImage(fileList = false, readOnly = false, path = "assets/upload-files/leave-documents"){
-	let html 		= ``;
-	
-	let link 		= true;
-	if(EXIST_FILE_ARRAY || fileList){
-		let existFile 		= EXIST_FILE_ARRAY || [] ;
-		let parameterArray 	= fileList ? fileList.split("|") : [];
-		
-		let array		= [...existFile, ...parameterArray];
-		array.map(list =>{
-			let otherAttr = link ? `
-				href="${base_url+path+"/"+list}" 
-				target="_blank"` : `href="javascript:void(0)"`;
-			html += `	<div class="col-md-2 col-sm-2 image-column">
-							<div class="form-group">
-								<div class="d-flex justify-content align-items-center" style="font-size: 12px; border: 1px solid black; border-radius: 5px; color:black;background: #d1ffe0; padding: 2px 10px;">
-										${!readOnly ? `<span class="btnRemoveImage pr-2" style="cursor: pointer" filename="${list}"><i class="fas fa-close"></i></span>` : ""}
-										<a class="filename"
-											title="${list}"
-											style="display: block;
-											color:black !important;
-											width: 90%;
-											overflow: hidden;
-											white-space: nowrap;
-											text-overflow: ellipsis;"
-											${readOnly ? otherAttr : ""}>
-											${list}
-										</a>
-								</div>
-							</div>
-						</div>`;
-		});
-		$("#leaveDocuments").val("");
-	}
-	setTimeout(() => {
-		$(".row-display-image").html(html);
-	}, 800);
-}
-
-
-    // // ----- REMOVE IMAGE -----
-    $(document).on("click", `.btnRemoveImage`, function() {
-		let thisDivision 	= $(this).closest(".image-column");
-		let filename 		= $(this).attr("filename");
-		// FOR INPUT VALUE
-		let fileDataArray 	= FILE_ARRAY.filter(data => data.name != filename);
-		let tempFileData 	= [];
-		fileDataArray.map(x =>{
-			tempFileData.push(x);
-		});
-		FILE_ARRAY = tempFileData;
-
-		// FOR EXIST VALUE
-		let existFileDataArray 	= EXIST_FILE_ARRAY.filter(data => data == filename);
-		let tempExistFileData 	= [];
-			if(existFileDataArray){
-				EXIST_FILE_ARRAY.filter(data => data != filename).map(file=>{
-					tempExistFileData.push(file);
-				});
-			}
-			EXIST_FILE_ARRAY = tempExistFileData;
-		// REMOVING DIVISION
-        thisDivision.fadeOut(500, function(){
-			thisDivision.remove();
-		});
-
-    })
-    // ----- END REMOVE IMAGE -----
-
-
-	    // ----- SELECT IMAGE -----
-		$(document).on("change", "[id=leaveDocuments]", function(e) {
-			e.preventDefault();
-			let filesArray = [];
-			let data 	   = [];
-			let thisArray  = this.files;
-
-			for (let index = 0; index < thisArray.length; index++) {
-				let filesize 		= this.files[index].size/1024/1024; // Size in MB
-				let filename 		= this.files[index].name;
-				let filenameSplit 	= filename.split(".");
-				let filetype		= filenameSplit.pop();
-				if (filesize > 10) {
-					showNotification("danger", `${filename} <br> File size must be less than or equal to 10mb`);
-				} else if (filetype	== "image" || filetype	== "jpeg" || filetype	== "jpg" || filetype	== "png" || filetype	== "docx" || filetype	== "pdf") {
-					FILE_ARRAY.push(this.files[index]);
-				} else {
-					showNotification("danger", `${filename} <br>  Invalid file type`);
-				}	
-			}
-
-			FILE_ARRAY.map(files=>{
-				let filename = files.name;
-				filesArray.push(filename);
 			});
-			console.log(FILE_ARRAY);
-			displayImage(filesArray.join("|"), false);
-		})
-		// ----- END SELECT IMAGE -----
+		}
+		return thisReturnData;
+	}
 
+	// --------------- END DATABASE RELATION ---------------
+
+})

@@ -1278,7 +1278,7 @@ $(document).ready(function() {
 							<div class="panel-body" style="background-color: #515151;">
 								<div class="row">
 									<div class="col-md-3 col-sm-12 align-self-center text-right">
-										<i><a href="${base_url}assets/format/TimesheetFormat.csv"
+										<i><a href="${base_url}hris/timekeeping_module/download"
 											target="_blank"
 											class="text-warning border-bottom pb-1"
 											donwload="TimesheetFormat.csv">

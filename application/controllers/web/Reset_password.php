@@ -42,13 +42,13 @@ class Reset_password extends CI_Controller {
 
             $data["title"] = "Link Expired";
 
-            $this->load->view('template/header', $data);
+            $this->load->view('template/web_header', $data);
             $this->load->view('web/reset_password/link_expired', $data);
-            $this->load->view('template/footer', $data);
+            $this->load->view('template/web_footer', $data);
         }else{
-            $this->load->view('template/header', $data);
+            $this->load->view('template/web_header', $data);
             $this->load->view('web/reset_password/index', $data);
-            $this->load->view('template/footer', $data);
+            $this->load->view('template/web_footer', $data);
         }
     }
 

@@ -2094,19 +2094,19 @@ DROP TABLE IF EXISTS `hris_leave_request_tbl`;
 CREATE TABLE `hris_leave_request_tbl` (
   `leaveRequestID` bigint(20) NOT NULL AUTO_INCREMENT,
   `reviseLeaveRequestID` bigint(21) DEFAULT NULL,
-  `leaveRequestCode` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `employeeID` bigint(20) NOT NULL,
-  `leaveRequestDate` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `leaveRequestDateFrom` date NOT NULL,
-  `leaveRequestDateTo` date NOT NULL,
-  `leaveRequestNumberOfDate` bigint(20) NOT NULL,
-  `leaveID` bigint(20) NOT NULL,
+  `leaveRequestCode` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employeeID` bigint(20) DEFAULT NULL,
+  `leaveRequestDate` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `leaveRequestDateFrom` date DEFAULT NULL,
+  `leaveRequestDateTo` date DEFAULT NULL,
+  `leaveRequestNumberOfDate` decimal(10,2) DEFAULT NULL,
+  `leaveID` bigint(20) DEFAULT NULL,
   `leaveName` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `leaveRequestRemainingLeave` bigint(20) NOT NULL,
-  `leaveStatus` int(50) NOT NULL,
-  `leaveWorkingDay` int(50) NOT NULL,
-  `timeIn` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `timeOut` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `leaveRequestRemainingLeave` bigint(20) DEFAULT NULL,
+  `leaveStatus` int(50) DEFAULT NULL,
+  `leaveWorkingDay` int(50) DEFAULT NULL,
+  `timeIn` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `timeOut` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `leaveRequestReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -2129,7 +2129,7 @@ CREATE TABLE `hris_leave_request_tbl` (
 
 LOCK TABLES `hris_leave_request_tbl` WRITE;
 /*!40000 ALTER TABLE `hris_leave_request_tbl` DISABLE KEYS */;
-INSERT INTO `hris_leave_request_tbl` VALUES (1,NULL,'',2,'2021-12-28','2021-12-28','2021-12-28',1,2,'Vacation Leave',5,0,1,'','','Vacation to province.','2','2','2021-12-27 12:41:02',5,NULL,NULL,'2021-12-27 12:41:02',2,2,'2021-12-27 12:41:02','2021-12-28 03:23:58'),(2,NULL,'',2,'2021-12-29','2021-12-29','2021-12-29',1,2,'Vacation Leave',5,1,1,'','','Vacation to the province for new year','1','2','2021-12-27 12:48:49',2,NULL,NULL,'2021-12-27 12:47:18',2,1,'2021-12-27 12:47:18','2021-12-27 04:48:51'),(3,NULL,'',2,'2022-01-07','2022-01-07','2022-01-07',1,2,'Vacation Leave',5,0,1,'','','Vacation to Canada','4','2','2021-12-28 10:19:59',2,NULL,NULL,'2021-12-28 09:49:33',2,4,'2021-12-28 09:49:33','2021-12-28 02:20:01'),(4,NULL,'',20,'2021-12-30','2021-12-30','2021-12-30',1,2,'Vacation Leave',7,0,1,'','','tstng','20','2','2021-12-29 07:46:32',2,NULL,NULL,'2021-12-29 07:46:32',20,20,'2021-12-29 07:46:17','2021-12-28 23:46:42'),(5,NULL,'',20,'2021-12-31','2021-12-31','2021-12-31',1,2,'Vacation Leave',7,0,1,'','','tstng','2','2','2021-12-29 07:50:27',2,NULL,NULL,'2021-12-29 07:49:50',20,2,'2021-12-29 07:49:50','2021-12-28 23:51:20'),(6,NULL,'',20,'2022-01-01','2022-01-01','2022-01-01',1,2,'Vacation Leave',7,1,1,'','','tstng','2','2','2021-12-29 07:52:55',2,NULL,NULL,'2021-12-29 07:52:04',20,2,'2021-12-29 07:52:04','2021-12-28 23:52:58'),(7,NULL,'',20,'2021-12-29','2021-12-29','2021-12-29',1,2,'Vacation Leave',6,0,1,'','','tstng','2','2','2021-12-29 07:54:24',2,NULL,NULL,'2021-12-29 07:53:57',20,2,'2021-12-29 07:53:57','2021-12-28 23:54:25'),(8,NULL,'',2,'2021-12-31','2021-12-31','2021-12-31',1,2,'Vacation Leave',5,1,1,'','','Rest','4','2','2021-12-29 08:48:51',2,NULL,NULL,'2021-12-29 08:46:59',2,4,'2021-12-29 08:46:59','2021-12-29 00:48:57'),(9,NULL,'',2,'2021-12-29','2021-12-29','2021-12-29',1,2,'Vacation Leave',4,0,1,'','','Rest day','4','2','2021-12-29 08:51:36',2,NULL,NULL,'2021-12-29 08:50:59',2,4,'2021-12-29 08:50:59','2021-12-29 00:51:38');
+INSERT INTO `hris_leave_request_tbl` VALUES (1,NULL,'',2,'2021-12-28','2021-12-28','2021-12-28',1.00,2,'Vacation Leave',5,0,1,'','','Vacation to province.','2','2','2021-12-27 12:41:02',5,NULL,NULL,'2021-12-27 12:41:02',2,2,'2021-12-27 12:41:02','2021-12-28 03:23:58'),(2,NULL,'',2,'2021-12-29','2021-12-29','2021-12-29',1.00,2,'Vacation Leave',5,1,1,'','','Vacation to the province for new year','1','2','2021-12-27 12:48:49',2,NULL,NULL,'2021-12-27 12:47:18',2,1,'2021-12-27 12:47:18','2021-12-27 04:48:51'),(3,NULL,'',2,'2022-01-07','2022-01-07','2022-01-07',1.00,2,'Vacation Leave',5,0,1,'','','Vacation to Canada','4','2','2021-12-28 10:19:59',2,NULL,NULL,'2021-12-28 09:49:33',2,4,'2021-12-28 09:49:33','2021-12-28 02:20:01'),(4,NULL,'',20,'2021-12-30','2021-12-30','2021-12-30',1.00,2,'Vacation Leave',7,0,1,'','','tstng','20','2','2021-12-29 07:46:32',2,NULL,NULL,'2021-12-29 07:46:32',20,20,'2021-12-29 07:46:17','2021-12-28 23:46:42'),(5,NULL,'',20,'2021-12-31','2021-12-31','2021-12-31',1.00,2,'Vacation Leave',7,0,1,'','','tstng','2','2','2021-12-29 07:50:27',2,NULL,NULL,'2021-12-29 07:49:50',20,2,'2021-12-29 07:49:50','2021-12-28 23:51:20'),(6,NULL,'',20,'2022-01-01','2022-01-01','2022-01-01',1.00,2,'Vacation Leave',7,1,1,'','','tstng','2','2','2021-12-29 07:52:55',2,NULL,NULL,'2021-12-29 07:52:04',20,2,'2021-12-29 07:52:04','2021-12-28 23:52:58'),(7,NULL,'',20,'2021-12-29','2021-12-29','2021-12-29',1.00,2,'Vacation Leave',6,0,1,'','','tstng','2','2','2021-12-29 07:54:24',2,NULL,NULL,'2021-12-29 07:53:57',20,2,'2021-12-29 07:53:57','2021-12-28 23:54:25'),(8,NULL,'',2,'2021-12-31','2021-12-31','2021-12-31',1.00,2,'Vacation Leave',5,1,1,'','','Rest','4','2','2021-12-29 08:48:51',2,NULL,NULL,'2021-12-29 08:46:59',2,4,'2021-12-29 08:46:59','2021-12-29 00:48:57'),(9,NULL,'',2,'2021-12-29','2021-12-29','2021-12-29',1.00,2,'Vacation Leave',4,0,1,'','','Rest day','4','2','2021-12-29 08:51:36',2,NULL,NULL,'2021-12-29 08:50:59',2,4,'2021-12-29 08:50:59','2021-12-29 00:51:38');
 /*!40000 ALTER TABLE `hris_leave_request_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7677,4 +7677,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-01-29 16:03:40
+-- Dump completed on 2022-02-04 11:27:34

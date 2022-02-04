@@ -183,7 +183,7 @@ class Production extends CI_Controller {
                                 // ----- FOR EXPANDING DATE RANGE EXCLUDING WEEKENDS --------//
 
                                 // ----- GET SCHEDULE OF EMPLOYEE ----//
-                                $getSchedule = $this->leaverequest->getEmployeeScheduleInOut($employeeID, $getDateLeave);
+                                $getSchedule = getEmployeeScheduleInOut($employeeID, $getDateLeave);
 
                                 $setTimeIn ='';
                                 $setTimeOut ='';
@@ -268,7 +268,7 @@ class Production extends CI_Controller {
                                 // ----- FOR EXPANDING DATE RANGE EXCLUDING WEEKENDS --------//
 
                                 // ----- GET SCHEDULE OF EMPLOYEE ----//
-                                $getSchedule = $this->leaverequest->getEmployeeScheduleInOut($employeeID, $getDateOvertime);
+                                $getSchedule = getEmployeeScheduleInOut($employeeID, $getDateOvertime);
 
                                     $setTimeIn ='';
                                     $setTimeOut ='';

@@ -106,12 +106,9 @@
 </script>
 
 <div class="body_area after_bg">
-	<div class="block-header pb-0">
-	</div>
-
 
 	<div class="container">
-		<div class="row clearfix">
+		<div class="row clearfix pt-4">
 			<div class="col-lg-12">
 				<div class="card">
 

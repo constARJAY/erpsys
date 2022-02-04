@@ -2890,15 +2890,16 @@ $(document).ready(function() {
 		formData.append("action", action);
 		formData.append("method", method);
 		formData.append("updatedBy", sessionID);
-
+		let employeeID              	= sessionID;   
 		if (currentStatus == "0" && method != "approve") {
 			const costSheetID 				    = $("[name=referenceInput]").attr("costSheetID");
 			const costSheetGrandTotal 		    = getNonFormattedAmount($("#grandTotalAmount").text() || 0);
             const equipmentPercentage           = $("#equipmentPercentage").val();               
             const contingencyPercentage         = $("#contingencyPercentage").val();   
             const markupPercentage              = $("#markupPercentage").val();   
+			
 
-
+			formData.append("employeeID", employeeID);
             formData.append("costSheetGrandTotal", costSheetGrandTotal);
             formData.append("equipmentPercentage", equipmentPercentage);
             formData.append("contingencyPercentage", contingencyPercentage);
@@ -2968,7 +2969,7 @@ $(document).ready(function() {
 
     // ----- REVISE DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id                    = decryptString($(this).attr("billMaterialID"));
+		const id                    = decryptString($(this).attr("costSheetID"));
 		const fromCancelledDocument = $(this).attr("cancel") == "true";
 		viewDocument(id, false, true, fromCancelledDocument);
 	});
@@ -2977,7 +2978,7 @@ $(document).ready(function() {
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         				= decryptString($(this).attr("billMaterialID"));
+		const id         				= decryptString($(this).attr("costSheetID"));
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 		const revise     				= $(this).attr("revise") == "true";
 		const employeeID 				= $(this).attr("employeeID");
@@ -2990,10 +2991,10 @@ $(document).ready(function() {
 				const data   = getBillMaterialData(action, "save", "0", id);
 				data.append("costSheetStatus", 0);
 				if (!isFromCancelledDocument) {
-					data.append("reviseBillMaterialID", id);
-					data.delete("billMaterialID");
+					data.append("reviseCostSheetID", id);
+					data.delete("costSheetID");
 				} else {
-					data.append("billMaterialID", id);
+					data.append("costSheetID", id);
 					data.delete("action");
 					data.append("action", "update");
 				}
@@ -3020,7 +3021,7 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       				  = decryptString($(this).attr("billMaterialID"));
+		const id       				  = decryptString($(this).attr("costSheetID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   				  = $(this).attr("revise") == "true";
 		const feedback 				  = $(this).attr("code") || getFormCode("CTS", dateToday(), id);
@@ -3030,10 +3031,10 @@ $(document).ready(function() {
 
 		if (revise) {
 			if (!isFromCancelledDocument) {
-				data.append("reviseBillMaterialID", id);
-				data.delete("billMaterialID");
+				data.append("reviseCostSheetID", id);
+				data.delete("costSheetID");
 			} else {
-				data.append("billMaterialID", id);
+				data.append("costSheetID", id);
 				data.delete("action");
 				data.append("action", "update");
 			}

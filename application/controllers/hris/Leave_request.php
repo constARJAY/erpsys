@@ -24,8 +24,7 @@ class Leave_request extends CI_Controller {
         $leaveRequestID             = $this->input->post("leaveRequestID") ?? null;
         $reviseLeaveRequestID       = $this->input->post("reviseLeaveRequestID") ?? null;
         $employeeID                 = $this->input->post("employeeID");
-        $leaveRequestReason         = $this->input->post("leaveRequestReason") ?? null;
-
+        $leaveRequestReason         = $this->input->post("leaveRequestReason") ?? null; 
         $leaveRequestCode           = $this->input->post("leaveRequestCode") ?? null;
         $leaveRequestDate           = $this->input->post("leaveRequestDate") ?? null;
         $leaveRequestDateFrom       = $this->input->post("leaveRequestDateFrom") ?? null;
@@ -38,7 +37,6 @@ class Leave_request extends CI_Controller {
         $leaveWorkingDay            = $this->input->post("leaveWorkingDay") ?? null;
         $timeIn                     = $this->input->post("timeIn") ?? null;
         $timeOut                    = $this->input->post("timeOut") ?? null;
-
         $approversID                = $this->input->post("approversID") ?? null;
         $approversStatus            = $this->input->post("approversStatus") ?? null;
         $approversDate              = $this->input->post("approversDate") ?? null;
@@ -48,12 +46,10 @@ class Leave_request extends CI_Controller {
         $createdBy                  = $this->input->post("createdBy");
         $updatedBy                  = $this->input->post("updatedBy");
         $createdAt                  = $this->input->post("createdAt");
-        $existLeaveDocuments          = $this->input->post("existLeaveDocuments") ?? null;
 
         $leaveRequestData = [
-            "reviseLeaveRequestID" => $reviseLeaveRequestID,
-            "employeeID"              => $employeeID,
-
+            "reviseLeaveRequestID"          => $reviseLeaveRequestID,
+            "employeeID"                    => $employeeID,
             "leaveRequestCode"              => $leaveRequestCode,
             "leaveRequestDate"              => $leaveRequestDate,
             "leaveRequestDateFrom"          => $leaveRequestDateFrom,
@@ -78,6 +74,14 @@ class Leave_request extends CI_Controller {
             "createdAt"                     => $createdAt
         ];
 
+        $uploadedMultipleFiles = getUploadedMultipleFiles($_POST, $_FILES);
+        if ($uploadedMultipleFiles && !empty($uploadedMultipleFiles)) {
+            foreach ($uploadedMultipleFiles as $fileKey => $fileValue) {
+                unset($leaveRequestData[$fileKey]);
+                $leaveRequestData[$fileKey] = $fileValue;
+            }
+        }
+
         if ($action == "update") {
             unset($leaveRequestData["reviseLeaveRequestID"]);
             unset($leaveRequestData["createdBy"]);
@@ -86,24 +90,23 @@ class Leave_request extends CI_Controller {
             if ($method == "cancelform") {
                 $leaveRequestData = [
                     "leaveRequestStatus" => 4,
-                    "updatedBy"             => $updatedBy,
+                    "updatedBy"          => $updatedBy,
                 ];
             } else if ($method == "approve") {
                 $leaveRequestData = [
-                    "leaveStatus"           => $leaveStatus,
-                    "approversStatus"       => $approversStatus,
-                    "approversDate"         => $approversDate,
-                    "leaveRequestStatus"    => $leaveRequestStatus,
-                    "updatedBy"             => $updatedBy,
+                    "leaveStatus"        => $leaveStatus,
+                    "approversStatus"    => $approversStatus,
+                    "approversDate"      => $approversDate,
+                    "leaveRequestStatus" => $leaveRequestStatus,
+                    "updatedBy"          => $updatedBy,
                 ];
-                $this->leaverequest->updateEmployeeLeave($leaveRequestID);
             } else if ($method == "deny") {
                 $leaveRequestData = [
-                    "approversStatus"        => $approversStatus,
-                    "approversDate"          => $approversDate,
-                    "leaveRequestStatus"    => 3,
-                    "leaveRequestRemarks"   => $leaveRequestRemarks,
-                    "updatedBy"              => $updatedBy,
+                    "approversStatus"     => $approversStatus,
+                    "approversDate"       => $approversDate,
+                    "leaveRequestStatus"  => 3,
+                    "leaveRequestRemarks" => $leaveRequestRemarks,
+                    "updatedBy"           => $updatedBy,
                 ];
             }   else if ($method == "drop") {
                 $leaveRequestData = [
@@ -115,54 +118,6 @@ class Leave_request extends CI_Controller {
         }
 
         $saveLeaveRequestData = $this->leaverequest->saveLeaveRequestData($action, $leaveRequestData, $leaveRequestID);
-       
-
-        
-        if ($saveLeaveRequestData) {
-            $result     = explode("|", $saveLeaveRequestData);
-            $fileArray  = [];
-            if ($result[0] == "true") {
-                $leaveRequestID = $result[2];
-                // GETTING FILE (BINARY) DATA 
-                if($_FILES){
-                    $files = $_FILES["files"]["name"];
-                    
-                    for ($i=0; $i < count($files) ; $i++) { 
-                        $filesdata      =  $_FILES["files".$i];
-                        $filesname      =   $filesdata["name"];
-
-                        $leaveDocument =   "LRF-".date("y")."-".str_pad($leaveRequestID, 5, '0', STR_PAD_LEFT)."_".$filesname;
-                        array_push($fileArray, $leaveDocument);
-                        
-                        if(file_exists("assets/upload-files/leave-documents/".$leaveDocument)){
-                            unlink("assets/upload-files/leave-documents/".$leaveDocument);
-                        }
-
-                        move_uploaded_file($_FILES["files".$i]["tmp_name"], "assets/upload-files/leave-documents/".$leaveDocument);
-                       
-                    }
-                }
-                // END GETTING FILE (BINARY) DATA 
-
-                // GETTING EXISTING DATA 
-                if($existLeaveDocuments){
-                    $existLeaveDocumentsArr = explode("|", $existLeaveDocuments);
-                    for ($i=0; $i < count($existLeaveDocumentsArr) ; $i++) { 
-                        array_push($fileArray, $existLeaveDocumentsArr[$i]);
-                    }
-                }
-                // END GETTING EXISTING DATA 
-
-                // UPDATE TABLE - FILE COLUMN 
-                if($fileArray){
-                    $updateLeaveRequestData  = ["leaveDocument" => join("|", $fileArray)];
-                    $this->leaverequest->updateLeaveRequest("hris_leave_request_tbl", $updateLeaveRequestData, "leaveRequestID = ".$leaveRequestID);
-                }
-                // END UPDATE TABLE - FILE COLUMN 
-                
-            }
-            
-        }
         echo json_encode($saveLeaveRequestData);
     }
     
@@ -306,7 +261,7 @@ class Leave_request extends CI_Controller {
             $productionID = $value["productionID"];
             $productionEntriesID = $value["productionEntriesID"];
 
-            $getSchedule = $this->leaverequest->getEmployeeScheduleInOut($employeeID, $getDate);
+            $getSchedule = getEmployeeScheduleInOut($employeeID, $getDate);
 
             $setTimeIn ='';
             $setTimeOut ='';

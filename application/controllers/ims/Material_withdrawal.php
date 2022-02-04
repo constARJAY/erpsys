@@ -48,26 +48,26 @@ class Material_withdrawal extends CI_Controller {
         // exit;
         if($items){
             foreach ($items as $key1=> $item) {
-                $status = "0";
-                $getReceived = $item["received"];
-                $getRemaining = $item["remainingItem"];
+                $status         = "0";
+                $getReceived    = $item["received"];
+                $getRemaining   = $item["remainingItem"];
                 if($getRemaining <= 0 && $getReceived !=0   ){
-                    $status = "1";
-                    $statusItemFlag = true;
-                    $getItemID[$key1] = $item["itemID"];
+                    $status             = "1";
+                    $statusItemFlag     = true;
+                    $getItemID[$key1]   = $item["itemID"];
 
                 }
                 $temp = [
-                    "materialWithdrawalID"              => $item["materialWithdrawalID"],
-                    "withdrawalItemID"  => $item["withdrawalItemID"],
-                    "itemID"  => $item["itemID"],
-                    "received"            => $item["received"],
-                    "remaining"    => $item["remainingItem"],
-                    "dateReceived" => $item["receivedDateItem"],
-                    "remarks"    => $item["itemRemarks"],
-                    "withdrawalItemStatus"    =>$status,
-                    "createdBy"           => $sessionID,
-                    "updatedBy"           => $sessionID
+                    "materialWithdrawalID" => $item["materialWithdrawalID"],
+                    "withdrawalItemID"     => $item["withdrawalItemID"],
+                    "itemID"               => $item["itemID"],
+                    "received"             => $item["received"],
+                    "remaining"            => $item["remainingItem"],
+                    "dateReceived"         => $item["receivedDateItem"],
+                    "remarks"              => $item["itemRemarks"],
+                    "withdrawalItemStatus" => $status,
+                    "createdBy"            => $sessionID,
+                    "updatedBy"            => $sessionID
                 ];
                 array_push($dataItem, $temp);
             }
@@ -75,26 +75,26 @@ class Material_withdrawal extends CI_Controller {
 
         if($assets){
             foreach ($assets as $key2=>$asset) {
-                $status = "0";
-                $getReceived = $asset["received"];
-                $getRemaining = $asset["remainingAsset"];
+                $status         = "0";
+                $getReceived    = $asset["received"];
+                $getRemaining   = $asset["remainingAsset"];
                 if($getRemaining <= 0 && $getReceived !=0   ){
-                    $status = "1";
-                    $statusAssetFlag = true;
-                    $getAssetID[$key2] =  $asset["assetID"];
+                    $status             = "1";
+                    $statusAssetFlag    = true;
+                    $getAssetID[$key2]  =  $asset["assetID"];
 
                 }
                 $temp = [
                     "materialWithdrawalID"              => $asset["materialWithdrawalID"],
-                    "withdrawalAssetID"  => $asset["withdrawalAssetID"],
-                    "assetID"  => $asset["assetID"],
-                    "received"            => $asset["received"],
-                    "remaining"    => $asset["remainingAsset"],
-                    "dateReceived" => $asset["receivedDateAsset"],
-                    "remarks"    => $asset["assetRemarks"],
-                    "withdrawalAssetStatus"    =>$status,
-                    "createdBy"           => $sessionID,
-                    "updatedBy"           => $sessionID
+                    "withdrawalAssetID"                 => $asset["withdrawalAssetID"],
+                    "assetID"                           => $asset["assetID"],
+                    "received"                          => $asset["received"],
+                    "remaining"                         => $asset["remainingAsset"],
+                    "dateReceived"                      => $asset["receivedDateAsset"],
+                    "remarks"                           => $asset["assetRemarks"],
+                    "withdrawalAssetStatus"             => $status,
+                    "createdBy"                         => $sessionID,
+                    "updatedBy"                         => $sessionID
                 ];
                 array_push($dataAsset, $temp);
             }

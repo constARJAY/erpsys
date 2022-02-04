@@ -211,14 +211,22 @@ $(document).ready(function(){
                             for(var i=0; i<data["assets"].length; i++){
                                 var assetTotalQty = parseFloat( data["assets"][i].stockIN) - (parseFloat(data["assets"][i].totalequipmentBorrowing) + parseFloat(data["assets"][i].materiaWithdrawalQuantity) + parseFloat(data["assets"][i].disposed) );
                                 var assetAvailableStocks  = parseFloat(assetTotalQty) - (parseFloat(data["assets"][i].reservedAsset) + parseFloat(data["assets"][i].reOrderLevel) );
+                                let getAssetData          = getTableData(`ims_inventory_asset_tbl`,`assetImage`,`assetID=${data["assets"][i].assetID}`);
                                 assets +=`  
                                 <tr> 
                                     <td>${data["assets"][i].assetCode} </td> 
                                     <td>
-                                        <div>
-                                        ${data["assets"][i].assetName}
-                                        </div>
-                                        <small style="color:#848482;">${data["assets"][i].brand}</small>
+
+                                        <div class="d-flex justify-content-start align-items-center">
+                                            <img src="${base_url}assets/upload-files/inventory-assets/${getAssetData[0].assetImage || "noimage.jpg"}" alt="${data["assets"][i].assetName}" title="${data["assets"][i].assetName}" class="rounded rounded-circle" style="width: 50px; height: 50px">
+                                            <div class="ml-2">
+                                                <div> ${data["assets"][i].assetName} </div>
+                                                <small style="color:#848482;">${data["assets"][i].brand}</small>
+                                            </div>   
+                                        </div>    
+
+
+                                       
                                     </td>
                                     <td>
                                         <div>
@@ -233,10 +241,10 @@ $(document).ready(function(){
                                     <td class="text-center">${data["assets"][i].returnQuantity}</td>
                                     <td class="text-center">${data["assets"][i].Transferred}</td>
                                     <td class="text-center">${data["assets"][i].disposed}</td> 
-                                    <td class="text-center">${data["assets"][i].reservedAsset}</td> 
+                                    <td class="text-center">${data["assets"][i].reserved}</td> 
                                     <td class="text-center">${formatAmount(data["assets"][i].reOrderLevel)}</td>
-                                    <td class="text-center">${assetAvailableStocks <= "0" ? "0.00" : formatAmount(assetAvailableStocks) }</td>
-                                    <td class="text-center">${assetTotalQty <= "0" ? "0.00" : formatAmount(assetTotalQty)}</td>
+                                    <td class="text-center">${formatAmount(data["assets"][i].available) }</td>
+                                    <td class="text-center">${formatAmount(data["assets"][i].totalQuantity)}</td>
                                 </tr>`;
                             }
                             assets +=`</tbody>
@@ -280,18 +288,25 @@ $(document).ready(function(){
                                
                            for(var i=0; i<data["item"].length; i++){
                             
-                            var itemTotalQuantity    =  parseFloat(data["item"][i].stockIN) - (parseFloat(data["item"][i].materiaWithdrawalQuantity + data["item"][i].totalStockOut));
-                            var itemAvailableStocks  = parseFloat(itemTotalQuantity) - (parseFloat(data["item"][i].reOrderLevel) + parseFloat(data["item"][i].reservedItem) )
+                            // var itemTotalQuantity    =  parseFloat(data["item"][i].stockIN) - (parseFloat(data["item"][i].materiaWithdrawalQuantity + data["item"][i].totalStockOut));
+                            // var itemAvailableStocks  = parseFloat(itemTotalQuantity) - (parseFloat(data["item"][i].reOrderLevel) + parseFloat(data["item"][i].reservedItem) );
+
+                            var itemTotalQuantity    = data["item"][i].totalQuantity;
+                            var itemAvailableStocks  = data["item"][i].available;
+                            let getItemData          = getTableData(`ims_inventory_item_tbl`,`itemImage`,`itemID=${data["item"][i].itemID}`);
                             item +=`
                             <tr> 
                                 <td> 
                                     ${data["item"][i].itemCode}
                                 </td> 
                                 <td>
-                                    <div>
-                                    ${data["item"][i].itemName}
-                                    </div>
-                                    <small style="color:#848482;">${data["item"][i].brand}</small>
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        <img src="${base_url}assets/upload-files/inventory-items/${getItemData[0].itemImage || "noimage.jpg"}" alt="${data["item"][i].itemName}" title="${data["item"][i].itemName}" class="rounded rounded-circle" style="width: 50px; height: 50px">
+                                        <div class="ml-2">
+                                            <div> ${data["item"][i].itemName} </div>
+                                            <small style="color:#848482;">${data["item"][i].brand}</small>
+                                        </div>   
+                                    </div>                                 
                                 </td>
                                 <td>
                                     <div>
@@ -301,10 +316,10 @@ $(document).ready(function(){
                                 </td>
                                 <td class="text-center">${data["item"][i].uom}</td>
                                 <td class="text-center">${data["item"][i].stockIN}</td> 
-                                <td class="text-center">${data["item"][i].totalStockOut}</td>
+                                <td class="text-center">${data["item"][i].stockOut}</td>
                                 <td class="text-center">${data["item"][i].materiaWithdrawalQuantity}</td>
                                 <td class="text-center">${data["item"][i].Unused}</td>
-                                <td class="text-center">${data["item"][i].reservedItem}</td> 
+                                <td class="text-center">${ /*data["item"][i].reservedItem*/ data["item"][i].reserved }</td> 
                                 <td class="text-center">${formatAmount(data["item"][i].reOrderLevel)}</td>
                                 <td class="text-center">${itemAvailableStocks <= "0" ? "0.00" : formatAmount(itemAvailableStocks)}</td>
                                 <td class="text-center">${itemTotalQuantity <= "0" ? "0.00" : formatAmount(itemTotalQuantity)}</td>

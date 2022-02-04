@@ -791,56 +791,69 @@ function getItemsRow(readOnly = false,returnItemID) {
 	let html = "";
 	//let requestItemsData;	
 	let requestItemsData;	
-			requestItemsData = getTableData(
-				`ims_inventory_request_details_tbl AS ird`,
-				`*, SUM(ird.quantity) AS fixBorrowedQuantity, 
-					(SELECT subTable.quantity FROM ims_inventory_request_details_tbl AS subTable 
-							WHERE subTable.returnItemID = '${returnItemID}' LIMIT 1 ) as requestQuantity,
-				(SELECT unitOfMeasurementID FROM ims_inventory_item_tbl AS masterfileTable WHERE masterfileTable.itemID = ird.itemID) AS fixUom
-				`,
+			// requestItemsData = getTableData(
+			// 	`ims_inventory_request_details_tbl AS ird`,
+			// 	`*, SUM(ird.quantity) AS fixBorrowedQuantity, 
+			// 		(SELECT subTable.quantity FROM ims_inventory_request_details_tbl AS subTable 
+			// 				WHERE subTable.returnItemID = '${returnItemID}' LIMIT 1 ) as requestQuantity,
+			// 	(SELECT unitOfMeasurementID FROM ims_inventory_item_tbl AS masterfileTable WHERE masterfileTable.itemID = ird.itemID) AS fixUom
+			// 	`,
 					
 
-				`ird.returnItemID = ${returnItemID}`,
-				"",
-				`returnItemID`,
-			);
+			// 	`ird.returnItemID = ${returnItemID}`,
+			// 	"",
+			// 	`returnItemID`,
+			// );
+
+			requestItemsData = getTableData(`ims_material_withdrawal_asset_tbl AS imwat LEFT JOIN ims_return_item_tbl AS irit USING (equipmentBorrowingID)`,
+											`assetCode AS itemCode, assetID AS itemID, assetName AS itemName, assetBrandName AS Brand, requestQuantity,
+												assetClassification AS classificationName, assetCategory AS categoryName, assetUom AS uom, assetUom AS fixuom,
+												imwat.borrowedDate AS borrowedDate, imwat.remarks AS remarks, imwat.received AS receivedQuantity, imwat.createdAt AS createAt,
+												(SELECT inventoryRequestID FROM ims_inventory_request_details_tbl AS sub_irit 
+													WHERE sub_irit.returnItemID = '${returnItemID}' AND sub_irit.itemID = imwat.assetID  ) AS inventoryRequestID,
+												(SELECT returnItemID FROM ims_inventory_request_details_tbl AS sub_irit 
+													WHERE sub_irit.returnItemID = '${returnItemID}' AND sub_irit.itemID = imwat.assetID  ) AS returnItemID,
+												(SELECT SUM(sub_irit.quantity) FROM ims_inventory_request_details_tbl AS sub_irit 
+													WHERE sub_irit.returnItemID = '${returnItemID}' AND sub_irit.itemID = imwat.assetID  ) AS fixBorrowedQuantity`,
+											`irit.returnItemID = '${returnItemID}'`
+											);
 	if (requestItemsData.length > 0) {
 		requestItemsData.map((item, index) => {
 	   
 			let {
 				returnItemID               	= "",
-				classificationID					="",
-				itemCode							="",
-				itemID                    			= "",
-				itemName                   			= "",
-				Brand								="",
-				quantity                 			= "",
-				requestQuantity 					= "",
-				borrowedQuantity					= "",
-				fixBorrowedQuantity 				= "",
-				classificationName                  = "",
-				categoryName						= "",
-				manHours                     		= "",
-				uom                     			= "",
-				fixUom 								= "",
-				borrowedDate						= "",
-				remarks                   			= "",
-				createdAt                   		= "",
-				inventoryRequestID 					= "",
-				receivedQuantity					= "",
-				createAt							="",
+				classificationID			= "",
+				itemCode					= "",
+				itemID                    	= "",
+				itemName                   	= "",
+				Brand						= "",
+				quantity                 	= "",
+				requestQuantity 			= "",
+				borrowedQuantity			= "",
+				fixBorrowedQuantity 		= "",
+				classificationName          = "",
+				categoryName				= "",
+				manHours                   	= "",
+				uom                     	= "",
+				fixUom 						= "",
+				borrowedDate				= "",
+				remarks                   	= "",
+				createdAt                   = "",
+				inventoryRequestID 			= "",
+				receivedQuantity			= "",
+				createAt					= "",
 			} = item;
 			
 			quantity  		 = requestQuantity
 			borrowedQuantity = borrowedQuantity || fixBorrowedQuantity;
 			uom 			 = uom || fixUom;
 			//let pending = orderedPending ? orderedPending : forPurchase;
-
 			// const buttonAddRow = !readOnly ? `
 			// <button class="btn btn-md btn-primary float-left ml-2 my-1 btnAddSerial">
 			// 	<i class="fas fa-plus"></i> Add Serial
 			// </button>
-			// ` : ""
+			// ` : "";
+
 			var scopeData ="";
 
 			const buttonAddRow = !readOnly ? `
@@ -1037,8 +1050,8 @@ $(document).on("change", ".receivedQuantity", function() {
 			$(`#receivedQuantity${count}`).removeClass("is-valid").addClass("is-invalid");
 			$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).addClass("is-invalid");
 			$(`#invalid-receivedQuantity${count}`).html("Not more than borrowed quantity");
-		flag[0]= false;
-		removeIsValid("#tableInventoryReceived");
+			flag[0]= false;
+			removeIsValid("#tableInventoryReceived");
 	}else{
 		$(`#receivedQuantity${count}`).removeClass("is-invalid").addClass("is-valid");
 		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).removeClass("is-invalid");
@@ -1914,9 +1927,9 @@ function checkSerialReceivedQuantity() {
 
 // ----- SUBMIT DOCUMENT -----
 $(document).on("click", "#btnSubmit", function () {
-	let receivedQuantityCondition = $("[name=receivedQuantity]").hasClass("is-invalid");
-	const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid");
-	const validateSerialMessage  = $(".invalid-feedback").text() ;
+	let receivedQuantityCondition 	= $("[name=receivedQuantity]").hasClass("is-invalid");
+	const validateDuplicateSerial  	= $("[name=serialNumber]").hasClass("is-invalid");
+	const validateSerialMessage  	= $(".invalid-feedback").text() ;
 	// console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
 	// if(!validateDuplicateSerial || validateSerialMessage != "Data already exist!"){
 		if(!receivedQuantityCondition){

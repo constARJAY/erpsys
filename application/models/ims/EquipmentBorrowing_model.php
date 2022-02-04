@@ -198,20 +198,6 @@ class equipmentBorrowing_model extends CI_Model {
         return $query ? true : false;
     }
 
-    public function updateProjectBuilder($timelineBuilderID, $timelineManagementStatus)
-    {
-        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
-
-        $query = $this->db->update(
-            "pms_timeline_builder_tbl", 
-            [
-                "timelineManagementBy"     => $sessionID,
-                "timelineManagementStatus" => $timelineManagementStatus
-            ], 
-            ["timelineBuilderID" => $timelineBuilderID]);
-        return $query ? true : false;
-    }
-
     public function getInventoryStockInAssets($assetID = 0)
     {
         $sql = "SELECT *  FROM ims_stock_in_assets_tbl WHERE stockOutDate IS NUll 

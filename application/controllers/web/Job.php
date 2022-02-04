@@ -31,9 +31,9 @@ class Job extends CI_Controller {
 
         $data["pending"]  = count($pending);
 
-        $this->load->view("template/header", $data);
+        $this->load->view("template/web_header", $data);
         $this->load->view("web/job/index", $data);
-        $this->load->view("template/footer");
+        $this->load->view("template/web_footer");
     }
 
     public function apply(){

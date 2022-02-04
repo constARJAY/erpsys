@@ -54,9 +54,9 @@ class Examination_form extends CI_Controller {
         // $data['applicantSchedule'] = "2021-08-03";
       
 
-        $this->load->view('template/header', $data);
+        $this->load->view('template/web_header', $data);
         $this->load->view('web/examination_form/index', $data);
-        $this->load->view('template/footer', $data);
+        $this->load->view('template/web_footer', $data);
     }
 
     public function saveExam(){
@@ -64,8 +64,8 @@ class Examination_form extends CI_Controller {
         // print_r($_POST);
         // exit;
 
-        $examinationID = $this->input->post("examinationID");
         $applicantID = $this->input->post("applicantID");
+        $examinationID = $this->input->post("examinationID");
         $applicantAnswer = $this->input->post("applicantAnswer");
         $examinationQAID = $this->input->post("examinationQAID");
         $getPoints = $this->input->post("getPoints");
@@ -76,7 +76,7 @@ class Examination_form extends CI_Controller {
         // exit;
 
               
-        $saveExam = $this->examinationForm->saveExam($examinationID, $applicantID, $applicantAnswer, $examinationQAID,$getPoints,$totalPoints);
+        $saveExam = $this->examinationForm->saveExam($examinationID, $applicantID, $applicantAnswer, $examinationQAID,$getPoints,floatval($totalPoints));
         echo json_encode($saveExam);
     }
 

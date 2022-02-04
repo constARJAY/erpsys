@@ -174,10 +174,11 @@ $(document).ready(function () {
 				columnDefs: [
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
-					{ targets: 3, width: 300 },
-					{ targets: 4, width: 80  },
-					{ targets: 5, width: 200 },
+					{ targets: 2, width: 250 },
+					{ targets: 3, width: 150 },
+					{ targets: 4, width: 300 },
+					{ targets: 5, width: 80  },
+					{ targets: 6, width: 200 },
 				],
 			});
 
@@ -193,10 +194,11 @@ $(document).ready(function () {
 				columnDefs: [
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
-					{ targets: 3, width: 300 },
-					{ targets: 4, width: 80  },
-					{ targets: 5, width: 200 },
+					{ targets: 2, width: 250 },
+					{ targets: 3, width: 150 },
+					{ targets: 4, width: 300 },
+					{ targets: 5, width: 80  },
+					{ targets: 6, width: 200 },
 				],
 			});
 	}
@@ -284,6 +286,7 @@ $(document).ready(function () {
 				<tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Employee Name</th>
+					<th>Reason</th>
 					<th>Current Approver</th>
 					<th>Date</th>
 					<th>Status</th>
@@ -322,6 +325,10 @@ $(document).ready(function () {
 				<tr class="btnEdit btnView" id="${encryptString(noTimeinTimeoutID)}">
 					<td>${getFormCode("NTI", createdAt, noTimeinTimeoutID)}</td>
 					<td>${employeeFirstname + ' ' +employeeLastname}</td>
+					<td>
+						<div>${noTimeinTimeoutDate ? moment(noTimeinTimeoutDate).format("MMMM DD, YYYY") : ""}</div>
+						<samll>${noTimeinTimeoutReason}</samll>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, noTimeinTimeoutStatus, true))}
 					</td>
@@ -380,6 +387,7 @@ $(document).ready(function () {
                 <tr>
                     <th>Document No.</th>
                     <th>Employee Name</th>
+                    <th>Reason</th>
 					<th>Current Approver</th>
 					<th>Date</th>
                     <th>Status</th>
@@ -395,6 +403,7 @@ $(document).ready(function () {
 				noTimeinTimeoutDate,
 				approversID,
 				approversDate,
+				noTimeinTimeoutReason,
 				noTimeinTimeoutStatus,
 				noTimeinTimeoutRemarks,
 				submittedAt,
@@ -430,6 +439,10 @@ $(document).ready(function () {
             <tr class="btnEdit btnView" id="${encryptString(noTimeinTimeoutID)}">
                 <td>${getFormCode("NTI", createdAt, noTimeinTimeoutID)}</td>
                 <td>${employeeFirstname + ' ' +employeeLastname}</td>
+                <td>
+					<div>${noTimeinTimeoutDate ? moment(noTimeinTimeoutDate).format("MMMM DD, YYYY") : ""}</div>
+					<samll>${noTimeinTimeoutReason}</samll>
+				</td>
 				<td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, noTimeinTimeoutStatus, true))}
                 </td>

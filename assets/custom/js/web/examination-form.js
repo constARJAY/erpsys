@@ -2,6 +2,16 @@
 
 $(document).ready(function () {
 
+	var applicantID            = decryptString($(".body_area").attr("applicantID"));
+	var dateToday              = moment().format('YYYY-MM-DD');
+	var applicantDesignationID = decryptString($(".body_area").attr("designationID"));	
+	var schedule               =  decryptString($(".body_area").attr("applicantSchedule"));
+
+	const applicantData = getTableData(`web_applicant_list_tbl`,"","applicantID= "+applicantID);
+	const getExamData   = getTableData(`hris_examination_setup_tbl hest
+								LEFT JOIN hris_examination_tbl as het ON het.examinationID = hest.examinationID  `,"","designationID= "+ applicantDesignationID);
+	
+
 	// ----------- APPLICANT ANSWER -----------------------//
 		var applicantAnswer=[];
 	// ----------- END APPLICANT ANSWER ---------------------//
@@ -162,15 +172,14 @@ $(document).ready(function () {
 				if(timer.seconds_left == 0){
 					// execute to save the exam
 					Swal.fire({
-						icon:              'warning',
-						title:             "Time is up!",
-						showConfirmButton: false,
-						timer:             1800
-					});
-	
-					setTimeout(() => {
+						icon:               'warning',
+						title:              "Your time is now up! Prepare for the next examination.",
+						confirmButtonColor: '#dc3545',
+						confirmButtonText:  'Okay',
+						allowOutsideClick: false
+					}).then(function() {
 						saveExamData(examinationID,nextLevel);
-					}, 500);
+					});
 					
 				}
 			  }
@@ -647,20 +656,6 @@ $(document).ready(function () {
 			
 			$("#roles_permission_content").html(preloader);
 			
-			var applicantID= decryptString($(".body_area").attr("applicantID"));
-			// var designationID="4";
-			// var examStatus="0";
-			var dateToday=moment().format('YYYY-MM-DD');
-			// var schedule=  "2021-08-26";
-			var applicantDesignationID = decryptString($(".body_area").attr("designationID"));
-			var schedule=  decryptString($(".body_area").attr("applicantSchedule"));
-	
-			// console.log(dateToday)
-			const applicantData = getTableData(`web_applicant_list_tbl`,"","applicantID= "+applicantID);
-			// applicantDesignationID = applicantData[0].applicantDesignationID;
-			const getExamData = getTableData(`hris_examination_setup_tbl hest
-								LEFT JOIN hris_examination_tbl as het ON het.examinationID  = hest.examinationID  `,"","designationID= "+ applicantDesignationID);
-			
 			let html = "";
 			if(schedule == dateToday ){
 				if(onGoing == true){
@@ -671,7 +666,7 @@ $(document).ready(function () {
 						<div class="section">
 							<div class="row">
 								<div class="col-sm-12 col-md-12 col-lg-8 col-xl-4">
-									<img src="../assets/upload-files/examination/${getExamData[level].examinationPicture}" alt="">
+									<img src="../assets/upload-files/examination/${getExamData[level].examinationPicture}" style="width: 100%" alt="">
 								</div>
 								<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style="align-self: center;">
 									<h5><strong>Instructions:</strong><p>${getExamData[level].examinationDescription}</p></h5>
@@ -768,24 +763,47 @@ $(document).ready(function () {
 				}
 				
 			}else{
-				html =`<div class="container p-4">
-							<div class="section">
-									<div class="row">
-										<div class="col-sm-12 col-md-12 col-lg-8 col-xl-4">
-											
-											<img src="../assets/modal/warning.svg" alt="">
-										</div>
-										<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style="align-self: center;">
-											<h2 class="font-weight-bolder mb-1">WARNING!</h2>
-											<h5><strong>Your time to take the examination has already passed. Kindly contact the HR for further instructions.</strong></h5>
+
+				if (dateToday > moment(schedule)) {
+					html =`<div class="container p-4">
+								<div class="section">
+										<div class="row">
+											<div class="col-sm-12 col-md-12 col-lg-8 col-xl-4">
+												
+												<img src="../assets/modal/warning.svg" alt="">
+											</div>
+											<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style="align-self: center;">
+												<h2 class="font-weight-bolder mb-1">WARNING!</h2>
+												<h5><strong>Your time to take the examination has already passed. Kindly contact the HR for further instructions.</strong></h5>
+											</div>
 										</div>
 									</div>
+									<div class="footer float-right mt-2 col-sm-12 col-md-5 col-lg-3 col-xl-2">
+									<button type="button" class="btn btn-success btn-lg btn-block">Back to Homepage <i class="fas fa-arrow-right"></i></button>
+									</div> 
 								</div>
-								<div class="footer float-right mt-2 col-sm-12 col-md-5 col-lg-3 col-xl-2">
-								<button type="button" class="btn btn-success btn-lg btn-block">Back to Homepage <i class="fas fa-arrow-right"></i></button>
-								</div> 
-							</div>
-						</div>`;
+							</div>`;
+				} else {
+					html =`<div class="container p-4">
+								<div class="section">
+										<div class="row">
+											<div class="col-sm-12 col-md-12 col-lg-8 col-xl-4">
+												
+												<img src="../assets/modal/warning.svg" alt="">
+											</div>
+											<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style="align-self: center;">
+												<h2 class="font-weight-bolder mb-1">WARNING!</h2>
+												<h5><strong>Kindly wait for the time to take the examination.</strong></h5>
+											</div>
+										</div>
+									</div>
+									<div class="footer float-right mt-2 col-sm-12 col-md-5 col-lg-3 col-xl-2">
+									<button type="button" class="btn btn-success btn-lg btn-block">Back to Homepage <i class="fas fa-arrow-right"></i></button>
+									</div> 
+								</div>
+							</div>`;
+				}
+
 			}
 			
 	
@@ -860,9 +878,10 @@ $(document).ready(function () {
 		var applicantID= decryptString($(".body_area").attr("applicantID"));
 		
 		$("#roles_permission_content").html(preloader);
-			const data  = getTableData(`hris_examination_qa_tbl LEFT  JOIN hris_examination_setup_tbl USING(examinationID)`,
-			`designationID,examinationID,examinationQaID,examinationType,question,timeLimit
-			`,`examinationID='${examinationID}' AND  examinationType='${examinationType}' AND designationID='${applicantDesignationID}'`);
+			// const data  = getTableData(`hris_examination_qa_tbl LEFT  JOIN hris_examination_setup_tbl USING(examinationID)`,
+			// `designationID,examinationID,examinationQaID,examinationType,question,timeLimit
+			// `,`examinationID='${examinationID}' AND  examinationType='${examinationType}' AND designationID='${applicantDesignationID}'`);
+			const data = getTableData(`hris_examination_qa_tbl WHERE examinationID = ${examinationID}`, `*, (SELECT timeLimit FROM hris_examination_setup_tbl WHERE examinationID = 3 AND designationID = 9 LIMIT 1) AS timeLimit`);
 	
 			if(level == "0"){
 				updateApplicantExamStatus(applicantID);

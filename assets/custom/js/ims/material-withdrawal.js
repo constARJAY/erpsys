@@ -1075,7 +1075,7 @@
 
         if(value > stockOutValue){
             $(this).val(0);
-            showNotification("danger", "Incorrect Quantity Inserted!");
+            showNotification("danger", "Excessive amount of quantity!");
             
         }
 
@@ -1121,7 +1121,7 @@
 
         if(value > borrowedValue){
             $(this).val(0);
-            showNotification("danger", "Incorrect Quantity Inserted!");
+            showNotification("danger", "Excessive amount of quantity!");
             
         }
 

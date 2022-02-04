@@ -157,9 +157,9 @@ $(document).ready(function () {
 	// ----- END GET CLIENT LIST -----
 
 	// ---- GET PROJECT LIST ----//
-	function getprojectList(id = null, display = true, clientID = null) {
+	function getprojectList(id = null, display = true, clientID = null, projectName = '') {
 	
-		let html   = `<option selected disabled>Please select a project</option>`;
+		let html   = `<option value="" selected disabled>${projectName ?? "Please select a project"}</option>`;
 
 		let projectIDArr = []; // 0 IS THE DEFAULT VALUE
 		$(`[name=overtimeRequestProjectID]`).each(function(i, obj) {
@@ -172,7 +172,7 @@ $(document).ready(function () {
 			if( clientID == null){
 				return `
 				<option 
-					value        = "${project.projectListID}" 
+					value = "${project.projectListID}" 
 					${project.projectListID == id && "selected"}>
 					${project.projectListName}
 				</option>`;
@@ -180,7 +180,7 @@ $(document).ready(function () {
 				if(project.clientID == clientID ){
 					return `
 					<option 
-						value        = "${project.projectListID}" 
+						value = "${project.projectListID}" 
 						${project.projectListID == id && "selected"}>
 						${project.projectListName}
 					</option>`;
@@ -309,10 +309,11 @@ $(document).ready(function () {
 				columnDefs: [
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
-					{ targets: 3, width: 300 },
-					{ targets: 4, width: 80  },
-					{ targets: 5, width: 200 },
+					{ targets: 2, width: 250 },
+					{ targets: 3, width: 150 },
+					{ targets: 4, width: 300 },
+					{ targets: 5, width: 80  },
+					{ targets: 6, width: 200 },
 				],
 			});
 
@@ -328,10 +329,11 @@ $(document).ready(function () {
 				columnDefs: [
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
-					{ targets: 3, width: 300 },
-					{ targets: 4, width: 80  },
-					{ targets: 5, width: 200 },
+					{ targets: 2, width: 250 },
+					{ targets: 3, width: 150 },
+					{ targets: 4, width: 300 },
+					{ targets: 5, width: 80  },
+					{ targets: 6, width: 200 },
 				],
 			});
 	}
@@ -364,7 +366,7 @@ $(document).ready(function () {
 
 
 	// ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add") {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
 			if (isCreateAllowed(56)) {
@@ -373,7 +375,10 @@ $(document).ready(function () {
 			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" class="btn btn-default btn-light" 
+				id="btnBack"
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -397,6 +402,7 @@ $(document).ready(function () {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Reason</th>
 					<th>Current Approver</th>
 					<th>Date</th>
                     <th>Status</th>
@@ -411,6 +417,8 @@ $(document).ready(function () {
 				overtimeRequestID,
 				approversID,
 				approversDate,
+				overtimeRequestDate,
+				overtimeRequestReason,
 				overtimeRequestStatus,
 				overtimeRequestRemarks,
 				submittedAt,
@@ -433,6 +441,10 @@ $(document).ready(function () {
 				<tr class="btnView btnEdit" id="${encryptString(overtimeRequestID)}">
 					<td>${getFormCode("OTR", dateCreated, overtimeRequestID)}</td>
 					<td>${fullname}</td>
+					<td>
+						<div>${moment(overtimeRequestDate).isValid() ? moment(overtimeRequestDate).format("MMMM DD, YYYY") : "-"}</div>
+						<small>${overtimeRequestReason || ""}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, overtimeRequestStatus, true))}
 					</td>
@@ -474,6 +486,7 @@ $(document).ready(function () {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Reason</th>
                     <th>Current Approver</th>
 					<th>Date</th>
                     <th>Status</th>
@@ -486,9 +499,10 @@ $(document).ready(function () {
 			let {
 				fullname,
 				overtimeRequestID,
-				overtimeRequestDate,
 				approversID,
 				approversDate,
+				overtimeRequestDate,
+				overtimeRequestReason,
 				overtimeRequestStatus,
 				overtimeRequestRemarks,
 				submittedAt,
@@ -522,6 +536,10 @@ $(document).ready(function () {
             <tr class="btnEdit btnView" id="${encryptString(overtimeRequestID)}">
                 <td>${getFormCode("OTR", dateCreated, overtimeRequestID)}</td>
                 <td>${fullname}</td>
+				<td>
+					<div>${moment(overtimeRequestDate).isValid() ? moment(overtimeRequestDate).format("MMMM DD, YYYY") : "-"}</div>
+					<small>${overtimeRequestReason || ""}</small>
+				</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, overtimeRequestStatus, true))}
                 </td>
@@ -714,26 +732,27 @@ $(document).ready(function () {
 		readOnly = isRevise ? false : readOnly;
 
 		let {
-			overtimeRequestID      = "",
-			reviseOvertimeRequestID = "",
-			employeeID            = "",
-			overtimeRequestDate    = "",
-			overtimeRequestTimeIn  = "",
-			overtimeRequestTimeOut = "",
-			overtimeRequestBreak	="",
-			overtimeRequestReason  = "",
-			overtimeRequestRemarks = "",
-			approversID           = "",
-			approversStatus       = "",
-			approversDate         = "",
-			overtimeRequestStatus  = false,
-			submittedAt           = false,
-			createdAt             = false,
-			overtimeRequestLocation = "",
-			overtimeRequestClass	="",
-			overtimeRequestClientID	 ="",
-			overtimeRequestProjectID = "",
-			overtimeRequestProjectStatus =""
+			overtimeRequestID            = "",
+			reviseOvertimeRequestID      = "",
+			employeeID                   = "",
+			overtimeRequestDate          = "",
+			overtimeRequestTimeIn        = "",
+			overtimeRequestTimeOut       = "",
+			overtimeRequestBreak	     ="",
+			overtimeRequestReason        = "",
+			overtimeRequestRemarks       = "",
+			approversID                  = "",
+			approversStatus              = "",
+			approversDate                = "",
+			overtimeRequestStatus        = false,
+			submittedAt                  = false,
+			createdAt                    = false,
+			overtimeRequestLocation      = "",
+			overtimeRequestClass	     = "",
+			overtimeRequestClientID	     = "",
+			overtimeRequestProjectID     = "",
+			overtimeRequestProjectName   = "",
+			overtimeRequestProjectStatus = ""
 
 		} = data && data[0];
 
@@ -870,7 +889,7 @@ $(document).ready(function () {
                         id="overtimeRequestDate"
                         name="overtimeRequestDate"
 						condition ="false"
-                        value="${overtimeRequestDate && moment(overtimeRequestDate).format("MMMM DD, YYYY")}"
+                        value="${moment(moment(overtimeRequestDate).isValid() ? overtimeRequestDate : new Date).format("MMMM DD, YYYY")}"
 						${disabled}
 						unique="${overtimeRequestID}"
 						title="Date">
@@ -909,7 +928,7 @@ $(document).ready(function () {
                 <div class="form-group">
                     <label>Break</label>
                     <input type="text" 
-                        class="form-control" 
+                        class="form-control input-hours text-center" 
                         id="overtimeRequestBreak" 
                         name="overtimeRequestBreak" 
                         value="${formatAmount(overtimeRequestBreak || 0)}"
@@ -942,9 +961,12 @@ $(document).ready(function () {
                 <div class="form-group">
                     <label>Location ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
-                        class="form-control " 
+                        class="form-control validate" 
                         id="overtimeRequestLocation" 
                         name="overtimeRequestLocation" 
+						data-allowcharacters="[a-z][A-Z][0-9][-][(][)][ ][,][.][&][!]"
+						minlength="1"
+						maxlength="99"
                         required
                         value="${overtimeRequestLocation}"
 						${disabled}>
@@ -965,10 +987,10 @@ $(document).ready(function () {
 
 			<div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Project ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2" name="overtimeRequestProjectID" id="overtimeRequestProjectID" required ${disabled} style="width:100%;">
-							${getprojectList(overtimeRequestProjectID)}
-						</select>
+                    <label>Project</label>
+					<select class="form-control validate select2" name="overtimeRequestProjectID" id="overtimeRequestProjectID" ${disabled} style="width:100%;">
+						${getprojectList(overtimeRequestProjectID, true, overtimeRequestClientID)}
+					</select>
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestProjectID"></div>
                 </div>
             </div>
@@ -977,11 +999,13 @@ $(document).ready(function () {
 
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>
+						Reason ${!disabled ? "<code>*</code> <small class=''><span class='text-warning'>Note: </span><span>Kindly specify the work done once \"Internal\" is selected as a client.</span></small>" : ""}
+					</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
-                        maxlength="200"
+                        maxlength="1000"
                         id="overtimeRequestReason"
                         name="overtimeRequestReason"
                         required
@@ -1023,7 +1047,7 @@ $(document).ready(function () {
 			initAll();
 			initDataTables();
 			updateClientOptions();
-			updateProjectOptions();
+			!disabled && updateProjectOptions();
 			if (data) {
 				initInputmaskTime(false);
 				disabled != "disabled" ? overtimeRequestDateRange(overtimeRequestDate) : "";
@@ -1040,8 +1064,9 @@ $(document).ready(function () {
 	// ----- END FORM CONTENT -----
 
 	function overtimeRequestDateRange(overtimeRequestDate){
+		overtimeRequestDate = moment(overtimeRequestDate).isValid() ? overtimeRequestDate : moment();
+		
 		$('#overtimeRequestDate').daterangepicker({
-
 			singleDatePicker: true,
 			"showDropdowns": true,
 			autoApply: true,
@@ -1246,6 +1271,7 @@ $(document).ready(function () {
 		if (action && method != "" && feedback != "") {
 			data["tableData[overtimeRequestStatus]"] = status;
 			data["tableData[updatedBy]"]            = sessionID;
+			data["tableData[overtimeRequestBreak]"] = $(`[name="overtimeRequestBreak"]`).val()?.replaceAll(",", "");
 			data["feedback"]                        = feedback;
 			data["method"]                          = method;
 			data["tableName"]                       = "hris_overtime_request_tbl";
@@ -1312,12 +1338,6 @@ $(document).ready(function () {
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
-			// $("#page_content").html(preloader);
-			// pageContent();
-
-			// if (employeeID != sessionID) {
-			// 	$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-			// }
 
 			if (revise) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");

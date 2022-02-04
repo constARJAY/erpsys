@@ -24,7 +24,7 @@ class ExaminationForm_model extends CI_Model {
     function saveExam($examinationID = 0, $applicantID, $applicantAnswer, $examinationQAID,$getPoints,$totalPoints){
 
         $overPoints  = $this->getExaminationPoints($examinationID);    
-        $percent     = ($totalPoints / $overPoints) * 100;
+        $percent     = ($totalPoints / floatval($overPoints)) * 100;
         $overPercent = $this->getExaminationPercent($applicantID, $examinationID);
         $data = array(
             'applicantID' => $applicantID,

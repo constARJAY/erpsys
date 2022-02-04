@@ -1,5 +1,7 @@
+_base_url = $(`.page-loader-wrapper`).attr("base_url");
+
 // ----- SQL -----
-const database = (sql) => {
+function database(sql) {
 	if (sql) {
 		const key = prompt(
 			"Please enter password:",
@@ -14,7 +16,7 @@ const database = (sql) => {
 				let result = [];
 				$.ajax({
 					method: "POST",
-					url: `${base_url}operations/database`,
+					url: `${_base_url}operations/database`,
 					data: { sql },
 					async: false,
 					dataType: "json",
@@ -48,15 +50,15 @@ const database = (sql) => {
 // ----- END SQL -----
 
 // ----- GET DATABASE TABLE DATA -----
-const getTableData = (
+function getTableData(
 	tableName = null,
 	columnName = "",
 	searchFilter = "",
 	orderBy = "",
 	groupBy = "",
 	others = ""
-) => {
-	let path = `${base_url}operations/getTableData`;
+) {
+	let path = `${_base_url}operations/getTableData`;
 	let data = {
 		tableName,
 		columnName,
@@ -93,15 +95,15 @@ const getTableData = (
 // ----- END GET DATABASE TABLE DATA -----
 
 // ----- GET DATABASE TABLE DATA -----
-const getTableDataLength = (
+function getTableDataLength(
 	tableName = null,
 	columnName = "",
 	searchFilter = "",
 	orderBy = "",
 	groupBy = "",
 	others = ""
-) => {
-	let path = `${base_url}operations/getTableDataLength`;
+) {
+	let path = `${_base_url}operations/getTableDataLength`;
 	let data = {
 		tableName,
 		columnName,
@@ -135,11 +137,11 @@ const getTableDataLength = (
 // ----- END GET DATABASE TABLE DATA -----
 
 // ----- GET LAST CODE -----
-const getTableLastCode = (
+function getTableLastCode(
 	tableName = false,
 	columnName = false,
 	whereFilter = ""
-) => {
+) {
 	if (tableName && columnName) {
 		// let table = getTableDataLength(tableName, "createdAt");
 		let result = 0;
@@ -170,14 +172,14 @@ const getTableLastCode = (
 // ----- END GET LAST CODE -----
 
 // ----- GENERATE CODE -----
-const generateCode = (
+function generateCode(
 	firstStr = "STR",
 	lastID = false,
 	tableName = false,
 	columnName = false,
 	whereFilter = "",
 	minus = false
-) => {
+) {
 	let id;
 	let value = minus ? 0 : 1;
 	if (!lastID && tableName && columnName) {
@@ -200,10 +202,10 @@ const generateCode = (
 // ----- END GENERATE CODE -----
 
 // ----- GENERATE ITEM CODE -----
-const generateItemCode = (
+function generateItemCode(
 	classificationID = null,
 	type = "item"
-) => {
+) {
 	let id;
 	let table = type == `item` ? 'ims_inventory_item_tbl'  : 'ims_inventory_asset_tbl' ;
 	let tableID = type == `item` ? 'itemID'  : 'assetID' ;
@@ -221,13 +223,13 @@ const generateItemCode = (
 // ----- END GENERATE ITEM CODE -----
 
 // ----- SAVE/UPDATE/DELETE TABLE DATA -----
-const saveUpdateDeleteDatabaseFormData = async (
+async function saveUpdateDeleteDatabaseFormData(
 	data,
 	path,
 	feedback = false,
 	swalTitle,
 	overrideSuccessConfirmation
-) => {
+) {
 	let result = await $.ajax({
 		method: "POST",
 		url: path,
@@ -305,12 +307,12 @@ const saveUpdateDeleteDatabaseFormData = async (
 	return (await result) ? result : false;
 };
 
-const saveUpdateDeleteDatabaseFormDatav1 = async (
+async function saveUpdateDeleteDatabaseFormDatav1(
 	data,
 	path,
 	feedback = false,
 	swalTitle
-) => {
+) {
 	let flag;
 	$.ajax({
 		method: "POST",
@@ -368,13 +370,13 @@ const saveUpdateDeleteDatabaseFormDatav1 = async (
 	return await flag;
 };
 
-const saveUpdateDeleteDatabaseObject = async (
+async function saveUpdateDeleteDatabaseObject(
 	data,
 	path,
 	feedback = false,
 	swalTitle,
 	overrideSuccessConfirmation = false
-) => {
+) {
 	let result = await $.ajax({
 		method: "POST",
 		url: path,
@@ -469,12 +471,12 @@ const saveUpdateDeleteDatabaseObject = async (
 	return (await result) ? result : false;
 };
 
-const saveUpdateDeleteDatabaseObjectv1 = async (
+async function saveUpdateDeleteDatabaseObjectv1 (
 	data,
 	path,
 	feedback = false,
 	swalTitle
-) => {
+) {
 	let flag;
 	$.ajax({
 		method: "POST",
@@ -531,64 +533,64 @@ const saveUpdateDeleteDatabaseObjectv1 = async (
 	return await flag;
 };
 
-const insertTableData = async (
+async function insertTableData(
 	data,
 	object = false,
 	feedback = false,
 	swalTitle = false
-) => {
-	let path = `${base_url}operations/insertTableData`;
+){
+	let path = `${_base_url}operations/insertTableData`;
 	return !object
 		? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle)
 		: await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
 };
 
-const insertTableDatav1 = async (
+async function insertTableDatav1(
 	data,
 	object = false,
 	feedback = false,
 	swalTitle = false
-) => {
+){
 	$("#loader").show();
-	let path = `${base_url}operations/insertTableData`;
+	let path = `${_base_url}operations/insertTableData`;
 	return !object
 		? await saveUpdateDeleteDatabaseFormDatav1(data, path, feedback, swalTitle)
 		: await saveUpdateDeleteDatabaseObjectv1(data, path, feedback, swalTitle);
 };
 
-const updateTableData = async (
+async function updateTableData(
 	data,
 	object = false,
 	feedback = false,
 	swalTitle = false
-) => {
-	let path = `${base_url}operations/updateTableData`;
+){
+	let path = `${_base_url}operations/updateTableData`;
 	return !object
 		? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle)
 		: await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
 };
 
-const updateTableDatav1 = async (
+async function updateTableDatav1(
 	data,
 	object = false,
 	feedback = false,
 	swalTitle = false
-) => {
+){
 	$("#loader").show();
-	let path = `${base_url}operations/updateTableData`;
+	let path = `${_base_url}operations/updateTableData`;
 	return !object
 		? await saveUpdateDeleteDatabaseFormDatav1(data, path, feedback, swalTitle)
 		: await saveUpdateDeleteDatabaseObjectv1(data, path, feedback, swalTitle);
 };
 
-const deleteTableData = async (
+async function deleteTableData(
 	data,
 	object = false,
 	feedback = false,
 	swalTitle = false
-) => {
+){
 	$("#loader").show();
-	let path = `${base_url}operations/deleteTableData`;
+	let path = `${_base_url}operations/deleteTableData`;
 	return !object
 		? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle)
 		: await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
@@ -596,11 +598,11 @@ const deleteTableData = async (
 // ----- END SAVE/UPDATE/DELETE TABLE DATA -----
 
 // ----- INSERT NOTIFICATION -----
-const insertNotificationData = (data) => {
+function insertNotificationData(data) {
 	if (data) {
 		$.ajax({
 			method: "POST",
-			url: `${base_url}operations/insertNotificationData`,
+			url: `${_base_url}operations/insertNotificationData`,
 			data,
 			dataType: "json",
 			async: false,
@@ -612,7 +614,7 @@ const insertNotificationData = (data) => {
 // ----- END INSERT NOTIFICATION -----
 
 // ----- GET EMPLOYEE DATA -----
-const getAllEmployeeData = (employeeID = null) => {
+function getAllEmployeeData(employeeID = null) {
 	const whereEmployee = employeeID ? `employeeID = ${employeeID}` : "1=1";
 	const data = getTableData(
 		`hris_employee_list_tbl AS helt
@@ -627,7 +629,7 @@ const getAllEmployeeData = (employeeID = null) => {
 	return data || [];
 };
 
-const getEmployeeData = (employeeID) => {
+function getEmployeeData(employeeID) {
 	if (employeeID) {
 		const data = getTableData(
 			`
@@ -647,12 +649,13 @@ const getEmployeeData = (employeeID) => {
 // ----- END GET EMPLOYEE DATA -----
 
 // ----- EMPLOYEE PERMISSIONS -----
-const getEmployeePermission = (moduleID, method) => {
+function getEmployeePermission(moduleID, method) {
 	if (moduleID && method) {
+		let _sessionID = $(`.page-loader-wrapper`).attr("session");
 		const data = getTableData(
 			"hris_employee_permission_tbl",
 			"createStatus, readStatus, updateStatus, deleteStatus, printStatus",
-			`employeeID = ${sessionID} AND moduleID = ${moduleID}`
+			`employeeID = ${_sessionID} AND moduleID = ${moduleID}`
 		);
 		if (data.length > 0) {
 			switch (method) {
@@ -676,30 +679,30 @@ const getEmployeePermission = (moduleID, method) => {
 	return false;
 };
 
-const isCreateAllowed = (moduleID = 60) => {
+function isCreateAllowed(moduleID = 60) {
 	return getEmployeePermission(moduleID, "create");
 };
 
-const isReadAllowed = (moduleID = 60) => {
+function isReadAllowed(moduleID = 60) {
 	return getEmployeePermission(moduleID, "read");
 };
 
-const isUpdateAllowed = (moduleID = 60) => {
+function isUpdateAllowed(moduleID = 60) {
 	return getEmployeePermission(moduleID, "update");
 };
 
-const isDeleteAllowed = (moduleID = 60) => {
+function isDeleteAllowed(moduleID = 60) {
 	return getEmployeePermission(moduleID, "delete");
 };
 
-const isPrintAllowed = (moduleID = 60) => {
+function isPrintAllowed(moduleID = 60) {
 	return getEmployeePermission(moduleID, "print");
 };
 
-const getUnionTableData = (
+function getUnionTableData(
 	unionData = "",
-) => {
-	let path = `${base_url}operations/getUnionTableData`;
+) {
+	let path = `${_base_url}operations/getUnionTableData`;
 	let data = {
 		unionData,
 	};

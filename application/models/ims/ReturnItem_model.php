@@ -61,8 +61,7 @@ class ReturnItem_model extends CI_Model {
         }
         return false;
     }
-    public function saveSerial( $scopes = null, $returnItemID)
-    {
+    public function saveSerial( $scopes = null, $returnItemID) {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
         if ($scopes) {
          

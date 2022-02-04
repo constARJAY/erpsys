@@ -43,24 +43,41 @@ $(document).ready(function () {
     }
 
 	// ----- REUSABLE FUNCTIONS -----
+	function decimalToHours(decimal = 0.00) {
+        if (decimal) {
+            const num     = decimal * 60;
+            const hours   = Math.floor(num / 60);  
+            const minutes = Math.floor(num % 60);
+            if (isFinite(hours) && isFinite(minutes)) {
+                let hoursDisplay   = hours.toString().length > 1 ? hours : `0${hours}`;
+                let minutesDisplay = minutes.toString().length > 1 ? minutes : `0${minutes}`;
+                let display = `${hoursDisplay}:${minutesDisplay}`;
+                return display;  
+            }
+        }
+        return "00:00";
+    }
+
 	let holidayData = getTableData(
         "hris_holiday_tbl",
         `*`,
         `holidayStatus = 1`
     )?.map(holiday => holiday.holidayDate);
 
-	// let employeeSchedule = getTableData(
-	// 	`hris_employee_list_tbl as helt
-	// 		LEFT JOIN hris_schedule_setup_tbl AS hsst USING(scheduleID)`,
-	// 	`IF(mondayStatus = 1, 1, 0) AS monday,
-	// 	IF(tuesdayStatus = 1, 1, 0) AS tuesday,
-	// 	IF(wednesdayStatus = 1, 1, 0) AS wednesday,
-	// 	IF(thursdayStatus = 1, 1, 0) AS thursday,
-	// 	IF(fridayStatus = 1, 1, 0) AS friday,
-	// 	IF(saturdayStatus = 1, 1, 0) AS saturday,
-	// 	IF(sundayStatus = 1, 1, 0) AS sunday`,
-	// 	`employeeID = ${sessionID}`
-	// );
+	let getScheduleData = getTableData(
+		`hris_employee_list_tbl as helt
+			LEFT JOIN hris_schedule_setup_tbl AS hsst USING(scheduleID)`,
+		`hsst.*,
+		IF(mondayStatus = 1, 1, 0) AS monday,
+		IF(tuesdayStatus = 1, 1, 0) AS tuesday,
+		IF(wednesdayStatus = 1, 1, 0) AS wednesday,
+		IF(thursdayStatus = 1, 1, 0) AS thursday,
+		IF(fridayStatus = 1, 1, 0) AS friday,
+		IF(saturdayStatus = 1, 1, 0) AS saturday,
+		IF(sundayStatus = 1, 1, 0) AS sunday`,
+		`employeeID = ${sessionID}`
+	);
+	let scheduleData = getScheduleData;
 
 	const projectList = getTableData(
 		"pms_project_list_tbl AS project LEFT JOIN pms_timeline_builder_tbl AS timeline ON timeline.projectID = project.projectListID", 
@@ -107,35 +124,7 @@ $(document).ready(function () {
 			$(element).html(html);
 		});
 	}
-	// ----- END UPDATE CLIENT -----
-
-	// ----- UPDATE PROJECT NAME -----
-	function updateProjectOptions() {
-		let projectIDArr = []; // 0 IS THE DEFAULT VALUE
-		let projectElementID = [];
-		
-		$("[name=activityProject]").each(function(i, obj) {
-			projectIDArr.push($(this).val());
-			projectElementID.push(`#${this.id}`);
-			// $(this).val() && $(this).trigger("change");
-		}) 
-
-		projectElementID.map((element, index) => {
-			let html = `<option selected >Please select a project</option>`;
-			// let itemList = [...inventoryStorageList];
-			html += projectList.map(project => {
-				return `
-				<option 
-				value        = "${project.projectListID}" 
-				${project.projectListID == projectIDArr[index] && "selected"}>
-				${project.projectListName}
-			</option>`;
-				
-			})
-			$(element).html(html);
-		});
-	}
-	// ----- END UPDATE PROJECT NAME -----
+	// ----- END UPDATE CLIENT ----
 
 
 	// ----- GET CLIENT LIST -----
@@ -724,7 +713,7 @@ $(document).ready(function () {
 
 	// --- GET MAN HOURS FOR EVERY DEFAULT PRESENT DAY BASED ON EMPLOYEE SCHEDULE---//
 	function getSchedManHours(){
-		let getSchedule = employeeSchedule();
+		let getSchedule = [...scheduleData];
 		let getDayArr ={};
 
 		getSchedule.map((sched,index)=> {
@@ -1103,7 +1092,7 @@ $(document).ready(function () {
 		
 		Swal.fire({
             title: 'CREATE PRODUCTION DATES',
-        text: "Are you sure that you want to create a production?",
+			text: "Are you sure that you want to create a production?",
             imageUrl: `${base_url}assets/modal/add.svg`,
             imageWidth: 200,
             imageHeight: 200,
@@ -1179,12 +1168,12 @@ $(document).ready(function () {
 				})
 
 
-            Swal.fire({
-                icon: 'success',
-                title:  `${getDateSchedule} successfully created!`,
-                showConfirmButton: false,
-                timer: 800
-              })
+				// Swal.fire({
+				// 	icon: 'success',
+				// 	title:  `${getDateSchedule} successfully created!`,
+				// 	showConfirmButton: false,
+				// 	timer: 800
+				// })
             }
         });
 
@@ -1513,12 +1502,10 @@ $(document).ready(function () {
 		var dayEntriesCheck = dayEntries.length > 0 ? dayEntries[2].slice(0, -1) : "";
 		var getTimeStart = $parent.find(`[name="timePeriodStart"]`).val() || "0:00";
 		var getTimeEnd = $parent.find(`[name="timePeriodEnd"]`).val() || "0:00";
-		let computeHours = 0;
-
-		computeHours = timeDiffer(getTimeStart, getTimeEnd,dayEntriesCheck) || "0:00";
+		let computeHours = timeDiffer(getTimeStart, getTimeEnd, dayEntriesCheck) || "0.00";
 
 		if(getTimeStart != "0:00" && getTimeEnd != "0:00"){
-			$parent.find(`[name="activityManHours"]`).text(computeHours);
+			$parent.find(`[name="activityManHours"]`).text(formatAmount(computeHours));
 
 		}
 		let checkOutputHours = $parent.find(`[name="activityManHours"]`).text();
@@ -1819,175 +1806,238 @@ $(document).ready(function () {
     // ----- END UPDATE TABLE  -----
 
 	// ----- TIME DIFFER COMPUTATION ---//
+	function timeDiffer(start, end, day) {
+		let hours = 0, breakHours = 0;
 
-	function timeDiffer(start, end,dayEntries) {
-		start = start.split(":");
-		end = end.split(":");
-		var startDate = new Date(0, 0, 0, start[0], start[1], 0);
-		var endDate = new Date(0, 0, 0, end[0], end[1], 0);
-		var getMiddleTime = '';
-		var breakDuration = 0;
-		var getMiddleDurationTime ="";
-		var getSchedTimeFrom="";
-		var getSchedTimeTo="";
-		let getSchedule = employeeSchedule();
+		if (start && end && day) {
+			let tempDate = "2021-01-01";
+			start = moment(`${tempDate} ${start}`).format("YYYY-MM-DD HH:mm:ss");
+			end   = moment(`${tempDate} ${end}`).format("YYYY-MM-DD HH:mm:ss");
 
-		getSchedule.map((sched)=> {
-			let{
-				mondayFrom,
-				mondayTo,
-				mondayBreakDuration,
-				mondayStatus,
+			hours = moment.duration(moment(end).diff(moment(start)));
+			hours = hours.asHours();
 
-				tuesdayFrom,
-				tuesdayTo,
-				tuesdayBreakDuration,
-				tuesdayStatus,
+			day = day.toLowerCase();
+			let columnName = {
+				monday:    { status: 'mondayStatus',    breakHours: 'mondayBreakDuration',    startTime: 'mondayFrom',    endTime: 'mondayTo'    },
+				tuesday:   { status: 'tuesdayStatus',   breakHours: 'tuesdayBreakDuration',   startTime: 'tuesdayFrom',   endTime: 'tuesdayTo'   },
+				wednesday: { status: 'wednesdayStatus', breakHours: 'wednesdayBreakDuration', startTime: 'wednesdayFrom', endTime: 'wednesdayTo' },
+				thursday:  { status: 'thursdayStatus',  breakHours: 'thursdayBreakDuration',  startTime: 'thursdayFrom',  endTime: 'thursdayTo'  },
+				friday:    { status: 'fridayStatus',    breakHours: 'fridayBreakDuration',    startTime: 'fridayFrom',    endTime: 'fridayTo'    },
+				saturday:  { status: 'saturdayStatus',  breakHours: 'saturdayBreakDuration',  startTime: 'saturdayFrom',  endTime: 'saturdayTo'  },
+				sunday:    { status: 'sundayStatus',    breakHours: 'sundayBreakDuration',    startTime: 'sundayFrom',    endTime: 'sundayTo'    },
+			};
 
-				wednesdayFrom,
-				wednesdayTo,
-				wednesdayBreakDuration,
-				wednesdayStatus,
+			let startTime = "07:00", endTime = "16:00";
+			scheduleData.map(sch => { 
+				if (sch[`${columnName[day].status}`] == 1) {
+					breakHours = +sch[`${columnName[day].breakHours}`]; 
+					startTime  = sch[`${columnName[day].startTime}`]; 
+					endTime    = sch[`${columnName[day].endTime}`]; 
+				}
+			});
+			startTime = `${tempDate} ${startTime}`;
+			endTime   = `${tempDate} ${endTime}`;
 
-				thursdayFrom,
-				thursdayTo,
-				thursdayBreakDuration,
-				thursdayStatus,
+			if (breakHours) {
+				let breakStart = new Date(startTime);
+					breakStart = breakStart.getTime();
+				let breakEnd   = new Date(endTime);
+					breakEnd   = breakEnd.getTime();
+				let halfBreak  = moment.duration(moment(breakEnd).diff(moment(breakStart)));
+					halfBreak  = moment(breakStart).add(halfBreak.asHours() / 2, 'hours').format("YYYY-MM-DD HH:mm:ss");
 
-				fridayFrom,
-				fridayTo,
-				fridayBreakDuration,
-				fridayStatus,
+				let halfBreakMinutes = breakHours * 60 / 2;
+				breakStart = moment(halfBreak).add(-halfBreakMinutes, 'minutes').format("YYYY-MM-DD HH:mm:ss");
+				breakEnd   = moment(halfBreak).add(halfBreakMinutes, 'minutes').format("YYYY-MM-DD HH:mm:ss");
 
-				saturdayFrom,
-				saturdayTo,
-				saturdayBreakDuration,
-				saturdayStatus,
-
-				sundayFrom,
-				sundayTo,
-				sundayBreakDuration,
-				sundayStatus
-			} = sched;
-
-				let dayArr = [`monday`,`tuesday`,`wednesday`,`thursday`,`friday`,`saturday`,`sunday`];
-				let dayFromArr = [mondayFrom,tuesdayFrom,wednesdayFrom,thursdayFrom,fridayFrom,saturdayFrom,sundayFrom];
-				let dayToArr = [mondayTo,tuesdayTo,wednesdayTo,thursdayTo,fridayTo,saturdayTo,sundayTo];
-				let dayBreakArr = [mondayBreakDuration,tuesdayBreakDuration,wednesdayBreakDuration,thursdayBreakDuration,fridayBreakDuration,saturdayBreakDuration,sundayBreakDuration];
-				let dayStatusArr = [mondayStatus,tuesdayStatus,wednesdayStatus,thursdayStatus,fridayStatus,saturdayStatus,sundayStatus];
-			
-			for(var loop =0;loop<7;loop++){
-
-				// console.log(dayEntries.toLowerCase() +"=="+ dayArr[loop])
-
-				if(dayEntries.toLowerCase() == dayArr[loop]){
-
-					tmpStart = dayFromArr[loop].split(":");
-					tmpEnd = dayToArr[loop].split(":");
-
-					let tmpStartDate = new Date(0, 0, 0, tmpStart[0], tmpStart[1], 0);
-					let tmpEndDate = new Date(0, 0, 0, tmpEnd[0], tmpEnd[1], 0);
-					
-					var tmpDiff = tmpEndDate.getTime() - tmpStartDate.getTime();
-					var tmpHours = Math.floor(tmpDiff  / 1000 / 60 / 60);
-					tmpDiff -= tmpHours * 1000 * 60 * 60;
-					var tmpMinutes = Math.floor(tmpDiff / 1000 / 60);
-					var tmpComputeHour = ((parseFloat(tmpHours) - parseFloat(dayBreakArr[loop]))/2).toFixed(0) +":"+ (parseFloat((tmpMinutes/60))).toFixed(0);
-					var tmpComputeDurationHour = ((parseFloat(tmpHours))/2).toFixed(0) +":"+ (parseFloat((tmpMinutes/60))).toFixed(0);
-
-					getMiddleTime = moment(dayFromArr[loop], '"HH:mm"').add(moment.duration(tmpComputeHour)).format('HH:mm');
-					getMiddleDurationTime = moment(dayFromArr[loop], '"HH:mm"').add(moment.duration(tmpComputeDurationHour)).format('HH:mm');
-					breakDuration = dayBreakArr[loop];
-
-					 getSchedTimeFrom = dayFromArr[loop];
-					 getSchedTimeTo = dayToArr[loop];
+				if (moment(breakStart).isBetween(start, end, undefined, '[)') 
+					|| moment(breakEnd).isBetween(start, end, undefined, '[)') 
+					|| moment(start).isBetween(breakStart, breakEnd, undefined, '[)') 
+					|| moment(end).isBetween(breakStart, breakEnd, undefined, '[)')) {
+					let employeeStartBreak = moment.duration(moment(start).diff(moment(breakStart))).asHours() > 0 ? start : breakStart;
+					let employeeEndBreak   = moment.duration(moment(end).diff(moment(breakEnd))).asHours() > 0 ? breakEnd : end;
+					breakHours = moment.duration(moment(employeeEndBreak).diff(moment(employeeStartBreak))).asHours();
+				} else {
+					breakHours = 0;
 				}
 			}
-		})
-	
-		
 
-		var diff = endDate.getTime() - startDate.getTime();
-		var hours = Math.floor(diff  / 1000 / 60 / 60);
-		diff -= hours * 1000 * 60 * 60;
-		var minutes = Math.floor(diff / 1000 / 60);
-
-		let splitcheckTime = getMiddleTime.split(":");
-		let getNewCheckBrekTime = new Date(0, 0, 0, splitcheckTime[0], splitcheckTime[1], 0);
-
-		let splitDurationTime = getMiddleDurationTime.split(":");
-		let getNewBreakDurationTime = new Date(0, 0, 0, splitDurationTime[0], splitDurationTime[1], 0);
-
-		console.log(startDate)
-		console.log(endDate)
-
-		console.log("splitcheckTime " +splitcheckTime)
-		console.log("splitDurationTime " +splitDurationTime)
-
-	
-		// check lunch time // 
-		
-
-		let checkDurationTimeStart = moment(startDate).isBetween(getNewCheckBrekTime,getNewBreakDurationTime,null,'[]');
-		let checkDurationTimeEnd = moment(endDate).isBetween(getNewCheckBrekTime,getNewBreakDurationTime,null,'[]');
-
-		console.log("checkDurationTimeStart " + checkDurationTimeStart)
-		console.log("checkDurationTimeEnd " +checkDurationTimeEnd)
-
-		// var lunchFrom = new Date(0, 0, 0, 12, 0, 0);
-		// var lunchTo = new Date(0, 0, 0, 13, 0, 0);
-		// let checkDurationTimeStart = moment(startDate).isBetween(lunchFrom,lunchTo,null,'[]');
-		// let checkDurationTimeEnd = moment(endDate).isBetween(lunchFrom,lunchTo,null,'[]');
-		// end  check lunch time // 
-
-		//check include lunch time//
-		let splitschedTimeFrom = getSchedTimeFrom.split(":");
-		let splitschedTimeTo = getSchedTimeTo.split(":");
-		var schedTimeFrom = new Date(0, 0, 0, splitschedTimeFrom[0], splitschedTimeFrom[1], 0);
-		var schedTimeTo = new Date(0, 0, 0, splitschedTimeTo[0], splitschedTimeTo[1], 0);
-		let checkIncludeLunchTimeStart = moment(startDate).isBetween(schedTimeFrom,schedTimeTo,null,'[]');
-		let checkIncludeLunchTimeEnd = moment(endDate).isBetween(schedTimeFrom,schedTimeTo,null,'[]');
-
-		console.log("checkIncludeLunchTimeStart " + checkIncludeLunchTimeStart)
-		console.log("checkIncludeLunchTimeEnd " + checkIncludeLunchTimeEnd)
-		//end check include lunch time//
-	
-		// if(checkDurationTimeStart &&  checkDurationTimeEnd ){
-			
-		// 	var totalHours = (parseFloat(hours - 1) + parseFloat((minutes/60))).toFixed(2);
-
-		// }else{
-
-		// 	if(checkDurationTimeStart){
-		// 		var totalHours =  (parseFloat(hours -1) + parseFloat((minutes/60))).toFixed(2);
-		// 	}else{
-		// 		if(checkIncludeLunchTimeStart && checkIncludeLunchTimeEnd){
-		// 			var totalHours =  (parseFloat(hours-1) + parseFloat((minutes/60))).toFixed(2);
-		// 		}else{
-		// 			var totalHours =  (parseFloat(hours) + parseFloat((minutes/60))).toFixed(2);
-		// 		}
-		// 	}
-		// }
-
-		if(checkDurationTimeStart &&  checkDurationTimeEnd ){
-			
-			var totalHours = (parseFloat(hours - 1) + parseFloat((minutes/60))).toFixed(2);
-
-		}else{
-
-			if(checkDurationTimeStart){
-				var totalHours =  (parseFloat(hours -1) + parseFloat((minutes/60))).toFixed(2);
-			}else{
-				if(checkIncludeLunchTimeStart || checkIncludeLunchTimeEnd){
-					var totalHours =  (parseFloat(hours-1) + parseFloat((minutes/60))).toFixed(2);
-				}else{
-					var totalHours =  (parseFloat(hours) + parseFloat((minutes/60))).toFixed(2);
-				}
-			}
 		}
-
-		return  totalHours > 0 ? totalHours : "0.00";
+		return hours > 0 ? hours - breakHours : 0;
 	}
+
+
+	// function timeDiffer(start, end, dayEntries) {
+	// 	start = start.split(":");
+	// 	end = end.split(":");
+	// 	var startDate = new Date(0, 0, 0, start[0], start[1], 0);
+	// 	var endDate = new Date(0, 0, 0, end[0], end[1], 0);
+	// 	var getMiddleTime = '';
+	// 	var breakDuration = 0;
+	// 	var getMiddleDurationTime ="";
+	// 	var getSchedTimeFrom="";
+	// 	var getSchedTimeTo="";
+	// 	let getSchedule = [...scheduleData];
+
+	// 	getSchedule.map((sched)=> {
+	// 		let{
+	// 			mondayFrom,
+	// 			mondayTo,
+	// 			mondayBreakDuration,
+	// 			mondayStatus,
+
+	// 			tuesdayFrom,
+	// 			tuesdayTo,
+	// 			tuesdayBreakDuration,
+	// 			tuesdayStatus,
+
+	// 			wednesdayFrom,
+	// 			wednesdayTo,
+	// 			wednesdayBreakDuration,
+	// 			wednesdayStatus,
+
+	// 			thursdayFrom,
+	// 			thursdayTo,
+	// 			thursdayBreakDuration,
+	// 			thursdayStatus,
+
+	// 			fridayFrom,
+	// 			fridayTo,
+	// 			fridayBreakDuration,
+	// 			fridayStatus,
+
+	// 			saturdayFrom,
+	// 			saturdayTo,
+	// 			saturdayBreakDuration,
+	// 			saturdayStatus,
+
+	// 			sundayFrom,
+	// 			sundayTo,
+	// 			sundayBreakDuration,
+	// 			sundayStatus
+	// 		} = sched;
+
+
+
+	// 			let dayArr = [`monday`,`tuesday`,`wednesday`,`thursday`,`friday`,`saturday`,`sunday`];
+	// 			let dayFromArr = [mondayFrom,tuesdayFrom,wednesdayFrom,thursdayFrom,fridayFrom,saturdayFrom,sundayFrom];
+	// 			let dayToArr = [mondayTo,tuesdayTo,wednesdayTo,thursdayTo,fridayTo,saturdayTo,sundayTo];
+	// 			let dayBreakArr = [mondayBreakDuration,tuesdayBreakDuration,wednesdayBreakDuration,thursdayBreakDuration,fridayBreakDuration,saturdayBreakDuration,sundayBreakDuration];
+	// 			let dayStatusArr = [mondayStatus,tuesdayStatus,wednesdayStatus,thursdayStatus,fridayStatus,saturdayStatus,sundayStatus];
+			
+	// 		for(var loop =0;loop<7;loop++){
+
+	// 			// console.log(dayEntries.toLowerCase() +"=="+ dayArr[loop])
+
+	// 			if(dayEntries.toLowerCase() == dayArr[loop]){
+
+	// 				tmpStart = dayFromArr[loop].split(":");
+	// 				tmpEnd = dayToArr[loop].split(":");
+
+	// 				let tmpStartDate = new Date(0, 0, 0, tmpStart[0], tmpStart[1], 0);
+	// 				let tmpEndDate = new Date(0, 0, 0, tmpEnd[0], tmpEnd[1], 0);
+					
+	// 				var tmpDiff = tmpEndDate.getTime() - tmpStartDate.getTime();
+	// 				var tmpHours = Math.floor(tmpDiff  / 1000 / 60 / 60);
+	// 				tmpDiff -= tmpHours * 1000 * 60 * 60;
+	// 				var tmpMinutes = Math.floor(tmpDiff / 1000 / 60);
+	// 				var tmpComputeHour = ((parseFloat(tmpHours) - parseFloat(dayBreakArr[loop]))/2).toFixed(0) +":"+ (parseFloat((tmpMinutes/60))).toFixed(0);
+	// 				var tmpComputeDurationHour = ((parseFloat(tmpHours))/2).toFixed(0) +":"+ (parseFloat((tmpMinutes/60))).toFixed(0);
+
+	// 				getMiddleTime = moment(dayFromArr[loop], '"HH:mm"').add(moment.duration(tmpComputeHour)).format('HH:mm');
+	// 				getMiddleDurationTime = moment(dayFromArr[loop], '"HH:mm"').add(moment.duration(tmpComputeDurationHour)).format('HH:mm');
+	// 				breakDuration = dayBreakArr[loop];
+
+	// 				 getSchedTimeFrom = dayFromArr[loop];
+	// 				 getSchedTimeTo = dayToArr[loop];
+	// 			}
+	// 		}
+	// 	})
+	
+		
+
+	// 	var diff = endDate.getTime() - startDate.getTime();
+	// 	var hours = Math.floor(diff  / 1000 / 60 / 60);
+	// 	diff -= hours * 1000 * 60 * 60;
+	// 	var minutes = Math.floor(diff / 1000 / 60);
+
+	// 	let splitcheckTime = getMiddleTime.split(":");
+	// 	let getNewCheckBrekTime = new Date(0, 0, 0, splitcheckTime[0], splitcheckTime[1], 0);
+
+	// 	let splitDurationTime = getMiddleDurationTime.split(":");
+	// 	let getNewBreakDurationTime = new Date(0, 0, 0, splitDurationTime[0], splitDurationTime[1], 0);
+
+	// 	console.log(startDate)
+	// 	console.log(endDate)
+
+	// 	console.log("splitcheckTime " +splitcheckTime)
+	// 	console.log("splitDurationTime " +splitDurationTime)
+
+	
+	// 	// check lunch time // 
+		
+
+	// 	let checkDurationTimeStart = moment(startDate).isBetween(getNewCheckBrekTime,getNewBreakDurationTime,null,'[]');
+	// 	let checkDurationTimeEnd = moment(endDate).isBetween(getNewCheckBrekTime,getNewBreakDurationTime,null,'[]');
+
+	// 	console.log("checkDurationTimeStart " + checkDurationTimeStart)
+	// 	console.log("checkDurationTimeEnd " +checkDurationTimeEnd)
+
+	// 	// var lunchFrom = new Date(0, 0, 0, 12, 0, 0);
+	// 	// var lunchTo = new Date(0, 0, 0, 13, 0, 0);
+	// 	// let checkDurationTimeStart = moment(startDate).isBetween(lunchFrom,lunchTo,null,'[]');
+	// 	// let checkDurationTimeEnd = moment(endDate).isBetween(lunchFrom,lunchTo,null,'[]');
+	// 	// end  check lunch time // 
+
+	// 	//check include lunch time//
+	// 	let splitschedTimeFrom = getSchedTimeFrom.split(":");
+	// 	let splitschedTimeTo = getSchedTimeTo.split(":");
+	// 	var schedTimeFrom = new Date(0, 0, 0, splitschedTimeFrom[0], splitschedTimeFrom[1], 0);
+	// 	var schedTimeTo = new Date(0, 0, 0, splitschedTimeTo[0], splitschedTimeTo[1], 0);
+	// 	let checkIncludeLunchTimeStart = moment(startDate).isBetween(schedTimeFrom,schedTimeTo,null,'[]');
+	// 	let checkIncludeLunchTimeEnd = moment(endDate).isBetween(schedTimeFrom,schedTimeTo,null,'[]');
+
+	// 	console.log("checkIncludeLunchTimeStart " + checkIncludeLunchTimeStart)
+	// 	console.log("checkIncludeLunchTimeEnd " + checkIncludeLunchTimeEnd)
+	// 	//end check include lunch time//
+	
+	// 	// if(checkDurationTimeStart &&  checkDurationTimeEnd ){
+			
+	// 	// 	var totalHours = (parseFloat(hours - 1) + parseFloat((minutes/60))).toFixed(2);
+
+	// 	// }else{
+
+	// 	// 	if(checkDurationTimeStart){
+	// 	// 		var totalHours =  (parseFloat(hours -1) + parseFloat((minutes/60))).toFixed(2);
+	// 	// 	}else{
+	// 	// 		if(checkIncludeLunchTimeStart && checkIncludeLunchTimeEnd){
+	// 	// 			var totalHours =  (parseFloat(hours-1) + parseFloat((minutes/60))).toFixed(2);
+	// 	// 		}else{
+	// 	// 			var totalHours =  (parseFloat(hours) + parseFloat((minutes/60))).toFixed(2);
+	// 	// 		}
+	// 	// 	}
+	// 	// }
+
+	// 	if(checkDurationTimeStart &&  checkDurationTimeEnd ){
+			
+	// 		var totalHours = (parseFloat(hours - 1) + parseFloat((minutes/60))).toFixed(2);
+
+	// 	}else{
+
+	// 		if(checkDurationTimeStart){
+	// 			var totalHours =  (parseFloat(hours -1) + parseFloat((minutes/60))).toFixed(2);
+	// 		}else{
+	// 			if(checkIncludeLunchTimeStart || checkIncludeLunchTimeEnd){
+	// 				var totalHours =  (parseFloat(hours-1) + parseFloat((minutes/60))).toFixed(2);
+	// 			}else{
+	// 				var totalHours =  (parseFloat(hours) + parseFloat((minutes/60))).toFixed(2);
+	// 			}
+	// 		}
+	// 	}
+
+	// 	return  totalHours > 0 ? totalHours : "0.00";
+	// }
 
 	// ----- TIME DIFFER COMPUTATION ---//
 

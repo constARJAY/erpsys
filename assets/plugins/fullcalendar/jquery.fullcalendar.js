@@ -1,6 +1,9 @@
 
 !function($) {
     const base_url = $(".page-loader-wrapper").attr("base_url");
+    const allowedCreate = isCreateAllowed(124);
+    const allowedUpdate = isUpdateAllowed(124);
+    const allowedDelete = isDeleteAllowed(124);
     "use strict";
     var CalendarApp = function() {
         this.$body = $("body")
@@ -36,10 +39,12 @@
 
     /* on click on event */
     CalendarApp.prototype.onEventClick =  function (calEvent, jsEvent, view) {
-        $(".my_event_header").text("EDIT EVENT");
-        $("#my_event").modal("show");
-        console.log(calEvent);
-        $("#my_event_content").html(preloader);
+
+        if (allowedUpdate) {
+            $(".my_event_header").text("EDIT EVENT");
+            $("#my_event").modal("show");
+            console.log(calEvent);
+            $("#my_event_content").html(preloader);
             const calendarID =  calEvent.id;
             const eventName  = calEvent.title;
             const background = calEvent.className[0];
@@ -47,107 +52,119 @@
             const dateTo     = moment(new Date(calEvent.end._d));
             const eventDate  = moment(new Date(calEvent.start._d)).format("MMMM DD, YYYY")+" - "+moment(new Date(calEvent.end._d)).format("MMMM DD, YYYY");
             const modalButtons = `<button type="button" class="btn btn-save update-event submit-btn" data-calendarid="${calendarID}"><i class="fas fa-save"></i>&nbsp;Update</button>
-                                  <button type="button" class="btn btn-cancel delete-event submit-btn"><i class="fas fa-trash"></i>&nbsp;DELETE</button>`;
-            // modalButtons = `<button type="button" class="btn btn-primary save-event submit-btn">CREATE EVENT</button>
-            //                 <button type="button" class="btn btn-danger delete-event submit-btn" id="btn-cancel">CANCEL</button>`;
-        const   my_event_content = `<div class="modal-body">
-                                        <div class="form-group">
-                                            <label>Event Name <span class="text-danger">*</span></label>
-                                            <input class="form-control validate" data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,][()]['][&][*]" name="eventCalendarName" type="text" id="edit-eventname" value="${eventName}" minlength="2" maxlength="30" required autocomplete="off">
-                                            <div class="invalid-feedback d-block" id="invalid-edit-eventname"></div>
+                                      <button type="button" class="btn btn-cancel delete-event submit-btn"><i class="fas fa-trash"></i>&nbsp;DELETE</button>`;
+                // modalButtons = `<button type="button" class="btn btn-primary save-event submit-btn">CREATE EVENT</button>
+                //                 <button type="button" class="btn btn-danger delete-event submit-btn" id="btn-cancel">CANCEL</button>`;
+            const   my_event_content = `<div class="modal-body">
+                                            <div class="form-group">
+                                                <label>Event Name <span class="text-danger">*</span></label>
+                                                <input class="form-control validate" data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,][()]['][&][*]" name="eventCalendarName" type="text" id="edit-eventname" value="${eventName}" minlength="2" maxlength="30" required autocomplete="off">
+                                                <div class="invalid-feedback d-block" id="invalid-edit-eventname"></div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="">Color <span class="text-danger">*</span></label>
+                                                <select class="form-control validate" name="eventCalendarBackground" id="edit-eventcolor" required>
+                                                    <option value="" selected disabled>Select Color</option>
+                                                    <option value="bg-red">Red</option>
+                                                    <option value="bg-yellow">Yellow</option>
+                                                    <option value="bg-green">Green</option>
+                                                    <option value="bg-orange">Orange</option>
+                                                    <option value="bg-blue">Blue</option>
+                                                    <option value="bg-violet">Violet</option>
+                                                </select>
+                                                <div class="invalid-feedback d-block" id="invalid-edit-eventcolor"></div>
+                                            </div>
+                                            <div class="form-group" id="edit-eventdate_parent">
+                                                <label>Event Date <span class="text-danger">*</span></label>
+                                                <input class="form-control validate calendarDateRangerPicker text-left" data-allowcharacters="[A-Z][a-z][0-9][,][ ]" type="button" value="${eventDate}" id="edit-eventdate" required autocomplete="off">
+                                                <div class="invalid-feedback d-block" id="invalid-edit-eventdate"></div>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="">Color <span class="text-danger">*</span></label>
-                                            <select class="form-control validate" name="eventCalendarBackground" id="edit-eventcolor" required>
-                                                <option value="" selected disabled>Select Color</option>
-                                                <option value="bg-red">Red</option>
-                                                <option value="bg-yellow">Yellow</option>
-                                                <option value="bg-green">Green</option>
-                                                <option value="bg-orange">Orange</option>
-                                                <option value="bg-blue">Blue</option>
-                                                <option value="bg-violet">Violet</option>
-                                            </select>
-                                            <div class="invalid-feedback d-block" id="invalid-edit-eventcolor"></div>
-                                        </div>
-                                        <div class="form-group" id="edit-eventdate_parent">
-                                            <label>Event Date <span class="text-danger">*</span></label>
-                                            <input class="form-control validate calendarDateRangerPicker text-left" data-allowcharacters="[A-Z][a-z][0-9][,][ ]" type="button" value="${eventDate}" id="edit-eventdate" required autocomplete="off">
-                                            <div class="invalid-feedback d-block" id="invalid-edit-eventdate"></div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <div class="w-100 text-right">
-                                            ${modalButtons}
-                                        </div>
-                                    </div>`;
-        setTimeout(function(){$("#my_event_content").html(my_event_content);calendarDateRangerPicker();$("#edit-eventcolor").val(background).trigger("change");},500)
-        var $this = this;
-        $(document).on("click", ".delete-event", function () {
-            $this.$calendarObj.fullCalendar('removeEvents', function (ev) {
-                return (ev._id == calEvent._id);
-            });
-            const data     = getFormData("my_event_content", true);
-            data["tableData"]["updatedBy"]   =  sessionID;
-            data["whereFilter"]              =  "eventCalendarID ="+calendarID;
-            data["tableName"]                =  "hris_event_calendar_tbl";
-            data["feedback"]                 =  eventName;
-            deleteTableData(data, true, false, "Delete "+eventName.toUpperCase()+ " successfully");
-            $this.$modal.modal('hide');
-        });
-        $(document).on("click", ".update-event", function (e) {
-            let condition  = validateForm("my_event_content");
-            if(condition == true){
-                let thisCalendarID    = $(this).data("calendarid");
-                e.preventDefault();
-                calEvent.title        = $this.$modal.find("#edit-eventname").val();
-                calEvent.className[0] = $this.$modal.find("#edit-eventcolor").val();
-                $this.$modal.modal('hide');
+                                        <div class="modal-footer">
+                                            <div class="w-100 text-right">
+                                                ${modalButtons}
+                                            </div>
+                                        </div>`;
+            setTimeout(function(){$("#my_event_content").html(my_event_content);calendarDateRangerPicker();$("#edit-eventcolor").val(background).trigger("change");},500)
+        }
 
-                    const eventName  = $("#edit-eventname").val();
-                    const background = $("#edit-eventcolor").val();
-                    const newDate    = $(".calendarDateRangerPicker").val().split("-");
-                    let dateFrom     = moment(new Date(newDate[0])).format("YYYY-MM-DD");
-                    let dateTo       = moment(new Date(newDate[1])).format("YYYY-MM-DD");
+        var $this = this;
+        if (allowedDelete) {
+            $(document).on("click", ".delete-event", function () {
+                if (allowedDelete) {
+                    $this.$calendarObj.fullCalendar('removeEvents', function (ev) {
+                        return (ev._id == calEvent._id);
+                    });
                     const data     = getFormData("my_event_content", true);
-                    data["tableData"]["eventCalendarName"]          = eventName;
-                    data["tableData"]["eventCalendarBackground"]    = background;
-                    data["tableData"]["eventCalendarDateFrom"]      = dateFrom;
-                    data["tableData"]["eventCalendarDateTo"]        = dateTo;
                     data["tableData"]["updatedBy"]   =  sessionID;
-                    data["whereFilter"]              =  "eventCalendarID ="+thisCalendarID;
+                    data["whereFilter"]              =  "eventCalendarID ="+calendarID;
                     data["tableName"]                =  "hris_event_calendar_tbl";
                     data["feedback"]                 =  eventName;
-                    sweetAlertConfirmation("update", "Award","my_event", null, data, true, callCalendar);
-            }
-        });
+                    deleteTableData(data, true, false, "Delete "+eventName.toUpperCase()+ " successfully");
+                    $this.$modal.modal('hide');
+                }
+            });
+        }
+        if (allowedUpdate) {
+            $(document).on("click", ".update-event", function (e) {
+                    let condition  = validateForm("my_event_content");
+                    if(condition == true){
+                        let thisCalendarID    = $(this).data("calendarid");
+                        e.preventDefault();
+                        calEvent.title        = $this.$modal.find("#edit-eventname").val();
+                        calEvent.className[0] = $this.$modal.find("#edit-eventcolor").val();
+                        $this.$modal.modal('hide');
+        
+                            const eventName  = $("#edit-eventname").val();
+                            const background = $("#edit-eventcolor").val();
+                            const newDate    = $(".calendarDateRangerPicker").val().split("-");
+                            let dateFrom     = moment(new Date(newDate[0])).format("YYYY-MM-DD");
+                            let dateTo       = moment(new Date(newDate[1])).format("YYYY-MM-DD");
+                            const data     = getFormData("my_event_content", true);
+                            data["tableData"]["eventCalendarName"]          = eventName;
+                            data["tableData"]["eventCalendarBackground"]    = background;
+                            data["tableData"]["eventCalendarDateFrom"]      = dateFrom;
+                            data["tableData"]["eventCalendarDateTo"]        = dateTo;
+                            data["tableData"]["updatedBy"]   =  sessionID;
+                            data["whereFilter"]              =  "eventCalendarID ="+thisCalendarID;
+                            data["tableName"]                =  "hris_event_calendar_tbl";
+                            data["feedback"]                 =  eventName;
+                            sweetAlertConfirmation("update", "Award","my_event", null, data, true, callCalendar);
+                    }
+            });
+        }
             
     },
 
     /* on select */
     CalendarApp.prototype.onSelect = function (start, end, allDay) {
-        $(".my_event_header").text("ADD EVENT");
-        $("#my_event").modal("show");
-        $("#my_event_content").html(preloader);
-        const eventDate  = moment(new Date(start)).format("MMMM DD, YYYY")+" - "+moment(new Date(end)).subtract(1, "days").format("MMMM DD, YYYY");
-        addingEvent(eventDate);
+        if (allowedCreate) {
+            $(".my_event_header").text("ADD EVENT");
+            $("#my_event").modal("show");
+            $("#my_event_content").html(preloader);
+            const eventDate  = moment(new Date(start)).format("MMMM DD, YYYY")+" - "+moment(new Date(end)).subtract(1, "days").format("MMMM DD, YYYY");
+            addingEvent(eventDate);
+        }
     },
 
-    CalendarApp.prototype.enableDrag = function() {
-        //init events
-        $(this.$event).each(function () {
-            // it doesn't need to have a start or end
-            var eventObject = {
-                title: $.trim($(this).text()) // use the element's text as the event title
-            };
-            // store the Event Object in the DOM element so we can get to it later
-            $(this).data('eventObject', eventObject);
-            // make the event draggable using jQuery UI
-            $(this).draggable({
-                zIndex: 999,
-                revert: true,      // will cause the event to go back to its
-                revertDuration: 0  //  original position after the drag
+    CalendarApp.prototype.enableDrag = function(e) {
+        if (allowedUpdate) {
+            //init events
+            $(this.$event).each(function () {
+                // it doesn't need to have a start or end
+                var eventObject = {
+                    title: $.trim($(this).text()) // use the element's text as the event title
+                };
+                // store the Event Object in the DOM element so we can get to it later
+                $(this).data('eventObject', eventObject);
+                // make the event draggable using jQuery UI
+                $(this).draggable({
+                    zIndex: 999,
+                    revert: true,      // will cause the event to go back to its
+                    revertDuration: 0  //  original position after the drag
+                });
             });
-        });
+        }
     }
 
     /* Initializing */

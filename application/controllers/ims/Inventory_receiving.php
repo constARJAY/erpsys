@@ -80,23 +80,27 @@ class Inventory_receiving extends CI_Controller {
             "updatedBy"                     => $updatedBy,
             "createdAt"                     => $createdAt
         ];
+
         if ($action == "update") {
             unset($inventoryReceivingData["reviseInventoryReceivingID"]);
             unset($inventoryReceivingData["createdBy"]);
             unset($inventoryReceivingData["createdAt"]);
 
             if ($method == "cancelform") {
+                $inventoryReceivingStatus = 4;
                 $inventoryReceivingData = [
                     "inventoryReceivingStatus" => 4,
                     "updatedBy"                => $updatedBy,
                 ];
             } else if ($method == "approve") {
+                
                 $inventoryReceivingData = [
                     "approversStatus"          => $approversStatus,
                     "approversDate"            => $approversDate,
                     "inventoryReceivingStatus" => $inventoryReceivingStatus,
                     "updatedBy"                => $updatedBy,
                 ];
+                $inventoryReceivingStatus = 2;
             } else if ($method == "deny") {
                 $inventoryReceivingData = [
                     "approversStatus"           => $approversStatus,
@@ -115,7 +119,13 @@ class Inventory_receiving extends CI_Controller {
                 $this->inventoryreceiving->deleteItemAndSerial($inventoryReceivingID);
             }
         }
-        $saveInventoryReceivingData = $this->inventoryreceiving->saveInventoryReceivingData($action, $inventoryReceivingData, $inventoryReceivingID, $approversStatus);
+
+
+        if($method == "submit" && $employeeID == $approversID ){
+            $inventoryReceivingStatus = 2;
+        }
+
+        $saveInventoryReceivingData = $this->inventoryreceiving->saveInventoryReceivingData($action, $inventoryReceivingData, $inventoryReceivingID, $inventoryReceivingStatus);
 
         if ($saveInventoryReceivingData && ($method == "submit" || $method == "save")) {
             $result = explode("|", $saveInventoryReceivingData);
@@ -162,18 +172,20 @@ class Inventory_receiving extends CI_Controller {
                         
                         if(!empty($item["scopes"])){
                             $scopes = $item["scopes"];
-
                             $saveServices = $this->inventoryreceiving->saveSerial($scopes, $inventoryReceivingID); 
-                            }    
+                        }    
                         
                         $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID,$item["itemID"]);
                     }
-                    
-                    // if ($inventoryReceivingData["inventoryReceivingStatus"] == "2") {
-                    //     $this->inventoryreceiving->updateOrderedPending($inventoryReceivingID);
-                    // }
-                }
 
+                    if ($inventoryReceivingStatus == 2) {
+                        $this->inventoryreceiving->insertRemainingQTY($inventoryReceivingID);
+                    }
+                    
+                    
+                }
+                
+                
             }
             
         }

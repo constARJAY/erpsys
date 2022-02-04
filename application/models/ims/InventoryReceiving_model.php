@@ -10,10 +10,8 @@ class InventoryReceiving_model extends CI_Model {
 
 
 
-    public function saveInventoryReceivingData($action, $data, $id = null, $approversStatus =0) 
+    public function saveInventoryReceivingData($action, $data, $id = null, $approversStatus = 0) 
     {
-        //    echo "<pre>";
-    //     print_r($data);
         if ($action == "insert") {
             $query = $this->db->insert("ims_inventory_receiving_tbl", $data);
         } else {
@@ -22,13 +20,12 @@ class InventoryReceiving_model extends CI_Model {
         }
 
         if ($query) {
-            $insertID = $action == "insert" ? $this->db->insert_id() : $id;
-            $sql = "SELECT * FROM ims_inventory_receiving_tbl WHERE inventoryReceivingID   = $insertID";
-            $query = $this->db->query($sql);
-            $result = $query ? $query->result_array() : [];
+            $insertID   = $action == "insert" ? $this->db->insert_id() : $id;
+            $sql        = "SELECT * FROM ims_inventory_receiving_tbl WHERE inventoryReceivingID   = $insertID";
+            $query      = $this->db->query($sql);
+            $result     = $query ? $query->result_array() : [];
             foreach ($result as $res) {
                 $createdAt      = $res["createdAt"];
-              //$data   = ["materialUsageCode" => getFormCode("MUF", $createdAt, $id)];
               $data = array(
                 'inventoryReceivingCode' => getFormCode("INR", $createdAt, $id));
               $this->db->where('inventoryReceivingID', $id);
@@ -39,7 +36,7 @@ class InventoryReceiving_model extends CI_Model {
                 $newdata = $this->db->query("SELECT ird.inventoryReceivingID FROM 
                                         ims_inventory_request_details_tbl AS ird 
                                         LEFT JOIN ims_inventory_receiving_tbl AS ir ON ird.inventoryReceivingID = ir.inventoryReceivingID
-                                        WHERE ird.inventoryReceivingID = $insertID AND remainingQuantity <>0  GROUP BY inventoryReceivingID");
+                                        WHERE ird.inventoryReceivingID = $insertID AND remainingQuantity <> 0  GROUP BY inventoryReceivingID");
                 if ($newdata->num_rows() !== 0) {
                     
                     $this->db->query("CALL proc_get_receiving_report_remaining($insertID)");
@@ -57,6 +54,18 @@ class InventoryReceiving_model extends CI_Model {
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }
+
+    public function insertRemainingQTY($insertID){
+        $newdata = $this->db->query("SELECT ird.inventoryReceivingID FROM 
+                                        ims_inventory_request_details_tbl AS ird 
+                                        LEFT JOIN ims_inventory_receiving_tbl AS ir ON ird.inventoryReceivingID = ir.inventoryReceivingID
+                                        WHERE ird.inventoryReceivingID = $insertID AND remainingQuantity <> 0  GROUP BY inventoryReceivingID");
+
+        if ($newdata->num_rows() !== 0) {
+            $this->db->query("CALL proc_get_receiving_report_remaining($insertID)");
+        } 
+    }
+
 
     public function deleteItemAndSerial($id = 0)
     {
@@ -79,6 +88,7 @@ class InventoryReceiving_model extends CI_Model {
         }
         return false;
     }
+
     public function updateInventoryReceiving($tableName,$data, $reference){
         $query =  $this->db->update($tableName, $data, $reference);  //"id = 4"
         return $query;

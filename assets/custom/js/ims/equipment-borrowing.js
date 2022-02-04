@@ -1181,12 +1181,12 @@ $(document).ready(function() {
 
     // ----- KEYUP QUANTITY -----
     $(document).on("keyup", `[name="borrowed"]`, function() {
-        const assetID    = $(this).attr("assetID") || 0;
-        const index    = $(this).attr("index");
-        const withdrawalAssetID    = $(this).attr("withdrawalAssetID");
-        const value = +$(this).val();
-        var availableStocksValue = +$(this).attr("availableStocksValue");
-        var requestQuantity = +$(`div[assetID=${assetID}]`).find("span").eq(4).text().replace(",","") || 0;
+        const assetID               = $(this).attr("assetID") || 0;
+        const index                 = $(this).attr("index");
+        const withdrawalAssetID     = $(this).attr("withdrawalAssetID");
+        const value                 = +$(this).val();
+        var availableStocksValue    = +$(this).attr("availableStocksValue");
+        var requestQuantity         = +$(`div[assetID=${assetID}]`).find("span").eq(4).text().replace(",","") || 0;
 
         // const getRemainingItem = +$(`[name="remainingAsset"][assetID="${assetID}"]`).attr("remainingValueItem").replaceAll(",","");
         // var computeRemainingItem =0;
@@ -1208,7 +1208,7 @@ $(document).ready(function() {
         
         if(value == 0){
             $(this).closest("tr").find("span").eq(3).text("-");
-            // $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(getRemainingItem));
+            $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(getRemainingItem));
 
 
         }else{
@@ -1626,24 +1626,24 @@ $(document).ready(function() {
 
     // ----- CLICK BUTTON SUBMIT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id = decryptString($(this).attr("materialWithdrawalID"));
-		const materialRequestID = decryptString($(this).attr("materialRequestID"));
+		const id                    = decryptString($(this).attr("materialWithdrawalID"));
+		const materialRequestID     = decryptString($(this).attr("materialRequestID"));
 		const equipmentBorrowingID  = decryptString($(this).attr("equipmentBorrowingID"));
-        const checkValidateData = checkData();
+        const checkValidateData     = checkData();
 
         if(checkValidateData){
-            const validateBarcode = $("[name=barcodeAsset]").hasClass("is-invalid");
-            let serialNumberCondition = $("[name=serialAssetNumber]").hasClass("is-invalid");
-            let validateQuantity = $("[name=borrowed]").hasClass("is-invalid");
+            const validateBarcode       = $("[name=barcodeAsset]").hasClass("is-invalid");
+            let serialNumberCondition   = $("[name=serialAssetNumber]").hasClass("is-invalid");
+            let validateQuantity        = $("[name=borrowed]").hasClass("is-invalid");
             if( !validateBarcode && !serialNumberCondition && !validateQuantity){
-                const validate     = validateForm("pcrDetails");
+                const validate          = validateForm("pcrDetails");
                 if(validate){
                     formButtonHTML(this,true);
 
                 setTimeout(() => {
                     // validateInputs().then(res => {
                     //     if (res) {
-                            saveProjectBoard("update", id, pageContent,materialRequestID,equipmentBorrowingID );
+                            saveProjectBoard("update", id, pageContent, materialRequestID,equipmentBorrowingID );
                         // }
                         formButtonHTML(this, false);
                     // });
@@ -1769,7 +1769,7 @@ $(document).ready(function() {
                 availableStocks,
                 serials:[]
             };
-
+          
             $(`td .serial-number-table tbody > tr`, $parent).each(function(i) {
                let serialAssetNumber = $(this).find(`[name="serialAssetNumber"]`,this).val()?.trim();
 

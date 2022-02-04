@@ -127,3 +127,11 @@
         }
         return null;
     }
+
+    function getCompanyProfile() 
+    {
+        $CI =& get_instance();
+        $sql    = "SELECT * FROM gen_company_profile_tbl WHERE companyProfileID = 1";
+        $query  = $CI->db->query($sql);
+        return $query ? $query->row() : null;   
+    }

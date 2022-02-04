@@ -167,9 +167,8 @@ function initDataTables() {
                 { targets: 0,  width: 100 },
                 { targets: 1,  width: 250 },
                 { targets: 2,  width: 120 },
-                // { targets: 3,  width: 250 },
                 { targets: 3,  width: 150 },
-                { targets: 4,  width: 250 },
+                { targets: 4,  width: 300 },
                 { targets: 5,  width: 80  },
                 { targets: 6,  width: 80  },
                 { targets: 7,  width: 220 },
@@ -189,9 +188,8 @@ function initDataTables() {
                 { targets: 0,  width: 100 },
                 { targets: 1,  width: 250 },
                 { targets: 2,  width: 120 },
-                // { targets: 3,  width: 250 },
                 { targets: 3,  width: 150 },
-                { targets: 4,  width: 250 },
+                { targets: 4,  width: 300 },
                 { targets: 5,  width: 80  },
                 { targets: 6,  width: 80  },
                 { targets: 7,  width: 220 },
@@ -809,7 +807,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                 
                     grossPayListData += scopeData.map(scope => {
                         totalGrossPayAmount += parseFloat(scope.grossPay) || 0;
-                        return getSerialNumber(scope, readOnly,monthID,totalGrossPayAmount);
+                        return getSerialNumber(scope, readOnly,monthID);
                     }).join("");
                 }
                 //  else {
@@ -824,8 +822,8 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                 grossPayListData += payrollData.map(payroll => {
                     let netPay = 0;
                     netPay = parseFloat(payroll.basicSalary) - (parseFloat(payroll.lateUndertimeDeduction) +  parseFloat(payroll.lwopDeduction));
-                    totalGrossPayAmount = parseFloat(netPay) || 0;
-                    return getSerialNumber(payroll, readOnly,monthID,totalGrossPayAmount);
+                    totalGrossPayAmount += parseFloat(netPay) || 0;
+                    return getSerialNumber(payroll, readOnly,monthID);
                 }).join("");
 			}
 
@@ -835,7 +833,7 @@ function getItemsRow(monthID = "", readOnly = false,numOfMonths = 0, startDate =
                                 </div>`;
 
             if( monthTotalPayAmount =="" || monthTotalPayAmount ==0){
-                monthTotalPayAmount =(parseFloat(totalGrossPayAmount) || 0 /( parseFloat(numOfMonths) || 0 * 2)) || 0;
+                monthTotalPayAmount = totalGrossPayAmount ? (parseFloat(totalGrossPayAmount) / ( parseFloat(numOfMonths))) || 0 : 0;
                 // monthTotalPayAmount = 100;
             }
             
@@ -1051,9 +1049,9 @@ $(document).on("click","#generatePeriod",function(){
         let hasTableRow = $(".itemTableRow").length > 0 ? true : false;
         if(hasTableRow){
             let totalOnHold = 0, totalRelease = 0, grandTotal = 0;
+            
             $(".itemTableRow").each(function(){
-                let grossPayText    = $(this).find(".gross-pay").text().replace("₱ ","");
-                let grossPay        = grossPayText.replaceAll(",","") || grossPayText;
+                let grossPay = $(this).find(`[name="monthTotalPayAmount"]`).text().replace("₱ ","").replaceAll(",","");
                 if($(this).find(".monthHoldStatus").prop("checked")){
                     totalOnHold += parseFloat(grossPay);
                 }else{
@@ -1237,7 +1235,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
             <div class="form-group">
                 <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                 <textarea 
-                rows="2" 
+                rows="4" 
                 style="resize: none" 
                 class="form-control validate" 
                 name="monthDescription" 
@@ -1312,8 +1310,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                                     <th>Basic Salary</th>
                                     <th>Gross Pay</th>
                                     <th>Total 13th Month 
-                                            <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="13th MONTH COMPUTATION:
-                                                13th Month   =  Every CutOff( Basic Salary - Late - Absent(LWOP) ) ÷ No. of months for date period. "></i>
+                                            <i class="fal fa-info-circle" style="cursor:pointer;color:#007bff;" data-toggle="tooltip" title="13th MONTH COMPUTATION:\n13th Month   =  Every CutOff( Basic Salary - Late - Absent(LWOP) ) ÷ No. of months for date period. "></i>
                                     </th>
                                     ${checkboxHoldStatus}
                                 </tr>
@@ -1592,16 +1589,22 @@ $(document).on("click", "#btnAdd", function () {
 
 // ----- OPEN EDIT FORM -----
 $(document).on("click", ".btnEdit", function () {
+    $("#page_content").html(preloader);
     const id = $(this).attr("id");
-    viewDocument(id);
+    setTimeout(function() {
+        viewDocument(id);
+    }, 100)
 });
 // ----- END OPEN EDIT FORM -----
 
 
 // ----- VIEW DOCUMENT -----
 $(document).on("click", ".btnView", function () {
+    $("#page_content").html(preloader);
     const id = $(this).attr("id");
-    viewDocument(id, true);
+    setTimeout(function() {
+        viewDocument(id, true);
+    }, 100)
 });
 // ----- END VIEW DOCUMENT -----
 

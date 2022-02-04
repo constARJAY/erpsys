@@ -1013,6 +1013,114 @@ $(document).ready(function() {
     }
     // ----- END GET ASSET ROW -----
 
+	function getAvailableStocksString(itemID){
+		let string = `
+		SELECT ROUND( stockIN - (stockOut + materiaWithdrawalQuantity), 2) AS totalQuantity
+                                        
+                                    FROM
+                                    (
+                                        SELECT i.itemID, i.itemCode, brand, i.itemName, classificationName, categoryName, uom, ROUND(stockIN,2) AS stockIN,
+                                        ROUND(IF((SELECT SUM(stockUsedIn.quantity) AS UnusedStockIn  FROM ims_stock_in_item_tbl as stockUsedIn WHERE stockUsedIn.materialUsageID <>0 AND  stockUsedIn.stockOutDate = '0000-00-00' AND stockUsedIn.stockInDate IS NOT NULL AND itemID = i.itemID),
+                                        IFNULL(
+                                        IF((SELECT SUM(stockUsedIn.quantity) AS UnusedStockIn  FROM ims_stock_in_item_tbl as stockUsedIn WHERE stockUsedIn.materialUsageID <>0 AND  stockUsedIn.stockOutDate = '0000-00-00' AND stockUsedIn.stockInDate IS NOT NULL AND itemID = i.itemID) >  Unused,
+                                        (SELECT SUM(stockUsedIn.quantity) AS UnusedStockIn  FROM ims_stock_in_item_tbl as stockUsedIn WHERE stockUsedIn.materialUsageID <>0 AND  stockUsedIn.stockOutDate = '0000-00-00' AND stockUsedIn.stockInDate IS NOT NULL AND itemID = i.itemID) -  Unused,
+                                        Unused - (SELECT SUM(stockUsedIn.quantity) AS UnusedStockIn  FROM ims_stock_in_item_tbl as stockUsedIn WHERE stockUsedIn.materialUsageID <>0 AND  stockUsedIn.stockOutDate = '0000-00-00' AND stockUsedIn.stockInDate IS NOT NULL AND itemID = i.itemID)),0),Unused - 0) ,2) AS Unused, 
+                                        
+                                        
+                                        ROUND(reservedItem,2) AS reservedItem, ROUND(materiaWithdrawalQuantity - Unused,2)  AS materiaWithdrawalQuantity, 
+
+                                        ROUND(stockOut,2) AS stockOut,  (stockOut - materiaWithdrawalQuantity) totalStockOut,
+                                        CASE WHEN stockOut <> 0 THEN (IF((reservedItem - stockOut)< 0, 0,reservedItem - stockOut))
+                                        ELSE reservedItem END reserved,
+                                        ROUND(reservedItem - stockOut, 2) AS reservedQTY, 
+                                        IFNULL(iii.reOrderLevel,0) AS reOrderLevel
+
+                                       
+                                        FROM
+                                        (
+                                            SELECT itemID, itemCode, brand, itemName, classificationName, categoryName, uom, IFNULL(SUM(stockIN),0) AS stockIN,IFNULL(SUM(stockOut),0) AS stockOut,
+                                            IFNULL(SUM(Unused),0) AS Unused,
+                                            IFNULL(SUM(reservedItem),0) AS reservedItem, IFNULL(SUM(materiaWithdrawalQuantity),0) AS materiaWithdrawalQuantity
+                                            FROM
+                                            (
+                                                SELECT 
+                                                sii.itemID, sii.itemCode, sii.brand,sii.itemName,
+                                                sii.classificationName, sii.categoryName,
+                                                sii.uom,  SUM(sii.quantityForStockin) AS stockIN, -- Stock In Quantity
+                                                    0 AS stockOut,
+                                                    0 AS Unused,
+                                                    0 AS reservedItem,
+                                                    0 AS materiaWithdrawalQuantity
+                                                FROM  ims_stock_in_item_tbl AS sii
+                                                WHERE  (sii.inventoryReceivingID <> 0 OR sii.materialUsageID <> 0) AND  sii.stockOutDate = '0000-00-00' AND sii.stockInDate IS NOT NULL
+                                                GROUP BY sii.itemID
+                                                -- Get Stock In Quantity in Stock In Item Table
+                                                UNION ALL
+
+                                                SELECT 
+                                                sii.itemID, sii.itemCode, sii.brand,sii.itemName,
+                                                sii.classificationName, sii.categoryName,
+                                                sii.uom,  0 AS stockIN,
+                                                (SUM(sii.quantity) - (
+                                                                         SELECT 
+                                                                            SUM(mww.received) AS materiaWithdrawalQuantity  -- Withdrawn Quantity
+                                                                            FROM  ims_material_withdrawal_tbl AS mw
+                                                                            LEFT JOIN ims_material_withdrawal_item_tbl AS mww ON mw.materialWithdrawalID = mww.materialWithdrawalID
+                                                                            WHERE  mw.inventoryItemStatus = 9 AND mww.itemID = sii.itemID
+                                                                            GROUP BY mww.itemID
+                                                                     )
+                                                    
+                                                    ) AS stockOut, -- Stock Out Quantity
+                                                0 AS Unused,
+                                                0 AS reservedItem,
+                                                0 AS materiaWithdrawalQuantity
+                                                FROM  ims_stock_in_item_tbl AS sii
+                                                WHERE sii.stockOutID <> 0  AND sii.stockOutDate != '0000-00-00'
+                                                GROUP BY sii.itemID
+                                                -- Get Stock Out Quantity in Stock In Item Table 
+                                                UNION ALL
+
+
+                                                -- START RESERVE QTY BASED ON THE REQUEST --
+                                                    SELECT 
+                                                    sii.itemID, itemCode AS itemCode, itemBrandName AS brand,  itemName AS itemName,
+                                                    itemClassification AS classificationName, itemCategory AS categoryName,
+                                                    itemUom AS uom,  0 AS stockIN,
+                                                    0 AS stockOut,
+                                                    0  Unused,
+                                                    SUM(sii.requestQuantity) AS reservedItem, -- Reserved Item
+                                                    0 AS materiaWithdrawalQuantity
+                                                    FROM  ims_request_items_tbl AS sii
+                                                    LEFT JOIN ims_inventory_validation_tbl AS iiv ON  sii.inventoryValidationID = iiv.inventoryValidationID
+                                                    WHERE sii.inventoryValidationID IS NOT NULL AND bidRecapID IS NULL AND iiv.inventoryValidationStatus = 2 AND reservedItem IS NOT NULL
+                                                    GROUP BY sii.itemID
+                                                -- END RESERVE QTY BASED ON THE REQUEST --
+
+                                                -- Get Reserved Item in Request Item Table 
+                                                UNION ALL
+
+                                                SELECT 
+                                                mww.itemID, 0 AS itemCode, 0 AS brand, 0 AS itemName,
+                                                0 AS classificationName, 0 AS categoryName,
+                                                0 AS uom,  0 AS stockIN,
+                                                0 AS stockOut,
+                                                0 AS Unused,
+                                                0 AS reservedItem,
+                                                SUM(mww.received) AS materiaWithdrawalQuantity  -- Withdrawn Quantity
+                                                FROM  ims_material_withdrawal_tbl AS mw
+                                                LEFT JOIN ims_material_withdrawal_item_tbl AS mww ON mw.materialWithdrawalID = mww.materialWithdrawalID
+                                                WHERE  mw.inventoryItemStatus = 9 AND mww.itemID IS NOT NULL
+                                                GROUP BY mww.itemID
+                                                -- Get Withdrawn Quantity in Material Withdrawal Table 
+                                            )w 
+                                            WHERE w.itemCode IS NOT NULL
+                                            GROUP BY itemID
+                                        )i
+                                        LEFT JOIN ims_inventory_item_tbl AS iii ON i.itemID = iii.itemID
+                                        GROUP BY itemID
+                                    )l  WHERE itemID = ${itemID}  GROUP BY itemID`;
+									return string;
+	}
 
 	// ----- GET REQUEST ITEMS CONTENT -----
 	function requestItemsContent(data = false, readOnly = false){
@@ -1033,7 +1141,7 @@ $(document).ready(function() {
 					if(inventoryValidationStatus == 0 || inventoryValidationStatus == 1 || inventoryValidationStatus == 4  ){
 						
 						let checkExistItems = getTableData("ims_request_items_tbl","",`inventoryValidationID = ${inventoryValidationID}`);
-						let queryCondition ="";
+						let queryCondition 	= "";
 						if(checkExistItems.length <=0){
 							 queryCondition = readOnly ? "AND inventoryValidationID IS NOT NULL" : "AND inventoryValidationID IS  NULL";
 						}else{
@@ -1042,7 +1150,7 @@ $(document).ready(function() {
 
 						
 						requestItemsData = getTableData(
-							`ims_request_items_tbl as reqItems`, 
+							`ims_request_items_tbl as reqItems LEFT JOIN ims_inventory_item_tbl AS itemv USING(itemID)`, 
 							`	reqItems.requestItemID,
 								reqItems.materialRequestID,
 								reqItems.itemID,
@@ -1053,18 +1161,7 @@ $(document).ready(function() {
 								reqItems.itemCategory,
 								reqItems.itemUom,
 								reqItems.requestQuantity,
-									(SELECT 
-										CASE 
-										WHEN ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL)) < 0 
-											THEN  0
-										WHEN  ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL)) > 0 
-											THEN (IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL))
-										END as availableStocks
-									FROM ims_stock_in_item_tbl AS itmStock 
-									LEFT JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
-									WHERE itmStock.stockOutDate IS NUll 
-									AND itmStock.stockInDate IS NOT NULL 
-									AND itmStock.itemID = reqItems.itemID) as availableStocks,
+									((${getAvailableStocksString(`reqItems.itemID`)}) - itemv.reOrderLevel) as availableStocks,
 	
 									(SELECT 
 										CASE 
@@ -1471,24 +1568,24 @@ $(document).ready(function() {
 		let {
 			inventoryValidationID       = "",
 			reviseInventoryValidationID = "",
-			employeeID              = "",
-			materialRequestID          = "",
-			materialRequestCode ="",
-			projectCode             = "",
-			projectName             = "",
-			projectCategory         = "",
-			clientName              = "",
-			clientAddress           = "",
+			employeeID              	= "",
+			materialRequestID          	= "",
+			materialRequestCode 		="",
+			projectCode             	= "",
+			projectName             	= "",
+			projectCategory         	= "",
+			clientName              	= "",
+			clientAddress           	= "",
 			inventoryValidationReason   = "",
 			inventoryValidationRemarks  = "",
-			approversID             = "",
-			approversStatus         = "",
-			approversDate           = "",
-			dateNeeded				=  "",
+			approversID             	= "",
+			approversStatus         	= "",
+			approversDate           	= "",
+			dateNeeded					=  "",
 			inventoryValidationStatus   = false,
-			submittedAt             = false,
-			createdAt               = false,
-			createdBy 				= ""
+			submittedAt             	= false,
+			createdAt               	= false,
+			createdBy 					= ""
 		} = data && data[0];
 
 	// console.log(data)
@@ -1881,53 +1978,51 @@ $(document).ready(function() {
 			let tableData  = getTableData("ims_inventory_validation_tbl", "", "inventoryValidationID = " + id);
 			if (tableData) {	
 				
-			let createdBy       = tableData[0].createdBy;
-			let employeeID      = tableData[0].employeeID;
-			let inventoryValidationID = id;
-			let inventoryValidationCode = tableData[0].inventoryValidationCode;
-			let materialRequestID = tableData[0].materialRequestID;
-			let materialRequestCode = tableData[0].materialRequestCode;
-			let costEstimateID = tableData[0].costEstimateID;
-			let costEstimateCode = tableData[0].costEstimateCode;
-			let billMaterialID = tableData[0].billMaterialID;
-			let billMaterialCode = tableData[0].billMaterialCode;
-			let timelineBuilderID = tableData[0].timelineBuilderID;
-			let projectCode = tableData[0].projectCode;
-			let projectName = tableData[0].projectName;
-			let projectCategory = tableData[0].projectCategory;
-			let clientCode = tableData[0].clientCode;
-			let clientName = tableData[0].clientName;
-			let clientAddress = tableData[0].clientAddress;
-			let dateNeeded = tableData[0].dateNeeded;
-			let inventoryValidationReason = tableData[0].inventoryValidationReason;
+				let createdBy       			= tableData[0].createdBy;
+				let employeeID      			= tableData[0].employeeID;
+				let inventoryValidationID 		= id;
+				let inventoryValidationCode 	= tableData[0].inventoryValidationCode;
+				let materialRequestID 			= tableData[0].materialRequestID;
+				let materialRequestCode 		= tableData[0].materialRequestCode;
+				let costEstimateID 				= tableData[0].costEstimateID;
+				let costEstimateCode 			= tableData[0].costEstimateCode;
+				let billMaterialID 				= tableData[0].billMaterialID;
+				let billMaterialCode 			= tableData[0].billMaterialCode;
+				let timelineBuilderID 			= tableData[0].timelineBuilderID;
+				let projectCode 				= tableData[0].projectCode;
+				let projectName 				= tableData[0].projectName;
+				let projectCategory 			= tableData[0].projectCategory;
+				let clientCode 					= tableData[0].clientCode;
+				let clientName 					= tableData[0].clientName;
+				let clientAddress 				= tableData[0].clientAddress;
+				let dateNeeded 					= tableData[0].dateNeeded;
+				let inventoryValidationReason 	= tableData[0].inventoryValidationReason;
+				let inventoryItemStatus 		= 0;
+				let inventoryAssetStatus 		= 0;
+				let materialWithdrawalStatus 	= 0;
 
-			let inventoryItemStatus = 0;
-			let inventoryAssetStatus = 0;
-			let materialWithdrawalStatus = 0;
-
-			data.append(`inventoryValidationID`, inventoryValidationID);
-			data.append(`inventoryValidationCode`, inventoryValidationCode);
-			data.append(`inventoryValidationReason`, inventoryValidationReason);
-			data.append(`materialRequestID`, materialRequestID);
-			data.append(`materialRequestCode`, materialRequestCode);
-			data.append(`costEstimateID`, costEstimateID);
-			data.append(`costEstimateCode`, costEstimateCode);
-			data.append(`billMaterialID`, billMaterialID);
-			data.append(`billMaterialCode`, billMaterialCode);
-			data.append(`timelineBuilderID`, timelineBuilderID);
-			data.append(`projectCode`, projectCode);
-			data.append(`projectName`, projectName);
-			data.append(`projectCategory`, projectCategory);
-			data.append(`clientCode`, clientCode);
-			data.append(`clientName`, clientName);
-			data.append(`clientAddress`, clientAddress);
-			data.append(`dateNeeded`, dateNeeded);
-			data.append(`employeeID`, employeeID);
-			data.append(`createdBy`, createdBy);
-			
-			data.append(`inventoryItemStatus`, inventoryItemStatus);
-			data.append(`inventoryAssetStatus`, inventoryAssetStatus);
-			data.append(`materialWithdrawalStatus`, materialWithdrawalStatus);
+				data.append(`inventoryValidationID`, 		inventoryValidationID);
+				data.append(`inventoryValidationCode`, 		inventoryValidationCode);
+				data.append(`inventoryValidationReason`, 	inventoryValidationReason);
+				data.append(`materialRequestID`, 			materialRequestID);
+				data.append(`materialRequestCode`, 			materialRequestCode);
+				data.append(`costEstimateID`, 				costEstimateID);
+				data.append(`costEstimateCode`, 			costEstimateCode);
+				data.append(`billMaterialID`, 				billMaterialID);
+				data.append(`billMaterialCode`, 			billMaterialCode);
+				data.append(`timelineBuilderID`, 			timelineBuilderID);
+				data.append(`projectCode`, 					projectCode);
+				data.append(`projectName`, 					projectName);
+				data.append(`projectCategory`,	 			projectCategory);
+				data.append(`clientCode`, 					clientCode);
+				data.append(`clientName`, 					clientName);
+				data.append(`clientAddress`, 				clientAddress);
+				data.append(`dateNeeded`, 					dateNeeded);
+				data.append(`employeeID`, 					employeeID);
+				data.append(`createdBy`, 					createdBy);
+				data.append(`inventoryItemStatus`, 			inventoryItemStatus);
+				data.append(`inventoryAssetStatus`, 		inventoryAssetStatus);
+				data.append(`materialWithdrawalStatus`, 	materialWithdrawalStatus);
 			}
 		}
 
@@ -1936,38 +2031,38 @@ $(document).ready(function() {
 			let inventoryValidationID 	= $(this).attr("inventoryValidationID");
 			let requestItemData			= getTableData("ims_request_items_tbl", "", `requestItemID = '${requestItemID}'`);
 			let tableData 				= requestItemData[0];
-			let getForPurchase = +$(this).find(".forpurchase").text()?.trim().replaceAll(",","") || $(this).find(".forpurchase").text()?.trim();
-			let getAvailableStocks = +$(this).find(".availablestocks").text()?.trim().replaceAll(",","") || $(this).find(".availablestocks").text()?.trim();
-			let getItemRemarks = $(this).find('.itemRemarks > textarea').val()?.trim() || $(this).find('.itemRemarks').text()?.trim();
+			let getForPurchase 			= +$(this).find(".forpurchase").text()?.trim().replaceAll(",","") || $(this).find(".forpurchase").text()?.trim();
+			let getAvailableStocks 		= +$(this).find(".availablestocks").text()?.trim().replaceAll(",","") || $(this).find(".availablestocks").text()?.trim();
+			let getItemRemarks 			= $(this).find('.itemRemarks > textarea').val()?.trim() || $(this).find('.itemRemarks').text()?.trim();
 			if(requestItemData.length !=0){
-				let costEstimateID = tableData.costEstimateID;
-			let billMaterialID = tableData.billMaterialID;
-			let materialRequestID = tableData.materialRequestID;
-			let bidRecapID = tableData.bidRecapID;
-			let purchaseRequestID = tableData.purchaseRequestID;
-			let purchaseOrderID = tableData.purchaseOrderID;
-			let changeRequestID = tableData.changeRequestID;
-			let inventoryReceivingID = tableData.inventoryReceivingID;
-			let inventoryVendorID = tableData.inventoryVendorID;
-			let inventoryVendorCode = tableData.inventoryVendorCode;
-			let inventoryVendorName = tableData.inventoryVendorName;
-			let finalQuoteRemarks = tableData.finalQuoteRemarks;
-			let milestoneBuilderID = tableData.milestoneBuilderID;
-			let phaseDescription = tableData.phaseDescription;
-			let milestoneListID = tableData.milestoneListID;
-			let projectMilestoneID = tableData.projectMilestoneID;
-			let projectMilestoneName = tableData.projectMilestoneName;
-			let itemID = tableData.itemID;
-			let itemCode = tableData.itemCode;
-			let itemBrandName = tableData.itemBrandName;
-			let itemName = tableData.itemName;
-			let itemClassification = tableData.itemClassification;
-			let itemCategory = tableData.itemCategory;
-			let itemUom = tableData.itemUom;
-			let itemDescription = tableData.itemDescription;
-			let files = tableData.files;
-			let remarks = tableData.remarks;
-			let requestQuantity = tableData.requestQuantity;
+				let costEstimateID 			= tableData.costEstimateID;
+				let billMaterialID 			= tableData.billMaterialID;
+				let materialRequestID 		= tableData.materialRequestID;
+				let bidRecapID 				= tableData.bidRecapID;
+				let purchaseRequestID 		= tableData.purchaseRequestID;
+				let purchaseOrderID 		= tableData.purchaseOrderID;
+				let changeRequestID 		= tableData.changeRequestID;
+				let inventoryReceivingID 	= tableData.inventoryReceivingID;
+				let inventoryVendorID 		= tableData.inventoryVendorID;
+				let inventoryVendorCode 	= tableData.inventoryVendorCode;
+				let inventoryVendorName 	= tableData.inventoryVendorName;
+				let finalQuoteRemarks 		= tableData.finalQuoteRemarks;
+				let milestoneBuilderID 		= tableData.milestoneBuilderID;
+				let phaseDescription 		= tableData.phaseDescription;
+				let milestoneListID 		= tableData.milestoneListID;
+				let projectMilestoneID 		= tableData.projectMilestoneID;
+				let projectMilestoneName 	= tableData.projectMilestoneName;
+				let itemID 					= tableData.itemID;
+				let itemCode 				= tableData.itemCode;
+				let itemBrandName 			= tableData.itemBrandName;
+				let itemName 				= tableData.itemName;
+				let itemClassification 		= tableData.itemClassification;
+				let itemCategory 			= tableData.itemCategory;
+				let itemUom 				= tableData.itemUom;
+				let itemDescription 		= tableData.itemDescription;
+				let files 					= tableData.files;
+				let remarks 				= tableData.remarks;
+				let requestQuantity 		= tableData.requestQuantity;
 
 			let computeReservedItem  = "";
 			
@@ -2276,9 +2371,9 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id            = decryptString($(this).attr("inventoryValidationID"));
-		const isFromCancelledDocument = $(this).attr("cancel") == "true";
-		const revise        = $(this).attr("revise") == "true";
+		const id            			= decryptString($(this).attr("inventoryValidationID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise        			= $(this).attr("revise") == "true";
 
 		
 			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
@@ -2348,27 +2443,27 @@ $(document).ready(function() {
 			let createdAt       = tableData[0].createdAt;
 			let createdBy       = tableData[0].createdBy;
 
-			let inventoryValidationID = id;
-			let inventoryValidationCode = tableData[0].inventoryValidationCode;
-			let materialRequestID = tableData[0].materialRequestID;
-			let materialRequestCode = tableData[0].materialRequestCode;
-			let costEstimateID = tableData[0].costEstimateID;
-			let costEstimateCode = tableData[0].costEstimateCode;
-			let billMaterialID = tableData[0].billMaterialID;
-			let billMaterialCode = tableData[0].billMaterialCode;
-			let timelineBuilderID = tableData[0].timelineBuilderID;
-			let projectCode = tableData[0].projectCode;
-			let projectName = tableData[0].projectName;
-			let projectCategory = tableData[0].projectCategory;
-			let clientCode = tableData[0].clientCode;
-			let clientName = tableData[0].clientName;
-			let clientAddress = tableData[0].clientAddress;
-			let dateNeeded = tableData[0].dateNeeded;
-			let inventoryValidationReason = tableData[0].inventoryValidationReason;
+			let inventoryValidationID 		= id;
+			let inventoryValidationCode 	= tableData[0].inventoryValidationCode;
+			let materialRequestID 			= tableData[0].materialRequestID;
+			let materialRequestCode 		= tableData[0].materialRequestCode;
+			let costEstimateID 				= tableData[0].costEstimateID;
+			let costEstimateCode 			= tableData[0].costEstimateCode;
+			let billMaterialID 				= tableData[0].billMaterialID;
+			let billMaterialCode 			= tableData[0].billMaterialCode;
+			let timelineBuilderID 			= tableData[0].timelineBuilderID;
+			let projectCode 				= tableData[0].projectCode;
+			let projectName 				= tableData[0].projectName;
+			let projectCategory 			= tableData[0].projectCategory;
+			let clientCode 					= tableData[0].clientCode;
+			let clientName 					= tableData[0].clientName;
+			let clientAddress 				= tableData[0].clientAddress;
+			let dateNeeded 					= tableData[0].dateNeeded;
+			let inventoryValidationReason 	= tableData[0].inventoryValidationReason;
 			
-			let inventoryItemStatus = 0;
-			let inventoryAssetStatus = 0;
-			let materialWithdrawalStatus = 0;
+			let inventoryItemStatus 		= 0;
+			let inventoryAssetStatus 		= 0;
+			let materialWithdrawalStatus 	= 0;
 
 			let data = getInventoryValidationData("update", "approve", "2", id);
 			data.append("approversStatus", updateApproveStatus(approversStatus, 2));

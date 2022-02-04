@@ -12,9 +12,9 @@ class Forgot_password extends CI_Controller {
     public function index()
     {
         $data["title"] = "Forgot Password";
-        $this->load->view('template/header', $data);
+        $this->load->view('template/web_header', $data);
         $this->load->view('web/forgot_password/index', $data);
-        $this->load->view('template/footer', $data);
+        $this->load->view('template/web_footer', $data);
     }
 
     public function validate_email($email_to){

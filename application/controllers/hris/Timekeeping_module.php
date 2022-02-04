@@ -566,5 +566,22 @@ class Timekeeping_module extends CI_Controller {
 
 
 
+    // ----- DOWNLOAD -----
+    function download() {
+        $file = 'assets/format/TimesheetFormat.csv';
+
+        if(!file_exists($file)){ 
+            die('file not found');
+        } else {
+            header("Cache-Control: public");
+            header("Content-Description: File Transfer");
+            header("Content-Disposition: attachment; filename=TimesheetFormat.csv");
+            header("Content-Type: application/zip");
+            header("Content-Transfer-Encoding: binary");
+            readfile($file);
+        }
+    }
+    // ----- END DOWNLOAD -----
+
 }
 

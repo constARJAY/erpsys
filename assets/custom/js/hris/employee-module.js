@@ -3171,7 +3171,7 @@ $(document).ready(function() {
 
                                 const employeeFirstname = $("[name=employeeFirstname]").val()?.trim();
                                 const employeeLastname  = $("[name=employeeLastname]").val()?.trim();
-                                const employeeID        = insertedID && insertedID > 1 ? 999999999 : (insertedID - 1);
+                                const employeeID        = insertedID && insertedID > 1 ? (insertedID - 1) : 999999999;
         
                                 let swalTitle;
                                 if (method == "add") {

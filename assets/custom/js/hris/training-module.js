@@ -653,7 +653,11 @@ $(document).ready(function () {
 		// /let disabled
 		//let button = formButtons(data);
 
-		let src = `${base_url}assets/upload-files/training-development-setup/${trainingDevelopmentModuleFile}`;
+		let target = "", src = "";
+		if (trainingDevelopmentModuleFile) {
+			src    = `${base_url}assets/upload-files/training-development-setup/${trainingDevelopmentModuleFile}`;
+			target = `target="_blank"`;
+		}
 
 		let html = `
         <div class="row px-2">
@@ -846,7 +850,7 @@ $(document).ready(function () {
 				<div class="form-group">
 					<label>Training module</label>
 					<input class="form-group" type="hidden" id="trainingDevelopmentModuleFile1">
-					<a class="form-control record" style="background : #e9ecef;" href="${trainingDevelopmentModuleFile ? src : "#"}" id="trainingDevelopmentModuleFile" name="trainingDevelopmentModuleFile" target="_blank">${trainingDevelopmentModuleFile}</a>
+					<a class="form-control record" style="background : #e9ecef;" id="trainingDevelopmentModuleFile" name="trainingDevelopmentModuleFile" ${src} ${target}>${trainingDevelopmentModuleFile}</a>
 				</div>
 			   </div>
 			   <div class="col-md-4 col-sm-12">
@@ -1022,9 +1026,13 @@ $(document).ready(function () {
 		$("#trainingDevelopmentModuleType").val(TrainingType);
 		//$("#trainingDevelopmentModuleFile").text(TrainingModule);
 		$("#trainingDevelopmentModuleDifficulty").val(TrainingDifficulty);
-		var scrt_var = `${base_url}assets/upload-files/training-development-setup/`+TrainingModule;
-		$("#trainingDevelopmentModuleFile").attr("href",scrt_var);
-		$("#trainingDevelopmentModuleFile").text(TrainingModule);
+		if (TrainingModule) {
+			var scrt_var = `${base_url}assets/upload-files/training-development-setup/`+TrainingModule;
+			$("#trainingDevelopmentModuleFile").attr("href",scrt_var).attr("target", "_blank");
+			$("#trainingDevelopmentModuleFile").text(TrainingModule);
+		} else {
+			$("#trainingDevelopmentModuleFile").attr("href", "#").removeAttr("target");
+		}
     });
     // ----- END CHANGE CLIENT ADDRESS -----//
 

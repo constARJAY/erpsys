@@ -2036,9 +2036,9 @@ function checkSerialReceivedQuantity() {
 // ----- SUBMIT DOCUMENT -----
 $(document).on("click", "#btnSubmit", function () {
 
-	const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid");
-	const receivedQuantity  = $("[name=receivedQuantity]").hasClass("is-invalid");
-	const validateSerialMessage  = $(".invalid-feedback").text();
+	const validateDuplicateSerial  	= $("[name=serialNumber]").hasClass("is-invalid");
+	const receivedQuantity  		= $("[name=receivedQuantity]").hasClass("is-invalid");
+	const validateSerialMessage  	= $(".invalid-feedback").text();
 	//const revise        = $(this).attr("revise") == "true";
 	//let condition = $("[name=receivedQuantity]").hasClass("is-invalid");
 	// console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
@@ -2138,11 +2138,11 @@ $(document).on("click", "#btnApprove", function () {
 		let employeeID      = tableData[0].employeeID;
 		let createdAt       = tableData[0].createdAt;
 
-		let data = getInventoryReceivingData("update", "approve", "2", id);
-		data["approversStatus"] = updateApproveStatus(approversStatus, 2);
+		let data 					= getInventoryReceivingData("update", "approve", "2", id);
+		data["approversStatus"] 	= updateApproveStatus(approversStatus, 2);
 		data.append("approversStatus", updateApproveStatus(approversStatus, 2));
-		let dateApproved = updateApproveDate(approversDate)
-		data["approversDate"] = dateApproved;
+		let dateApproved 			= updateApproveDate(approversDate)
+		data["approversDate"] 		= dateApproved;
 		data.append("approversDate", dateApproved);
 	
 		let status, notificationData,lastApproveCondition = false;

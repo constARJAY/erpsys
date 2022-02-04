@@ -199,6 +199,7 @@ $(document).on("click", "#approvalUpdateBtn", function(){
     let approvalID      = $(this).attr("approval");
     let moduleID        = $(this).attr("module");
     let designationID   = $(this).attr("designation");
+    let moduleApprover  = +$(this).attr("moduleApprover");
     let formName        = modalBody.children("h5").text();
     let condition       = validateForm("modal_approval_setup_form");
     let approvalUsers   = [];
@@ -213,12 +214,14 @@ $(document).on("click", "#approvalUpdateBtn", function(){
             modalBody.find("select").each(function(){
                 approvalUsers.push(this.value);
             });
+            let approvalLength = approvalUsers.filter(i => i == 0).length;
+            let noApprover = approvalLength == approvalUsers.length || approvalLength >= moduleApprover;
             let data = getFormData("modal_approval_setup_form", true);
-            data["tableData"]["userAccountID"]   = approvalUsers.join("|");
-            data["tableData"]["updatedBy"]      =  sessionID;
-            data["whereFilter"]                 =  "approvalID="+approvalID;
-            data["tableName"]                   =  "gen_approval_setup_tbl";
-            data["feedback"]                    =  formName + " Approvers";
+            data["tableData"]["userAccountID"]  = noApprover ? "0" : approvalUsers.join("|");
+            data["tableData"]["updatedBy"]      = sessionID;
+            data["whereFilter"]                 = "approvalID="+approvalID;
+            data["tableName"]                   = "gen_approval_setup_tbl";
+            data["feedback"]                    = formName + " Approvers";
             sweetAlertConfirmation("update", "Approval Setup","modal_approval_setup", null , data, true, getApproval);      
             
         }
@@ -397,7 +400,7 @@ function approvalModalContent(approvalID){
 
 
 
-    modalFooterContent = `  <button class="btn btn-update px-5 p-2" approval="${approvalTableData[0]["approvalID"]}" module="${approvalTableData[0]["moduleID"]}" designation="${approvalTableData[0]["designationID"]}" id="approvalUpdateBtn"><i class="fas fa-save"></i>&nbsp;Update</button>
+    modalFooterContent = `  <button class="btn btn-update px-5 p-2" approval="${approvalTableData[0]["approvalID"]}" module="${approvalTableData[0]["moduleID"]}" designation="${approvalTableData[0]["designationID"]}" moduleApprover="${moduleTableData[0]['moduleApprover'] ?? 0}" id="approvalUpdateBtn"><i class="fas fa-save"></i>&nbsp;Update</button>
                             <button class="btn btn-cancel px-5 p-2" data-dismiss="modal" id="approvalCancelBtn"><i class="fas fa-ban"></i>&nbsp;Cancel</button>`;
 
 

@@ -514,15 +514,12 @@ $(document).ready(function() {
     function generateAddNewRow(itemID=0,materialRequestID=0){
        let tableStockContent = '';
 
-        const itemSerialContent = displayItemSerialNumber();
-        const withdrawalItemRemaining = getTableData(`ims_material_withdrawal_item_tbl`,` ((SELECT DISTINCT(requestQuantity) FROM ims_request_items_tbl WHERE itemID = ${itemID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` itemID = ${itemID} AND materialRequestID = ${materialRequestID}`);
-        const getAvailableStocks = getTableData(`ims_stock_in_item_tbl AS itmStock 
+        const itemSerialContent         = displayItemSerialNumber();
+        const withdrawalItemRemaining   = getTableData(`ims_material_withdrawal_item_tbl`,` ((SELECT DISTINCT(requestQuantity) FROM ims_request_items_tbl WHERE itemID = ${itemID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` itemID = ${itemID} AND materialRequestID = ${materialRequestID}`);
+        const getAvailableStocks        = getTableData(`ims_stock_in_item_tbl AS itmStock 
         JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
         `,
-        `CASE
-        WHEN IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0) <0 THEN 0
-        ELSE IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)
-        END AS availableStocks`,
+        `SUM(itmStock.quantity) AS availableStocks`,
         ` (itmStock.stockOutDate IS NUll OR  itmStock.stockOutDate = '0000-00-00') 
         AND (itmStock.stockInDate IS NOT NULL OR itmStock.stockInDate != '0000-00-00') 
         AND itmStock.itemID = ${itemID}`);
@@ -605,12 +602,12 @@ $(document).ready(function() {
     //  ITEM RECORDS LIST //
     const getItemContent = (milestoneTask = [],itemID = null, materialRequestID =null,withdrawalItemStatus = 0) => {
         let stockOutContent     = ""; 
-        let receivedContent = ""; 
-        let remainingContent = "";
-        let stockOutDateContent  ="";
-        let remarksContent = "";
-        let receivedDateContent ="";
-        let tableStockContent ="";
+        let receivedContent     = ""; 
+        let remainingContent    = "";
+        let stockOutDateContent = "";
+        let remarksContent      = "";
+        let receivedDateContent = "";
+        let tableStockContent   = "";
 
      
         if(milestoneTask.length >0){
@@ -809,7 +806,7 @@ $(document).ready(function() {
 					<div class="d-none itemContent" 
 						itemCode    = "${itemCode}"
 						itemID      ="${itemID}"
-						style       = "margin-top: 70px;">
+						>
                         
                         <table class="table" id="pcrDetails">
                             <thead style="line-height:8px; white-space:nowrap;">
@@ -1640,17 +1637,17 @@ $(document).ready(function() {
 
     // ----- CLICK BUTTON SUBMIT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id = decryptString($(this).attr("materialWithdrawalID"));
+		const id                = decryptString($(this).attr("materialWithdrawalID"));
 		const materialRequestID = decryptString($(this).attr("materialRequestID"));
-		const stockOutID = decryptString($(this).attr("stockOutID"));
+		const stockOutID        = decryptString($(this).attr("stockOutID"));
         const checkValidateData = checkData();
             if(checkValidateData){
 
-                const validateBarcode = $("[name=barcodeItem]").hasClass("is-invalid");
-                let serialNumberCondition = $("[name=serialItemNumber]").hasClass("is-invalid");
-                let validateQuantity = $("[name=stockOutID]").hasClass("is-invalid");
+                const validateBarcode       = $("[name=barcodeItem]").hasClass("is-invalid");
+                let serialNumberCondition   = $("[name=serialItemNumber]").hasClass("is-invalid");
+                let validateQuantity        = $("[name=stockOutID]").hasClass("is-invalid");
                 if( !validateBarcode && !serialNumberCondition && !validateQuantity){
-                    const validate     = validateForm("pcrDetails");
+                    const validate = validateForm("pcrDetails");
                     if(validate){
                         formButtonHTML(this,true);
 

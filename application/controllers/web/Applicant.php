@@ -14,9 +14,9 @@ class Applicant extends CI_Controller {
         if(!$this->session->has_userdata('session_applicant_id')) redirect(base_url("web/login"));
 
         $data["title"] = "Applicant Dashboard";
-        $this->load->view('template/header', $data);
+        $this->load->view('template/web_header', $data);
         $this->load->view('web/applicant/index', $data);
-        $this->load->view('template/footer', $data);
+        $this->load->view('template/web_footer', $data);
     }
 
     public function registration()
@@ -24,17 +24,17 @@ class Applicant extends CI_Controller {
         if($this->session->has_userdata('session_applicant_id')) redirect(base_url("web/applicant"));
 
         $data["title"] = "Applicant Registration";
-        $this->load->view('template/header', $data);
+        $this->load->view('template/web_header', $data);
         $this->load->view('web/applicant/registration', $data);
-        $this->load->view('template/footer', $data);
+        $this->load->view('template/web_footer', $data);
     }
 
     public function registration_success(){
         if($this->session->flashdata('session_success_registration')){
             $data["title"] = "Registration Success";
-            $this->load->view('template/header', $data);
+            $this->load->view('template/web_header', $data);
             $this->load->view('web/applicant/registration_success', $data);
-            $this->load->view('template/footer', $data);
+            $this->load->view('template/web_footer', $data);
         }else{
             redirect(base_url('web/login/'));
         }
@@ -471,20 +471,20 @@ class Applicant extends CI_Controller {
         $data["title"] = "Account Activation";
         
         if($applicantID==""){
-            $this->load->view('template/header', $data);
+            $this->load->view('template/web_header', $data);
             $this->load->view('web/applicant/activate_failed', $data);
-            $this->load->view('template/footer', $data);
+            $this->load->view('template/web_footer', $data);
         }else{
             $result = $this->applicant->activate($applicantID);
             
             if($result=="success"){
-                $this->load->view('template/header', $data);
+                $this->load->view('template/web_header', $data);
                 $this->load->view('web/applicant/activate_success', $data);
-                $this->load->view('template/footer', $data);
+                $this->load->view('template/web_footer', $data);
             }else{
-                $this->load->view('template/header', $data);
+                $this->load->view('template/web_header', $data);
                 $this->load->view('web/applicant/activate_failed', $data);
-                $this->load->view('template/footer', $data);
+                $this->load->view('template/web_footer', $data);
             }
         }
     }

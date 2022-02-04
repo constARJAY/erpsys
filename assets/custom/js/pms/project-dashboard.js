@@ -514,7 +514,7 @@ let html = `        <div class="row clearfix row-deck">
                         </div>
 
                         <div class="col-xl-3 col-lg-6">
-                            <div class="card">
+                            <div class="card" style="box-shadow:none !important;">
                                 <div class="header bg-primary">
                                     <h2 class="font-weight-bold text-white">EVENTS</h2>
                                 </div>
@@ -1279,7 +1279,7 @@ let html = `        <div class="row clearfix row-deck">
                         </div>
 
                         <div class="col-xl-4 col-lg-12">
-                            <div class="card">
+                            <div class="card" style="box-shadow:none !important;">
                                 <div class="header bg-primary">
                                     <h2 class="font-weight-bold text-white">EVENTS</h2>
                                 </div>

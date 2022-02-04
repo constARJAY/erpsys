@@ -11,14 +11,12 @@ class Login extends CI_Controller {
 
     public function index()
     {
-        if($this->session->has_userdata('session_applicant_id')) {
-            redirect(base_url("web/applicant"));
-        }else{
-            $data["title"] = "Login";
-            $this->load->view('template/header', $data);
+        // $sessionID  =   $this->session->has_userdata('session_applicant_id') ? $this->session->userdata('session_applicant_id') : redirect(base_url("web"));
+
+            $data["title"] = "Applicant Login";
+            $this->load->view('template/web_header', $data);
             $this->load->view('web/login/index', $data);
-            $this->load->view('template/footer', $data);
-        }
+            $this->load->view('template/web_footer', $data);
     }
 
     public function set_session(){

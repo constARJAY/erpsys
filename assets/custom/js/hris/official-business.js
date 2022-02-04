@@ -153,10 +153,11 @@ $(document).ready(function () {
 				columnDefs: [
 					{ targets: 0,  width: 110 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 300 },
-					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 200 },
+					{ targets: 2,  width: 250 },
+					{ targets: 3,  width: 150 },
+					{ targets: 4,  width: 300 },
+					{ targets: 5,  width: 80  },
+					{ targets: 6,  width: 200 },
 				],
 			});
 
@@ -174,10 +175,11 @@ $(document).ready(function () {
 				columnDefs: [
 					{ targets: 0,  width: 110 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 300 },
-					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 200 },
+					{ targets: 2,  width: 250 },
+					{ targets: 3,  width: 150 },
+					{ targets: 4,  width: 300 },
+					{ targets: 5,  width: 80  },
+					{ targets: 6,  width: 200 },
 				],
 			});
 	}
@@ -255,10 +257,9 @@ $(document).ready(function () {
                 <tr>
 					<th>Document No.</th>
 					<th>Employee Name</th>
+					<th>Work Performed</th>
 					<th>Current Approver</th>
-					
 					<th>Date</th>
-
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -299,6 +300,10 @@ $(document).ready(function () {
 				<tr class="btnView btnEdit" id="${encryptString(item.officialBusinessID)}">
 					<td>${getFormCode("OBF", dateCreated, officialBusinessID)}</td>
 					<td>${fullname}</td>
+					<td>
+						<div>${officialBusinessDate ? moment(officialBusinessDate).format("MMMM DD, YYYY") : "-"}</div>
+						<small>${officialBusinessReason || "-"}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, officialBusinessStatus, true))}
 					</td>
@@ -353,10 +358,9 @@ $(document).ready(function () {
                 <tr>
                     <th>Document No.</th>
                     <th>Employee Name</th>
+                    <th>Work Performed</th>
 					<th>Current Approver</th>
-					
 					<th>Date</th>
-
                     <th>Status</th>
                     <th>Remarks</th>
                 </tr>
@@ -414,6 +418,10 @@ $(document).ready(function () {
             <tr class="btnEdit btnView" id="${encryptString(officialBusinessID)}">
                 <td>${getFormCode("OBF", dateCreated, officialBusinessID)}</td>
                 <td>${fullname}</td>
+				<td>
+					<div>${officialBusinessDate ? moment(officialBusinessDate).format("MMMM DD, YYYY") : "-"}</div>
+					<small>${officialBusinessReason || "-"}</small>
+				</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, officialBusinessStatus, true))}
 				</td>

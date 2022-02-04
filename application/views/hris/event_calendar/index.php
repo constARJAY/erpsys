@@ -55,7 +55,9 @@
 				<div class="card">
                         <div class="header">
                             <div class="d-flex justify-content-end align-items-center px-3">
+                            <?php if(isCreateAllowed(124)){ ?>
                                 <button class="btn btn-primary p-2 align-self-baseline" data-toggle="modal" id="add_event"><i class="icon-plus"></i>&nbsp;&nbsp;Add Event</button>
+                            <?php  } ?>
                             </div>
                         </div>
                         <div class="body">
@@ -92,6 +94,7 @@
 </div>
 <!-- /Add Event Modal -->
 
+    <script src="<?php echo base_url(); ?>assets/custom/js/operations.js"></script>
     <script src="<?php echo base_url(); ?>assets/js/jquery-ui.min.js"></script>
 	<script src="<?php echo base_url(); ?>assets/plugins/fullcalendar/fullcalendar.min.js"></script>
 	<script src="<?php echo base_url(); ?>assets/custom/js/hris/event-calendar.js"></script>

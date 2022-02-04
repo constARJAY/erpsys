@@ -135,9 +135,9 @@ class MaterialWithdrawal_model extends CI_Model {
         $query  = $this->db->query($sql);
         $items  = $query ? $query->result_array() : [];
         foreach ($items as $item) {
-            $materialRequestID = $item["materialRequestID"];
-            $inventoryValidationID = $item["inventoryValidationID"];
-            $itemID = $item["itemID"];
+            $materialRequestID      = $item["materialRequestID"];
+            $inventoryValidationID  = $item["inventoryValidationID"];
+            $itemID             = $item["itemID"];
             $itemCode = $item["itemCode"];
             $itemBrandName = $item["itemBrandName"];
             $itemName = $item["itemName"];   
@@ -343,7 +343,7 @@ class MaterialWithdrawal_model extends CI_Model {
 
 
             if($statusItemFlag == true){
-                  // START UPDATE THE STOCK OUT AL ITEM STATUS//
+                  // START UPDATE THE STOCK OUT ALL ITEM STATUS//
                   for($loop1 =0; $loop1<count($getItemID);$loop1++){
                     $query = $this->db->query("UPDATE  ims_material_withdrawal_item_tbl
                     SET withdrawalItemStatus = 1

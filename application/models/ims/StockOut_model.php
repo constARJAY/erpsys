@@ -317,20 +317,20 @@ class StockOut_model extends CI_Model {
             // foreach($requestItems as $item)
             // {
                 $data = array(
-                    'inventoryCode'       => $requestItems[0]['inventoryCode'],
-                    'inventoryStorageID'         => $requestItems[0]['inventoryStorageID'],
-                    'inventoryStorageCode'         => $requestItems[0]['inventoryStorageCode'],
+                    'inventoryCode'                 => $requestItems[0]['inventoryCode'],
+                    'inventoryStorageID'            => $requestItems[0]['inventoryStorageID'],
+                    'inventoryStorageCode'          => $requestItems[0]['inventoryStorageCode'],
                     'inventoryStorageOfficeName'    => $requestItems[0]['inventoryStorageOfficeName'],
-                    'itemID'       => $requestItems[0]['itemID'],
-                    'itemCode' => $requestItems[0]['itemCode'],
-                    'itemName'     => $requestItems[0]['itemName'],
-                    'brand'    => $requestItems[0]['brand'],
-                    'uom'    => $requestItems[0]['uom'],
-                    'classificationName'       => $requestItems[0]['classificationName'],
-                    'categoryName'     => $requestItems[0]['categoryName'],
-                    'serialNumber'     => $requestItems[0]['serialNumber'],
-                    'ExpirationDate'      => $requestItems[0]['ExpirationDate'],
-                    'ManufactureDate'        => $requestItems[0]['ManufactureDate']
+                    'itemID'                        => $requestItems[0]['itemID'],
+                    'itemCode'                      => $requestItems[0]['itemCode'],
+                    'itemName'                      => $requestItems[0]['itemName'],
+                    'brand'                         => $requestItems[0]['brand'],
+                    'uom'                           => $requestItems[0]['uom'],
+                    'classificationName'            => $requestItems[0]['classificationName'],
+                    'categoryName'                  => $requestItems[0]['categoryName'],
+                    'serialNumber'                  => $requestItems[0]['serialNumber'],
+                    'ExpirationDate'                => $requestItems[0]['ExpirationDate'],
+                    'ManufactureDate'               => $requestItems[0]['ManufactureDate']
                 );
             // }
 
@@ -356,9 +356,9 @@ class StockOut_model extends CI_Model {
                
                     
                 if($query){
-                    $withdrawalItemID = $this->db->insert_id();
-                    $item_ID = $dataItem['itemID'];
-                    $requestStocks =  $dataItem["stockOut"];
+                    $withdrawalItemID   = $this->db->insert_id();
+                    $item_ID            = $dataItem['itemID'];
+                    $requestStocks      = $dataItem["stockOut"];
 
                         // Update the stock in records in imd_stock_in_item_tbl//
                         $getSpecificAvailableStocks = $this->db->query("SELECT stockInItemID,quantity,expirationDate
@@ -424,7 +424,7 @@ class StockOut_model extends CI_Model {
                         FROM 
                         ims_stock_in_item_tbl 
                         WHERE
-                        stockOutDate IS NUll 
+                        stockOutDate = '0000-00-00' 
                         AND stockInDate IS NOT NULL 
                         AND itemID = $item_ID  ");
 
@@ -441,9 +441,9 @@ class StockOut_model extends CI_Model {
 
                         $this->db->insert('ims_stock_in_item_tbl', $data);
 
-                        $insertID = $this->db->insert_id();
+                        $insertID               = $this->db->insert_id();
 
-                        $insertBidRecapItems  = $this->insertBidRecapItems($item_ID,$insertID);
+                        $insertBidRecapItems  = $this->insertBidRecapItems($item_ID, $insertID);
                         // Stock Out Quantity Data in ims_stock_in_item_tbl//
                        
                 

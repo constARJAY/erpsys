@@ -202,6 +202,7 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				sorting: [],
+				order:[4,[["PENDING"], ["COMPLETED"]]],
 				scrollCollapse: true,
 				columnDefs: [{
 						targets: 0,
@@ -572,8 +573,6 @@ $(document).ready(function () {
 		$("#page_content").html(preloader);
 		storageContent();
 		let {	
-
-
 			consolidateCode,
 			employeeID,
 			quantity,
@@ -592,18 +591,12 @@ $(document).ready(function () {
 		}else{
 			services = 'Asset';
 		}
-		//alert(formatquantity);
-		//var formatquantity = parseFloat(quantity);
-		//alert(formatquantity);
 		var formatreceivingQuantity = parseFloat(received) || 0;
-		//alert( formatquantity +" " +formatreceivingQuantity);
 		let statusDisplay = "";
 		if (formatquantity == formatreceivingQuantity) {
 			statusDisplay = `<span class="badge badge-success w-100">Completed</span>`;
 		} else {
-			
 			statusDisplay = `<span class="badge badge-outline-warning w-100">Pending</span>`;
-			
 		}
 
 
@@ -909,15 +902,15 @@ $(document).ready(function () {
 
 	}
 	$(document).on("click", ".btnRecord", function () {
-		var id = $(this).attr("inventoryid");
-		var referenceCode = $(this).attr("referenceCode");
-		var itemID = $(this).attr("itemID");
-		var itemCode = $(this).attr("itemCode");
-		var itemNameBrand = $(this).attr("itemNameBrand");
-		var classificationCategory = $(this).attr("classificationCategory");
-		var quantity = $(this).attr("quantityRequest");
-		var remaining = $(this).attr("remaining");
-		var uom =$(this).attr("UOM");
+		var id 						= $(this).attr("inventoryid");
+		var referenceCode 			= $(this).attr("referenceCode");
+		var itemID 					= $(this).attr("itemID");
+		var itemCode 				= $(this).attr("itemCode");
+		var itemNameBrand 			= $(this).attr("itemNameBrand");
+		var classificationCategory 	= $(this).attr("classificationCategory");
+		var quantity 				= $(this).attr("quantityRequest");
+		var remaining 				= $(this).attr("remaining");
+		var uom 					= $(this).attr("UOM");
 
 		$("#modal_product_record").modal("show");
 		// Display preloader while waiting for the completion of getting the data
@@ -938,11 +931,12 @@ $(document).ready(function () {
 													classificationName,
 													categoryName
 												FROM ims_return_item_tbl AS iri
-												LEFT JOIN ims_inventory_request_details_tbl	AS ird ON iri.returnItemID = ird.returnItemID AND ird.itemID =${itemID}
-												LEFT JOIN  ims_inventory_request_serial_tbl AS irs ON iri.returnItemID = irs.returnItemID AND irs.itemID =${itemID}
+													LEFT JOIN ims_inventory_request_details_tbl	AS ird ON iri.returnItemID = ird.returnItemID AND ird.itemID =${itemID}
+													LEFT JOIN  ims_inventory_request_serial_tbl AS irs ON iri.returnItemID = irs.returnItemID AND irs.itemID =${itemID}
 												WHERE returnItemCode ='${referenceCode}' AND ird.itemID =${itemID}
-												GROUP BY inventoryRequestSerialID
+													GROUP BY inventoryRequestSerialID
 												UNION ALL
+												
 												SELECT 
 													'' AS moduleReturnItemID,
 													muf.materialUsageID AS moduleMaterialUsageID,
@@ -1772,9 +1766,9 @@ $(document).ready(function () {
 	});
 
 	$(document).on("change", ".btn-barcode", function () {
-		var referenceCode = $(this).attr("referenceCode");
-		var itemID = $(this).attr("itemID");
-		var recordID = $(this).val();
+		var referenceCode 	= $(this).attr("referenceCode");
+		var itemID 			= $(this).attr("itemID");
+		var recordID 		= $(this).val();
 
 	
 		// console.log(data);
@@ -1788,14 +1782,15 @@ $(document).ready(function () {
 
 			},
 			success: function (data) {
-				var left = ($(window).width() / 2) - (900 / 2),
-					top = ($(window).height() / 2) - (600 / 2),
-					mywindow = window.open("", "PRINT", "width=900, height=600, top=" + top + ", left=" + left);
-
+				var left 		= ($(window).width() / 2) - (900 / 2),
+					top 		= ($(window).height() / 2) - (600 / 2),
+					mywindow 	= window.open("", "PRINT", "width=900, height=600, top=" + top + ", left=" + left);
 				mywindow.document.write(data);
-
 				mywindow.document.close();
 				mywindow.focus();
+				setTimeout(() => {
+					mywindow.print();
+				}, 300);
 			}
 		})
 

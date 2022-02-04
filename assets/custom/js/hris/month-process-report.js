@@ -2,7 +2,7 @@ $(document).ready(function() {
 
     //------ MODULE FUNCTION IS ALLOWED UPDATE-----
 
-    const allowedUpdate = isUpdateAllowed(112);
+    const allowedUpdate = isUpdateAllowed(83);
     if(!allowedUpdate){
         $("#page_content").find("input, select, textarea").each(function(){
             $(this).attr("disabled",true);
@@ -280,7 +280,7 @@ function headerTabContent(display = true) {
 function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
     let html;
     if (isAdd) {
-        if(isCreateAllowed(112)){
+        if(isCreateAllowed(83)){
             // html = `
             // <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
 
@@ -1639,7 +1639,7 @@ $(document).on("click", "#btnSubmit", function () {
                    let notificationData = false;
                    if (employeeID != sessionID) {
                        notificationData = {
-                           moduleID:                112,
+                           moduleID:                83,
                            notificationTitle:       "13th Month",
                            notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
                            notificationType:        2,
@@ -1692,7 +1692,7 @@ $(document).on("click", "#btnApprove", function () {
         if (isImLastApprover(approversID, approversDate)) {
             status = 2;
             notificationData = {
-                moduleID:                112,
+                moduleID:                83,
                 tableID:                 id,
                 notificationTitle:       "13th Month",
                 notificationDescription: `${feedback}: Your request has been approved.`,
@@ -1704,7 +1704,7 @@ $(document).on("click", "#btnApprove", function () {
         } else {
             status = 1;
             notificationData = {
-                moduleID:                112,
+                moduleID:                83,
                 tableID:                 id,
                 notificationTitle:       "13th Month",
                 notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -1786,7 +1786,7 @@ $(document).on("click", "#btnRejectConfirmation", function () {
             data.append("updatedBy", sessionID);
 
             let notificationData = {
-                moduleID:                112,
+                moduleID:                83,
                 tableID: 				 id,
                 notificationTitle:       "13th Month",
                 notificationDescription: `${feedback}: Your request has been denied.`,

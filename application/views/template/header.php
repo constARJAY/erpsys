@@ -8,6 +8,9 @@
     $sessionDesignationName     = $sessionUserAccount->designationName;
     $sessionProfilePicture      = $sessionUserAccount->employeeProfile;
 
+    $company = getCompanyProfile();
+    $companyWebsite = $company ? $company->companyWebsite : "";
+
 ?>
 
 <!DOCTYPE html>
@@ -100,7 +103,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="navbar-logo">
                             <a href="javascript:void(0);" class="bars"></a>
-                            <a class="navbar-brand" href="index.html"><img src="<?= base_url() ?>assets/images/BC-WHITE.png" width="165" alt="ERP"><span class="ml-2"></span></a>
+                            <a class="navbar-brand" href="<?= $companyWebsite ? $companyWebsite : "#" ?>" <?= $companyWebsite ? "target='_blank'" : "" ?>><img src="<?= base_url() ?>assets/images/BC-WHITE.png" width="165" alt="ERP"><span class="ml-2"></span></a>
                         </div>
                         <div class="d-flex justify-content-end justify-content-md-between align-items-center flex-grow-1">
                             <div class="d-flex align-items-center currently_maintain hidden-xs">
@@ -163,7 +166,7 @@
                                 </li>                        
                                 <li class="dropdown profile">
                                     <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button">
-                                        <img class="rounded-circle" src="<?= base_url() ?>assets/upload-files/profile-images/<?=$sessionProfilePicture?>" alt="<?=$sessionFullname?>">
+                                        <img class="rounded-circle" style="height: 45px; width: 45px;" src="<?= base_url() ?>assets/upload-files/profile-images/<?=$sessionProfilePicture?>" alt="<?=$sessionFullname?>">
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
