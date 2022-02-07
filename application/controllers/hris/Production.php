@@ -68,21 +68,14 @@ class Production extends CI_Controller {
     }
 
     public function saveProductionDocument(){
-        $employeeID  = $this->input->post("employeeID");
+        $employeeID    = $this->input->post("employeeID");
         $dateSchedule  = $this->input->post("getDateSchedule");
-        $dateStart  = $this->input->post("dateStart");
-        $dateEnd  = $this->input->post("dateEnd");
-        $approversID = $this->input->post("apprversID");
-
-        $listDateRange  = $this->input->post("listDateRange");
+        $dateStart     = $this->input->post("dateStart");
+        $dateEnd       = $this->input->post("dateEnd");
+        $approversID   = $this->input->post("apprversID");
+        $listDateRange = $this->input->post("listDateRange");
         $listDayRange  = $this->input->post("listDayRange");
-
-        // echo "<pre>";
-        // print_r($_POST);
-        // exit;
-
-        
-        $action  = $this->input->post("action");
+        $action        = $this->input->post("action");
 
         if($action == "add"){
             $data = [
@@ -517,6 +510,14 @@ class Production extends CI_Controller {
 
     }
 
+
+
+
+    public function updateProductionCode()
+    {
+        $productionID = $this->input->post("productionID");
+        echo json_encode($this->production->updateProductionCode($productionID));
+    }
 
 
 }    

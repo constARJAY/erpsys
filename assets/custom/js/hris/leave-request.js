@@ -1122,7 +1122,16 @@ $(document).ready(function() {
 
 	// ----- CHECK FILE LENGTH -----
 	function checkFileLength() {
-		let count = oldLRFilename.length + newLRFilename.length;
+		let leaveID   = $(`[name="leaveID"]`).val();
+		let leaveDays = +$(`[name="leaveRequestNumberOfDate"]`).val();
+		let count     = oldLRFilename.length + newLRFilename.length;
+		if (leaveID == 1 && leaveDays >= 3) { // SICK LEAVE
+			if (!count) {
+				showNotification("danger", "Please upload supporting documents.");
+				return false;
+			}
+		}
+
 		if (count > 10) {
 			showNotification("danger", "Only 10 files are allowed to upload.");
 			return false;
@@ -1517,7 +1526,7 @@ $(document).ready(function() {
 		const revise       				= $(this).attr("revise") == "true";
 		const validate     				= validateForm("form_leave_request");
 
-		if (validate && validateDate()) {
+		if (validate && validateDate() && checkFileLength()) {
 			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getleaveRequestData(action, "submit", "1", id);
 

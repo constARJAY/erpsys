@@ -118,6 +118,15 @@ class Leave_request extends CI_Controller {
         }
 
         $saveLeaveRequestData = $this->leaverequest->saveLeaveRequestData($action, $leaveRequestData, $leaveRequestID);
+        $result = explode("|", $saveLeaveRequestData);
+        if ($result[0] == "true") {
+            $leaveRequestID = $result[2];
+            if ($leaveRequestData['leaveRequestStatus'] == '2') {
+                $insertProduction = $this->leaverequest->insertProduction($leaveRequestID, $employeeID);
+            }
+        }
+
+
         echo json_encode($saveLeaveRequestData);
     }
     

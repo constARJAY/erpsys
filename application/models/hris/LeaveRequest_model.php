@@ -100,4 +100,83 @@ class LeaveRequest_model extends CI_Model {
 
 
 
+    // ----- ***** INSERT PRODUCTION ***** -----
+    function insertProduction($leaveRequestID = 0) 
+    {
+        $leaveRequest = $this->getLeaveRequestData($leaveRequestID);
+        if ($leaveRequest) 
+        {
+            $employeeID = $leaveRequest[0]["employeeID"];
+            $schedule = getEmployeeSchedule($employeeID);
+            
+            $startDate = $leaveRequest[0]["leaveRequestDateFrom"];
+            $endDate   = $leaveRequest[0]["leaveRequestDateTo"];
+            $createdAt = $leaveRequest[0]["createdAt"];
+            $leaveRequestCode = getFormCode("LRF", $createdAt, $leaveRequestID);
+
+            $period = new DatePeriod(
+                new DateTime($startDate),
+                new DateInterval('P1D'),
+                new DateTime("$endDate +1 day")
+            );
+
+            foreach ($period as $key => $value) {
+                $date       = $value->format('Y-m-d');
+                $dayEntries = date('l', strtotime($date));
+                $day        = strtolower($dayEntries);
+
+                $columnStatus        = $day."Status";
+                $columnFrom          = $day."From";
+                $columnTo            = $day."To";
+                $columnBreakDuration = $day."BreakDuration";
+
+                $scheduleStatus        = $schedule->{"$columnStatus"};
+                $scheduleFrom          = $schedule->{"$columnFrom"};
+                $scheduleTo            = $schedule->{"$columnTo"};
+                $scheduleBreakDuration = $schedule->{"$columnBreakDuration"} ?? 0;
+
+                $sql = "
+                SELECT 
+                    hpt.productionID,
+                    productionEntriesID
+                FROM hris_production_tbl AS hpt
+                    LEFT JOIN hris_production_entries_tbl AS hpet ON hpt.productionID = hpet.productionID AND hpet.dateEntries = '$date'
+                WHERE '$date' BETWEEN dateStart AND dateEnd 
+                    AND employeeID = $employeeID
+                    AND productionStatus = 0 LIMIT 1";
+                $lrQuery = $this->db->query($sql);
+                $result = $lrQuery ? $lrQuery->row() : null;
+
+                if ($result) {
+                    $leaveStatus = $leaveRequest[0]['leaveStatus'] == 1 ? "Billable" : "Non-billable";
+                    $leaveBadge  = $leaveRequest[0]['leaveStatus'] == 1 ? '<span class="badge badge-success">Paid</span>' : '<span class="badge badge-danger">Unpaid</span>';
+                    $leaveCode   = "<span class='badge badge-info'>$leaveRequestCode</span>";
+                    $duration    = getDuration("2021-01-01 $scheduleFrom", "2021-01-01 $scheduleTo", $scheduleBreakDuration);
+
+                    $isWholeDay   = $leaveRequest[0]['leaveWorkingDay'] == 1;
+                    $scheduleFrom = $isWholeDay ? $scheduleFrom : $leaveRequest[0]['timeIn'];
+                    $scheduleTo   = $isWholeDay ? $scheduleTo : $leaveRequest[0]['timeIn'];
+
+                    $data = [
+                        'productionEntriesID' => $result->productionEntriesID,
+                        'productionID'        => $result->productionID,
+                        'dateEntries'         => $date,
+                        'dayEntries'          => $dayEntries,
+                        'timeStart'           => $scheduleFrom,
+                        'timeEnd'             => $scheduleTo,
+                        'activityLocation'    => '',
+                        'activityClass'       => $leaveStatus,
+                        'activityDescription' => "$leaveBadge $leaveCode <br>" . $leaveRequest[0]["leaveRequestReason"] ?? '',
+                        'activityHours'       => $duration,
+                        'leaveRequestID'      => $leaveRequestID ?? 0,
+                    ];
+                    $this->db->insert("hris_production_activity_tbl", $data);
+                }
+    
+            }
+
+        }
+    }
+    // ----- ***** END INSERT PRODUCTION ***** -----
+
 }

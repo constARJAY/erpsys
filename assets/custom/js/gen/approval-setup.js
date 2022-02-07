@@ -315,7 +315,7 @@ function getApproval(moduleID = null,designationID = null){
        
             let approvalArray =    approval[0]["userAccountID"].split("|");
             approvalArray.map((items,index) =>{
-                let approvalItems   = getTableData("hris_employee_list_tbl", "", "employeeID = '"+ items +"' ");
+                let approvalItems   = getTableData("hris_employee_list_tbl", "employeeID, employeeFirstname, employeeLastname, employeeProfile, departmentID, designationID", "employeeID = '"+ items +"' ");
                 
                 let approverName            = approvalItems.length > 0 ? approvalItems[0]["employeeFirstname"]+" "+approvalItems[0]["employeeLastname"] : `Level ${index + 1} Approver N / A `;
                 let approverDesignation     = approvalItems.length > 0 ? getTableData("hris_designation_tbl","","designationID="+approvalItems[0].designationID) : "Department";

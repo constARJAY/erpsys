@@ -14,6 +14,8 @@ class Production_model extends CI_Model {
             productionID,
             productionCode,
             reviseProductionID,
+            dateStart,
+            dateEnd,
             employeeID,
             productionSchedule,
             productionStatus,
@@ -40,15 +42,15 @@ class Production_model extends CI_Model {
    
 
         $sql    = "SELECT 
-        productionEntriesID,
-        productionID,
-        dateEntries,
-        dayEntries,
-        dateCredited
+            productionEntriesID,
+            productionID,
+            dateEntries,
+            dayEntries,
+            dateCredited
         FROM 
-        hris_production_entries_tbl
+            hris_production_entries_tbl
         WHERE 
-        productionID = $productionID";
+            productionID = $productionID ORDER BY dateEntries";
         $query = $this->db->query($sql);
 
         $entries = $query ? $query->result_array() : [];
@@ -73,20 +75,22 @@ class Production_model extends CI_Model {
         $output = [];
         $productionDetails = $this->getProductionDetails($productionID);
         if ($productionDetails) {
-            $output["productionID"] = $productionDetails->productionID;
-            $output["productionCode"]        = $productionDetails->productionCode;
-            $output["reviseProductionID"]        = $productionDetails->reviseProductionID;
-            $output["employeeID"]       = $productionDetails->employeeID;
-            $output["productionSchedule"]       = $productionDetails->productionSchedule;
-            $output["productionStatus"]       = $productionDetails->productionStatus;
-            $output["productionReason"]       = $productionDetails->productionReason;
-            $output["approversID"] = $productionDetails->approversID;
-            $output["approversDate"] = $productionDetails->approversDate;
-            $output["approversStatus"] = $productionDetails->approversStatus;
-            $output["createdAt"] = $productionDetails->createdAt;
-            $output["submittedAt"] = $productionDetails->submittedAt;
-            $output["createdBy"] = $productionDetails->createdBy;
-            $output["updatedBy"] = $productionDetails->updatedBy;
+            $output["productionID"]       = $productionDetails->productionID;
+            $output["productionCode"]     = $productionDetails->productionCode;
+            $output["reviseProductionID"] = $productionDetails->reviseProductionID;
+            $output["employeeID"]         = $productionDetails->employeeID;
+            $output["productionSchedule"] = $productionDetails->productionSchedule;
+            $output["dateStart"]          = $productionDetails->dateStart;
+            $output["dateEnd"]            = $productionDetails->dateEnd;
+            $output["productionStatus"]   = $productionDetails->productionStatus;
+            $output["productionReason"]   = $productionDetails->productionReason;
+            $output["approversID"]        = $productionDetails->approversID;
+            $output["approversDate"]      = $productionDetails->approversDate;
+            $output["approversStatus"]    = $productionDetails->approversStatus;
+            $output["createdAt"]          = $productionDetails->createdAt;
+            $output["submittedAt"]        = $productionDetails->submittedAt;
+            $output["createdBy"]          = $productionDetails->createdBy;
+            $output["updatedBy"]          = $productionDetails->updatedBy;
 
             $output["entries"] = $this->getProductionEntries($productionID);
         }
@@ -140,12 +144,76 @@ class Production_model extends CI_Model {
         return $result;
     }
 
-    public function saveProductionEntries($data,$action ="add",$listDateRange = false, $employeeID =0,$productionID = 0){
+    public function saveProductionEntries($data, $action ="add", $listDateRange = false, $employeeID = 0, $productionID = 0){
+        if($data && !empty($data) && $action == "add"){
+            $query    = $this->db->insert_batch("hris_production_entries_tbl", $data);
+            $insertID = $this->db->insert_id();
+            $schedule = getEmployeeSchedule($employeeID);
 
+            if ($listDateRange && !empty($listDateRange) && $schedule) {
+                // INSERT PRODUCTION
+                foreach ($listDateRange as $date) {
+                    $queryDate = $this->db->query("SELECT * FROM hris_leave_request_tbl WHERE employeeID = $employeeID AND leaveRequestStatus = 2 AND '$date' BETWEEN leaveRequestDateFrom AND leaveRequestDateTo");
+                    $leaveRequest = $queryDate->result_array() ?? null;
+                    if ($leaveRequest) {
+                        $dayEntries = date('l', strtotime($date));
+                        $day        = strtolower($dayEntries);
 
-        if($action == "add"){
-            $query = $this->db->insert_batch("hris_production_entries_tbl", $data);
-            $insertID =    $this->db->insert_id();
+                        $startDate = $leaveRequest[0]["leaveRequestDateFrom"];
+                        $endDate   = $leaveRequest[0]["leaveRequestDateTo"];
+                        $createdAt = $leaveRequest[0]["createdAt"];
+                        $leaveRequestCode = getFormCode("LRF", $createdAt, $leaveRequestID);
+
+                        $columnStatus        = $day."Status";
+                        $columnFrom          = $day."From";
+                        $columnTo            = $day."To";
+                        $columnBreakDuration = $day."BreakDuration";
+
+                        $scheduleStatus        = $schedule->{"$columnStatus"};
+                        $scheduleFrom          = $schedule->{"$columnFrom"};
+                        $scheduleTo            = $schedule->{"$columnTo"};
+                        $scheduleBreakDuration = $schedule->{"$columnBreakDuration"} ?? 0;
+
+                        $sql = "
+                        SELECT 
+                            hpt.productionID,
+                            productionEntriesID
+                        FROM hris_production_tbl AS hpt
+                            LEFT JOIN hris_production_entries_tbl AS hpet ON hpt.productionID = hpet.productionID AND hpet.dateEntries = '$date'
+                        WHERE '$date' BETWEEN dateStart AND dateEnd 
+                            AND employeeID = $employeeID
+                            AND productionStatus = 0 LIMIT 1";
+                        $lrQuery = $this->db->query($sql);
+                        $result = $lrQuery ? $lrQuery->row() : null;
+
+                        if ($result) {
+                            $leaveStatus = $leaveRequest[0]['leaveStatus'] == 1 ? "Billable" : "Non-billable";
+                            $leaveBadge  = $leaveRequest[0]['leaveStatus'] == 1 ? '<span class="badge badge-success">Paid</span>' : '<span class="badge badge-danger">Unpaid</span>';
+                            $leaveCode   = "<span class='badge badge-info'>$leaveRequestCode</span>";
+                            $duration = getDuration("2021-01-01 $scheduleFrom", "2021-01-01 $scheduleTo", $scheduleBreakDuration);
+
+                            $isWholeDay   = $leaveRequest[0]['leaveWorkingDay'] == 1;
+                            $scheduleFrom = $isWholeDay ? $scheduleFrom : $leaveRequest[0]['timeIn'];
+                            $scheduleTo   = $isWholeDay ? $scheduleTo : $leaveRequest[0]['timeIn'];
+        
+                            $data = [
+                                'productionEntriesID' => $result->productionEntriesID,
+                                'productionID'        => $result->productionID,
+                                'dateEntries'         => $date,
+                                'dayEntries'          => $dayEntries,
+                                'timeStart'           => $scheduleFrom,
+                                'timeEnd'             => $scheduleTo,
+                                'activityLocation'    => '',
+                                'activityClass'       => $leaveStatus,
+                                'activityDescription' => "$leaveBadge $leaveCode" . $leaveRequest[0]["leaveRequestReason"] ?? '',
+                                'activityHours'       => $duration,
+                                'leaveRequestID'      => $leaveRequestID ?? 0,
+                            ];
+                            $this->db->insert("hris_production_activity_tbl", $data);
+                        }
+                    }
+                }
+            }
 
             return "true|Successfully created|$insertID|".date("Y-m-d");
         }
@@ -294,6 +362,16 @@ class Production_model extends CI_Model {
             }
         }
         return false;
+    }
+
+
+
+    public function updateProductionCode($productionID = 0)
+    {
+        $productionCode = "PDN-".date("y")."-".str_pad($productionID, 5, "0", STR_PAD_LEFT);
+        $updateArr = ["productionCode"=> $productionCode ];
+        $this->db->update("hris_production_tbl", $updateArr, ["productionID" => $productionID]);
+        return true;
     }
 
 }

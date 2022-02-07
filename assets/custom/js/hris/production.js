@@ -397,11 +397,12 @@ $(document).ready(function () {
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: 150},
+					{ targets: 0, width: 250 },
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 150 },
-					{ targets: 3, width: 50  },
-					{ targets: 4, width: 200  },
+					{ targets: 3, width: 300 },
+					{ targets: 4, width: 50  },
+					{ targets: 5, width: 200 },
 				],
 				dom: 'lBfrtip',
 				buttons: [
@@ -481,7 +482,6 @@ $(document).ready(function () {
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
-				
 				proccessing: false,
 				serverSide: false,
 				scrollX: true,
@@ -492,50 +492,41 @@ $(document).ready(function () {
                 info:           false,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: 50 },
+					{ targets: 0, width: 50  },
 					{ targets: 1, width: 100 },
 					{ targets: 2, width: 100 },
-					{ targets: 3, width: 50 },
+					{ targets: 3, width: 50  },
 					{ targets: 4, width: 200 },
-					{ targets: 5, width: 150  },
-					{ targets: 6, width: 300  },
-					{ targets: 7, width: 300  },
-					{ targets: 8, width: 300  },
-					// { targets: 9, width: 150  },
-
+					{ targets: 5, width: 150 },
+					{ targets: 6, width: 300 },
+					{ targets: 7, width: 300 },
+					{ targets: 8, width: 300 },
 				],
-				// dom: 'Bfrtip',
-			
 			});
 
-			var table = $("#tableForActivity0")
+		var table = $("#tableForActivity0")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
-				
 				proccessing: false,
 				serverSide: false,
 				scrollX: true,
 				sorting:        false,
-                searching:      false,
-                paging:         false,
-                ordering:       false,
-                info:           false,
+				searching:      false,
+				paging:         false,
+				ordering:       false,
+				info:           false,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: 50 },
-					{ targets: 1, width: 50 },
-					{ targets: 2, width: 50 },
-					{ targets: 3, width: 50 },
-					{ targets: 4, width: 50  },
-					{ targets: 5, width: 250  },
-					{ targets: 6, width: 270  },
-					{ targets: 7, width: 250  },
-					// { targets: 8, width: 50  },
-
+					{ targets: 0, width: 50  },
+					{ targets: 1, width: 50  },
+					{ targets: 2, width: 50  },
+					{ targets: 3, width: 100 },
+					{ targets: 4, width: 150 },
+					{ targets: 5, width: 150 },
+					{ targets: 6, width: 150 },
+					{ targets: 7, width: 250 },
 				],
-				// dom: 'Bfrtip',
-			
 			});
 	}
 	// ----- END DATATABLES -----
@@ -601,8 +592,9 @@ $(document).ready(function () {
             <thead>
 					<tr style="white-space: nowrap">
 					<th>Production Dates</th>
+					<th>Employee Name</th>
 					<th>Current Approver</th>
-					<th>Current Approver</th>
+					<th>Dates</th>
 					<th>Status</th>
 					<th>Remarks</th>
 					
@@ -614,6 +606,7 @@ $(document).ready(function () {
 			let {
 				productionID,
 				productionCode,
+				fullname,
 				productionSchedule,
 				approversID,
 				approversDate,
@@ -637,6 +630,7 @@ $(document).ready(function () {
 						<div>${productionSchedule}</div>
 						<small>${productionCode}</small>
 					</td>
+					<td>${fullname}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, productionStatus, true))}
 					</td>
@@ -946,20 +940,12 @@ $(document).ready(function () {
 			
 			existingDates.push(expandDaterange(dateStart,dateEnd)); // NOTE: this is for a whole document inside of the table
 
-			// let leaveDateSplit= leaveRequestDate.split(" - ");
-			// let leaveDate 	  = leaveDateSplit[0] == leaveDateSplit[1] ? leaveDateSplit[0] : leaveDateSplit[0]+" - "+leaveDateSplit[1];
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = productionStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
-
-			// let unique = {
-			// 	id:               productionID,
-			// 	leaveRequestDate: leaveRequestDate,
-			// };
-			// (productionStatus == 1 || productionStatus == 2) && uniqueData.push(unique);
 
 			let btnClass =
 				productionStatus != 0 ? `btnView`: `btnEdit`;
@@ -985,7 +971,17 @@ $(document).ready(function () {
 					<div class="dropdown-menu">
 					<a class="dropdown-item btnOverView"  id="${encryptString(productionID)}" code="${productionCode}" href="javascript:void(0);"><i class="fas fa-list-ul"></i> Overview</a>
 					<a class="dropdown-item ${btnClass}"  id="${encryptString(productionID)}" code="${productionCode}" href="javascript:void(0);"><i class="fas fa-eye"></i> View</a>
-					${productionStatus == 0 ? `<a class="dropdown-item"  id="btnSubmit" productionID="${encryptString(productionID)}" code="${productionCode}" revise="${false}" cancel="${false}"  href="javascript:void(0);"><i class="fas fa-paper-plane"></i> Submit</a>` : ""}
+					${productionStatus == 0 ? `
+					<a class="dropdown-item"  
+						id="btnSubmit" 
+						productionID="${encryptString(productionID)}" 
+						code="${productionCode}" 
+						revise="false" 
+						cancel="false"  
+						dateStart="${dateStart}"
+						dateEnd="${dateEnd}"
+						productionCode="${productionCode}"
+						href="javascript:void(0);"><i class="fas fa-paper-plane"></i> Submit</a>` : ""}
 					
 					
 					</div>
@@ -1038,18 +1034,18 @@ $(document).ready(function () {
 	// ------ EVENT IN MY FORMS CONTENTS-------//
 	$(document).on("click",".addProductionDocument",function(){
 		var getDateSchedule =  $(`[name=setDateSchedule]`).val() || "";
-		var explode = getDateSchedule.split('-');
-		var getdateStart = moment(explode[0]).format("YYYY-MM-DD") || "";
-		var getdateEnd = moment(explode[1]).format("YYYY-MM-DD") || "";
-		var action = $(this).attr("action") || "add";
+		var explode         = getDateSchedule.split('-');
+		var getdateStart    = moment(explode[0]).format("YYYY-MM-DD") || "";
+		var getdateEnd      = moment(explode[1]).format("YYYY-MM-DD") || "";
+		var action          = $(this).attr("action") || "add";
 		
-		var getInputDateRange =[];
-		var getInputDayRange =[];
-		var existingDatesAdd =[];
-		var mergeArrayAdd =[];
+		var getInputDateRange = [];
+		var getInputDayRange  = [];
+		var existingDatesAdd  = [];
+		var mergeArrayAdd     = [];
 
 		getInputDateRange = expandDaterange(getdateStart,getdateEnd);
-		getInputDayRange = expandDayrange(getdateStart,getdateEnd);
+		getInputDayRange  = expandDayrange(getdateStart,getdateEnd);
 
 		let getDates = getTableData("hris_production_tbl","dateStart,dateEnd",`employeeID = ${sessionID}`);
 
@@ -1539,13 +1535,17 @@ $(document).ready(function () {
 	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
+			console.log(data);
 			let {
 				productionID     = "",
+				productionCode   = "",
+				dateStart        = "",
+				dateEnd          = "",
 				productionStatus = "",
-				employeeID         = "",
-				approversID        = "",
-				approversDate      = "",
-				createdAt          = new Date
+				employeeID       = "",
+				approversID      = "",
+				approversDate    = "",
+				createdAt        = new Date
 			} = data && data[0];
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
@@ -1583,7 +1583,10 @@ $(document).ready(function () {
 							productionID="${encryptString(productionID)}"
 							code="${getFormCode("PDN", createdAt, productionID)}"
 							revise="${isRevise}"
-							cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
+							cancel="${isFromCancelledDocument}"
+							dateStart="${dateStart}"
+							dateEnd="${dateEnd}"
+							productionCode="${productionCode}"><i class="fas fa-paper-plane"></i>
 							Submit
 						</button>`;
 					} else {
@@ -1717,7 +1720,7 @@ $(document).ready(function () {
 
 
 	// ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false,isOverView =false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false, isOverView =false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			// preventRefresh(false);
@@ -2068,24 +2071,6 @@ $(document).ready(function () {
             updatedBy = 0
         } = data;
 
-			// var newDescription = '';
-			// if(activityDescription){
-			// 	let explode = activityDescription.split(";");
-			// 	var getLength = explode.length || 0;
-			// 	for(var loop = 0; loop<explode.length;loop++){
-	
-			// 		if( loop == getLength-1){
-			// 			newDescription += explode[loop];
-			// 		}else{
-			// 			newDescription += explode[loop]+"<br>";
-			// 		}
-			// 	}
-			// }else{
-			// 	newDescription = activityDescription;
-			// }
-
-	
-
 		
 		let statusBadgeRow = '';
 
@@ -2104,19 +2089,19 @@ $(document).ready(function () {
         if (readOnly) {
             html += `
             <tr>
-                <td>
-                    <small> ${moment(timeStart, 'HH:mm').format('hh:mm A')  || "-"} </small>
+                <td class="text-center">
+                    <small> ${moment("2021-01-01 " + timeStart).format('hh:mm A')  || "-"} </small>
                 </td>
-				<td>
-                    <small> ${moment(timeEnd, 'HH:mm').format('hh:mm A') || "-"} </small>
+				<td class="text-center">
+                    <small> ${moment("2021-01-01 " + timeEnd).format('hh:mm A') || "-"} </small>
                 </td>
-				<td>
+				<td class="text-center">
                     <small>${formatAmount(activityHours)} </small>
                 </td>
 				<td>
                     <small> ${activityLocation == null || activityLocation ==""  ?  "-" : activityLocation} </small>
                 </td>
-				<td>
+				<td class="text-center">
                     <small> ${activityClass || "-"} </small>
                 </td>
 				<td>
@@ -2126,71 +2111,47 @@ $(document).ready(function () {
                    <small> ${activityProjectName || "-"}</small>
                 </td>
 				<td>
-                    <small>${ activityDescription ||""} </small>
+                    <small style="white-space: pre-line;">${ activityDescription ||""} </small>
                 </td>
 				
 				
-            </tr>`;
-
-			// <td>
-            //         <small>${statusBadgeRow || "-"} </small>
-            //     </td>
+            </tr>`; 
         } else {
-
-			// if(productionStatus != 0){
-				// html += `
-				// <tr>
-				// 	<td>
-				// 		${"-"}
-				// 	</td>
-				// 	<td>
-				// 		${"-"}
-				// 	</td>
-				// 	<td>
-				// 		${"-"}
-				// 	</td>
-				// 	<td>
-				// 		${"-"}
-				// 	</td>
-				// 	<td>
-				// 		${"-"}
-				// 	</td>
-				// 	<td>
-				// 		${"-"}
-				// 	</td>
-				// 	<td>
-				// 		${"-"}
-				// 	</td>
-				// 	<td>
-				// 		${"-"}
-				// 	</td>
-					
-				  
-				// </tr>`;
-
-
-			// }else{
 				html += `
-				<tr>
+				<tr class="checkboxrow">
 					 <td class="text-center">
 						<div class="action">
-						${leaveRequestID != 0 || overtimeRequestID != 0 ? `` : `<input type="checkbox" class="checkboxrow">`}
+							${leaveRequestID != 0 || overtimeRequestID != 0 ? `` : `<input type="checkbox" class="checkboxrow">`}
 						</div>
 					</td>
 	
 					<td>
 						<div class="form-group mb-0 activityTimeStartPeriodParent">
-						${leaveRequestID != 0 || overtimeRequestID != 0 ? `${timeStart || "-"}` : `<input type="time" class="form-control text-center " name="timePeriodStart" id="timePeriodStart0"  value="${timeStart}" productionID="${productionID}" productionEntriesID="${productionEntriesID}" productionActivityID="${productionActivityID || 0}" getDateEntries="${getDateEntries}" getDayEntries="${getDayEntries}"  >
-						<div class="d-block invalid-feedback"></div>` }
+						${leaveRequestID != 0 || overtimeRequestID != 0 ? 
+							`${moment("2021-01-01 "+timeStart).format("hh:mm A") || "-"}` : 
+							`<input type="time" class="form-control text-center " 
+								name="timePeriodStart" id="timePeriodStart0"  
+								value="${timeStart}" 
+								productionID="${productionID}" 
+								productionEntriesID="${productionEntriesID}" 
+								productionActivityID="${productionActivityID || 0}" 
+								getDateEntries="${getDateEntries}" 
+								getDayEntries="${getDayEntries}">
+							<div class="d-block invalid-feedback"></div>` }
 							
 						</div>
 					</td>
 	
 					<td>
 						<div class="form-group mb-0 activityTimeEndPeriodParent">
-							${leaveRequestID != 0 || overtimeRequestID != 0 ? `${timeEnd || "-"}` : `<input type="time" class="form-control text-center " name="timePeriodEnd" id="timePeriodEnd0" value="${timeEnd}" >
+							${leaveRequestID != 0 || overtimeRequestID != 0 ? 
+								`${moment("2021-01-01 "+timeEnd).format("hh:mm A") || "-"}` : 
+								`<input type="time" class="form-control text-center" 
+									name="timePeriodEnd" 
+									id="timePeriodEnd0" 
+									value="${timeEnd}" >
 							<div class="d-block invalid-feedback"></div>` }
-	
+
 						</div>
 					</td>
 
@@ -2203,92 +2164,76 @@ $(document).ready(function () {
 	
 					<td>
 						<div class="form-group mb-0 activityLocationParent">
-						${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityLocation != "null" ? activityLocation  : ""}` 
-						: `<input type="text" 
-						class="form-control text-center autoSaved validate" 
-						name="activityLocation" 
-						id="activityLocation0"
-						data-allowcharacters="[a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][[][]][ ]"
-                        minlength="1"
-                        maxlength="75"
-						value="${activityLocation == null || activityLocation == "" ? "" : activityLocation}" >
-						<div class="d-block invalid-feedback"></div>`}
+						${leaveRequestID != 0 || overtimeRequestID != 0 ? 
+							`${activityLocation != "null" ? activityLocation  : ""}` : 
+							`<input type="text" 
+								class="form-control text-center autoSaved validate" 
+								name="activityLocation" 
+								id="activityLocation0"
+								data-allowcharacters="[a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][[][]][ ]"
+								minlength="1"
+								maxlength="75"
+								value="${activityLocation == null || activityLocation == "" ? "" : activityLocation}" >
+							<div class="d-block invalid-feedback"></div>`}
 							
 						</div>
 					</td>
 					
 					<td>
 						<div class="form-group  mb-0 activityClassParent">
-
-						${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityClass || "-" }` : `<select class="form-control validate select2 autoSaved" name="activityClass" id="activityClass0">
-						<option selected>Please select a category</option>
-						<option value="Billable" ${activityClass == "Billable" ? "selected" : ""}>
-							Billable
-						</option>
-						<option value="Non-Billable" ${activityClass == "Non-Billable" ? "selected" : ""}>
-							Non-billable
-						</option>
-					</select>
-					<div class="d-block invalid-feedback"></div>` }
-							
+						${leaveRequestID != 0 || overtimeRequestID != 0 ? 
+							`${activityClass || "-" }` : `
+							<select class="form-control validate select2 autoSaved" name="activityClass" id="activityClass0">
+								<option selected>Please select a category</option>
+								<option value="Billable" ${activityClass == "Billable" ? "selected" : ""}>Billable</option>
+								<option value="Non-Billable" ${activityClass == "Non-Billable" ? "selected" : ""}>Non-billable</option>
+							</select>
+							<div class="d-block invalid-feedback"></div>` }
 						</div>
 					</td>
 	
 					<td>
 						<div class="form-group  mb-0 activityClientParent">
-
-						${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityClientName || "-"}` : `<select class="form-control validate select2 autoSaved" name="activityClient" id="activityClient0" >
-							
-						${getClientList(activityClient)}
-					</select>
-					<div class="d-block invalid-feedback"></div>` }
-							
+						${leaveRequestID != 0 || overtimeRequestID != 0 ? 
+							`${activityClientName || "-"}` : 
+							`<select class="form-control validate select2 autoSaved" 
+								name="activityClient" 
+								id="activityClient0" >
+								${getClientList(activityClient)}
+							</select>
+							<div class="d-block invalid-feedback"></div>` }
 						</div>
 					</td>
 	
 					<td>
 						<div class="form-group  mb-0 activityProjectParent">
-							${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityProjectName || "-"}` : `<select class="form-control validate select2 autoSaved" name="activityProject" id="activityProject0">
-							${getprojectList(activityProject,true,activityClient)}
-						</select>
-						<div class="d-block invalid-feedback"></div>`}
-							
+							${leaveRequestID != 0 || overtimeRequestID != 0 ? 
+								`${activityProjectName || "-"}` : 
+								`<select class="form-control validate select2 autoSaved" 
+									name="activityProject" 
+									id="activityProject0">
+									${getprojectList(activityProject,true,activityClient)}
+								</select>
+								<div class="d-block invalid-feedback"></div>`}
 						</div>
 					</td>
 	
 					<td>
 						<div class="form-group mb-0 activityDescriptionParent">
-							${leaveRequestID != 0 || overtimeRequestID != 0 ? `<small>${ activityDescription ||""}</small>` : `<textarea rows="2" class="form-control validate autoSaved" name="activityDescription" id="activityDescription0"
-							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][[][]][ ]" minlength="2"
-							maxlength="325"  >${ activityDescription ||""}</textarea>`}
+							${leaveRequestID != 0 || overtimeRequestID != 0 ? 
+								`<small style="white-space: pre-line;">${ activityDescription ||""}</small>` : 
+								`<textarea rows="3" 
+									class="form-control validate autoSaved" 
+									name="activityDescription" 
+									id="activityDescription0"
+									data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][[][]][ ]" 
+									minlength="2"
+									maxlength="1000"
+									style="resize: none;">${activityDescription ||""}</textarea>`}
 							<div class="d-block invalid-feedback"></div>
 						</div>
-					</td>
-	
-					
-	
-					
+					</td>				
 				</tr>`;
-				// <td>
-				// 		<div class="form-group  mb-0 activityStatusParent">
-
-				// 		${leaveRequestID != 0 || overtimeRequestID != 0 ? `${activityStatus || "-"}` : `<select class="form-control validate select2 autoSaved" name="activityStatus"  id="activityStatus0">
-				// 		<option disabled selected>Select Status</option>
-				// 		<option value="Pending" ${activityStatus == "Pending" ? "selected" : ""}>
-				// 			Pending
-				// 		</option>
-				// 		<option value="Done" ${activityStatus == "Done" ? "selected" : ""}>
-				// 			Done
-				// 		</option>
-				// 		<option value="Overdue" ${activityStatus == "Overdue" ? "selected" : ""}>
-				// 			Overdue
-				// 		</option>
-				// 	</select>
-				// 	<div class="d-block invalid-feedback"></div>`}
-							
-				// 		</div>
-				// 	</td>
-			// }
       
         }
 		
@@ -2298,7 +2243,7 @@ $(document).ready(function () {
 
 	// ----- DELETE TABLE ROW -----
 	function deleteTableRow() {
-		if ($(`.checkboxrow:checked`).length != $(`.checkboxrow`).length) {
+		if ($(`#activityTableBody tr`).length != $(`.checkboxrow:checked`).length && $(`.checkboxrow:checked`).length != $(`.checkboxrow`).length) {
 			Swal.fire({
 				title:              "DELETE ROW",
 				text:               "Are you sure that you want to delete the selected row/s?",
@@ -2337,7 +2282,7 @@ $(document).ready(function () {
     // ----- UPDATE DELETE BUTTON -----
 	function updateDeleteButton() {
 		let checkedCount = 0;
-		$(".checkboxrow").each(function() {
+		$("#activityTableBody").find(".checkboxrow").each(function() {
 			this.checked && checkedCount++;
 		})
 		$(".btnDeleteRow").attr("disabled", checkedCount == 0);
@@ -2519,7 +2464,7 @@ $(document).ready(function () {
             
 				<div class=" card-body col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 text-left">
 					<h6 class="bg-primary text-light p-3"><strong>Production Dates</strong></h6>
-					<div style="height: 510px;overflow-y: scroll;">`;
+					<div style="height: 510px; overflow-y: auto;">`;
 
 					
 					entries.map((entry,index) =>{
@@ -2564,9 +2509,7 @@ $(document).ready(function () {
 								
 							</tr>
 						</thead>
-						<tbody class="activityTableBody" id="activityTableBody">
-			`;
-			// <th>Status</th>
+						<tbody class="activityTableBody" id="activityTableBody">`;
 
 						let getActivities = getTableData(`hris_production_activity_tbl`,'',`productionEntriesID = ${entries[0].productionEntriesID}`);
 						if(getActivities.length >0){
@@ -2598,37 +2541,17 @@ $(document).ready(function () {
           
         </div>
 		<div class="approvers">
-			${getApproversStatus(approversID, approversStatus, approversDate)}
+			${disabled ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
 
 		setTimeout(() => {
-			let leaveRequestData = getTableData(
-				"hris_leave_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
-				"hris_leave_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_leave_request_tbl.createdAt AS dateCreated",
-				`hris_leave_request_tbl.employeeID = ${sessionID}`,
-				`FIELD(leaveRequestStatus, 0, 1, 3, 2, 4), COALESCE(hris_leave_request_tbl.submittedAt, hris_leave_request_tbl.createdAt)`
-			);
-			leaveRequestData.map(leave => {
-				let {
-					productionID,
-					leaveRequestDate,
-					leaveRequestStatus
-				} = leave;
-				let unique = {
-					id: productionID,
-					leaveRequestDate,
-				};
-				(leaveRequestStatus == 1 || leaveRequestStatus == 2) && uniqueData.push(unique);
-			})
 			$("#page_content").html(html);
 		
 			initDataTables();
             initDataTablesForActivity();
 			updateTableItems();
-			// updateClientOptions();
-			// updateProjectOptions();
 			initAll();
-			// $('.js-example-basic-multiple'+date_counter).select2({dropdownAutoWidth : true});
+			
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
 				$("#page_content").find(`input, select, textarea`).each(function() {
@@ -2640,8 +2563,6 @@ $(document).ready(function () {
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
-
-			return html;
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
@@ -2652,21 +2573,20 @@ $(document).ready(function () {
 		readOnly = isRevise ? false : readOnly;
 
 		let {
-			productionID 				= "",
-			reviseProductionID        = "",
-			productionCode 			= "",
-			employeeID 					= "",
-			productionSchedule			="",
-			productionReason			= "",
-			approversID 				= "",
-			approversStatus 			= "",
-			approversDate 				= "",
-			productionStatus 			= false,
-			submittedAt 				= false,
-			createdAt 					= false,
-			entries =[]
+			productionID 	   = "",
+			reviseProductionID = "",
+			productionCode 	   = "",
+			employeeID 		   = "",
+			productionSchedule ="",
+			productionReason   = "",
+			approversID 	   = "",
+			approversStatus    = "",
+			approversDate 	   = "",
+			productionStatus   = false,
+			submittedAt 	   = false,
+			createdAt 		   = false,
+			entries            =[]
 		} = data && data[0];
-
 
 		// ----- GET EMPLOYEE DATA -----
 		let {
@@ -2676,7 +2596,6 @@ $(document).ready(function () {
 		} = employeeData(data ? employeeID : sessionID);
 		// ----- END GET EMPLOYEE DATA -----
 
-		// readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("productionID", productionID ? encryptString(productionID) : "");
 		$("#btnBack").attr("code", getFormCode("PDN", moment(createdAt), productionID));
@@ -2843,24 +2762,7 @@ $(document).ready(function () {
 										leaveRequestID = 0,
 										overtimeRequestID = 0,
 									} = activity;
-
-									// var newDescription = '';
-									// if(activityDescription){
-									// 	let explode = activityDescription.split(";");
-									// var getLength = explode.length || 0;
-									// for(var loop = 0; loop<explode.length;loop++){
-						
-									// 	if( loop == getLength-1){
-									// 		newDescription += explode[loop];
-									// 	}else{
-									// 		newDescription += explode[loop]+"<br>";
-									// 	}
-									// }
-									// }else{
-									// 	newDescription = activityDescription;
-									// }
 									
-
 									let statusBadgeRow = '';
 
 									if(activityStatus == "Pending"){
@@ -2893,20 +2795,16 @@ $(document).ready(function () {
 											<small> ${activityProjectName || "-"}</small>
 										</td>
 										<td>
-											<small>${ activityDescription ||""} </small>
+											<small style="white-space: pre-line;">${activityDescription || ""} </small>
 										</td>
 										
 										<td class="text-center">
 											<small>${formatAmount(activityHours)} </small>
 										</td>
-									
 									</tr>`;
-									// <td>
-									// 		<small>${statusBadgeRow || "-"} </small>
-									// 	</td>
 
 									manHoursSubtotal += parseFloat(activityHours) || 0;
-									manHoursTotal += manHoursSubtotal || 0;
+									manHoursTotal    += parseFloat(activityHours) || 0;
 								})
 
 
@@ -2932,36 +2830,17 @@ $(document).ready(function () {
           
 
 		<div class="approvers">
-			${getApproversStatus(approversID, approversStatus, approversDate)}
+			${productionStatus != 0 ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
 
 		setTimeout(() => {
-			let leaveRequestData = getTableData(
-				"hris_leave_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
-				"hris_leave_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_leave_request_tbl.createdAt AS dateCreated",
-				`hris_leave_request_tbl.employeeID = ${sessionID}`,
-				`FIELD(leaveRequestStatus, 0, 1, 3, 2, 4), COALESCE(hris_leave_request_tbl.submittedAt, hris_leave_request_tbl.createdAt)`
-			);
-			leaveRequestData.map(leave => {
-				let {
-					productionID,
-					leaveRequestDate,
-					leaveRequestStatus
-				} = leave;
-				let unique = {
-					id: productionID,
-					leaveRequestDate,
-				};
-				(leaveRequestStatus == 1 || leaveRequestStatus == 2) && uniqueData.push(unique);
-			})
 			$("#page_content").html(html);
 		
 			initDataTables();
             initDataTablesForActivity();
 			updateClientOptions();
-			// updateProjectOptions();
 			initAll();
-			// $('.js-example-basic-multiple'+date_counter).select2({dropdownAutoWidth : true});
+
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
 				$("#page_content").find(`input, select, textarea`).each(function() {
@@ -2969,26 +2848,14 @@ $(document).ready(function () {
 						$(this).attr("disabled", true);
 					}
 				})
-				// $('#btnBack').attr("status", "2");
-				// $(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
-
-			return html;
 		}, 300);
 	}
 	// ----- END OVERVIEW CONTENT -----
 
-	// $(document).on("change", "#leaveWorkingDay", function() {
-	// 	var workDay = $("#leaveWorkingDay option:selected").val();
-	// 	var numberOfDays = $("#leaveRequestNumberOfDate").attr("numberofdays");
-	// 	if(workDay =="0"){
-	// 		var countnumber = (parseInt(numberOfDays) - 0.5);
-	// 		$("#leaveRequestNumberOfDate").val(countnumber);
-	// 	}else{
-	// 		$("#leaveRequestNumberOfDate").val(numberOfDays);
-	// 	}
-	// });	
 
 	// ----- GET DATA -----
 	function getData(action = "insert", status, method, feedback, id = null) {
@@ -3289,7 +3156,11 @@ $(document).ready(function () {
 		const id           = decryptString($(this).attr("productionID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise       = $(this).attr("revise") == "true";
-		// const validate     = validateForm("activityTableBody");
+
+		let dateStart      = $(this).attr("dateStart");
+		let dateEnd        = $(this).attr("dateEnd");
+		let productionCode = $(this).attr("productionCode");
+		
 
 		const validate = DocumentValidateManHours(id);
 		
@@ -3300,8 +3171,14 @@ $(document).ready(function () {
 			const data     = getData(action, 1, "submit", feedback, id);
 
 			if (revise) {
+				data['tableData[dateStart]']       = dateStart;
+				data['tableData[dateEnd]']         = dateEnd;
+				data['tableData[approversDate]']   = null;
+				data['tableData[approversStatus]'] = null;
 				if (!isFromCancelledDocument) {
-					data[`tableData[reviseProductionID]`] = id;
+					data[`tableData[reviseProductionID]`]   = id;
+					data[`tableData[reviseProductionCode]`] = productionCode;
+					data['tableData[productionSchedule]']   = `${moment(dateStart).format("MMMM DD, YYYY")} - ${moment(dateEnd).format("MMMM DD, YYYY")}`;
 					delete data[`tableData[productionID]`];
 					data["feedback"] = getFormCode("PDN", new Date);
 				} else {
@@ -3632,6 +3509,8 @@ $(document).ready(function () {
 
 
 
+
+
 function leaveRequestDateRange(disabledDays){
     $('#setDateSchedule').daterangepicker({
         "showDropdowns": true,
@@ -3663,23 +3542,161 @@ function changeDefaultDateRange(disabledDays = false,index = 0){
     });
 }
 
-$(document).on("change","#leaveRequestDate", function(){
-    let thisValue           = $(this).val();
-    let splitingValue       = thisValue.split("-");
-    let fromDate            = new Date(splitingValue[0]); 	
-    let toDate              = new Date(splitingValue[1]);
-    let numberOfDays        = Math.round((toDate-fromDate)/(1000*60*60*24)) + 1;
-    var remaining_of_days   = $("#leaveRequestRemainingLeave").val();
 
-    $("#leaveRequestNumberOfDate").val(numberOfDays);
-    $("#leaveRequestNumberOfDate").attr("numberOfDays",numberOfDays);
-    if(numberOfDays > remaining_of_days){
-        $("#leaveRequestNumberOfDate").addClass("is-invalid");
-        $("#invalid-leaveRequestNumberOfDate").addClass("is-invalid");
-        $("#invalid-leaveRequestNumberOfDate").text("Not enough number of leave!");
-    }else{
-        $("#leaveRequestNumberOfDate").removeClass("is-invalid");
-        $("#invalid-leaveRequestNumberOfDate").removeClass("is-invalid");
-        $("#invalid-leaveRequestNumberOfDate").text("");
-    }
-});
+
+
+
+
+// ----- FORM/DOCUMENT CONFIRMATION -----
+function formConfirmation(
+	method           = "", // save|cancelform|approve|reject|submit|cancel|drop
+	action           = "",
+	title            = "",
+	modalID          = "",
+	containerID      = "",
+	data             = null,
+	isObject         = true,
+	callback         = false,
+	notificationData = false,
+	buttonElement    = null,
+	aFunctions       = false,
+	aArguments       = []
+) {
+	buttonElement && formButtonHTML(buttonElement, false);
+
+	if (method && action && title && (modalID || containerID)) {
+		method = method.toLowerCase();
+		action = action.toLowerCase() == "update" ? "update" : "insert";
+
+		modalID && $("#" + modalID).modal("hide");
+
+		let swalText, swalImg;
+		switch (method) {
+			case "save":
+				swalTitle = `SAVE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to save this document?";
+				swalImg   = `${base_url}assets/modal/draft.svg`;
+				break;
+			case "submit":
+				swalTitle = `SUBMIT ${title.toUpperCase()}`;
+				swalText  = "Are you sure to submit this document?";
+				swalImg   = `${base_url}assets/modal/add.svg`;
+				break;
+			case "approve":
+				swalTitle = `APPROVE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to approve this document?";
+				swalImg   = `${base_url}assets/modal/approve.svg`;
+				break;
+			case "reject":
+				swalTitle = `DENY ${title.toUpperCase()}`;
+				swalText  = "Are you sure to deny this document?";
+				swalImg   = `${base_url}assets/modal/reject.svg`;
+				break;
+			case "cancelform":
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
+				swalText  = "Are you sure to cancel this document?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
+			case "drop":
+				swalTitle = `DROP ${title.toUpperCase()}`;
+				swalText  = "Are you sure to drop this document?";
+				swalImg   = `${base_url}assets/modal/drop.svg`;
+				break;
+			default:
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
+				swalText  = "Are you sure that you want to cancel this process?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
+		}
+		Swal.fire({
+			title:              swalTitle,
+			text:               swalText,
+			imageUrl:           swalImg,
+			imageWidth:         200,
+			imageHeight:        200,
+			imageAlt:           "Custom image",
+			showCancelButton:   true,
+			confirmButtonColor: "#dc3545",
+			cancelButtonColor:  "#1a1a1a",
+			cancelButtonText:   "No",
+			confirmButtonText:  "Yes",
+			// allowOutsideClick:  false,
+		}).then((result) => {
+			if (result.isConfirmed) {
+				if (method != "cancel") {
+
+					const feedback = data["feedback"].split("-");
+					const overrideSuccessConfirmation = feedback[2] == "00000" && `${feedback[0]}-${feedback[1]}`;
+
+					let saveData = saveFormData(
+						action,
+						method,
+						data,
+						isObject,
+						swalTitle,
+						overrideSuccessConfirmation
+					);
+					saveData.then((res) => {
+						if (res) {
+							callback && callback();
+							if (aFunctions) {
+								aFunctions(...aArguments);
+							}
+
+							if (method == "approve" || method == "reject") {
+								$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+							}
+
+							if (notificationData) {
+								if (Object.keys(notificationData).includes("tableID")) {
+									insertNotificationData(notificationData);
+								} else {
+									const insertedID = res.split("|")[2];
+									notificationData["tableID"] = insertedID;
+									insertNotificationData(notificationData);
+								}
+							}
+
+							// ----- UPDATE PRODUCTION CODE -----
+							$.ajax({
+								method: "POST",
+								url: 'production/updateProductionCode',
+								data: {productionID: insertedID},
+								async: true,
+								success: function(data) {
+
+								}
+							})
+							// ----- END UPDATE PRODUCTION CODE -----
+
+						} else {
+							Swal.fire({
+								icon:             "danger",
+								title:            "Failed!",
+								text:              res[1],
+								showConfirmButton: false,
+								timer:             2000,
+							});
+						}
+					});
+				} else {
+					Swal.fire({
+						icon:              "success",
+						title:             swalTitle,
+						showConfirmButton: false,
+						timer:             2000,
+					});
+				}
+			} else {
+				containerID && $("#" + containerID).show();
+				modalID && $("#" + modalID).modal("show");
+				if (method == "save" && result.dismiss == "cancel") {
+					callback && callback();
+				}
+			}
+		});
+	} else {
+		showNotification("danger", "Invalid arguments!");
+	}
+}
+// ----- END FORM/DOCUMENT CONFIRMATION -----

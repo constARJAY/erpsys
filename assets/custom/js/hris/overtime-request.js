@@ -157,7 +157,7 @@ $(document).ready(function () {
 	// ----- END GET CLIENT LIST -----
 
 	// ---- GET PROJECT LIST ----//
-	function getprojectList(id = null, display = true, clientID = null, projectName = '') {
+	function getprojectList(id = null, display = true, clientID = null, projectName = null) {
 	
 		let html   = `<option value="" selected disabled>${projectName ?? "Please select a project"}</option>`;
 
@@ -650,15 +650,15 @@ $(document).ready(function () {
 					}
 				} else if (overtimeRequestStatus == 2) {
 					// DROP
-					button = `
-					<button type="button" 
-						class="btn btn-cancel px-5 p-2"
-						id="btnDrop" 
-						overtimeRequestID="${encryptString(overtimeRequestID)}"
-						code="${getFormCode("OTR", createdAt, overtimeRequestID)}"
-						status="${overtimeRequestStatus}"><i class="fas fa-ban"></i> 
-						Drop
-					</button>`;
+					// button = `
+					// <button type="button" 
+					// 	class="btn btn-cancel px-5 p-2"
+					// 	id="btnDrop" 
+					// 	overtimeRequestID="${encryptString(overtimeRequestID)}"
+					// 	code="${getFormCode("OTR", createdAt, overtimeRequestID)}"
+					// 	status="${overtimeRequestStatus}"><i class="fas fa-ban"></i> 
+					// 	Drop
+					// </button>`;
 				} else if (overtimeRequestStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(overtimeRequestID)) {
@@ -1020,7 +1020,7 @@ $(document).ready(function () {
             </div>
         </div>
 		<div class="approvers">
-			${getApproversStatus(approversID, approversStatus, approversDate)}
+			${disabled ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
 
 		// <div class="col-md-2 col-sm-12">
