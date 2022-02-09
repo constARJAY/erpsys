@@ -11947,6 +11947,7 @@ body.h_menu .sidebar .menu li.active a {
 }
 body.h_menu .sidebar .menu li:hover .ml-menu {
 	display: block !important;
+	width: auto;
 
 	/* ----- CHANGE ----- */
 	position: absolute;
@@ -11978,7 +11979,7 @@ body.h_menu .sidebar .menu li .ml-menu li a {
 	color: var(--font-color);
 	position: relative;
 	opacity: 1;
-	padding: 6px 0px 6px 40px;
+	padding: 6px 20px 6px 40px;
 	font-size: 14px;
 }
 body.h_menu .sidebar .menu li .ml-menu li a:hover {

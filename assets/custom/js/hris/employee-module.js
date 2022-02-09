@@ -187,13 +187,14 @@ $(document).ready(function() {
                 sorting: false,
                 info: false,
 				columnDefs: [
-					{ targets: 0, width: "40%"  },
+					{ targets: 0, width: "30%"  },
 					{ targets: 1, width: "10%" },
 					{ targets: 2, width: "10%" },
 					{ targets: 3, width: "10%" },
 					{ targets: 4, width: "10%" },
 					{ targets: 5, width: "10%" },
 					{ targets: 6, width: "10%" },
+					{ targets: 7, width: "10%" },
 				],
 			});
 
@@ -2095,7 +2096,8 @@ $(document).ready(function() {
 
         let html = moduleList.map(module => {
             let checked = employeeID == 1 ? "checked" : "";
-            let createStatus = checked, 
+            let showStatus   = checked, 
+                createStatus = checked, 
                 readStatus   = checked, 
                 updateStatus = checked, 
                 deleteStatus = checked, 
@@ -2106,6 +2108,7 @@ $(document).ready(function() {
                 getPersonnelAccessibility
                 .filter(mdl => mdl.moduleID == module.moduleID)
                 .map(mdl2 => {
+                    showStatus   = mdl2.showStatus   == 1 || employeeID == 1 ? "checked" : "";
                     createStatus = mdl2.createStatus == 1 || employeeID == 1 ? "checked" : "";
                     readStatus   = mdl2.readStatus   == 1 || employeeID == 1 ? "checked" : "";
                     updateStatus = mdl2.updateStatus == 1 || employeeID == 1 ? "checked" : "";
@@ -2123,6 +2126,9 @@ $(document).ready(function() {
                 <td>${module.moduleName}</td>
                 <td class="text-center">
                     <input type="checkbox" name="checkall" ${disabled}>
+                </td>
+                <td class="text-center">
+                    <input type="checkbox" name="show" moduleid="${module.moduleID}" ${showStatus} ${disabled}>
                 </td>
                 <td class="text-center">
                     <input type="checkbox" name="read" moduleid="${module.moduleID}" ${readStatus} ${disabled}>
@@ -2157,6 +2163,7 @@ $(document).ready(function() {
                                 <tr>
                                     <th>Module Name</th>
                                     <th>Check All</th>
+                                    <th>Show All</th>
                                     <th>View</th>
                                     <th>Add</th>
                                     <th>Edit</th>
@@ -2769,12 +2776,13 @@ $(document).ready(function() {
         let result = [];
         $(".module").each(function() {
             const moduleID = $(this).attr("moduleid");
+            const showStatus    = $(`[name=show][moduleid=${moduleID}]`).prop("checked") ? 1 : 0;
             const createStatus  = $(`[name=create][moduleid=${moduleID}]`).prop("checked") ? 1 : 0;
             const readStatus    = $(`[name=read][moduleid=${moduleID}]`).prop("checked") ? 1 : 0;
             const updateStatus  = $(`[name=update][moduleid=${moduleID}]`).prop("checked") ? 1 : 0;
             const deleteStatus  = $(`[name=delete][moduleid=${moduleID}]`).prop("checked") ? 1 : 0;
             const printStatus   = $(`[name=print][moduleid=${moduleID}]`).prop("checked") ? 1 : 0;
-            result.push({moduleID, createStatus, readStatus, updateStatus, deleteStatus, printStatus});
+            result.push({moduleID, showStatus, createStatus, readStatus, updateStatus, deleteStatus, printStatus});
         })
         return result;
     }
@@ -2804,8 +2812,9 @@ $(document).ready(function() {
         formData.append("scheduleID", getPersonnelScheduleData());
         const accessiblityData = getPersonnelAccessibilityData();
         accessiblityData.map((accessibility, index) => {
-            const { moduleID, createStatus, readStatus, updateStatus, deleteStatus, printStatus } = accessibility;
+            const { moduleID, showStatus, createStatus, readStatus, updateStatus, deleteStatus, printStatus } = accessibility;
             formData.append(`accessibility[${index}][moduleID]`, moduleID);
+            formData.append(`accessibility[${index}][showStatus]`, showStatus);
             formData.append(`accessibility[${index}][createStatus]`, createStatus);
             formData.append(`accessibility[${index}][readStatus]`, readStatus);
             formData.append(`accessibility[${index}][updateStatus]`, updateStatus);

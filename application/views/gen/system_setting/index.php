@@ -128,22 +128,7 @@
                         </div>
                     </div>
 
-
-
-
-
-
-
-
-
-
-                <div class="card">
-                    <div class="body">
-                       <div class="row clear-fix">
-
-                       </div>
-                    </div>
-                </div>
+                    
             </div>
         </div>
 	</div>

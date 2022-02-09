@@ -179,6 +179,43 @@ function initDataTables() {
     //         ],
     //     });
 
+
+    var table = $("#item-table")
+        .css({ "min-width": "100%" })
+        .removeAttr("width")
+        .DataTable({
+            proccessing: false,
+            serverSide: false,
+            scrollX: true,
+            sorting: [],
+            scrollCollapse: true,
+            columnDefs: [
+                { targets: 0,  width: 200 },
+                { targets: 1,  width: 200 },
+                { targets: 2,  width: 200 },
+                { targets: 3,  width: 200 },
+                { targets: 4,  width: 200 }
+            ],
+        });
+    
+    var table = $("#asset-table")
+        .css({ "min-width": "100%" })
+        .removeAttr("width")
+        .DataTable({
+            proccessing: false,
+            serverSide: false,
+            scrollX: true,
+            sorting: [],
+            scrollCollapse: true,
+            columnDefs: [
+                { targets: 0,  width: 200 },
+                { targets: 1,  width: 200 },
+                { targets: 2,  width: 200 },
+                { targets: 3,  width: 200 },
+                { targets: 4,  width: 200 }
+            ],
+        });
+
     var table = $("#tableReservedItems")
         .css({ "min-width": "100%" })
         .removeAttr("width")
@@ -950,6 +987,72 @@ function noOfEmployeeHiredLeftChart (){
         </div>`;
         return html;
     }
+
+    $(document).on("change","[name=inventory-type]", function(){
+        let thisValue   =   $(this).val();
+        // console.log(thisValue);/
+        filteringInventoryType(thisValue);
+    });
+
+    function filteringInventoryType(type){
+        let html = "";
+        $(".nearly-expire-table").html(preloader);
+        let inventoryTable  = type=="items" ? 'ims_inventory_item_tbl' : 'ims_invetory_asset_tbl';
+        let inventoryStock  = type=="items" ? 'ims_stock_in_item_tbl' : 'ims_stock_in_assets_tbl';
+        let inventoryColumn = type=="items" ? 'itemID' : 'assetID'; 
+        let inventorySelect = type=="items" ? 'itemCode AS code, itemName AS name, brandName AS brand, unitOfMeasurementID AS uom, classificationName, categoryName,'  
+                                            : 'assetCode AS code, assetName AS name, brandName AS brand, unitOfMeasurementID AS uom, classificationName, categoryName,';
+        let inventoryWhere   = type=="items" ? "itemStatus = '1'" : "assetStatus = '1'";
+        let inventoryQuery  = getTableData(`${inventoryTable} AS mainTable 
+                                                LEFT JOIN ims_inventory_classification_tbl AS iict USING(classificationID) 
+                                                LEFT JOIN ims_inventory_category_tbl AS iicat ON mainTable.categoryID = iicat.categoryID
+                                            `,
+                                            ` ${inventorySelect}
+                                             (SELECT SUM(quantity) FROM ${inventoryStock} AS subTable WHERE subTable.stockOutDate != '0000-00-00' AND subTable.${inventoryColumn} = mainTable.${inventoryColumn} AND subTable.ExpirationDate >= DATE_ADD(${moment().format("YYYY-MM-DD")}, INTERVAL 14 DAY) ) AS used,
+                                             (SELECT SUM(quantity) FROM ${inventoryStock} AS subTable WHERE subTable.stockOutDate = '0000-00-00' AND subTable.${inventoryColumn} = mainTable.${inventoryColumn} AND subTable.ExpirationDate >= DATE_ADD(${moment().format("YYYY-MM-DD")}, INTERVAL 14 DAY) ) AS unused
+                                            `,
+                                            inventoryWhere
+                                          );
+        tableData = ``;
+        inventoryQuery.map((value,index)=>{
+            let quantity    = parseFloat(value.unused) - parseFloat(value.used);
+            if(quantity > 0){
+                tableData += `
+                            <tr style="white-space: nowrap">
+                                <td>${value.code}</td>
+                                <td>${value.name}</td>
+                                <td>${value.classifcationName}</td>
+                                <td>${value.uom}</td>
+                                <td>${formatAmount(quantity)}</td>
+                            </tr>
+                        `;
+            }
+            
+        });
+        
+            html += `
+                    <table class="table table-bordered table-striped" id="${type=="items" ? 'item' : 'asset'}-table">
+                        <thead>
+                            <tr style="white-space: nowrap">
+                                <th>${type=="items" ? 'Item' : 'Asset'} Code</th>
+                                <th>${type=="items" ? 'Item' : 'Asset'} Name</th>
+                                <th>${type=="items" ? 'Item' : 'Asset'} Classification</th>
+                                <th>UOM</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                            <tbody id="">
+                                ${tableData}
+                            </tbody>
+                    </table>
+                `;
+
+        setTimeout(() => {
+            $(".nearly-expire-table").html(html);
+            initDataTables();
+        }, 200);
+        
+    }
     // ----- END FILTERING OPTIONS -----
 
 // // ---- EVENT FOR CHANGE DEPARTMENT-----//
@@ -1504,35 +1607,68 @@ let html = `        <div class="row clearfix row-deck">
 
                    
                     html += `
-                        <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6">
-                            <div class="card">
+                            <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6">
+                                <div class="card">
                                     <div class="card-header w-100 bg-primary text-white text-left">
                                         <h6 class="font-weight-bold">TOTAL NO. OF ASSET</h6>
                                     </div>
 
                                 
+                                    <div class="card-body table">
+
+                                        <div id="filterContent">
+                                            ${filteringOptions()}
+                                        </div>
+                                        <table class="table table-bordered table-striped" id="tableWarehouse">
+                                            <thead>
+                                                <tr style="white-space: nowrap">
+                                                    <th>Asset Code</th>
+                                                    <th>Asset Name</th>
+                                                    <th>Asset Classification</th>
+                                                    <th>UOM</th>
+                                                    <th>Quantity</th>
+                                                    <th>Barcode</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodyProject">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                        
+                        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                            <div class="card">
+                                <div class="card-header w-100 bg-primary text-white text-left">
+                                    <h6 class="font-weight-bold">NEARLY EXPIRE</h6>
+                                </div>
+
+                            
                                 <div class="card-body table">
 
-                                <div id="filterContent">
-                                    ${filteringOptions()}
-                                </div>
-                                    <table class="table table-bordered table-striped" id="tableWarehouse">
-                                        <thead>
-                                            <tr style="white-space: nowrap">
-                                                <th>Asset Code</th>
-                                                <th>Asset Name</th>
-                                                <th>Asset Classification</th>
-                                                <th>UOM</th>
-                                                <th>Quantity</th>
-                                                <th>Barcode</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tbodyProject">
-                                        </tbody>
-                                    </table>
+                                    <div class="d-flex justify-content-end">
+                                            <div>
+                                            <select class="form-control select2 w-50"
+                                                name="inventory-type"
+                                                style="width: 100%">
+                                                    <option disabled selected>Select Inventory Type</option>
+                                                    <option value="items">Item</option>
+                                                    <option value="assets">Assets</option>
+                                                </select>
+                                            </div>
+                                    </div>
+                                    <div class="nearly-expire-table">
+                                    
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+
+
+
+
                     </div>
                       `;
 

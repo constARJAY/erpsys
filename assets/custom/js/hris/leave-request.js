@@ -37,11 +37,8 @@ $(document).ready(function() {
 	);
 
 	let leaveType = getTableData(
-		`hris_leave_tbl AS hlt
-			LEFT JOIN hris_employee_leave_tbl AS helt USING(leaveID) 
-		WHERE hlt.leaveStatus = 1
-			AND helt.employeeID = ${sessionID}`,
-		`hlt.*, helt.leaveCredit`);
+		`hris_leave_tbl AS hlt WHERE leaveStatus = 1`,
+		`hlt.*, (SELECT leaveCredit FROM hris_employee_leave_tbl WHERE leaveID = hlt.leaveID AND employeeID = 1) AS leaveCredit`);
 
 	function getDateInRange(dateFrom = '', dateTo = '') {
 		let result = [];
@@ -535,7 +532,7 @@ $(document).ready(function() {
 			html += `
 			<option value   = "${leaveID}"
 				leavename   = "${leaveName}"
-				leavecredit	= "${leaveCredit}"
+				leavecredit	= "${leaveCredit || 0}"
 				${leaveID == inLeaveID ? "selected" : "" }>${leaveName}</option>`;
 		});
 
@@ -987,7 +984,7 @@ $(document).ready(function() {
 
 			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
-					<label>Leave Type <code>*</code> </label>
+					<label>Leave Type ${!disabled ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2 w-100" name="leaveID" id="leaveID" required ${disabled}>
 						${getLeaveTypeOption(leaveID)}
 					</select>
@@ -1012,7 +1009,7 @@ $(document).ready(function() {
 
 			<div class="col-md-3 col-sm-12">
 				<div class="form-group">
-					<label>Date <code>*</code> </label>
+					<label>Date ${!disabled ? "<code>*</code>" : ""}</label>
 					<input type="button" class="form-control text-left validate" name="leaveRequestDate" id="leaveRequestDate" value="${leaveRequestDate || ""}" required ${disabled}>
 					<div class="d-block invalid-feedback" id="invalid-leaveRequestDate"></div>
 				</div>
@@ -1827,8 +1824,9 @@ $(document).ready(function() {
 										title:             swalTitle,
 										showConfirmButton: false,
 										timer:             2000,
+									}).then(function() {
+										callback && callback();
 									});
-									callback && callback();
 									
 									if (method == "approve" || method == "deny") {
 										$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")

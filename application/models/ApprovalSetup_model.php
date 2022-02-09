@@ -58,6 +58,8 @@ class ApprovalSetup_model extends CI_Model {
         $undefinedIDString = join(", ", $undefinedID);
          
         $updateSql = "UPDATE gen_approval_setup_tbl SET userAccountID = '0' WHERE approvalID IN ($undefinedIDString)";
+        
+        $this->db->query($updateSql);
     }
 
 }

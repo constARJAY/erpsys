@@ -178,6 +178,7 @@ class EmployeeModule_model extends CI_Model {
                     $temp = [
                         "employeeID"   => $id,
                         "moduleID"     => $module["moduleID"],
+                        "showStatus"   => $status,
                         "createStatus" => $status,
                         "readStatus"   => $status,
                         "updateStatus" => $status,

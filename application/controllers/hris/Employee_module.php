@@ -398,6 +398,7 @@ class Employee_module extends CI_Controller {
                 $temp = [
                     "employeeID"   => $employeeID,
                     "moduleID"     => $module["moduleID"],
+                    "showStatus"   => $module["showStatus"],
                     "createStatus" => $module["createStatus"],
                     "readStatus"   => $module["readStatus"],
                     "updateStatus" => $module["updateStatus"],

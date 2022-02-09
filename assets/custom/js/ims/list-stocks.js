@@ -1,5 +1,6 @@
 $(document).ready(function(){
-
+    const ASSETDATA = getTableData(`ims_inventory_asset_tbl`,`assetID, assetImage`);
+    const ITEMDATA  = getTableData(`ims_inventory_item_tbl`,`itemID, itemImage`);
 
    let html = `
             <div class="text-center">
@@ -211,7 +212,7 @@ $(document).ready(function(){
                             for(var i=0; i<data["assets"].length; i++){
                                 var assetTotalQty = parseFloat( data["assets"][i].stockIN) - (parseFloat(data["assets"][i].totalequipmentBorrowing) + parseFloat(data["assets"][i].materiaWithdrawalQuantity) + parseFloat(data["assets"][i].disposed) );
                                 var assetAvailableStocks  = parseFloat(assetTotalQty) - (parseFloat(data["assets"][i].reservedAsset) + parseFloat(data["assets"][i].reOrderLevel) );
-                                let getAssetData          = getTableData(`ims_inventory_asset_tbl`,`assetImage`,`assetID=${data["assets"][i].assetID}`);
+                                let getAssetData          = ASSETDATA.filter(x=> x.assetID == data["assets"][i].assetID);
                                 assets +=`  
                                 <tr> 
                                     <td>${data["assets"][i].assetCode} </td> 
@@ -293,7 +294,7 @@ $(document).ready(function(){
 
                             var itemTotalQuantity    = data["item"][i].totalQuantity;
                             var itemAvailableStocks  = data["item"][i].available;
-                            let getItemData          = getTableData(`ims_inventory_item_tbl`,`itemImage`,`itemID=${data["item"][i].itemID}`);
+                            let getItemData          = ITEMDATA.filter(x=> x.itemID == data["item"][i].itemID);
                             item +=`
                             <tr> 
                                 <td> 
