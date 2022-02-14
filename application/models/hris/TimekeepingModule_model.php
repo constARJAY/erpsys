@@ -163,7 +163,7 @@ class TimekeepingModule_model extends CI_Model {
                 $tDiff = $tCheckOut - $tCheckIn;
                 if ($tDiff <= 0) 
                 {
-                    $outCheckOut = date("Y-m-d", strtolower($date." +1 day"))." $timeOut";
+                    $outCheckOut = date("Y-m-d", strtotime($date." +1 day"))." $timeOut";
                 } 
                 else 
                 {

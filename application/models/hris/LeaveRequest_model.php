@@ -23,9 +23,9 @@ class LeaveRequest_model extends CI_Model {
             $updateArr = ["leaveRequestCode"=> $leaveRequestCode ];
             $this->db->update("hris_leave_request_tbl", $updateArr, ["leaveRequestID" => $insertID]);
 
-            if ($data['leaveRequestStatus'] == 2 && $data['leaveStatus'] == 1) {
-                $this->updateEmployeeLeave($insertID);
-            }
+            // if ($data['leaveRequestStatus'] == 2 && $data['leaveStatus'] == 1) {
+            //     $this->updateEmployeeLeave($insertID);
+            // }
 
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }
@@ -65,7 +65,7 @@ class LeaveRequest_model extends CI_Model {
                 $leaveCredit      = $result->leaveCredit ?? 0;
                 $leaveAccumulated = $result->leaveAccumulated ?? 0;
                 $leaveBalance     = $leaveCredit + $leaveAccumulated;
-                if ($leaveBalance > $deductLeave) {
+                if ($leaveBalance >= $deductLeave) {
                     $creditBalance      = $leaveCredit - $deductLeave;
                     $accumulatedBalance = $leaveAccumulated;
                     if ($creditBalance < 0) {
@@ -81,11 +81,11 @@ class LeaveRequest_model extends CI_Model {
 
                     if ($updateQuery) {
                         $remainingLeave = $creditBalance + $accumulatedBalance;
-                        $this->db->query("
+                        $query = $this->db->query("
                             UPDATE hris_leave_request_tbl 
                             SET leaveRequestRemainingLeave = $remainingLeave
                             WHERE leaveRequestID <> 0 
-                                AND employeeID = 1
+                                AND employeeID = $employeeID
                                 AND leaveRequestStatus IN (0,1);");
                     }
 

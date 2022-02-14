@@ -26,6 +26,8 @@ $(document).ready(function() {
             return `<span class="badge badge-info" style="width: 100% !important">Rendering</span>`;
         }
     }
+
+    let systemSetting = getTableData(`gen_system_setting_tbl`);
     // ----- END GLOBAL VARIABLES -----
 
 
@@ -46,8 +48,9 @@ $(document).ready(function() {
     function isImHumanResource() {
         if (getDesignationName.length > 0) {
             let { designationName:designation } = getDesignationName[0];
-            let designationName = designation.toLowerCase().replaceAll(" ", "")
-            if (designationName == "humanresource" || designationName == "humanresources" || sessionDesignationID == 1) {
+            // let designationName = designation.toLowerCase().replaceAll(" ", "");
+            let designationArr = designation?.toLowerCase()?.split(' ') || [];
+            if ((designationArr.length > 1 && designationArr.includes('human') && designationArr.includes('resource')) || sessionDesignationID == 1) {
                 return true;
             }
             return false;
@@ -610,23 +613,23 @@ $(document).ready(function() {
 
     // ----- REGION OPTIONS -----
     const phRegion = [
-		{ key: "01",    name: "REGION I" },
-		{ key: "02",    name: "REGION II" },
-		{ key: "03",    name: "REGION III" },
+		{ key: "01",    name: "REGION I"    },
+		{ key: "02",    name: "REGION II"   },
+		{ key: "03",    name: "REGION III"  },
 		{ key: "4A",    name: "REGION IV-A" },
 		{ key: "4B",    name: "REGION IV-B" },
-		{ key: "05",    name: "REGION V" },
-		{ key: "06",    name: "REGION VI" },
-		{ key: "07",    name: "REGION VII" },
+		{ key: "05",    name: "REGION V"    },
+		{ key: "06",    name: "REGION VI"   },
+		{ key: "07",    name: "REGION VII"  },
 		{ key: "08",    name: "REGION VIII" },
-		{ key: "09",    name: "REGION IX" },
-		{ key: "10",    name: "REGION X" },
-		{ key: "11",    name: "REGION XI" },
-		{ key: "12",    name: "REGION XII" },
+		{ key: "09",    name: "REGION IX"   },
+		{ key: "10",    name: "REGION X"    },
+		{ key: "11",    name: "REGION XI"   },
+		{ key: "12",    name: "REGION XII"  },
 		{ key: "13",    name: "REGION XIII" },
-		{ key: "BARMM", name: "BARMM" },
-		{ key: "CAR",   name: "CAR" },
-		{ key: "NCR",   name: "NCR" },
+		{ key: "BARMM", name: "BARMM"       },
+		{ key: "CAR",   name: "CAR"         },
+		{ key: "NCR",   name: "NCR"         },
 	];
 
     function regionOptions(regionKey = null) {
@@ -1547,9 +1550,10 @@ $(document).ready(function() {
 
     // ----- CHANGE BASIC SALARY -----
     $(document).on("keyup", "[name=employeeBasicSalary]", function() {
-        const salary     = +$(this).val().replaceAll(",", "");
-        const dailyRate  = salary / 22;
-        const hourlyRate = dailyRate / 8;
+        const workingDays = +$(this).attr("workingDays");
+        const salary      = +$(this).val().replaceAll(",", "");
+        const dailyRate   = salary / (workingDays == 6 ? 26 : 22);
+        const hourlyRate  = dailyRate / 8;
         $("[name=employeeDailyRate]").val(dailyRate.toFixed(2));
         $("[name=employeeHourlyRate]").val(hourlyRate.toFixed(2));
     })
@@ -1573,6 +1577,8 @@ $(document).ready(function() {
             employeePagibig         = "",
         } = data;
 
+        let workingDays = (systemSetting && systemSetting.length ? systemSetting.filter(stg => stg.workingDays)?.[0]?.workingDays : 5) || 5;
+
         let html = `
         <div class="forms-group">
             <div class="row">
@@ -1589,6 +1595,7 @@ $(document).ready(function() {
                                 id="employeeBasicSalary"
                                 min="0"
                                 max="9999999999"
+                                workingDays="${workingDays}"
                                 required
                                 value="${employeeBasicSalary}">
                         </div>
@@ -2095,6 +2102,8 @@ $(document).ready(function() {
         }
 
         let html = moduleList.map(module => {
+            let { moduleID, moduleName } = module;
+
             let checked = employeeID == 1 ? "checked" : "";
             let showStatus   = checked, 
                 createStatus = checked, 
@@ -2104,46 +2113,55 @@ $(document).ready(function() {
                 printStatus  = checked,
                 disabled     = checked;
 
+            let defaultModule = ["88", "144", "108", "3"].includes(moduleID);
+
             if (employeeID) {
                 getPersonnelAccessibility
-                .filter(mdl => mdl.moduleID == module.moduleID)
+                .filter(mdl => mdl.moduleID == moduleID)
                 .map(mdl2 => {
-                    showStatus   = mdl2.showStatus   == 1 || employeeID == 1 ? "checked" : "";
-                    createStatus = mdl2.createStatus == 1 || employeeID == 1 ? "checked" : "";
-                    readStatus   = mdl2.readStatus   == 1 || employeeID == 1 ? "checked" : "";
-                    updateStatus = mdl2.updateStatus == 1 || employeeID == 1 ? "checked" : "";
-                    deleteStatus = mdl2.deleteStatus == 1 || employeeID == 1 ? "checked" : "";
-                    printStatus  = mdl2.printStatus  == 1 || employeeID == 1 ? "checked" : "";
+                    showStatus   = mdl2.showStatus   == 1 || employeeID == 1 || defaultModule ? "checked" : "";
+                    createStatus = mdl2.createStatus == 1 || employeeID == 1 || defaultModule ? "checked" : "";
+                    readStatus   = mdl2.readStatus   == 1 || employeeID == 1 || defaultModule ? "checked" : "";
+                    updateStatus = mdl2.updateStatus == 1 || employeeID == 1 || defaultModule ? "checked" : "";
+                    deleteStatus = mdl2.deleteStatus == 1 || employeeID == 1 || defaultModule ? "checked" : "";
+                    printStatus  = mdl2.printStatus  == 1 || employeeID == 1 || defaultModule ? "checked" : "";
                 });
 
                 // ----- IF THE USER IS ADMIN -----
                 disabled = employeeID == 1 ? "disabled" : "";
                 // ----- END IF THE USER IS ADMIN -----
+            } else {
+                showStatus   = defaultModule ? "checked" : "";
+                createStatus = defaultModule ? "checked" : "";
+                readStatus   = defaultModule ? "checked" : "";
+                updateStatus = defaultModule ? "checked" : "";
+                deleteStatus = defaultModule ? "checked" : "";
+                printStatus  = defaultModule ? "checked" : "";
             }
 
             return `
-            <tr class="module" moduleid="${module.moduleID}">
-                <td>${module.moduleName}</td>
+            <tr class="module" moduleid="${moduleID}">
+                <td>${moduleName}</td>
                 <td class="text-center">
                     <input type="checkbox" name="checkall" ${disabled}>
                 </td>
                 <td class="text-center">
-                    <input type="checkbox" name="show" moduleid="${module.moduleID}" ${showStatus} ${disabled}>
+                    <input type="checkbox" name="show" moduleid="${moduleID}" ${showStatus} ${disabled}>
                 </td>
                 <td class="text-center">
-                    <input type="checkbox" name="read" moduleid="${module.moduleID}" ${readStatus} ${disabled}>
+                    <input type="checkbox" name="read" moduleid="${moduleID}" ${readStatus} ${disabled}>
                 </td>
                 <td class="text-center">
-                    <input type="checkbox" name="create" moduleid="${module.moduleID}" ${createStatus} ${disabled}>
+                    <input type="checkbox" name="create" moduleid="${moduleID}" ${createStatus} ${disabled}>
                 </td>
                 <td class="text-center">
-                    <input type="checkbox" name="update" moduleid="${module.moduleID}" ${updateStatus} ${disabled}>
+                    <input type="checkbox" name="update" moduleid="${moduleID}" ${updateStatus} ${disabled}>
                 </td>
                 <td class="text-center">
-                    <input type="checkbox" name="delete" moduleid="${module.moduleID}" ${deleteStatus} ${disabled}>
+                    <input type="checkbox" name="delete" moduleid="${moduleID}" ${deleteStatus} ${disabled}>
                 </td>
                 <td class="text-center">
-                    <input type="checkbox" name="print" moduleid="${module.moduleID}" ${printStatus} ${disabled}>
+                    <input type="checkbox" name="print" moduleid="${moduleID}" ${printStatus} ${disabled}>
                 </td>
             </tr>`;
         })
@@ -2175,6 +2193,9 @@ $(document).ready(function() {
                                 ${displayAccessibility(employeeID)}
                             </tbody>
                         </table>
+                        <div class="mt-2">
+                            <b class="text-warning">NOTE: </b><span>The <i>"Show All"</i> checkbox is for viewing of all approved document for that module.</span>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,19 +1,13 @@
 $(document).ready(function() {
 
-	//------ MODULE FUNCTION IS ALLOWED UPDATE-----
-	
-	const allowedUpdate = isUpdateAllowed(50);
-	if(!allowedUpdate){
-		$("#page_content").find("input, select, textarea").each(function(){
-			$(this).attr("disabled",true);
-		});
-		$("#btnSubmit").hide();
-	}
+	const MODULE_ID     = 50;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing    = false;
 
-	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
 
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover(50);
+	const moduleApprover = getModuleApprover(MODULE_ID);
 	// ----- END MODULE APPROVER -----
 
 
@@ -171,57 +165,34 @@ $(document).ready(function() {
 
     // ----- DATATABLES -----
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
 
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
+		["#tableMyForms", "#tableForApproval", "#tableForViewing"].map(element => {
+			if ($.fn.DataTable.isDataTable(element)) {
+			   $(element).DataTable().destroy();
+			}
 
-		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 250 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 250 },
-					{ targets: 7,  width: 80  },
-					{ targets: 8, width: 250 },
-				],
-			});
-
-		var table = $("#tableMyForms")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 250 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 250 },
-					{ targets: 7,  width: 80  },
-					{ targets: 8, width: 250 },
-				],
-			});
+			var table = $(element)
+				.css({ "min-width": "100%" })
+				.removeAttr("width")
+				.DataTable({
+					proccessing: false,
+					serverSide: false,
+					scrollX: true,
+					sorting: [],
+					scrollCollapse: true,
+					columnDefs: [
+						{ targets: 0, width: 100 },
+						{ targets: 1, width: 150 },
+						{ targets: 2, width: 150 },
+						{ targets: 3, width: 150 },
+						{ targets: 4, width: 250 },
+						{ targets: 5, width: 150 },
+						{ targets: 6, width: 300 },
+						{ targets: 7, width: 80  },
+						{ targets: 8, width: 250 },
+					],
+				});
+		})
 	}
 	// ----- END DATATABLES -----
    
@@ -229,12 +200,13 @@ $(document).ready(function() {
     // ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("pms_personnel_requisition_tbl", "approversID")) {
+			if (isImModuleApprover("pms_personnel_requisition_tbl", "approversID") || allowedShow) {
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}  
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
                             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
@@ -253,10 +225,9 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if(isCreateAllowed(50)){
-				html = `
-				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
-				}
+			if(isCreateAllowed(MODULE_ID)){
+				html = `<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -264,6 +235,113 @@ $(document).ready(function() {
 		$("#headerButton").html(html);
 	}
 	// ----- END HEADER BUTTON -----
+
+
+    // ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent").html(preloader);
+		let transferRequestData = getTableData(
+			`pms_personnel_requisition_tbl AS mwt 
+			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)
+			LEFT JOIN hris_department_tbl AS hdt ON hdt.departmentID = mwt.departmentID
+			LEFT JOIN hris_designation_tbl AS hd ON hd.designationID = mwt.designationID`,
+			`requisitionID,
+			requisitionRemarks,
+			designationName,
+			departmentName,
+			CASE 
+				WHEN personnelOption = 1 THEN 'Permanent'
+				WHEN personnelOption = 2 THEN 'Non-Permanent'
+				WHEN personnelOption = 3 THEN 'Other Justifications'
+				END as natureRequest, 
+			personnelDescription,
+			requisitionStatus,
+			approversID,
+			approversDate,
+			mwt.submittedAt,
+			CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
+			mwt.createdAt,
+			mwt.createdAt AS dateCreated`,
+			`mwt.employeeID != ${sessionID} AND requisitionStatus != 0 AND requisitionStatus != 4 AND requisitionStatus = 2`,
+			`FIELD(requisitionStatus, 0, 1, 3, 2, 4, 5), COALESCE(mwt.submittedAt, mwt.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
+            <thead >
+                <tr>
+					<th>Document No.</th>
+					<th>Prepared By</th>
+					<th>Open Designation</th>
+					<th>Nature of Request</th>
+					<th>Description</th>
+					<th>Current Approver</th>
+					<th>Date</th>
+					<th>Status</th>
+					<th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+		transferRequestData.map((item) => {
+			let {
+				fullname,
+				requisitionID,
+				departmentName,
+				designationName,
+				requisitionRemarks,
+				personnelDescription,
+				natureRequest,
+				requisitionStatus,
+				approversID,
+				approversDate,
+				submittedAt,
+				createdAt,
+			} = item;
+
+			let remarks       = requisitionRemarks ? requisitionRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = requisitionStatus == 2 || requisitionStatus == 5 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
+			let btnClass = requisitionStatus != 0 ? "btnView" : "btnEdit";
+
+			html += `
+			<tr class="${btnClass}" id="${encryptString(requisitionID)}" isForViewing="true">
+				<td>${getFormCode("PRF", createdAt, requisitionID)}</td>
+				<td>${fullname}</td>
+				<td>
+					<div>
+						${designationName || '-'}
+					</div>
+					<small style="color:#848482;">${departmentName || '-'}</small>
+				</td>
+				<td>${natureRequest || '-'}</td>
+				<td>${personnelDescription || '-'}</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, requisitionStatus, true))}
+				</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">
+					${getStatusStyle(requisitionStatus)}
+				</td>
+				<td>${remarks || '-'}</td>
+			</tr>`;
+		});
+
+		html += `
+			</tbody>
+		</table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 300);
+	}
+	// ----- END FOR VIEWING CONTENT -----
 
 
     // ----- FOR APPROVAL CONTENT -----
@@ -296,7 +374,7 @@ $(document).ready(function() {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
             <thead >
                 <tr>
 					<th>Document No.</th>
@@ -491,7 +569,6 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
-			return html;
 		}, 300);
 	}
 	// ----- END MY FORMS CONTENT -----
@@ -504,10 +581,10 @@ $(document).ready(function() {
 			let {
 				requisitionID     = "",
 				requisitionStatus = "",
-				employeeID            = "",
-				approversID           = "",
-				approversDate         = "",
-				createdAt             = new Date
+				employeeID        = "",
+				approversID       = "",
+				approversDate     = "",
+				createdAt         = new Date
 			} = data && data[0];
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
@@ -520,7 +597,8 @@ $(document).ready(function() {
 						id="btnSubmit" 
 						requisitionID="${requisitionID}"
 						code="${getFormCode("PRF", createdAt, requisitionID)}"
-						revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
+						revise="${isRevise}" 
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
@@ -529,7 +607,8 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel px-5 p-2" 
 							id="btnCancel"
-							revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+							revise="${isRevise}" 
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
@@ -539,7 +618,8 @@ $(document).ready(function() {
 							id="btnCancelForm" 
 							requisitionID="${requisitionID}"
 							code="${getFormCode("PRF", createdAt, requisitionID)}"
-							revise=${isRevise}><i class="fas fa-ban"></i> 
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -554,7 +634,8 @@ $(document).ready(function() {
 							id="btnCancelForm" 
 							requisitionID="${requisitionID}"
 							code="${getFormCode("PRF", createdAt, requisitionID)}"
-							status="${requisitionStatus}"><i class="fas fa-ban"></i> 
+							status="${requisitionStatus}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -566,7 +647,8 @@ $(document).ready(function() {
 						id="btnDrop" 
 						requisitionID="${encryptString(requisitionID)}"
 						code="${getFormCode("PRF", createdAt, requisitionID)}"
-						status="${requisitionStatus}"><i class="fas fa-ban"></i> 
+						status="${requisitionStatus}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
 					
@@ -580,7 +662,8 @@ $(document).ready(function() {
 							id="btnRevise" 
 							requisitionID="${encryptString(requisitionID)}"
 							code="${getFormCode("PRF", createdAt, requisitionID)}"
-							status="${requisitionStatus}"><i class="fas fa-clone"></i>
+							status="${requisitionStatus}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
@@ -671,7 +754,6 @@ $(document).ready(function() {
                     html += `<option departmentid="${deptID}" value="${dsg.designationID}" ${dsg.designationID == dsgID  ? "selected":""}>${dsg.designationName}</option>`;
                 })
             }
-			console.log(html)
             $("#designationID").html(html);
     }
     // ----- END DESIGNATION CONTENT -----
@@ -710,22 +792,12 @@ $(document).ready(function() {
         }
         // ----- END REPORT EMPLOYEE CONTENT -----
 
-        // $(document).on("change","#departmentID",function(){
-        //     let thisValue   =   $(this).val();
-        //     designationList (thisValue,"");
-        //     reportEmployeeList(thisValue,"");
-        //     // initAll();
-        // });
-
         $(document).on("change","#designationID",function(){
             let thisValue   =   $(this).val();
             let departmentID = $(this).find(":selected").attr("departmentid");
             
 			reportEmployeeList(departmentID,"","");
             reportEmployeeList2(thisValue,departmentID,"");
-			// reportEmployeeList(thisValue,departmentID,"");
-            // reportEmployeeList2(thisValue,departmentID,"");
-            // initAll();
         });
     
 
@@ -874,7 +946,7 @@ $(document).ready(function() {
             </div>
         </div>
 
-        <div class="row" id="form_purchase_request">
+        <div class="row" id="for_personnel_requisition">
 
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
@@ -1006,7 +1078,7 @@ $(document).ready(function() {
                         required
                         id="personnelDateNeeded"
                         name="personnelDateNeeded"
-                        value="${personnelDateNeeded && moment(personnelDateNeeded).format("MMMM DD, YYYY")}"
+                        value="${personnelDateNeeded && moment(personnelDateNeeded || new Date).format("MMMM DD, YYYY")}"
                         ${disabled}
                         title="Date">
 						<div class="invalid-feedback d-block invalid-personnelOption" id="invalid-personnelDateNeeded"></div>
@@ -1143,9 +1215,23 @@ $(document).ready(function() {
 			requisitionID && requisitionID != 0 &&  reportEmployeeList(departmentID,personnelReportByID) ;
 			requisitionID && requisitionID != 0 &&  $("[name='personnelOption']:checked").trigger("change");
 
-			!requisitionID && requisitionID == 0 && $("#personnelDateNeeded").val(moment(new Date).format("MMMM DD, YYYY"));
+			!requisitionID && requisitionID == 0 && $("#personnelDateNeeded").val(moment(personnelDateNeeded || new Date).format("MMMM DD, YYYY"));
+			
 			$("#personnelDateNeeded").data("daterangepicker").minDate = moment();
-			return html;
+			$("#personnelDateNeeded").data('daterangepicker').setStartDate(moment(personnelDateNeeded || new Date).format("MMMM DD, YYYY"));
+			$("#personnelDateNeeded").data('daterangepicker').setEndDate(moment(personnelDateNeeded || new Date).format("MMMM DD, YYYY"));
+
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+				if (this.type != "search") {
+				$(this).attr("disabled", true);                    }
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
+ 
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
@@ -1334,19 +1420,11 @@ $(document).ready(function() {
         if(radioVal == 4){
             $("#personnelReplacement").addClass("validate").removeClass("is-valid");
             $("#personnelReplacement").attr("required","");
-            $("#personnelReplacement").prop("disabled",false);
-
-		
+            $("#personnelReplacement").prop("disabled",false);		
         }else{
             $("#personnelReplacement").removeClass("validate").removeClass("is-invalid").removeClass("is-valid");
-
             $("#personnelReplacement").removeAttr("required");
             $("#personnelReplacement").prop("disabled",true);
-
-			
-
-            // $("#personnelReplacement").val(0).trigger('change.select2');
-            // $('#personnelReplacement option:eq(0)').prop('selected',true);
             $('#personnelReplacement').val($('#personnelReplacement option:eq(0)').val()).trigger('change');
             $("#invalid-personnelReplacement").text("");
         }
@@ -1400,6 +1478,10 @@ $(document).ready(function() {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -1426,8 +1508,8 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-	// ----- GET PURCHASE REQUEST DATA -----
-	function getPurchaseRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	// ----- GET PERSONNEL REQUISITION DATA -----
+	function getPersonnelRequisitionData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1555,7 +1637,7 @@ $(document).ready(function() {
 
 		return isObject ? data : formData;
 	}
-	// ----- END GET PURCHASE REQUEST DATA -----
+	// ----- END GET PERSONNEL REQUISITION DATA -----
 
 
     // ----- OPEN ADD FORM -----
@@ -1578,6 +1660,7 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = $(this).attr("id");
+		isForViewing = $(this).attr("isForViewing") == "true";
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1585,8 +1668,9 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("requisitionID");
-		viewDocument(id, false, true);
+		const id                    = $(this).attr("requisitionID");
+		const fromCancelledDocument = $(this).attr("cancel" ) == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 
@@ -1603,13 +1687,9 @@ $(document).ready(function() {
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				// const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-				const data   = getPurchaseRequestData(action, "save", "0", id);
+				const data   = getPersonnelRequisitionData(action, "save", "0", id);
 				data.append("requisitionStatus", 0);
-				// data.append("reviseRequisitionID", id);
-				// data.delete("requisitionID");
-
 				if (!isFromCancelledDocument) {
 					data.append("reviseRequisitionID", id);
 					data.delete("requisitionID");
@@ -1625,13 +1705,13 @@ $(document).ready(function() {
 				pageContent();
 	
 				if (employeeID != sessionID) {
-					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+					$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
 				}
 			}
 
 		} else {
 			const action = id && feedback ? "update" : "insert";
-			const data   = getPurchaseRequestData(action, "save", "0", id);
+			const data   = getPersonnelRequisitionData(action, "save", "0", id);
 			data.append("requisitionStatus", 0);
 
 			savePurchaseRequest(data, "save", null, pageContent);
@@ -1644,7 +1724,6 @@ $(document).ready(function() {
 	$(document).on("click", "#btnSave, #btnCancel", function () {
 
         let condition = $("[name=quantity]").hasClass("is-invalid");
-
 		if(!condition){
         
             const id       = $(this).attr("requisitionID");
@@ -1652,13 +1731,10 @@ $(document).ready(function() {
             const revise   = $(this).attr("revise") == "true";
             const feedback = $(this).attr("code") || getFormCode("PRF", dateToday(), id);
             const action   = revise && "insert" || (id && feedback ? "update" : "insert");
-            const data     = getPurchaseRequestData(action, "save", "0", id);
+            const data     = getPersonnelRequisitionData(action, "save", "0", id);
             data.append("requisitionStatus", 0);
 
             if (revise) {
-                // data.append("reviseRequisitionID", id);
-                // data.delete("requisitionID");
-
 				if (!isFromCancelledDocument) {
 					data.append("reviseRequisitionID", id);
 					data.delete("requisitionID");
@@ -1693,16 +1769,17 @@ $(document).ready(function() {
         let group1 = $("[name='radioGroup1']").val();
         let field1 =  $("#invalid-personnelReplacement").text();
 
-        const id           = $(this).attr("requisitionID");
-        const revise       = $(this).attr("revise") == "true";
-        const validate     = validateForm("form_purchase_request");
+        const id                      = $(this).attr("requisitionID");
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise       			  = $(this).attr("revise") == "true";
+        const validate                = validateForm("for_personnel_requisition");
         $(".no-error").each(function(){
             var thisParent  = $(this).closest(".form-group");
             var closestFeedback = thisParent.find(".invalid-feedback");
             closestFeedback.text("");
         });
 
-        $("#form_purchase_request .is-valid").each(function(){
+        $("#for_personnel_requisition .is-valid").each(function(){
             var thisParent  = $(this).closest(".form-group");
             var closestFeedback = thisParent.find(".invalid-feedback");  
             closestFeedback.text(""); 
@@ -1716,20 +1793,18 @@ $(document).ready(function() {
             if(group1 == 4 && field1 !=""){
                 $("#invalid-personnelReplacement").text("");
             }
-          
-			// removeIsValid("#tableProjectRequestItems");
-            
 
             if (validate) {
                 
-               
-                const action = revise && "insert" || (id ? "update" : "insert");
-                const data   = getPurchaseRequestData(action, "submit", "1", id);
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+                const data   = getPersonnelRequisitionData(action, "submit", "1", id);
 
-                if (revise) {
-                    data.append("reviseRequisitionID", id);
-                    data.delete("requisitionID");
-                }
+				if (revise) {
+					if(!isFromCancelledDocument){
+						data.append("reviseRequisitionID", id);
+						data.delete("requisitionID");
+					}
+				}
 
                 let approversID = "", approversDate = "";
                 for (var i of data) {
@@ -1765,7 +1840,7 @@ $(document).ready(function() {
 		const id     = $(this).attr("requisitionID");
 		const status = $(this).attr("status");
 		const action = "update";
-		const data   = getPurchaseRequestData(action, "cancelform", "4", id, status);
+		const data   = getPersonnelRequisitionData(action, "cancelform", "4", id, status);
 
 		savePurchaseRequest(data, "cancelform", null, pageContent);
 	});
@@ -1785,7 +1860,7 @@ $(document).ready(function() {
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data = getPurchaseRequestData("update", "approve", "2", id);
+			let data = getPersonnelRequisitionData("update", "approve", "2", id);
 			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
 			data.append("approversDate", dateApproved);
@@ -1911,6 +1986,10 @@ $(document).ready(function() {
     // ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
+		if (tab == "#forViewingTab") {
+			forViewingContent();
+			$(".title_content").text("This module is used to manage the submission and approval of incident.");
+		}
 		if (tab == "#forApprovalTab") {
 			forApprovalContent();
 			$(".title_content").text("This module is used to manage the submission and approval of incident.");

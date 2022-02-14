@@ -43,6 +43,7 @@ $(document).ready(function(){
         setTimeout(() => {
             $("#modal_content").modal("show");
             initAll();
+            $('[data-toggle="tooltip"]').tooltip();
         }, 500);
     });
     
@@ -52,7 +53,7 @@ $(document).ready(function(){
         let feedback;
         switch ($(this).attr("givenaction")) {
             case "cuttoff":
-                    feedback = "Cutoff";
+                    feedback = "Cut-off";
                 break;
             case "pettycash":
                 feedback = "Petty Cash";
@@ -90,7 +91,7 @@ $(document).ready(function(){
         let feedback;
         switch ($(this).attr("givenaction")) {
             case "cuttoff":
-                    feedback = "Cutoff";
+                    feedback = "Cut-off";
                 break;
             case "pettycash":
                 feedback = "Petty Cash";
@@ -183,43 +184,66 @@ $(document).ready(function(){
             
             if(index < 2){
                 html += `
-                    <div class="row"> 
-                        <div class="col-md-12 col-sm-12 bg-black py-2 ${index == 0 ? "mb-3" : "my-3"} d-flex justify-content-between align-items-center">
-                            <h5>${index == 0 ? "First" : "Second"} Cutoff</h5>
-                            <div>
-                                <span>Mandates </span><input type="checkbox" name="${mandates}" class="mandates-checkbox" ${systemSettingData[0][mandates] == "1" ? "checked" : ""}>
-                            </div>
+                <div class="row px-3 py-2"> 
+                    <div class="col-md-12 col-sm-12 bg-black py-2 ${index == 0 ? "mb-3" : "my-3"} d-flex justify-content-between align-items-center">
+                        <h5>${index == 0 ? "First" : "Second"} Cut-off</h5>
+                        <div class="d-flex align-items-center">
+                            <div>Mandates </div>
+                            <input type="checkbox" name="${mandates}" class="mandates-checkbox ml-2" ${systemSettingData[0][mandates] == "1" ? "checked" : ""}>
                         </div>
+                    </div>
 
-                        <div class="col-md-6 col-sm-12">
-                            <div class="form-group">
-                                <label for="${startDate}" >Start of Cutoff ${index == 1 ? "<code>*</code>" : ""} </label>
-                                <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${startDate}" id="${startDate}" 
-                                    ${payrollTable.length > 0 ? "disabled" : ""}
-                                    data-allowcharacters="[0-9]" value="${systemSettingData[0][startDate] || "" }" ${index < 2 ? "required" : ""} ${index == 1 ? "disabled" : ""}>
-                                <div class="invalid-feedback d-block" id="invalid-${startDate}"></div>
-                            </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label for="${startDate}" >Start of Cut-off ${index == 1 ? "<code>*</code>" : ""} </label>
+                            <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${startDate}" id="${startDate}" 
+                                ${payrollTable.length > 0 ? "disabled" : ""}
+                                data-allowcharacters="[0-9]" value="${systemSettingData[0][startDate] || "" }" ${index < 2 ? "required" : ""} ${index == 1 ? "disabled" : ""}>
+                            <div class="invalid-feedback d-block" id="invalid-${startDate}"></div>
                         </div>
-                        <div class="col-md-6 col-sm-12">
-                            <div class="form-group">
-                                <label for="${endDate}" >End of Cutoff ${index == 1 ? "<code>*</code>" : ""} </label>
-                                <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${endDate}" id="${endDate}" 
-                                    ${payrollTable.length > 0 ? "disabled" : ""}
-                                    data-allowcharacters="[0-9]" value="${systemSettingData[0][endDate] || "" }" ${index < 2 ? "required" : ""} ${index == 1 ? "disabled" : ""}>
-                                <div class="invalid-feedback d-block" id="invalid-${endDate}"></div>
-                            </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label for="${endDate}" >End of Cut-off ${index == 1 ? "<code>*</code>" : ""} </label>
+                            <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${endDate}" id="${endDate}" 
+                                ${payrollTable.length > 0 ? "disabled" : ""}
+                                data-allowcharacters="[0-9]" value="${systemSettingData[0][endDate] || "" }" ${index < 2 ? "required" : ""} ${index == 1 ? "disabled" : ""}>
+                            <div class="invalid-feedback d-block" id="invalid-${endDate}"></div>
                         </div>
-                        <div class="col-md-12 col-sm-12">
-                            <div class="form-group">
-                                <label for="${payout}">Payout Date <code>*</code></label>
-                                <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${payout}" id="${payout}" 
-                                    data-allowcharacters="[0-9]"  ${payrollTable.length > 0 ? "disabled" : ""} value="${systemSettingData[0][payout] || ""}" ${index < 2 ? "required" : ""} >
-                                <div class="invalid-feedback d-block" id="invalid-${payout}"></div>
-                            </div>
+                    </div>
+                    <div class="col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label for="${payout}">Payout Date <code>*</code></label>
+                            <input type="text" class="form-control validate number" min="1" max="31" maxlength="2" name="${payout}" id="${payout}" 
+                                data-allowcharacters="[0-9]"  ${payrollTable.length > 0 ? "disabled" : ""} value="${systemSettingData[0][payout] || ""}" ${index < 2 ? "required" : ""} >
+                            <div class="invalid-feedback d-block" id="invalid-${payout}"></div>
                         </div>
-                    </div>`;
+                    </div>
+                </div>`;
             }
         });
+
+        html += `
+        <div class="form-group">
+            <label>
+                No. of Working Days  
+                <i class="fal fa-info-circle" style="color:#007bff;" data-toggle="tooltip" title="" data-original-title="Per week"></i>
+                <code>*</code>
+            </label>
+            <input type="text"
+                class="form-control validate number"
+                data-allowcharacters="[0-9]"
+                min="1"
+                max="7"
+                minlength="1"
+                maxlength="2"
+                id="workingDays"
+                name="workingDays"
+                value="${systemSettingData[0]['workingDays'] || 0}"
+                required>
+            <div class="d-block invalid-feedback" id="invalid-workingDays"></div>
+        </div>`;
+
         return html;
     }
     
@@ -285,27 +309,26 @@ $(document).ready(function(){
             let payout      = tableData[`${value.toLowerCase()}CutOffPayOut`]; 
             let mandates    = tableData[`${value.toLowerCase()}CutOffDeduction`];
             cutOffRow += startDate ? 
-                                `   <div class="col-lg-3 col-12">
-                                        <label for="">Cutoff Number	</label>
-                                        <p> <span>${value} Cut off</span> </p>
-                                    </div>
-                                    <div class="col-lg-3 col-12">
-                                        <label for="">Cutoff Date</label>
-                                        <p> <span>${placingNumber(parseInt(startDate))} - ${placingNumber(parseInt(endDate))} day of the month</span> </p>
-                                    </div>
-                                    <div class="col-lg-3 col-12">
-                                        <label for="">Payout Date</label>
-                                        <p> <span>${placingNumber(parseInt(payout))} day of the month</span> </p>
-                                    </div>
-
-                                    <div class="col-lg-3 col-12">
-                                        <label for="">Mandates</label>
-                                        <p> <span>${mandates == "1" ? "Yes" : "No"}</span> </p>
-                                    </div>
-                                    
-                                    
-                                    ` : ``;
+            `<div class="col-lg-3 col-12">
+                <label for="">Cut-off Number	</label>
+                <p> <span>${value} Cut off</span> </p>
+            </div>
+            <div class="col-lg-3 col-12">
+                <label for="">Cut-off Date</label>
+                <p> <span>${placingNumber(parseInt(startDate))} - ${placingNumber(parseInt(endDate))} day of the month</span> </p>
+            </div>
+            <div class="col-lg-3 col-12">
+                <label for="">Payout Date</label>
+                <p> <span>${placingNumber(parseInt(payout))} day of the month</span> </p>
+            </div>
+            <div class="col-lg-3 col-12">
+                <label for="">Mandates</label>
+                <p> <span>${mandates == "1" ? "Yes" : "No"}</span> </p>
+            </div>
+            ` : ``;
         });
+        cutOffRow += `<div class="col-12"><label>No. of Working Days</label><p>${tableData[`workingDays`] ?? 0}</p></div>`;
+
         $(".cut-off-row").html(cutOffRow);
 
         let pettyCash                   = tableData.pettyCashReplenishmentLimit ? (tableData.pettyCashReplenishmentLimit.replaceAll(",","") || tableData.pettyCashReplenishmentLimit) : 0;
@@ -348,124 +371,124 @@ $(document).ready(function(){
 
 
 
-            // ----- SWEET ALERT CONFIRMATION -----
-const thisAlertConfirmation = (
-    condition   = "add",            // add|update|cancel
-    moduleName  = "Another Data",   // Title
-    modalID     = null,             // Modal ID 
-    containerID = null,             // ContainerID - if not modal
-    data        = null,             // data - object or formData
-    isObject    = true,             // if the data is object or not
-) => {
+    // ----- SWEET ALERT CONFIRMATION -----
+    const thisAlertConfirmation = (
+        condition   = "add",            // add|update|cancel
+        moduleName  = "Another Data",   // Title
+        modalID     = null,             // Modal ID 
+        containerID = null,             // ContainerID - if not modal
+        data        = null,             // data - object or formData
+        isObject    = true,             // if the data is object or not
+    ) => {
 
-if (checkIfUpdateNotAllowed()) {
-    const isUpdate = $(`#${modalID}`).find(".page-title").text().trim().toLowerCase().indexOf("edit");
-    if (isUpdate != -1) {
-        return false;
-    } 
-}
-
-$("#"+modalID).modal("hide");
-
-let lowerCase 	= moduleName.toLowerCase();
-let upperCase	= moduleName.toUpperCase();
-let capitalCase = moduleName;
-let title 		      =  "";
-let text 		      =  ""
-let success_title     =  "";
-let swalImg           =  "";
-let argument          =  "";
-switch(condition) {
-    case "add":
-        title 					+=  "ADD " + upperCase;
-        text 					+=  "Are you sure that you want to add a new "+ lowerCase +" to the system?"
-        success_title        	+=  "Add new "+capitalCase + " successfully saved!";
-        swalImg                 +=  `${base_url}assets/modal/add.svg`;
-        break;
-    case "update":
-        title 					+=  "UPDATE " + upperCase;
-        text 					+=  "Are you sure that you want to update the "+ lowerCase +" to the system?"
-        success_title        	+=  "Update "+ capitalCase + " successfully saved!";
-        swalImg                 +=  `${base_url}assets/modal/update.svg`;
-        break;
-    default:
-        title 					+=  "DISCARD CHANGES";
-        text 					+=  "Are you sure that you want to cancel this process?"
-        success_title        	+=  "Process successfully discarded!";
-        swalImg                 +=  `${base_url}assets/modal/cancel.svg`;
+    if (checkIfUpdateNotAllowed()) {
+        const isUpdate = $(`#${modalID}`).find(".page-title").text().trim().toLowerCase().indexOf("edit");
+        if (isUpdate != -1) {
+            return false;
+        } 
     }
-switch (moduleName) {
-        case "Cutoff":
-            argument = "cutoff";
+
+    $("#"+modalID).modal("hide");
+
+    let lowerCase 	= moduleName.toLowerCase();
+    let upperCase	= moduleName.toUpperCase();
+    let capitalCase = moduleName;
+    let title 		      =  "";
+    let text 		      =  ""
+    let success_title     =  "";
+    let swalImg           =  "";
+    let argument          =  "";
+    switch(condition) {
+        case "add":
+            title 					+=  "ADD " + upperCase;
+            text 					+=  "Are you sure that you want to add a new "+ lowerCase +" to the system?"
+            success_title        	+=  "Add new "+capitalCase + " successfully saved!";
+            swalImg                 +=  `${base_url}assets/modal/add.svg`;
             break;
-        case "Petty Cash":
-            argument = "pettycash";
+        case "update":
+            title 					+=  "UPDATE " + upperCase;
+            text 					+=  "Are you sure that you want to update the "+ lowerCase +" to the system?"
+            success_title        	+=  "Update "+ capitalCase + " successfully saved!";
+            swalImg                 +=  `${base_url}assets/modal/update.svg`;
             break;
-        case "Client Fund":
-            argument = "clientfund";
-            break;    
         default:
-            argument = "approval";
-            break;
-    }
-    Swal.fire({
-        title, 
-        text,
-        imageUrl: swalImg,
-        imageWidth: 200,
-        imageHeight: 200,
-        imageAlt: 'Custom image',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#1a1a1a',
-        cancelButtonText: 'No',
-        confirmButtonText: 'Yes',
-        allowOutsideClick: false
-    }).then((result) => {
-        if (result.isConfirmed) {
-            let swalTitle = success_title.toUpperCase();
+            title 					+=  "DISCARD CHANGES";
+            text 					+=  "Are you sure that you want to cancel this process?"
+            success_title        	+=  "Process successfully discarded!";
+            swalImg                 +=  `${base_url}assets/modal/cancel.svg`;
+        }
+    switch (moduleName) {
+            case "Cutoff":
+                argument = "cutoff";
+                break;
+            case "Petty Cash":
+                argument = "pettycash";
+                break;
+            case "Client Fund":
+                argument = "clientfund";
+                break;    
+            default:
+                argument = "approval";
+                break;
+        }
+        Swal.fire({
+            title, 
+            text,
+            imageUrl: swalImg,
+            imageWidth: 200,
+            imageHeight: 200,
+            imageAlt: 'Custom image',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#1a1a1a',
+            cancelButtonText: 'No',
+            confirmButtonText: 'Yes',
+            allowOutsideClick: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let swalTitle = success_title.toUpperCase();
 
-            if (condition != "cancel") {
-                let saveData = condition.toLowerCase() == "add" ? insertTableData(data, isObject, false, swalTitle) : updateTableData(data, isObject, false, swalTitle);
-                saveData.then(res => {  
-                    if (res) {
-                        
-                        if (condition.toLowerCase() == "add" && (moduleName.toLowerCase() === "role" || moduleName.toLowerCase() === "designation")) {
-                            generateNewRolesPermission();
-                        }   
+                if (condition != "cancel") {
+                    let saveData = condition.toLowerCase() == "add" ? insertTableData(data, isObject, false, swalTitle) : updateTableData(data, isObject, false, swalTitle);
+                    saveData.then(res => {  
+                        if (res) {
+                            
+                            if (condition.toLowerCase() == "add" && (moduleName.toLowerCase() === "role" || moduleName.toLowerCase() === "designation")) {
+                                generateNewRolesPermission();
+                            }   
 
-                        pageContent(argument);
+                            pageContent(argument);
 
-                    } else {
-                        Swal.fire({
-                            icon: 'danger',
-                            title: "Failed!",
-                            text: result[1],
-                            showConfirmButton: false,
-                            timer: 2000
-                        })
-                    }
-                })
+                        } else {
+                            Swal.fire({
+                                icon: 'danger',
+                                title: "Failed!",
+                                text: result[1],
+                                showConfirmButton: false,
+                                timer: 2000
+                            })
+                        }
+                    })
+                } else {
+                    preventRefresh(false);
+                    Swal.fire({
+                        icon:  'success',
+                        title: swalTitle,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                        if(modalID == "isNotModal" ){
+                            pageContent(argument);
+                        }
+                }
             } else {
                 preventRefresh(false);
-                Swal.fire({
-                    icon:  'success',
-                    title: swalTitle,
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-                    if(modalID == "isNotModal" ){
-                        pageContent(argument);
-                    }
+                containerID && $("#"+containerID).show();
+                $("#"+modalID).modal("show");
             }
-        } else {
-            preventRefresh(false);
-            containerID && $("#"+containerID).show();
-            $("#"+modalID).modal("show");
-        }
-    });
-}
-// ----- END SWEET ALERT CONFIRMATION -----
+        });
+    }
+    // ----- END SWEET ALERT CONFIRMATION -----
 
 
 

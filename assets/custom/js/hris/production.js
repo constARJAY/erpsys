@@ -1,9 +1,12 @@
 $(document).ready(function () {
-	const allowedUpdate = isUpdateAllowed(143);
+	const MODULE_ID     = 143;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing    = false;
 
 
 	// ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover(143);
+	const moduleApprover = getModuleApprover(MODULE_ID);
 	// ----- END MODULE APPROVER -----
 
 
@@ -323,7 +326,7 @@ $(document).ready(function () {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					const isAllowed = isCreateAllowed(143);
+					const isAllowed = isCreateAllowed(MODULE_ID);
 					pageContent(isAllowed);
 				}
 			}else if (isOverView != -1) {
@@ -332,7 +335,7 @@ $(document).ready(function () {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					const isAllowed = isCreateAllowed(143);
+					const isAllowed = isCreateAllowed(MODULE_ID);
 					pageContent(isAllowed);
 				}
 			}
@@ -379,94 +382,59 @@ $(document).ready(function () {
 
 	// ----- DATATABLES -----
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
+		["#tableMyForms", "#tableForApproval", "#tableForViewing"].map(element => {
+			if ($.fn.DataTable.isDataTable(element)) {
+			   $(element).DataTable().destroy();
+			}
 
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
+			let columnDefs = element == "#tableMyForms" ? [
+				{ targets: 0, width: 250 },
+				{ targets: 1, width: 150 },
+				{ targets: 2, width: 300 },
+				{ targets: 3, width: 80  },
+				{ targets: 4, width: 50  },
+			] : [
+				{ targets: 0, width: 250 },
+				{ targets: 1, width: 150 },
+				{ targets: 2, width: 150 },
+				{ targets: 3, width: 300 },
+				{ targets: 4, width: 50  },
+				{ targets: 5, width: 200 },
+			];
 
-		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0, width: 250 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
-					{ targets: 3, width: 300 },
-					{ targets: 4, width: 50  },
-					{ targets: 5, width: 200 },
-				],
-				dom: 'lBfrtip',
-				buttons: [
-					{
-						extend: 'excelHtml5',
-						exportOptions: {
-							columns: [ 0, 1, 2, 3, 4 ]
+			var table = $(element)
+				.css({ "min-width": "100%" })
+				.removeAttr("width")
+				.DataTable({
+					proccessing: false,
+					serverSide: false,
+					scrollX: true,
+					sorting: [],
+					scrollCollapse: true,
+					columnDefs,
+					dom: 'lBfrtip',
+					buttons: [
+						{
+							extend: 'excelHtml5',
+							exportOptions: {
+								columns: [ 0, 1, 2, 3, 4 ]
+							}
+						},
+						{
+							extend: 'pdfHtml5',
+							exportOptions: {
+								columns: [ 0, 1, 2, 3, 4 ]
+							}
+						},
+						{
+							extend: 'print',
+							exportOptions: {
+								columns: [ 0, 1, 2, 3, 4 ]
+							}
 						}
-					},
-					{
-						extend: 'pdfHtml5',
-						exportOptions: {
-							columns: [ 0, 1, 2, 3, 4 ]
-						}
-					},
-					{
-						extend: 'print',
-						exportOptions: {
-							columns: [ 0, 1, 2, 3, 4 ]
-						}
-					}
-				]
-			});
-
-		var table = $("#tableMyForms")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				
-				proccessing: false,
-				serverSide: false,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0, width: 180 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
-					{ targets: 3, width: 50  },
-					{ targets: 4, width: 50  },
-				],
-				dom: 'lBfrtip',
-				buttons: [
-					{
-						extend: 'excelHtml5',
-						exportOptions: {
-							columns: [ 0, 1, 2, 3 ]
-						}
-					},
-					{
-						extend: 'pdfHtml5',
-						exportOptions: {
-							columns: [ 0, 1, 2, 3 ]
-						}
-					},
-					{
-						extend: 'print',
-						exportOptions: {
-							columns: [ 0, 1, 2, 3 ]
-						}
-					}
-				]
-				
-			
-			});
+					]
+				});
+		 })
 	}
 
 	function initDataTablesForActivity(){
@@ -535,7 +503,7 @@ $(document).ready(function () {
 	// ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_production_tbl", "approversID")) {
+			if (isImModuleApprover("hris_production_tbl", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_production_tbl", "productionStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
@@ -543,6 +511,7 @@ $(document).ready(function () {
 				<div class="row clearfix appendHeader">
 					<div class="col-12">
 						<ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}  
 							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
 							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
 						</ul>
@@ -561,11 +530,6 @@ $(document).ready(function () {
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
-			// if (isCreateAllowed(143)) {
-			// 	html = `
-			// 	<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
-			// }
-
 			html=``;
 		} else {
 			html = `
@@ -574,6 +538,83 @@ $(document).ready(function () {
 		$("#headerButton").html(html);
 	}
 	// ----- END HEADER BUTTON -----
+
+
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent").html(preloader);
+
+		let leaveRequestData = getTableData(
+			"hris_production_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+			"hris_production_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_production_tbl.createdAt AS dateCreated",
+			`hris_production_tbl.employeeID != ${sessionID} AND productionStatus != 0 AND productionStatus != 4 AND productionStatus = 2`,
+			`FIELD(productionStatus, 0, 1, 3, 2, 4), COALESCE(hris_production_tbl.submittedAt, hris_production_tbl.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
+            <thead>
+					<tr style="white-space: nowrap">
+					<th>Production Dates</th>
+					<th>Employee Name</th>
+					<th>Current Approver</th>
+					<th>Dates</th>
+					<th>Status</th>
+					<th>Remarks</th>
+					
+                </tr>
+            </thead>
+            <tbody>`;
+
+		leaveRequestData.map((schedule) => {
+			let {
+				productionID,
+				productionCode,
+				fullname,
+				productionSchedule,
+				approversID,
+				approversDate,
+				productionStatus,
+				productionReason,
+				submittedAt,
+				createdAt,
+			} = schedule;
+			let remarks       = productionReason ? productionReason : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = productionStatus == 2 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
+			html += `
+			<tr class="btnView"  id="${encryptString(productionID)}" code="${productionCode}" isForViewing="true">
+				<td>
+					<div>${productionSchedule}</div>
+					<small>${productionCode}</small>
+				</td>
+				<td>${fullname}</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, productionStatus, true))}
+				</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">
+					${getStatusStyle(productionStatus)}
+				</td>
+				<td>${remarks}</td>
+			</tr>`;
+		});
+
+		html += `
+            </tbody>
+        </table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 300);
+	}
+	// ----- END FOR VIEWING CONTENT -----
 
 
 	// ----- FOR APPROVAL CONTENT -----
@@ -588,7 +629,7 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
             <thead>
 					<tr style="white-space: nowrap">
 					<th>Production Dates</th>
@@ -774,11 +815,6 @@ $(document).ready(function () {
 				var tmpComputeHour = parseFloat(tmpHours) +":"+ parseFloat(tmpMinutes/60);
 				let getDayManHoursToDecimal = moment.duration(tmpComputeHour).asHours(); 
 				let getExactManHours = parseFloat(getDayManHoursToDecimal) - parseFloat(dayBreakArr[loop]);
-
-
-				// let getDayManHours = moment(dayFromArr[loop], '"HH:mm"').add(moment.duration(dayToArr[loop])).format('HH:mm');
-				// let getDayManHoursToDecimal = moment.duration(getDayManHours).asHours(); 
-				// let getExactManHours = parseFloat(getDayManHoursToDecimal) - parseFloat(dayBreakArr[loop]);
 				
 				
 				getDayArr.manHours.push(getExactManHours);    
@@ -1005,13 +1041,6 @@ $(document).ready(function () {
 			initDataTables();
 			initAll();
 			leaveRequestDateRange(mergeArray);
-
-			// let count = $("#tableMyForms tbody > tr").length;
-
-			// for(var loop = 0; loop<count; loop++){
-			// 	changeDefaultDateRange("",loop);
-			// }
-			return html;
 		}, 300);
 	}
 	// ----- END MY FORMS CONTENT -----
@@ -1162,14 +1191,6 @@ $(document).ready(function () {
 						$("#loader").hide();
 					}, 500);
 				})
-
-
-				// Swal.fire({
-				// 	icon: 'success',
-				// 	title:  `${getDateSchedule} successfully created!`,
-				// 	showConfirmButton: false,
-				// 	timer: 800
-				// })
             }
         });
 
@@ -1178,86 +1199,86 @@ $(document).ready(function () {
 
 	// ------ EVENT IN MY FORMS CONTENTS-------//
 
-		// ------ EVENT IN MY FORMS CONTENTS-------//
-		$(document).on("change",".autoSaved",function(){
+	// ------ EVENT IN MY FORMS CONTENTS-------//
+	$(document).on("change",".autoSaved",function(){
 
-			$parent = $(this).closest("tr");
+		$parent = $(this).closest("tr");
 
-			var getTimeStartPeriod = $parent.find(`[name="timePeriodStart"]`).val();
-			var getTimeEndPeriod = $parent.find(`[name="timePeriodEnd"]`).val();
-			var getLocation = $parent.find(`[name="activityLocation"]`).val() || "";
-			var getClass = $parent.find(`[name="activityClass"] option:selected`).val();
-			var getClientID = $parent.find(`[name="activityClient"] option:selected`).val();
-			var getClientName = $parent.find(`[name="activityClient"] option:selected`).text();
-			var getProjectID = $parent.find(`[name="activityProject"] option:selected`).val();
-			var getProjectName = $parent.find(`[name="activityProject"] option:selected`).text();
-			// var getStatus = $parent.find(`[name="activityStatus"] option:selected`).val();
-			var getDescription = $parent.find(`[name="activityDescription"]`).val()?.trim();
-			var getManHours = $parent.find(`[name="activityManHours"]`).text();
-			var createdBy = sessionID;
-			var productionActivityID  = $parent.find(`[name="timePeriodStart"]`).attr("productionActivityID");
-			var productionID = $parent.find(`[name="timePeriodStart"]`).attr("productionID");
-			var productionEntriesID = $parent.find(`[name="timePeriodStart"]`).attr("productionentriesiD");
-			var getDateEntries = $parent.find(`[name="timePeriodStart"]`).attr("getDateEntries");
-			var getDayEntries = $parent.find(`[name="timePeriodStart"]`).attr("getDayEntries");
+		var getTimeStartPeriod = $parent.find(`[name="timePeriodStart"]`).val();
+		var getTimeEndPeriod = $parent.find(`[name="timePeriodEnd"]`).val();
+		var getLocation = $parent.find(`[name="activityLocation"]`).val() || "";
+		var getClass = $parent.find(`[name="activityClass"] option:selected`).val();
+		var getClientID = $parent.find(`[name="activityClient"] option:selected`).val();
+		var getClientName = $parent.find(`[name="activityClient"] option:selected`).text();
+		var getProjectID = $parent.find(`[name="activityProject"] option:selected`).val();
+		var getProjectName = $parent.find(`[name="activityProject"] option:selected`).text();
+		// var getStatus = $parent.find(`[name="activityStatus"] option:selected`).val();
+		var getDescription = $parent.find(`[name="activityDescription"]`).val()?.trim();
+		var getManHours = $parent.find(`[name="activityManHours"]`).text();
+		var createdBy = sessionID;
+		var productionActivityID  = $parent.find(`[name="timePeriodStart"]`).attr("productionActivityID");
+		var productionID = $parent.find(`[name="timePeriodStart"]`).attr("productionID");
+		var productionEntriesID = $parent.find(`[name="timePeriodStart"]`).attr("productionentriesiD");
+		var getDateEntries = $parent.find(`[name="timePeriodStart"]`).attr("getDateEntries");
+		var getDayEntries = $parent.find(`[name="timePeriodStart"]`).attr("getDayEntries");
 
-			let data = {
-				getTimeStartPeriod		:	getTimeStartPeriod,
-				getTimeEndPeriod		:	getTimeEndPeriod,
-				getLocation				:	getLocation,
-				getClass				:	(getClass=='Please select a category' ? 'N/A' : getClass),
-				getClientID				:	getClientID,
-				getClientName			:	(getClientName=='Please select a client' ? 'N/A' : getClientName),
-				// getClientName			:	getClientName,
-				getProjectID			:	getProjectID,
-				// getProjectName			:	(getProjectName=='Select Project' ? '' : getProjectName),
-				getProjectName			:	(getProjectName=='Please select a project' ? 'N/A' : getProjectName),
-				// getStatus				:	(getStatus=='Select Status' ? '' : getStatus),
-				getDescription			:	getDescription,
-				getManHours				:	getManHours,
-				createdBy				:	createdBy,
-				productionActivityID 	: 	productionActivityID ,
-				productionID			:	productionID,
-				productionEntriesID		:	productionEntriesID,
-				getDateEntries			:	getDateEntries,
-				getDayEntries			:	getDayEntries,
-			};
+		let data = {
+			getTimeStartPeriod		:	getTimeStartPeriod,
+			getTimeEndPeriod		:	getTimeEndPeriod,
+			getLocation				:	getLocation,
+			getClass				:	(getClass=='Please select a category' ? 'N/A' : getClass),
+			getClientID				:	getClientID,
+			getClientName			:	(getClientName=='Please select a client' ? 'N/A' : getClientName),
+			// getClientName			:	getClientName,
+			getProjectID			:	getProjectID,
+			// getProjectName			:	(getProjectName=='Select Project' ? '' : getProjectName),
+			getProjectName			:	(getProjectName=='Please select a project' ? 'N/A' : getProjectName),
+			// getStatus				:	(getStatus=='Select Status' ? '' : getStatus),
+			getDescription			:	getDescription,
+			getManHours				:	getManHours,
+			createdBy				:	createdBy,
+			productionActivityID 	: 	productionActivityID ,
+			productionID			:	productionID,
+			productionEntriesID		:	productionEntriesID,
+			getDateEntries			:	getDateEntries,
+			getDayEntries			:	getDayEntries,
+		};
 
-			setTimeout(() => {
-				$.ajax({
-					method:      "POST",
-					url:         `production/autoSavedProductionActivity`,
-					data,
-					cache:       false,
-					async:       false,
-					dataType:    "json",
-					beforeSend: function() {
-					},
-					success: function(data) {
-						let result = data.split("|");
-		
-						let isSuccess   = result[0];
-						let message     = result[1];
-						let insertedID  = result[2];
-						let dateCreated = result[3];
+		setTimeout(() => {
+			$.ajax({
+				method:      "POST",
+				url:         `production/autoSavedProductionActivity`,
+				data,
+				cache:       false,
+				async:       false,
+				dataType:    "json",
+				beforeSend: function() {
+				},
+				success: function(data) {
+					let result = data.split("|");
 	
-						if(isSuccess){
-							$parent.find(`[name="timePeriodStart"]`).attr("productionActivityID",insertedID);
-						}
-					},
-					error: function() {
-						setTimeout(() => {
-							// $("#loader").hide();
-							showNotification("danger", "System error: Please contact the system administrator for assistance!");
-						}, 500);
+					let isSuccess   = result[0];
+					let message     = result[1];
+					let insertedID  = result[2];
+					let dateCreated = result[3];
+
+					if(isSuccess){
+						$parent.find(`[name="timePeriodStart"]`).attr("productionActivityID",insertedID);
 					}
-				})
-			}, 500);
-	
-			
-		})
-	
-		// ------ EVENT IN MY FORMS CONTENTS-------//
+				},
+				error: function() {
+					setTimeout(() => {
+						// $("#loader").hide();
+						showNotification("danger", "System error: Please contact the system administrator for assistance!");
+					}, 500);
+				}
+			})
+		}, 500);
+
+		
+	})
+
+	// ------ EVENT IN MY FORMS CONTENTS-------//
 
 
 	// -----  EVENT FOR SIDETABLE ENTRIES CONTENT ----- //
@@ -1723,9 +1744,12 @@ $(document).ready(function () {
 	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false, isOverView =false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
-			// preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="" id="tableForApprovalParent">
                     </div>
@@ -1869,179 +1893,6 @@ $(document).ready(function () {
 		}
 		return hours > 0 ? hours - breakHours : 0;
 	}
-
-
-	// function timeDiffer(start, end, dayEntries) {
-	// 	start = start.split(":");
-	// 	end = end.split(":");
-	// 	var startDate = new Date(0, 0, 0, start[0], start[1], 0);
-	// 	var endDate = new Date(0, 0, 0, end[0], end[1], 0);
-	// 	var getMiddleTime = '';
-	// 	var breakDuration = 0;
-	// 	var getMiddleDurationTime ="";
-	// 	var getSchedTimeFrom="";
-	// 	var getSchedTimeTo="";
-	// 	let getSchedule = [...scheduleData];
-
-	// 	getSchedule.map((sched)=> {
-	// 		let{
-	// 			mondayFrom,
-	// 			mondayTo,
-	// 			mondayBreakDuration,
-	// 			mondayStatus,
-
-	// 			tuesdayFrom,
-	// 			tuesdayTo,
-	// 			tuesdayBreakDuration,
-	// 			tuesdayStatus,
-
-	// 			wednesdayFrom,
-	// 			wednesdayTo,
-	// 			wednesdayBreakDuration,
-	// 			wednesdayStatus,
-
-	// 			thursdayFrom,
-	// 			thursdayTo,
-	// 			thursdayBreakDuration,
-	// 			thursdayStatus,
-
-	// 			fridayFrom,
-	// 			fridayTo,
-	// 			fridayBreakDuration,
-	// 			fridayStatus,
-
-	// 			saturdayFrom,
-	// 			saturdayTo,
-	// 			saturdayBreakDuration,
-	// 			saturdayStatus,
-
-	// 			sundayFrom,
-	// 			sundayTo,
-	// 			sundayBreakDuration,
-	// 			sundayStatus
-	// 		} = sched;
-
-
-
-	// 			let dayArr = [`monday`,`tuesday`,`wednesday`,`thursday`,`friday`,`saturday`,`sunday`];
-	// 			let dayFromArr = [mondayFrom,tuesdayFrom,wednesdayFrom,thursdayFrom,fridayFrom,saturdayFrom,sundayFrom];
-	// 			let dayToArr = [mondayTo,tuesdayTo,wednesdayTo,thursdayTo,fridayTo,saturdayTo,sundayTo];
-	// 			let dayBreakArr = [mondayBreakDuration,tuesdayBreakDuration,wednesdayBreakDuration,thursdayBreakDuration,fridayBreakDuration,saturdayBreakDuration,sundayBreakDuration];
-	// 			let dayStatusArr = [mondayStatus,tuesdayStatus,wednesdayStatus,thursdayStatus,fridayStatus,saturdayStatus,sundayStatus];
-			
-	// 		for(var loop =0;loop<7;loop++){
-
-	// 			// console.log(dayEntries.toLowerCase() +"=="+ dayArr[loop])
-
-	// 			if(dayEntries.toLowerCase() == dayArr[loop]){
-
-	// 				tmpStart = dayFromArr[loop].split(":");
-	// 				tmpEnd = dayToArr[loop].split(":");
-
-	// 				let tmpStartDate = new Date(0, 0, 0, tmpStart[0], tmpStart[1], 0);
-	// 				let tmpEndDate = new Date(0, 0, 0, tmpEnd[0], tmpEnd[1], 0);
-					
-	// 				var tmpDiff = tmpEndDate.getTime() - tmpStartDate.getTime();
-	// 				var tmpHours = Math.floor(tmpDiff  / 1000 / 60 / 60);
-	// 				tmpDiff -= tmpHours * 1000 * 60 * 60;
-	// 				var tmpMinutes = Math.floor(tmpDiff / 1000 / 60);
-	// 				var tmpComputeHour = ((parseFloat(tmpHours) - parseFloat(dayBreakArr[loop]))/2).toFixed(0) +":"+ (parseFloat((tmpMinutes/60))).toFixed(0);
-	// 				var tmpComputeDurationHour = ((parseFloat(tmpHours))/2).toFixed(0) +":"+ (parseFloat((tmpMinutes/60))).toFixed(0);
-
-	// 				getMiddleTime = moment(dayFromArr[loop], '"HH:mm"').add(moment.duration(tmpComputeHour)).format('HH:mm');
-	// 				getMiddleDurationTime = moment(dayFromArr[loop], '"HH:mm"').add(moment.duration(tmpComputeDurationHour)).format('HH:mm');
-	// 				breakDuration = dayBreakArr[loop];
-
-	// 				 getSchedTimeFrom = dayFromArr[loop];
-	// 				 getSchedTimeTo = dayToArr[loop];
-	// 			}
-	// 		}
-	// 	})
-	
-		
-
-	// 	var diff = endDate.getTime() - startDate.getTime();
-	// 	var hours = Math.floor(diff  / 1000 / 60 / 60);
-	// 	diff -= hours * 1000 * 60 * 60;
-	// 	var minutes = Math.floor(diff / 1000 / 60);
-
-	// 	let splitcheckTime = getMiddleTime.split(":");
-	// 	let getNewCheckBrekTime = new Date(0, 0, 0, splitcheckTime[0], splitcheckTime[1], 0);
-
-	// 	let splitDurationTime = getMiddleDurationTime.split(":");
-	// 	let getNewBreakDurationTime = new Date(0, 0, 0, splitDurationTime[0], splitDurationTime[1], 0);
-
-	// 	console.log(startDate)
-	// 	console.log(endDate)
-
-	// 	console.log("splitcheckTime " +splitcheckTime)
-	// 	console.log("splitDurationTime " +splitDurationTime)
-
-	
-	// 	// check lunch time // 
-		
-
-	// 	let checkDurationTimeStart = moment(startDate).isBetween(getNewCheckBrekTime,getNewBreakDurationTime,null,'[]');
-	// 	let checkDurationTimeEnd = moment(endDate).isBetween(getNewCheckBrekTime,getNewBreakDurationTime,null,'[]');
-
-	// 	console.log("checkDurationTimeStart " + checkDurationTimeStart)
-	// 	console.log("checkDurationTimeEnd " +checkDurationTimeEnd)
-
-	// 	// var lunchFrom = new Date(0, 0, 0, 12, 0, 0);
-	// 	// var lunchTo = new Date(0, 0, 0, 13, 0, 0);
-	// 	// let checkDurationTimeStart = moment(startDate).isBetween(lunchFrom,lunchTo,null,'[]');
-	// 	// let checkDurationTimeEnd = moment(endDate).isBetween(lunchFrom,lunchTo,null,'[]');
-	// 	// end  check lunch time // 
-
-	// 	//check include lunch time//
-	// 	let splitschedTimeFrom = getSchedTimeFrom.split(":");
-	// 	let splitschedTimeTo = getSchedTimeTo.split(":");
-	// 	var schedTimeFrom = new Date(0, 0, 0, splitschedTimeFrom[0], splitschedTimeFrom[1], 0);
-	// 	var schedTimeTo = new Date(0, 0, 0, splitschedTimeTo[0], splitschedTimeTo[1], 0);
-	// 	let checkIncludeLunchTimeStart = moment(startDate).isBetween(schedTimeFrom,schedTimeTo,null,'[]');
-	// 	let checkIncludeLunchTimeEnd = moment(endDate).isBetween(schedTimeFrom,schedTimeTo,null,'[]');
-
-	// 	console.log("checkIncludeLunchTimeStart " + checkIncludeLunchTimeStart)
-	// 	console.log("checkIncludeLunchTimeEnd " + checkIncludeLunchTimeEnd)
-	// 	//end check include lunch time//
-	
-	// 	// if(checkDurationTimeStart &&  checkDurationTimeEnd ){
-			
-	// 	// 	var totalHours = (parseFloat(hours - 1) + parseFloat((minutes/60))).toFixed(2);
-
-	// 	// }else{
-
-	// 	// 	if(checkDurationTimeStart){
-	// 	// 		var totalHours =  (parseFloat(hours -1) + parseFloat((minutes/60))).toFixed(2);
-	// 	// 	}else{
-	// 	// 		if(checkIncludeLunchTimeStart && checkIncludeLunchTimeEnd){
-	// 	// 			var totalHours =  (parseFloat(hours-1) + parseFloat((minutes/60))).toFixed(2);
-	// 	// 		}else{
-	// 	// 			var totalHours =  (parseFloat(hours) + parseFloat((minutes/60))).toFixed(2);
-	// 	// 		}
-	// 	// 	}
-	// 	// }
-
-	// 	if(checkDurationTimeStart &&  checkDurationTimeEnd ){
-			
-	// 		var totalHours = (parseFloat(hours - 1) + parseFloat((minutes/60))).toFixed(2);
-
-	// 	}else{
-
-	// 		if(checkDurationTimeStart){
-	// 			var totalHours =  (parseFloat(hours -1) + parseFloat((minutes/60))).toFixed(2);
-	// 		}else{
-	// 			if(checkIncludeLunchTimeStart || checkIncludeLunchTimeEnd){
-	// 				var totalHours =  (parseFloat(hours-1) + parseFloat((minutes/60))).toFixed(2);
-	// 			}else{
-	// 				var totalHours =  (parseFloat(hours) + parseFloat((minutes/60))).toFixed(2);
-	// 			}
-	// 		}
-	// 	}
-
-	// 	return  totalHours > 0 ? totalHours : "0.00";
-	// }
-
 	// ----- TIME DIFFER COMPUTATION ---//
 
 
@@ -2955,39 +2806,6 @@ $(document).ready(function () {
 				if(insertedID !="false"){
 					$('#activityTableBody tr:last').find(`[name="timePeriodStart"]`).attr('productionActivityID',insertedID);
 				}
-
-
-				// let swalTitle;
-				// if (action == "add") {
-				// 	swalTitle = `${getFormCode("PDN", dateCreated, insertedID)} created successfully!`;
-				// } else if (action == "update") {
-				// 	swalTitle = `${getFormCode("PDN", dateCreated, insertedID)} updated successfully!`;
-				// }
-
-				// if (isSuccess == "true") {
-				// 	setTimeout(() => {
-				// 		$("#loader").hide();
-				// 		closeModals();
-				// 		// callback && callback();
-				// 		Swal.fire({
-				// 			icon:              "success",
-				// 			title:             swalTitle,
-				// 			showConfirmButton: false,
-				// 			timer:             2000,
-				// 		});
-				// 		myFormsContent();
-				// 	}, 500);
-				// } else {
-				// 	setTimeout(() => {
-				// 		$("#loader").hide();
-				// 		Swal.fire({
-				// 			icon:              "danger",
-				// 			title:             message,
-				// 			showConfirmButton: false,
-				// 			timer:             2000,
-				// 		});
-				// 	}, 500);
-				// }
 			},
 			error: function() {
 				setTimeout(() => {
@@ -3036,8 +2854,6 @@ $(document).ready(function () {
         $("#activityTableBody").append(row);
         $(`[name="timePeriod"]`).last().focus();
 		updateTableItems();
-			// initAmount();
-			// initQuantity();
         initSelect2();
 		updateDatabaseRow("add");
     })
@@ -3062,6 +2878,7 @@ $(document).ready(function () {
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -3082,61 +2899,13 @@ $(document).ready(function () {
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("PDN", dateToday(), id);
 		const status     = $(this).attr("status");
+		
+		$("#page_content").html(preloader);
+		pageContent();
 
-		// if (status != "false" && status != 0) {
-
-			// if (revise) {
-			// 	const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-			// 	const data   = getData(action, 0, "save", feedback, id);
-			// 	data["leaveRequestStatus"] = 0;
-			// 	if (!isFromCancelledDocument) {
-			// 		data["reviseLeaveRequestID"] = id;
-			// 		data[`feedback`] = getFormCode("PDN", new Date);
-			// 		delete data["leaveRequestID"];
-			// 	} else {
-			// 		delete data["action"];
-			// 		data["leaveRequestID"] = id;
-			// 		data["action"] = "update";
-			// 	}
-
-			// 	setTimeout(() => {
-			// 		cancelForm(
-			// 			"save", 
-			// 			action,
-			// 			"PRODUCTION REPORT",
-			// 			"",
-			// 			"form_leave_request",
-			// 			data,
-			// 			true,
-			// 			pageContent
-			// 		);
-			// 	}, 0);
-			// } else {
-				$("#page_content").html(preloader);
-				pageContent();
-	
-				if (employeeID != sessionID) {
-					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-				}
-			// }
-		// } else {
-		// 	const action   = id && feedback ? "update" : "insert";
-		// 	const data     = getData(action, 0, "save", feedback, id);
-		// 	data["leaveRequestStatus"] = 0;
-
-		// 	setTimeout(() => {
-		// 		cancelForm(
-		// 			"save", 
-		// 			action,
-		// 			"PRODUCTION REPORT",
-		// 			"",
-		// 			"form_leave_request",
-		// 			data,
-		// 			true,
-		// 			pageContent
-		// 		);
-		// 	}, 0);
-		// }
+		if (employeeID != sessionID) {
+			$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
+		}
 	});
 	// ----- END CLOSE FORM -----
 
@@ -3195,7 +2964,7 @@ $(document).ready(function () {
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                143,
+					moduleID:                MODULE_ID,
 					notificationTitle:       "Production",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
@@ -3323,7 +3092,7 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                143,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Production",
 					notificationDescription: `${getFormCode("PDN", createdAt, id)}: Your request has been approved.`,
@@ -3333,7 +3102,7 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                143,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Production",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -3420,7 +3189,7 @@ $(document).ready(function () {
 				data["tableData[approversDate]"]         = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID:                143,
+					moduleID:                MODULE_ID,
 					tableID: 				 id,
 					notificationTitle:       "Production",
 					notificationDescription: `${getFormCode("PDN", createdAt, id)}: Your request has been denied.`,
@@ -3456,6 +3225,9 @@ $(document).ready(function () {
 	// ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
+		if (tab == "#forViewingTab") {
+			forViewingContent();
+		}
 		if (tab == "#forApprovalTab") {
 			forApprovalContent();
 		}

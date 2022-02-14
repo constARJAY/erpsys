@@ -19,6 +19,14 @@ class Petty_cash_request extends CI_Controller {
         $this->load->view("template/footer");
     }
 
+    public function insertLiquidation()
+    {
+        $pettyCashRequestID = $this->input->post("pettyCashRequestID") ?? 0;
+        echo json_encode($this->pettycashrequest->insertLiquidation($pettyCashRequestID));
+    }
+
+
+
     public function savePettyCashRequest()
     {
         $action                             = $this->input->post("action");
@@ -64,7 +72,7 @@ class Petty_cash_request extends CI_Controller {
             if ($method == "cancelform") {
                 $pettyCashRequestData = [
                     "pettyCashRequestStatus" => 4,
-                    "updatedBy"             => $updatedBy,
+                    "updatedBy"              => $updatedBy,
                 ];
             } else if ($method == "approve") {
                 $pettyCashRequestData = [
@@ -156,43 +164,6 @@ class Petty_cash_request extends CI_Controller {
         }
         echo json_encode($savePettyCashRequestData);
     }
-
-
-
-
-    // public function getTableData() 
-    // {
-    //     $tableName    = $this->input->post("tableName");
-    //     $columnName   = $this->input->post("columnName"); 
-    //     $searchFilter = $this->input->post("searchFilter");
-    //     $orderBy      = $this->input->post("orderBy");
-    //     echo json_encode($this->company_setup->getTableData($tableName, $columnName, $searchFilter, $orderBy));
-    // }
-
-    // public function updateTableData()
-    // {
-    //     $tableName   = $this->input->post("tableName") ? $this->input->post("tableName") : null;
-    //     $tableData   = $this->input->post("tableData") ? $this->input->post("tableData") : false;
-    //     $whereFilter = $this->input->post("whereFilter") ? $this->input->post("whereFilter") : false;
-    //     $feedback    = $this->input->post("feedback")  ? $this->input->post("feedback") : null;
-    //     $data = array();
-
-    //     // $uploadedFiles = $this->getUploadedFiles();
-    //     // if ($uploadedFiles) {
-    //     //     foreach ($uploadedFiles as $fileKey => $fileValue) {
-    //     //         $data[$fileKey] = $fileValue;
-    //     //     }
-    //     // }
-        
-    //     if ($tableName && $tableData && $whereFilter) {
-    //         foreach ($tableData as $key => $value) {
-    //             $data[$key] = $value;
-    //         }
-    //         echo json_encode($this->company_setup->updateTableData($tableName, $data, $whereFilter, $feedback));
-    //     } else {
-    //         echo json_encode("false|Invalid arguments");
-    //     }
-    // }
 
 }
 ?>

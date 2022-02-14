@@ -42,36 +42,38 @@ class Leave_request extends CI_Controller {
         $approversDate              = $this->input->post("approversDate") ?? null;
         $leaveRequestStatus         = $this->input->post("leaveRequestStatus");
         $leaveRequestRemarks        = $this->input->post("leaveRequestRemarks") ?? null;
+        $leaveRequestRecommendation = $this->input->post("leaveRequestRecommendation") ?? null;
         $submittedAt                = $this->input->post("submittedAt") ?? null;
         $createdBy                  = $this->input->post("createdBy");
         $updatedBy                  = $this->input->post("updatedBy");
         $createdAt                  = $this->input->post("createdAt");
 
         $leaveRequestData = [
-            "reviseLeaveRequestID"          => $reviseLeaveRequestID,
-            "employeeID"                    => $employeeID,
-            "leaveRequestCode"              => $leaveRequestCode,
-            "leaveRequestDate"              => $leaveRequestDate,
-            "leaveRequestDateFrom"          => $leaveRequestDateFrom,
-            "leaveRequestDateTo"            => $leaveRequestDateTo,
-            "leaveRequestNumberOfDate"      => $leaveRequestNumberOfDate,
-            "leaveID"                       => $leaveID,
-            "leaveName"                     => $leaveName,
-            "leaveRequestRemainingLeave"    => $leaveRequestRemainingLeave,
-            "leaveStatus"                   => $leaveStatus,
-            "leaveWorkingDay"               => $leaveWorkingDay,
-            "timeIn"                        => $timeIn,
-            "timeOut"                       => $timeOut,
-            "leaveRequestRemarks"           => $leaveRequestRemarks,
-            "approversID"                   => $approversID,
-            "approversStatus"               => $approversStatus,
-            "approversDate"                 => $approversDate,
-            "leaveRequestStatus"            => $leaveRequestStatus,
-            "leaveRequestReason"            => $leaveRequestReason,
-            "submittedAt"                   => $submittedAt,
-            "createdBy"                     => $createdBy,
-            "updatedBy"                     => $updatedBy,
-            "createdAt"                     => $createdAt
+            "reviseLeaveRequestID"       => $reviseLeaveRequestID,
+            "employeeID"                 => $employeeID,
+            "leaveRequestCode"           => $leaveRequestCode,
+            "leaveRequestDate"           => $leaveRequestDate,
+            "leaveRequestDateFrom"       => $leaveRequestDateFrom,
+            "leaveRequestDateTo"         => $leaveRequestDateTo,
+            "leaveRequestNumberOfDate"   => $leaveRequestNumberOfDate,
+            "leaveID"                    => $leaveID,
+            "leaveName"                  => $leaveName,
+            "leaveRequestRemainingLeave" => $leaveRequestRemainingLeave,
+            "leaveStatus"                => $leaveStatus,
+            "leaveWorkingDay"            => $leaveWorkingDay,
+            "timeIn"                     => $timeIn,
+            "timeOut"                    => $timeOut,
+            "leaveRequestRemarks"        => $leaveRequestRemarks,
+            "leaveRequestRecommendation" => $leaveRequestRecommendation,
+            "approversID"                => $approversID,
+            "approversStatus"            => $approversStatus,
+            "approversDate"              => $approversDate,
+            "leaveRequestStatus"         => $leaveRequestStatus,
+            "leaveRequestReason"         => $leaveRequestReason,
+            "submittedAt"                => $submittedAt,
+            "createdBy"                  => $createdBy,
+            "updatedBy"                  => $updatedBy,
+            "createdAt"                  => $createdAt
         ];
 
         $uploadedMultipleFiles = getUploadedMultipleFiles($_POST, $_FILES);
@@ -100,6 +102,12 @@ class Leave_request extends CI_Controller {
                     "leaveRequestStatus" => $leaveRequestStatus,
                     "updatedBy"          => $updatedBy,
                 ];
+
+                if ($leaveRequestRecommendation && $leaveRequestRecommendation != "undefined") {
+                    $leaveRequestData['leaveRequestRecommendation'] = $leaveRequestRecommendation;
+                } else {
+                    unset($leaveRequestData['leaveRequestRecommendation']);
+                }
             } else if ($method == "deny") {
                 $leaveRequestData = [
                     "approversStatus"     => $approversStatus,
@@ -122,7 +130,8 @@ class Leave_request extends CI_Controller {
         if ($result[0] == "true") {
             $leaveRequestID = $result[2];
             if ($leaveRequestData['leaveRequestStatus'] == '2') {
-                $insertProduction = $this->leaverequest->insertProduction($leaveRequestID, $employeeID);
+                $insertProduction    = $this->leaverequest->insertProduction($leaveRequestID, $employeeID);
+                $updateEmployeeLeave = $this->leaverequest->updateEmployeeLeave($leaveRequestID);
             }
         }
 

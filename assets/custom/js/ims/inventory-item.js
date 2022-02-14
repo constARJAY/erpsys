@@ -81,6 +81,7 @@ $(document).ready(function(){
                         itemID,
                         itemCode,
                         itemName,
+                        itemType,
                         brandName,
                         classificationID,
                         categoryID,
@@ -120,7 +121,10 @@ $(document).ready(function(){
                         <td>${classificationName}</td>
                         <td>${categoryName}</td>
                         <td>${unitOfMeasurementID.charAt(0).toUpperCase() + unitOfMeasurementID.slice(1)}</td>
-                        <td style="white-space: normal;">${itemDescription}</td>
+                        <td style="white-space: normal;">
+                            <div>${itemDescription || "-"}</div>
+                            <small>${itemType || ""}</small>
+                        </td>
                         <td>${reOrderLevel}</td>
                         <td class="text-center">${status}</td>
                     </tr>`;
@@ -287,6 +291,7 @@ $(document).ready(function(){
             itemID              = "",
             inventoryStorageID  = "",
             itemName            = "",
+            itemType            = "",
             classificationID    = "",
             categoryID          = "",
             itemSize            = "",
@@ -299,7 +304,7 @@ $(document).ready(function(){
             unitOfMeasurementID = "",
             itemStatus          = ""
         }= data && data[0];     
-        // classificationContent(data);
+        
         let button = itemID ? `
         <button 
             class="btn btn-update px-5 p-2" 
@@ -321,7 +326,7 @@ $(document).ready(function(){
                 <div class="row">
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Brand Name <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Brand Name <code>*</code></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
@@ -339,7 +344,7 @@ $(document).ready(function(){
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Item Name <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Item Name <code>*</code></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
@@ -357,7 +362,7 @@ $(document).ready(function(){
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Item Classification <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Item Classification <code>*</code></label>
                             <select 
                                 class="form-control select2 validate" 
                                 style="width: 100%"
@@ -371,7 +376,7 @@ $(document).ready(function(){
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Item Category <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Item Category <code>*</code></label>
                             <select 
                             class="form-control select2 validate" 
                             style="width: 100%"
@@ -383,48 +388,27 @@ $(document).ready(function(){
                             <div class="invalid-feedback d-block" id="invalid-input_categoryID"></div>
                         </div>
                     </div>
-                    <!--
+
                     <div class="col-md-4 col-sm-12">
                         <div class="form-group">
-                            <label>Item Size <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Item Type <code>*</code></label>
                             <select 
                                 class="form-control select2 validate" 
                                 style="width: 100%"
-                                id="input_itemSize" 
-                                name="itemSize"
-                                autocomplete="off"
+                                id="itemType" 
+                                name="itemType"
                                 required>
-                                <option 
-                                    value="" 
-                                    disabled 
-                                    selected
-                                    ${!data && "selected"} >Select Item Size</option>
-                                <option 
-                                    value="" 
-                                    ${data && itemSize == "N/A" && "selected"} > N/A</option>
-                                <option 
-                                    value="Extra Small" 
-                                    ${data && itemSize == "Extra Small" && "selected"} > Extra Small</option>
-                                <option 
-                                    value="Small" 
-                                    ${data && itemSize == "Small" && "selected"} >Small</option>
-                                <option 
-                                    value="Medium" 
-                                    ${data && itemSize == "Medium" && "selected"}  >Medium</option>
-                                <option 
-                                    value="Large" 
-                                    ${data && itemSize == "Large" && "selected"} >Large</option>
-                                <option 
-                                    value="Extra Large" 
-                                    ${data && itemSize == "Extra Large" && "selected"}  >Extra Large</option>
+                                <option value="" selected disabled>Select Item Type</option>
+                                <option value="Consumables" ${itemType == "Consumables" ? "selected" : ""}>Consumables</option>
+                                <option value="Hardware" ${itemType == "Hardware" ? "selected" : ""}>Hardware</option>
                             </select>
-                            <div class="invalid-feedback d-block" id="invalid-input_itemSize"></div>
+                            <div class="invalid-feedback d-block" id="invalid-itemType"></div>
                         </div>
                     </div>
-                    -->
-                    <div class="col-md-6 col-sm-12">
+
+                    <div class="col-md-4 col-sm-12">
                         <div class="form-group">
-                            <label>Unit of Measurement <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Unit of Measurement <code>*</code></label>
                             <select 
                                 class="form-control select2 validate" 
                                 style="width: 100%"
@@ -438,9 +422,9 @@ $(document).ready(function(){
                         </div>
                     </div>
 
-                    <div class="col-md-6 col-sm-12">
+                    <div class="col-md-4 col-sm-12">
                         <div class="form-group">
-                            <label>Re-order Level <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Re-order Level <code>*</code></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
@@ -458,7 +442,7 @@ $(document).ready(function(){
                     
                     <div class="col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label>Item Description <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Item Description <code>*</code></label>
                             <textarea style="resize:none; white-space:wrap;" row="3" class="form-control validate" name="itemDescription" id="inputItemDescription" 
                                     data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="2" maxlength="250" required >${itemDescription}</textarea>
                             <div class="invalid-feedback d-block" id="invalid-inputItemDescription"></div>

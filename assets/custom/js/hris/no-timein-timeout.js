@@ -1,8 +1,12 @@
 $(document).ready(function () {
-	const allowedUpdate = isUpdateAllowed(57);
+
+	const MODULE_ID = 57;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing = false;
 
 	// ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("no time in/out");
+	const moduleApprover = getModuleApprover(MODULE_ID);
 	// ----- END MODULE APPROVER -----
 
 
@@ -154,53 +158,31 @@ $(document).ready(function () {
 
 	// ----- DATATABLES -----
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
+		["#tableForApproval", "#tableMyForms", "#tableForViewing"].map(element => {
+			if ($.fn.DataTable.isDataTable(element)) {
+				$(element).DataTable().destroy();
+			}
 
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
-
-		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				scrollCollapse: true,
-				sorting: [],
-				columnDefs: [
-					{ targets: 0, width: 100 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 250 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 300 },
-					{ targets: 5, width: 80  },
-					{ targets: 6, width: 200 },
-				],
-			});
-
-		var table = $("#tableMyForms")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				scrollCollapse: true,
-				sorting: [],
-				columnDefs: [
-					{ targets: 0, width: 100 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 250 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 300 },
-					{ targets: 5, width: 80  },
-					{ targets: 6, width: 200 },
-				],
-			});
+			var table = $(element)
+				.css({ "min-width": "100%" })
+				.removeAttr("width")
+				.DataTable({
+					proccessing: false,
+					serverSide: false,
+					scrollX: true,
+					scrollCollapse: true,
+					sorting: [],
+					columnDefs: [
+						{ targets: 0, width: 100 },
+						{ targets: 1, width: 150 },
+						{ targets: 2, width: 250 },
+						{ targets: 3, width: 150 },
+						{ targets: 4, width: 300 },
+						{ targets: 5, width: 80  },
+						{ targets: 6, width: 200 },
+					],
+				});
+		})
 	}
 	// ----- END DATATABLES -----
 
@@ -208,7 +190,7 @@ $(document).ready(function () {
 	// ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_no_timein_timeout_tbl", "approversID")) {
+			if (isImModuleApprover("hris_no_timein_timeout_tbl", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_no_timein_timeout_tbl", "noTimeinTimeoutStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
@@ -216,6 +198,7 @@ $(document).ready(function () {
 				<div class="row clearfix appendHeader">
 					<div class="col-12">
 						<ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}	
 							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
 							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
 						</ul>
@@ -251,6 +234,104 @@ $(document).ready(function () {
 	// ----- END HEADER BUTTON -----
 
 
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent").html(preloader);
+
+		let noTimeinTimeoutData = getTableData(
+			`hris_no_timein_timeout_tbl AS notime
+			LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
+			`notime.noTimeinTimeoutID, 
+			notime.employeeID,
+			notime.noTimeinTimeoutDate, 
+			notime.noTimeinTimeoutTimeIn,
+			notime.noTimeinTimeoutTimeOut,
+			notime.noTimeinTimeoutReason,
+			notime.approversID,
+			notime.approversStatus,
+			notime.approversDate,
+			notime.noTimeinTimeoutStatus,
+			notime.noTimeinTimeoutRemarks,
+			notime.submittedAt,
+			notime.createdBy,
+			notime.updatedBy,
+			notime.createdAt,
+			notime.updatedAt,
+			hris_employee_list_tbl.employeeFirstname, 
+			hris_employee_list_tbl.employeeLastname`,
+			`notime.employeeID != ${sessionID} AND noTimeinTimeoutStatus != 0 AND noTimeinTimeoutStatus != 4 AND noTimeinTimeoutStatus = 2`,
+			`FIELD(noTimeinTimeoutStatus, 0, 1, 3, 2, 4), COALESCE(notime.submittedAt, notime.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
+            <thead>
+				<tr style="white-space: nowrap">
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Reason</th>
+					<th>Current Approver</th>
+					<th>Date</th>
+					<th>Status</th>
+					<th>Remarks</th>
+				</tr>
+            </thead>
+            <tbody>`;
+
+		noTimeinTimeoutData.map((item) => {
+
+			let {
+				noTimeinTimeoutID,
+				noTimeinTimeoutDate,
+				noTimeinTimeoutReason,
+				approversID,
+				approversDate,
+				noTimeinTimeoutStatus,
+				noTimeinTimeoutRemarks,
+				submittedAt,
+				createdAt,
+				employeeFirstname,
+				employeeLastname
+			} = item;
+
+			let remarks       = noTimeinTimeoutRemarks ? noTimeinTimeoutRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = noTimeinTimeoutStatus == 2 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
+			html += `
+			<tr class="btnEdit btnView" id="${encryptString(noTimeinTimeoutID)}" isForViewing="true">
+				<td>${getFormCode("NTI", createdAt, noTimeinTimeoutID)}</td>
+				<td>${employeeFirstname + ' ' +employeeLastname}</td>
+				<td>
+					<div>${noTimeinTimeoutDate ? moment(noTimeinTimeoutDate).format("MMMM DD, YYYY") : ""}</div>
+					<samll>${noTimeinTimeoutReason}</samll>
+				</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, noTimeinTimeoutStatus, true))}
+				</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">${getStatusStyle(noTimeinTimeoutStatus)}</td>
+				<td>${remarks}</td>
+			</tr>`;
+			
+		});
+
+		html += `
+            </tbody>
+        </table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 500);
+	}
+	// ----- END FOR VIEWING CONTENT -----
+
+
 	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
@@ -281,7 +362,7 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
             <thead>
 				<tr style="white-space: nowrap">
 					<th>Document No.</th>
@@ -299,6 +380,8 @@ $(document).ready(function () {
 
 			let {
 				noTimeinTimeoutID,
+				noTimeinTimeoutDate,
+				noTimeinTimeoutReason,
 				approversID,
 				approversDate,
 				noTimeinTimeoutStatus,
@@ -347,7 +430,6 @@ $(document).ready(function () {
 		setTimeout(() => {
 			$("#tableForApprovalParent").html(html);
 			initDataTables();
-			return html;
 		}, 500);
 	}
 	// ----- END FOR APPROVAL CONTENT -----
@@ -921,6 +1003,10 @@ $(document).ready(function () {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -1135,7 +1221,7 @@ $(document).ready(function () {
 				pageContent();
 	
 				if (employeeID != sessionID) {
-					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+					$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
 				}
 			}
 		} else {
@@ -1171,6 +1257,7 @@ $(document).ready(function () {
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		viewDocument(id);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1583,6 +1670,9 @@ $(document).ready(function () {
 		}
 		if (tab == "#myFormsTab") {
 			myFormsContent();
+		}
+		if (tab == "#forViewingTab") {
+			forViewingContent();
 		}
 	});
 	// ----- END NAV LINK -----

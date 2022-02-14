@@ -8,7 +8,7 @@ class ApprovalSetup_model extends CI_Model {
         // $data Variables
         $sessionID      =   $this->session->userdata('adminSessionID');
         $moduleID       =   $data["moduleID"];
-        $designationID         =   $data["designationID"];
+        $designationID  =   $data["designationID"];
         $userAccountID  =   $data["userAccountID"];
 
         // Getting the module Name
@@ -19,8 +19,8 @@ class ApprovalSetup_model extends CI_Model {
         
 
         // Array Variable
-        $designationID_array           =   explode("|", $designationID);
-        $userAccountID_array    =   explode(",", $userAccountID);
+        $designationID_array =   explode("|", $designationID);
+        $userAccountID_array =   explode(",", $userAccountID);
 
         // DELETE BEFORE INSERTING NEW DATA
         $deleteSql      = "DELETE FROM `gen_approval_setup_tbl` WHERE moduleID = $moduleID";
@@ -30,6 +30,7 @@ class ApprovalSetup_model extends CI_Model {
             $indexRoles =   0;
             foreach($designationID_array as $designations){
                 $userAccountID_value = $userAccountID_array[$indexRoles];
+                $userAccountID_value = $userAccountID_value != 'undefined' ? $userAccountID_value : '0';
                 $insertSql      = "INSERT INTO gen_approval_setup_tbl SET 
                                 `moduleID`      = '$moduleID',
                                 `moduleName`    = '$moduleName',
@@ -55,11 +56,11 @@ class ApprovalSetup_model extends CI_Model {
         foreach ($query->result_array() as $key => $value) {
             array_push($undefinedID, $value["approvalID"]);
         }
-        $undefinedIDString = join(", ", $undefinedID);
-         
-        $updateSql = "UPDATE gen_approval_setup_tbl SET userAccountID = '0' WHERE approvalID IN ($undefinedIDString)";
-        
-        $this->db->query($updateSql);
+        if ($undefinedID && !empty($undefinedID)) {
+            $undefinedIDString = join(", ", $undefinedID);
+            $updateSql = "UPDATE gen_approval_setup_tbl SET userAccountID = '0' WHERE approvalID IN ($undefinedIDString)";
+            $this->db->query($updateSql);
+        }
     }
 
 }

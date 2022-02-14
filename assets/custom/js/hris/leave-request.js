@@ -5,9 +5,11 @@ $(document).ready(function() {
 
 	const MODULE_ID = 55;
 	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing = false;
+
+
     // ----- MODULE APPROVER -----
-
-
 	const moduleApprover = getModuleApprover(MODULE_ID);
 	// ----- END MODULE APPROVER -----
 
@@ -38,7 +40,7 @@ $(document).ready(function() {
 
 	let leaveType = getTableData(
 		`hris_leave_tbl AS hlt WHERE leaveStatus = 1`,
-		`hlt.*, (SELECT leaveCredit FROM hris_employee_leave_tbl WHERE leaveID = hlt.leaveID AND employeeID = 1) AS leaveCredit`);
+		`hlt.*, (SELECT leaveCredit FROM hris_employee_leave_tbl WHERE leaveID = hlt.leaveID AND employeeID = ${sessionID}) AS leaveCredit`);
 
 	function getDateInRange(dateFrom = '', dateTo = '') {
 		let result = [];
@@ -77,55 +79,32 @@ $(document).ready(function() {
 
 	// ----- DATATABLES -----
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
-
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
-
-		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },	
-					{ targets: 3,  width: 250 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 300 },
-					{ targets: 6,  width: 80  },
-					{ targets: 7,  width: 200 }
-				],
-			});
-
-		var table = $("#tableMyForms")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },	
-					{ targets: 3,  width: 250 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 300 },
-					{ targets: 6,  width: 80  },
-					{ targets: 7,  width: 200 }
-				],
-			});
+		["#tableForApproval", "#tableMyForms", "#tableForViewing"].map(element => {
+			if ($.fn.DataTable.isDataTable(element)) {
+				$(element).DataTable().destroy();
+			}
+			
+			var table = $(element)
+				.css({ "min-width": "100%" })
+				.removeAttr("width")
+				.DataTable({
+					proccessing: false,
+					serverSide: false,
+					scrollX: true,
+					sorting: [],
+					scrollCollapse: true,
+					columnDefs: [
+						{ targets: 0,  width: 100 },
+						{ targets: 1,  width: 150 },
+						{ targets: 2,  width: 150 },	
+						{ targets: 3,  width: 250 },
+						{ targets: 4,  width: 150 },
+						{ targets: 5,  width: 300 },
+						{ targets: 6,  width: 80  },
+						{ targets: 7,  width: 200 }
+					],
+				});
+		});
 	}
 	// ----- END DATATABLES -----
 
@@ -230,7 +209,8 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					pageContent(true);
+					const isAllowed = isCreateAllowed(MODULE_ID);
+					pageContent(isAllowed);
 				}
 			}
 		}
@@ -277,7 +257,7 @@ $(document).ready(function() {
 	// ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_leave_request_tbl", "approversID")) {
+			if (isImModuleApprover("hris_leave_request_tbl", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_leave_request_tbl", "leaveRequestStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
@@ -285,6 +265,7 @@ $(document).ready(function() {
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
                             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
@@ -299,18 +280,19 @@ $(document).ready(function() {
 	// ----- END HEADER CONTENT -----
 
 
-	// ----- FOR APPROVAL CONTENT -----
-	function forApprovalContent() {
-		$("#tableForApprovalParent").html(preloader);
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent").html(preloader);
+
 		let leaveRequestData = getTableData(
 			"hris_leave_request_tbl AS hlrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)",
 			"hlrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hlrt.createdAt AS dateCreated",
-			`hlrt.employeeID != ${sessionID} AND leaveRequestStatus != 0 AND leaveRequestStatus != 4`,
+			`hlrt.employeeID != ${sessionID} AND leaveRequestStatus != 0 AND leaveRequestStatus != 4 AND leaveRequestStatus = 2`,
 			`FIELD(leaveRequestStatus, 0, 6, 1, 2, 3, 4, 5, 7), COALESCE(hlrt.submittedAt, hlrt.createdAt)`
 		);
 
 		let html = `
-		<table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+		<table class="table table-bordered table-striped table-hover" id="tableForViewing">
 			<thead>
 				<tr style="white-space: nowrap">
 					<th>Document No.</th>
@@ -346,13 +328,105 @@ $(document).ready(function() {
 				approversID,
 				approversDate,
 				leaveRequestStatus,
+				leaveRequestRecommendation,
 				leaveRequestRemarks,
 				leaveRequestReason,
 				submittedAt,
 				createdAt,
 			} = item;
 
-			let remarks       = leaveRequestRemarks ? leaveRequestRemarks : "-";
+			let remarks       = leaveRequestRemarks ? leaveRequestRemarks : (leaveRequestRecommendation || "-");
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "";
+			let dateApproved  = leaveRequestStatus == 2 || leaveRequestStatus == 5 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
+			let btnClass = leaveRequestStatus != 0 ? "btnView" : "btnEdit";
+			html += `
+			<tr class="${btnClass}" id="${encryptString(leaveRequestID)}" isForViewing="true">
+				<td>${getFormCode("LRF", createdAt, leaveRequestID )}</td>
+				<td>${fullname}</td>
+				<td>${leaveName || "-"}</td>
+				<td>
+					<div>${leaveRequestDate || "-"}</div>
+					<small>${leaveRequestReason || ""}</small>
+				</td>
+				<td>${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">${getStatusStyle(leaveRequestStatus)}</td>
+				<td>${remarks}</td>
+			</tr>`;
+		});
+
+		html += `
+			</tbody>
+		</table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 300);
+	}
+	// ----- END FOR VIEWING CONTENT -----
+
+
+	// ----- FOR APPROVAL CONTENT -----
+	function forApprovalContent() {
+		$("#tableForApprovalParent").html(preloader);
+		let leaveRequestData = getTableData(
+			"hris_leave_request_tbl AS hlrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)",
+			"hlrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hlrt.createdAt AS dateCreated",
+			`hlrt.employeeID != ${sessionID} AND leaveRequestStatus != 0 AND leaveRequestStatus != 4`,
+			`FIELD(leaveRequestStatus, 0, 6, 1, 2, 3, 4, 5, 7), COALESCE(hlrt.submittedAt, hlrt.createdAt)`
+		);
+
+		let html = `
+		<table class="table table-bordered table-striped table-hover" id="tableForApproval">
+			<thead>
+				<tr style="white-space: nowrap">
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Leave Type</th>
+					<th>Reason</th>
+					<th>Current Approver</th>
+					<th>Date</th>
+					<th>Status</th>
+					<th>Remarks</th>
+				</tr>
+			</thead>
+			<tbody>`;
+
+		leaveRequestData.map((item) => {
+			let {
+				fullname,
+				leaveRequestID,
+				reviseLeaveRequestID,
+				leaveRequestCode,
+				leaveRequestDate,
+				leaveRequestDateFrom,
+				leaveRequestDateTo,
+				leaveRequestNumberOfDate,
+				leaveID,
+				leaveName,
+				leaveRequestRemainingLeave,
+				leaveStatus,
+				leaveWorkingDay,
+				timeIn,
+				timeOut,
+				leaveDocuments,
+				approversID,
+				approversDate,
+				leaveRequestStatus,
+				leaveRequestRecommendation,
+				leaveRequestRemarks,
+				leaveRequestReason,
+				submittedAt,
+				createdAt,
+			} = item;
+
+			let remarks       = leaveRequestRemarks ? leaveRequestRemarks : (leaveRequestRecommendation || "-");
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "";
 			let dateApproved  = leaveRequestStatus == 2 || leaveRequestStatus == 5 ? approversDate.split("|") : "-";
@@ -439,13 +513,14 @@ $(document).ready(function() {
 				approversID,
 				approversDate,
 				leaveRequestStatus,
+				leaveRequestRecommendation,
 				leaveRequestRemarks,
 				leaveRequestReason,
 				submittedAt,
 				createdAt,
 			} = data;
 
-			let remarks       = leaveRequestRemarks ? leaveRequestRemarks : "-";
+			let remarks       = leaveRequestRemarks ? leaveRequestRemarks : (leaveRequestRecommendation || "-");
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "";
 			let dateApproved  = leaveRequestStatus == 2 || leaveRequestStatus == 5 ? approversDate.split("|") : "-";
@@ -498,6 +573,10 @@ $(document).ready(function() {
                 </div>
                 <div role="tabpanel" class="tab-pane active" id="myFormsTab" aria-expanded="false">
                     <div class="table-responsive" id="tableMyFormsParent">
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
                     </div>
                 </div>
             </div>`;
@@ -793,8 +872,8 @@ $(document).ready(function() {
 				}
 			}
 
-			$(`[name="leaveRequestDate"]`).removeClass("is-invalid").removeClass("is-valid");
-			$(`#invalid-leaveRequestDate`).text("");
+			$(`[name="leaveRequestDate"], [name="timeIn"], [name="timeOut"]`).removeClass("is-invalid").removeClass("is-valid");
+			$(`#invalid-leaveRequestDate, #invalid-timeIn, #invalid-timeOut`).text("");
 		});
 
 		if (leaveID) {
@@ -807,6 +886,8 @@ $(document).ready(function() {
 			$(`[name="leaveRequestNumberOfDate"]`).val(dayCount);
 			$(`[name="leaveRequestDate"]`).attr("dayCount", dayCount);
 			$(`[name="leaveWorkingDay"]`).val('1').trigger("change").attr("disabled", false);
+			$(`[name="timeIn"], [name="timeOut"]`).removeClass("is-invalid").removeClass("is-valid");
+			$(`#invalid-timeIn, #invalid-timeOut`).text("");
 		}
 	}
 	// ----- END INIT DATERANGEPICKER -----
@@ -839,6 +920,7 @@ $(document).ready(function() {
 			approversStatus				= "",
 			approversDate				= "",
 			leaveRequestStatus			= "",
+			leaveRequestRecommendation  = "",
 			leaveRequestRemarks			= "",
 			leaveRequestReason			= "",
 			submittedAt					= "",
@@ -853,15 +935,8 @@ $(document).ready(function() {
 		} = employeeData(data ? employeeID : sessionID);
 		// ----- END GET EMPLOYEE DATA -----
 
-		let disabledFileLeave = "disabled";
-		let isLastApprover = false;
-		if(approversID && leaveRequestStatus == "1") {
-			let approversArray  = approversID?.split("|");
-			let lastlength 		= approversArray.length;
-			let lastApproverID 	= approversArray[parseInt(lastlength) - 1];
-			disabledFileLeave 	= lastApproverID == sessionID ? "" : "disabled";
-			isLastApprover      = disabledFileLeave ? false : true;
-		}
+		let isLastApprover    = isImLastApprover(approversID, approversDate, true);
+		let disabledFileLeave = !isLastApprover ? "disabled" : "";
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
@@ -955,7 +1030,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
                         <h6 class="mt-0 font-weight-bold">
-							${leaveRequestRemarks && !isRevise ? leaveRequestRemarks : "---"}
+							${leaveRequestRemarks && !isRevise ? leaveRequestRemarks : (leaveRequestRecommendation || "---")}
 						</h6>      
                     </div>
                 </div>
@@ -1100,6 +1175,7 @@ $(document).ready(function() {
 			initDataTables();
 			initAll();
 			!disabled && initDateRangePicker(leaveID, leaveRequestDateFrom, leaveRequestDateTo);
+			$("#modal_leave_request_content").attr("approve", isImFirstApprover);
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -1111,6 +1187,7 @@ $(document).ready(function() {
 				$('#btnBack').attr("status", "2");
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
 
 		}, 200);
 	}
@@ -1394,6 +1471,7 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1438,7 +1516,7 @@ $(document).ready(function() {
 				pageContent();
 	
 				if (employeeID != sessionID) {
-					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+					$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
 				}
 			}
 
@@ -1475,15 +1553,6 @@ $(document).ready(function() {
 			}
 		} 
 		saveleaveRequest(data, "save", null, pageContent);
-
-		
-		// let btnBackCondition = $("#btnBack").attr("status");
-		// if(btnBackCondition != "7"){
-		// 	saveleaveRequest(data, "save", null, pageContent);
-		// }else{ 
-		// 	$("#page_content").html(preloader);
-		// 	pageContent();
-		// }
 	});
 	// ----- END SAVE DOCUMENT -----
 
@@ -1559,6 +1628,43 @@ $(document).ready(function() {
 
 
 	// ----- APPROVE DOCUMENT -----
+	function approveDocument(id = '', feedback = '', employeeID = '', approversID = '', approversDate = '', approversStatus = '') {
+		let leaveStatus = $(`[name=leaveStatus]`).val();
+
+		let data = getleaveRequestData("update", "approve", "2", id);
+		data.append("approversStatus", updateApproveStatus(approversStatus, 2));
+		let dateApproved = updateApproveDate(approversDate)
+		data.append("approversDate", dateApproved);
+		data.append("leaveRequestRecommendation", 	$("[name=leaveRequestRecommendation]").val()?.trim());
+
+		let status, notificationData;
+		if (isImLastApprover(approversID, approversDate)) {
+			status = 2;
+			notificationData = {
+				moduleID:                MODULE_ID,
+				tableID:                 id,
+				notificationTitle:       "Leave Request",
+				notificationDescription: `${feedback}: Your request has been approved.`,
+				notificationType:        7,
+				employeeID,
+			};
+		} else {
+			status = 1;
+			notificationData = {
+				moduleID:                MODULE_ID,
+				tableID:                 id,
+				notificationTitle:       "Leave Request",
+				notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
+				notificationType:         2,
+				employeeID:               getNotificationEmployeeID(approversID, dateApproved),
+			};
+		}
+
+		data.append("leaveRequestStatus", status);
+		data.append("leaveStatus", leaveStatus);
+		saveleaveRequest(data, "approve", notificationData, pageContent, id);
+	}
+
 	$(document).on("click", "#btnApprove", function () {
 		const id       		= decryptString($(this).attr("leaveRequestID"));
 		const feedback 		= $(this).attr("code") || getFormCode("LRF", dateToday(), id);
@@ -1571,50 +1677,77 @@ $(document).ready(function() {
 			showNotification("danger", "Insufficient leave credits.")
 		} else {
 			let tableData  		= getTableData("hris_leave_request_tbl", "", "leaveRequestID = " + id);
-		
 			let leaveRequestID  = tableData[0].leaveRequestID;
 			let approversID     = tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
 			let approversDate   = tableData[0].approversDate;
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
-			let leaveStatus 	= $(`[name=leaveStatus]`).val();
-	
-			let data = getleaveRequestData("update", "approve", "2", id);
-			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
-			let dateApproved = updateApproveDate(approversDate)
-			data.append("approversDate", dateApproved);
-	
-			let status, notificationData;
-			if (isImLastApprover(approversID, approversDate)) {
-				status = 2;
-				notificationData = {
-					moduleID:                MODULE_ID,
-					tableID:                 id,
-					notificationTitle:       "Leave Request",
-					notificationDescription: `${feedback}: Your request has been approved.`,
-					notificationType:        7,
-					employeeID,
-				};
-			} else {
-				status = 1;
-				notificationData = {
-					moduleID:                MODULE_ID,
-					tableID:                 id,
-					notificationTitle:       "Leave Request",
-					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
-					notificationType:         2,
-					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
-				};
-			}
-	
-			data.append("leaveRequestStatus", status);
-			data.append("leaveStatus", leaveStatus);
-			saveleaveRequest(data, "approve", notificationData, pageContent, leaveRequestID);
-		}
 
-		
+			if (isImFirstApprover(approversID)) {
+				$("#modal_leave_request_content").attr("approve", true);
+				$("#modal_leave_request_content").html(preloader);
+				$("#modal_leave_request .page-title").text("APPROVE LEAVE REQUEST");
+				$("#modal_leave_request").modal("show");
+				let html = `
+				<div class="modal-body">
+					<div class="form-group">
+						<label><input type="checkbox" name="recommended"> Recommended</label>
+						<textarea class="form-control validate"
+							data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+							minlength="2"
+							maxlength="250"
+							id="leaveRequestRecommendation"
+							name="leaveRequestRecommendation"
+							rows="4"
+							style="resize: none"
+							required
+							disabled></textarea>
+						<div class="d-block invalid-feedback" id="invalid-leaveRequestRecommendation"></div>
+					</div>
+				</div>
+				<div class="modal-footer text-right">
+					<button class="btn btn-danger px-5 p-2" id="btnApproveConfirmation"
+						leaveRequestID="${encryptString(id)}"
+						code="${feedback}"
+						employeeID="${employeeID || ""}"
+						approversID="${approversID || ""}"
+						approversStatus="${approversStatus || ""}"
+						approversDate="${approversDate || ""}"><i class="fas fa-check"></i> Confirm</button>
+					<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+				</div>`;
+				$("#modal_leave_request_content").html(html);
+			} else {
+				approveDocument(id, feedback, employeeID, approversID, approversDate, approversStatus);
+			}
+		}
 	});
+
+	$(document).on("click", "#btnApproveConfirmation", function () {
+		const id              = decryptString($(this).attr("leaveRequestID"));
+		const feedback        = $(this).attr("code") || getFormCode("LRF", dateToday(), id);
+		const employeeID      = $(this).attr("employeeID");
+		const approversID     = $(this).attr("approversID");
+		const approversStatus = $(this).attr("approversStatus");
+		const approversDate   = $(this).attr("approversDate");
+
+		const validate = validateForm("modal_leave_request");
+		if (validate) {
+			approveDocument(id, feedback, employeeID, approversID, approversDate, approversStatus);
+		} 
+	});
+
+	$(document).on("change", `[name="recommended"]`, function() {
+		let isChecked = this.checked;
+		if (isChecked) {
+			$(`[name="leaveRequestRecommendation"]`).removeAttr("disabled");
+		} else {
+			$(`[name="leaveRequestRecommendation"]`).attr("disabled", true);
+			$(`[name="leaveRequestRecommendation"]`).val("");
+			$(`[name="leaveRequestRecommendation"]`).removeClass("is-valid").removeClass("is-invalid");
+			$("#invalid-leaveRequestRecommendation").text("");
+		}
+	})
 	// ----- END APPROVE DOCUMENT -----
 
 
@@ -1622,6 +1755,7 @@ $(document).ready(function() {
 	$(document).on("click", "#btnReject", function () {
 		const id       = decryptString($(this).attr("leaveRequestID"));
 		const feedback = $(this).attr("code") || getFormCode("LRF", dateToday(), id);
+		$("#modal_leave_request_content").attr("approve", false);
 
 		$("#modal_leave_request_content").html(preloader);
 		$("#modal_leave_request .page-title").text("DENY LEAVE REQUEST");
@@ -1673,7 +1807,7 @@ $(document).ready(function() {
 				data.append("updatedBy", 			sessionID);
 
 				let notificationData = {
-					moduleID:                55,
+					moduleID:                MODULE_ID,
 					tableID: 				 id,
 					notificationTitle:       "Leave Request",
 					notificationDescription: `${feedback}: Your request has been denied.`,
@@ -1701,6 +1835,9 @@ $(document).ready(function() {
 		if (tab == "#myFormsTab") {
 			myFormsContent();
 		}
+		if (tab == "#forViewingTab") {
+			forViewingContent();
+		}
 	});
 	// ----- END NAV LINK -----
 
@@ -1709,7 +1846,7 @@ $(document).ready(function() {
 
 	// --------------- DATABASE RELATION ---------------
 	function getConfirmation(method = "submit") {
-		const title = "Leave Request";
+		const title = "LEAVE REQUEST";
 		let swalText, swalImg;
 
 		$("#modal_leave_request").text().length > 0 && $("#modal_leave_request").modal("hide");
@@ -1826,11 +1963,12 @@ $(document).ready(function() {
 										timer:             2000,
 									}).then(function() {
 										callback && callback();
+
+										if (method == "approve" || method == "deny") {
+											$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+										}
 									});
 									
-									if (method == "approve" || method == "deny") {
-										$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-									}
 
 									// ----- SAVE NOTIFICATION -----
 									if (notificationData) {
@@ -1867,18 +2005,19 @@ $(document).ready(function() {
 						}, 500);
 					})
 				} else {
+					let isApprove = $("#modal_leave_request_content").attr("approve") == "true";
 					if (res.dismiss === "cancel") {
 						if(method != "submit"){
-							if (method != "deny") {
+							if (!['deny', 'approve'].includes(method)) {
 								callback && callback();
 							} else {
-								$("#modal_leave_request").text().length > 0 && $("#modal_leave_request").modal("show");
+								($("#modal_leave_request_content").text().length > 0 || isApprove) && $("#modal_leave_request").modal("show");
 							}
 						}
 								
 					} else if (res.isDismissed) {
-						if (method == "deny") {
-							$("#modal_leave_request").text().length > 0 && $("#modal_leave_request").modal("show");
+						if (['deny', 'approve'].includes(method)) {
+							($("#modal_leave_request_content").text().length > 0 || isApprove) && $("#modal_leave_request").modal("show");
 						}
 					}
 				}

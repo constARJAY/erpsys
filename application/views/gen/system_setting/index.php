@@ -22,7 +22,7 @@
                     <div class="card">
                         <div class="body"> 
                             <!-- Nav tabs -->
-                            <ul class="nav nav-tabs">
+                            <ul class="nav nav-tabs justify-content-center">
                                 <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#gen">General Setting</a></li>
                                 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#hris">Human Resources Information Setting</a></li>
                                 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#pms">Project Management Setting</a></li>      
@@ -36,7 +36,7 @@
                                         <div class="col-lg-12 col-12">
                                             <div class="card" style="box-shadow:none !important">
                                                 <div class="card-header d-flex justify-content-between align-items-center bg-black">
-                                                    <h5>Approval</h5>
+                                                    <h5 class="font-weight-bold">APPROVAL</h5>
                                                     
                                                     <button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="approval"><i class="fas fa-save"></i> Update</button>
                                                 </div>
@@ -64,7 +64,7 @@
                                         <div class="col-lg-12 col-12">
                                             <div class="card" style="box-shadow:none !important">
                                                 <div class="card-header  d-flex justify-content-between align-items-center bg-black">
-                                                    <h5>Cut off</h5>
+                                                    <h5 class="font-weight-bold">CUT-OFF</h5>
                                                     <button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="cuttoff"><i class="fas fa-save"></i> Update</button>
                                                 </div>
                                                 <div class="body">
@@ -77,11 +77,23 @@
                                     </div>
                                 </div>
                                 <div role="tabpanel" class="tab-pane" id="pms"> 
-                                    
+                                    <div class="py-5 w-100 h-100 d-flex justify-content-center align-items-center flex-column">
+                                        <img src="<?= base_url('assets/modal/no-data.gif') ?>" style="max-width: 300px;
+                                            width: auto;
+                                            min-width: 100px;
+                                            height: auto;" alt="No data available yet.">
+                                        <span class="font-weight-bold">No data available yet.</span>
+                                    </div>
                                 </div>
 
                                 <div role="tabpanel" class="tab-pane" id="ims"> 
-                                    
+                                    <div class="py-5 w-100 h-100 d-flex justify-content-center align-items-center flex-column">
+                                        <img src="<?= base_url('assets/modal/no-data.gif') ?>" style="max-width: 300px;
+                                            width: auto;
+                                            min-width: 100px;
+                                            height: auto;" alt="No data available yet.">
+                                        <span class="font-weight-bold">No data available yet.</span>
+                                    </div>
                                 </div>
 
                                 <div role="tabpanel" class="tab-pane" id="fms"> 
@@ -89,13 +101,13 @@
                                         <div class="col-lg-12 col-12">
                                             <div class="card" style="box-shadow:none !important">
                                                 <div class="card-header d-flex justify-content-between align-items-center bg-black">
-                                                    <h5>Petty Cash</h5>
+                                                    <h5 class="font-weight-bold">PETTY CASH</h5>
                                                     <button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="pettycash"><i class="fas fa-save"></i> Update</button>
                                                 </div>
                                                 <div class="body">
                                                     <div class="row clear-fix petty-cash-replenishment-row">
                                                         <div class="col-lg-12 col-12">
-                                                            <label for="">Replenishment Limit</label>
+                                                            <label for="">REPLENISHMENT LIMIT</label>
                                                             <p>₱ 0.00</p>
                                                         </div>
                                                     </div>
@@ -106,14 +118,14 @@
                                         <div class="col-lg-12 col-12">
                                             <div class="card" style="box-shadow:none !important">
                                                 <div class="card-header d-flex justify-content-between align-items-center bg-black">
-                                                    <h5>Client Fund</h5>
+                                                    <h5 class="font-weight-bold">CLIENT FUND</h5>
                                                     
                                                     <button type="button" class="btn btn-danger px-5 p-2 btnUpdate" givenaction="clientfund"><i class="fas fa-save"></i> Update</button>
                                                 </div>
                                                 <div class="body">
                                                     <div class="row clear-fix client-fund-replenishment-row">
                                                         <div class="col-lg-12 col-12">
-                                                            <label for="">Replenishment Limit</label>
+                                                            <label for="">REPLENISHMENT LIMIT</label>
                                                             <p>₱ 0.00</p>
                                                         </div>
 

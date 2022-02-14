@@ -1,10 +1,13 @@
 $(document).ready(function() {
 
-    const allowedUpdate = isUpdateAllowed(100);
+	const MODULE_ID     = 110;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing    = false;
 
 
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("payroll module");
+	const moduleApprover = getModuleApprover(MODULE_ID);
 	// ----- END MODULE APPROVER -----
 
 
@@ -162,7 +165,7 @@ $(document).ready(function() {
             }
         }
 
-        ["#tableForApproval", "#tableMyForms", "#tablePayroll"].map(elementID => {
+        ["#tableForViewing", "#tableForApproval", "#tableMyForms", "#tablePayroll"].map(elementID => {
             manipulateDataTables(elementID);
         })
 	}
@@ -290,7 +293,7 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(110)) {
+			if (isCreateAllowed(MODULE_ID)) {
 				html = ``;
 			}
 		} else {
@@ -309,7 +312,7 @@ $(document).ready(function() {
     // ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_payroll_tbl", "approversID")) {
+			if (isImModuleApprover("hris_payroll_tbl", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_payroll_tbl", "payrollStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
@@ -317,6 +320,7 @@ $(document).ready(function() {
 				<div class="row clearfix appendHeader">
 					<div class="col-12">
 						<ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}  
 							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
 							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
 						</ul>
@@ -329,6 +333,96 @@ $(document).ready(function() {
 		}
 	}
 	// ----- END HEADER CONTENT -----
+
+
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent .loader").length == 0 && $("#tableForViewingParent").html(preloader);
+		let payrollData = getTableData(
+			`hris_payroll_tbl AS hpt 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+			"hpt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hpt.createdAt AS dateCreated",
+			`hpt.employeeID <> ${sessionID} AND payrollStatus <> 0 AND payrollStatus <> 4 AND payrollStatus = 2`,
+			`FIELD(payrollStatus, 0, 1, 3, 2, 4, 5), payrollStartDate DESC, COALESCE(hpt.submittedAt, hpt.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
+            <thead>
+                <tr style="white-space: nowrap">
+                    <th>Document No.</th>
+					<th>Reference No.</th>
+                    <th>Prepared By</th>
+                    <th>Payroll Period</th>
+                    <th>Current Approver</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+		payrollData.map((item) => {
+			let {
+				payrollID,
+				payrollCode,
+                revisePayrollID,
+				timekeepingCode,
+                employeeID,
+                fullname,
+                payrollStartDate, 
+                payrollEndDate,
+                payrollReason,
+                approversID,
+                approversStatus,
+                approversDate,
+                payrollStatus,
+                payrollRemarks,
+                submittedAt,
+                createdAt,
+			} = item;
+
+			let remarks       = payrollRemarks ? payrollRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = payrollStatus == 2 || payrollStatus == 5 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+            let payrollDate = "-";
+            if (payrollStartDate && payrollEndDate) {
+                payrollStartDate = moment(payrollStartDate).format("MMMM DD, YYYY");
+                payrollEndDate   = moment(payrollEndDate).format("MMMM DD, YYYY");
+                payrollDate      = `${payrollStartDate} - ${payrollEndDate}`;
+            }
+
+			html += `
+			<tr class="btnView" id="${encryptString(payrollID)}" isForViewing="true">
+				<td>${payrollCode}</td>
+				<td>${timekeepingCode || "-"}</td>
+				<td>${fullname || "-"}</td>
+				<td>${payrollDate}</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, payrollStatus, true))}
+				</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">
+					${getStatusStyle(payrollStatus, employeeID != 0)}
+				</td>
+				<td>${remarks}</td>
+			</tr>`;
+		});
+
+		html += `
+            </tbody>
+        </table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 300);
+	}
+	// ----- END FOR VIEWING CONTENT -----
 
 
 	// ----- FOR APPROVAL CONTENT -----
@@ -1381,6 +1475,10 @@ $(document).ready(function() {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -1410,6 +1508,7 @@ $(document).ready(function() {
     // ----- VIEW/EDIT DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		$("#page_content").html(preloader);
 		setTimeout(() => {
 			viewDocument(id, true);
@@ -1628,30 +1727,16 @@ $(document).ready(function() {
 				const payrollItemID = $(this).attr("payrollItemID");
 				const employeeID    = $(this).attr("employeeID");
 
-				const holdSalary         = $(`[name="holdSalary"]`, this).prop("checked") ? 1 : 0;
-				// const deductMandates     = $(`[name="deductMandates"]`, this).prop("checked") ? 1 : 0;
-				// let sssDeduction         = $(`[name="sssDeduction"]`, this).val();
-				// 	sssDeduction         = getNonFormattedAmount(sssDeduction);
-				// let phicDeduction        = $(`[name="phicDeduction"]`, this).val();
-				// 	phicDeduction        = getNonFormattedAmount(phicDeduction);
-				// let hdmfDeduction        = $(`[name="hdmfDeduction"]`, this).val();
-				// 	hdmfDeduction        = getNonFormattedAmount(hdmfDeduction);
-				// let withHoldingDeduction = $(`[name="withHoldingDeduction"]`, this).val();
-				// 	withHoldingDeduction = getNonFormattedAmount(withHoldingDeduction);
-				let loanDeduction        = $(`[name="loanDeduction"]`, this).val();
-					loanDeduction        = getNonFormattedAmount(loanDeduction);
-				let netPay               = $(`.netPay`, this).text();
-					netPay               = getNonFormattedAmount(netPay);
+				const holdSalary  = $(`[name="holdSalary"]`, this).prop("checked") ? 1 : 0;
+				let loanDeduction = $(`[name="loanDeduction"]`, this).val();
+					loanDeduction = getNonFormattedAmount(loanDeduction);
+				let netPay        = $(`.netPay`, this).text();
+					netPay        = getNonFormattedAmount(netPay);
 
 				let item = {
 					payrollItemID,
 					employeeID,
 					holdSalary,
-					// deductMandates,
-					// sssDeduction,
-					// phicDeduction,
-					// hdmfDeduction,
-					// withHoldingDeduction,
 					loanDeduction,
 					netPay,
 				};
@@ -1664,55 +1749,6 @@ $(document).ready(function() {
 	}
 	// ----- END GET PAYROLL DATA -----
 
-
-	// ----- APPLY MANDATES -----
-	// $(document).on("change", `[name="deductSss"]`, function() {
-	// 	$parent = $(this).closest(`tr`);
-
-	// 	const isChecked = $(this).prop("checked");
-
-	// 	let deduction = $(this).attr("sssBasis") ?? 0;
-	// 		deduction = isChecked ? deduction : 0;
-	// 		deduction = formatAmount(deduction, true);
-
-	// 	$parent.find(`[name="sssDeduction"]`).val(deduction);
-
-	// 	updateWithHoldingTax($parent);
-	// })
-
-	// $(document).on("change", `[name="deductPhic"]`, function() {
-	// 	$parent = $(this).closest(`tr`);
-
-	// 	const isChecked = $(this).prop("checked");
-
-	// 	let deduction = $(this).attr("phicBasis") ?? 0;
-	// 		deduction = isChecked ? deduction : 0;
-	// 		deduction = formatAmount(deduction, true);
-
-	// 	$parent.find(`[name="phicDeduction"]`).val(deduction);
-
-	// 	updateWithHoldingTax($parent);
-	// })
-
-	// $(document).on("change", `[name="deductHdmf"]`, function() {
-	// 	$parent = $(this).closest(`tr`);
-		
-	// 	const isChecked = $(this).prop("checked");
-
-	// 	let deduction = $(this).attr("hdmfBasis") ?? 0;
-	// 		deduction = isChecked ? deduction : 0;
-	// 		deduction = formatAmount(deduction, true);
-
-	// 	$parent.find(`[name="hdmfDeduction"]`).val(deduction);
-
-	// 	updateWithHoldingTax($parent);
-	// })
-
-	// $(document).on("change", `[name="deductWithHolding"]`, function() {
-	// 	$parent = $(this).closest(`tr`);
-
-	// 	updateWithHoldingTax($parent);
-	// })
 
 	// ----- CHECK DEDUCT LOAN -----
 	$(document).on("change", `[name="deductLoan"]`, function() {
@@ -1727,33 +1763,6 @@ $(document).ready(function() {
 		$parent.find(`[name="loanDeduction"]`).val(deduction);
 	})
 	// ----- END CHECK DEDUCT LOAN -----
-
-	// $(document).on("change", `[name="deductMandates"]`, function() {
-	// 	$parent = $(this).closest(`tr`);
-
-	// 	const isChecked = $(this).prop("checked");
-	// 	$parent.find(`[name="deductSss"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	// 	$parent.find(`[name="deductPhic"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	// 	$parent.find(`[name="deductHdmf"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	// 	$parent.find(`[name="deductWithHolding"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-
-	// 	const deductMandateLength  = $(`[name="deductMandates"]`).length;
-	// 	const deductMandateChecked = $(`[name="deductMandates"]:checked`).length;
-
-	// 	let checkParent = deductMandateLength == deductMandateChecked;
-	// 	$(`[name="checkAllDeductMandates"]`).prop("checked", checkParent);
-	// })
-
-	// $(document).on("change", `[mandates="child"]`, function() {
-	// 	$parent = $(this).closest(`tr`);
-
-	// 	let mandatesLength  = $parent.find(`[mandates="child"]`).length;
-	// 	let mandatesChecked = $parent.find(`[mandates="child"]:checked`).length;
-
-	// 	let isChecked = mandatesLength == mandatesChecked;
-	// 	$parent.find(`[mandates="parent"]`).prop("checked", isChecked);
-	// })
-	// ----- END APPLY MANDATES -----
 
 
 	// ----- CHECK HOLD SALARY -----
@@ -1773,35 +1782,10 @@ $(document).ready(function() {
 		$(`[name="holdSalary"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
 
-	// $(document).on("change", `[name="checkAllDeductMandates"]`, function() { // MANDATES
-	// 	const isChecked = $(this).prop("checked");
-	// 	$(`[name="deductMandates"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	// })
-
 	$(document).on("change", `[name="checkAllDeductLoan"]`, function() { // LOAN
 		const isChecked = $(this).prop("checked");
 		$(`[name="deductLoan"]:not([disabled])`).prop("checked", isChecked).trigger("change");
 	})
-
-	// $(document).on("change", `[name="checkAllSss"]`, function() { // LOAN
-	// 	const isChecked = $(this).prop("checked");
-	// 	$(`[name="deductSss"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	// })
-
-	// $(document).on("change", `[name="checkAllPhic"]`, function() { // LOAN
-	// 	const isChecked = $(this).prop("checked");
-	// 	$(`[name="deductPhic"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	// })
-
-	// $(document).on("change", `[name="checkAllHdmf"]`, function() { // LOAN
-	// 	const isChecked = $(this).prop("checked");
-	// 	$(`[name="deductHdmf"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	// })
-
-	// $(document).on("change", `[name="checkAllWithHolding"]`, function() { // LOAN
-	// 	const isChecked = $(this).prop("checked");
-	// 	$(`[name="deductWithHolding"]:not([disabled])`).prop("checked", isChecked).trigger("change");
-	// })
 	// ----- END CHECK ALL -----
 
 
@@ -1845,7 +1829,7 @@ $(document).ready(function() {
 					pageContent();
 		
 					if (employeeID != sessionID) {
-						$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+						$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
 					}
 				}, 10);
 			}
@@ -1969,17 +1953,17 @@ $(document).ready(function() {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                110,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Payroll Process",
-					notificationDescription: `${feedback}: Your request has been approved.`,
+					notificationDescription: `${feedback}: Your request has been approved. You may now proceed to the next step of the process (Payroll Register)`,
 					notificationType:        7,
 					employeeID,
 				};
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                110,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Payroll Process",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -2051,7 +2035,7 @@ $(document).ready(function() {
 				data["updatedBy"]            = sessionID;
 
 				let notificationData = {
-					moduleID:                110,
+					moduleID:                MODULE_ID,
 					tableID: 				 id,
 					notificationTitle:       "Payroll",
 					notificationDescription: `${feedback}: Your request has been denied.`,
@@ -2070,6 +2054,9 @@ $(document).ready(function() {
 	// ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
+		if (tab == "#forViewingTab") {
+			forViewingContent();
+		}
 		if (tab == "#forApprovalTab") {
 			forApprovalContent();
 		}

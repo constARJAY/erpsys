@@ -7,6 +7,7 @@ class Operations extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("Operations_model", "operations");
+        $this->load->model("RolesPermission_model", "rolespermission");
     }
 
     public function index()
@@ -241,11 +242,16 @@ class Operations extends CI_Controller {
         echo json_encode($this->operations->unionData($unionData));
     }
 
-    public function premiumPaymentReport(){
-        
-        // $type   = $this->input->post("type");
+    public function premiumPaymentReport()
+    {
         $result = $this->operations->premiumPaymentReport();    
         echo json_encode($result);
+    }
+
+    public function generateNewRolesPermission()
+    {
+        $roleID = $this->input->post("roleID");
+        echo json_encode($this->rolespermission->generateNewRolesPermission($roleID));
     }
 
 }

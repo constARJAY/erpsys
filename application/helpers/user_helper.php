@@ -23,11 +23,13 @@
         $sessionID = $CI->session->has_userdata("adminSessionID") ? $CI->session->userdata("adminSessionID") : 1;
 
         if ($moduleID && $method) {
-            $sql = "SELECT createStatus, readStatus, updateStatus, deleteStatus, printStatus FROM hris_employee_permission_tbl WHERE moduleID = $moduleID AND employeeID = $sessionID";
+            $sql = "SELECT showStatus, createStatus, readStatus, updateStatus, deleteStatus, printStatus FROM hris_employee_permission_tbl WHERE moduleID = $moduleID AND employeeID = $sessionID";
             $query = $CI->db->query($sql);
             if ($query && $query->num_rows() > 0) {
                 $data = $query->result_array();
                 switch ($method) {
+                    case 'show':
+                        return $data[0]["showStatus"] == 1 ? true : false;
                     case 'create':
                         return $data[0]["createStatus"] == 1 ? true : false;
                     case 'read':
@@ -44,6 +46,11 @@
             }
         }
         return false;
+    }
+
+    function isShowAllowed($moduleID)
+    {
+        return getEmployeePermission($moduleID, "show");
     }
 
     function isCreateAllowed($moduleID)

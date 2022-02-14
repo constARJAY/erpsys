@@ -1,5 +1,8 @@
 $(document).ready(function () {
-	const allowedUpdate = isUpdateAllowed(58);
+	const MODULE_ID     = 58;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing    = false;
 
 
 	// ----- MODULE APPROVER -----
@@ -131,63 +134,37 @@ $(document).ready(function () {
 
 
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
+		["#tableMyForms", "#tableForApproval", "#tableForViewing"].map(element => {
+			if ($.fn.DataTable.isDataTable(element)) {
+				$(element).DataTable().destroy();
+			}
 
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
-
-		var table = $("#tableForApprroval")
-			.css({
-				"min-width": "100%"
-			})
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				scrollCollapse: true,
-				sorting: [],
-				columnDefs: [
-					{ targets: 0,  width: 110 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 250 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 300 },
-					{ targets: 5,  width: 80  },
-					{ targets: 6,  width: 200 },
-				],
-			});
-
-		var table = $("#tableMyForms")
-			.css({
-				"min-width": "100%"
-			})
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				scrollCollapse: true,
-				sorting: [],
-				columnDefs: [
-					{ targets: 0,  width: 110 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 250 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 300 },
-					{ targets: 5,  width: 80  },
-					{ targets: 6,  width: 200 },
-				],
-			});
+			var table = $(element)
+				.css({ "min-width": "100%" })
+				.removeAttr("width")
+				.DataTable({
+					proccessing: false,
+					serverSide: false,
+					scrollX: true,
+					scrollCollapse: true,
+					sorting: [],
+					columnDefs: [
+						{ targets: 0,  width: 110 },
+						{ targets: 1,  width: 150 },
+						{ targets: 2,  width: 250 },
+						{ targets: 3,  width: 150 },
+						{ targets: 4,  width: 300 },
+						{ targets: 5,  width: 80  },
+						{ targets: 6,  width: 200 },
+					],
+				});
+		})
 	}
 
 	// ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_official_business_tbl", "approversID")) {
+			if (isImModuleApprover("hris_official_business_tbl", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_official_business_tbl", "officialBusinessStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
@@ -195,6 +172,7 @@ $(document).ready(function () {
 				<div class="row clearfix appendHeader">
 					<div class="col-12">
 						<ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}  
 							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
 							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
 						</ul>
@@ -212,7 +190,7 @@ $(document).ready(function () {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 				if (isAdd) {
-			if (isCreateAllowed(58)) {
+			if (isCreateAllowed(MODULE_ID)) {
 				html = `
 				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
 			}
@@ -227,6 +205,101 @@ $(document).ready(function () {
 		$("#headerButton").html(html);
 	}
 	// ----- END HEADER BUTTON -----
+
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent").html(preloader);
+		let officialBusinessData = getTableData(
+			`hris_official_business_tbl AS ob 
+					LEFT JOIN pms_client_tbl AS cl ON ob.officialBusinessCompanyID=cl.clientID 
+					LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
+			`ob.officialBusinessID,ob.officialBusinessCode,ob.employeeID,officialBusinessCompanyID,ob.officialBusinessDate,
+					ob.officialBusinessTimeIn,ob.officialBusinessTimeOut,ob.officialBusinessReason,ob.approversID,ob.approversStatus,ob.approversDate,
+					ob.officialBusinessStatus,ob.officialBusinessRemarks,ob.submittedAt,ob.createdBy,ob.updatedBy,ob.createdAt,ob.updatedAt,IFNULL(cl.clientName,'') AS clientName,
+					CONCAT(hris_employee_list_tbl.employeeFirstname,' ',hris_employee_list_tbl.employeeLastname) AS  fullname, 
+					IFNULL(concat(
+						UPPER(SUBSTRING(cl.clientPostalCode,1,1)),
+						' ',UPPER(SUBSTRING(cl.clientHouseNumber,1,1)),LOWER(SUBSTRING(cl.clientHouseNumber,2)),
+						' ',UPPER(SUBSTRING(cl.clientBarangay,1,1)),LOWER(SUBSTRING(cl.clientBarangay,2)),
+						' ',UPPER(SUBSTRING(cl.clientCity,1,1)),LOWER(SUBSTRING(cl.clientCity,2)),
+						' ',UPPER(SUBSTRING(cl.clientProvince,1,1)),LOWER(SUBSTRING(cl.clientProvince,2)),
+						' ',UPPER(SUBSTRING(cl.clientCountry,1,1)),LOWER(SUBSTRING(cl.clientCountry,2)),
+						' ',UPPER(SUBSTRING(cl.clientPostalCode,1,1)),LOWER(SUBSTRING(cl.clientPostalCode,2))),'') AS officialBusinessAddress`,
+			`employeeID != ${sessionID} AND officialBusinessStatus != 0 AND officialBusinessStatus != 4`,
+			`FIELD(officialBusinessStatus, 0, 1, 3, 2, 4), COALESCE(ob.submittedAt, ob.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
+            <thead>
+                <tr>
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Work Performed</th>
+					<th>Current Approver</th>
+					<th>Date</th>
+					<th>Status</th>
+					<th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+		officialBusinessData.map((item) => {
+			let {
+				officialBusinessID,
+				fullname,
+				clientName,
+				officialBusinessAddress,
+				officialBusinessReason,
+				officialBusinessDate,
+				officialBusinessTimeIn,
+				officialBusinessTimeOut,
+				approversID,
+				approversDate,
+				officialBusinessStatus,
+				officialBusinessRemarks,
+				submittedAt,
+				createdAt,
+			} = item;	
+
+			let remarks       = officialBusinessRemarks ? officialBusinessRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = officialBusinessStatus == 2 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
+			html += `
+			<tr class="btnView btnEdit" id="${encryptString(item.officialBusinessID)}" isForViewing="true">
+				<td>${getFormCode("OBF", dateCreated, officialBusinessID)}</td>
+				<td>${fullname}</td>
+				<td>
+					<div>${officialBusinessDate ? moment(officialBusinessDate).format("MMMM DD, YYYY") : "-"}</div>
+					<small>${officialBusinessReason || "-"}</small>
+				</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, officialBusinessStatus, true))}
+				</td>
+
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+
+				<td class="text-center">${getStatusStyle(officialBusinessStatus)}</td>
+				<td>${remarks}</td>
+			</tr>`;
+
+		});
+
+		html += `
+            </tbody>
+        </table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 500);
+	}
+	// ----- END FOR VIEWING CONTENT -----
 
 	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
@@ -252,7 +325,7 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
             <thead>
                 <tr>
 					<th>Document No.</th>
@@ -403,17 +476,6 @@ $(document).ready(function () {
 			};
 			(officialBusinessStatus == 1 || officialBusinessStatus == 2) && uniqueData.push(unique);
 			
-			let btnClass = officialBusinessStatus != 0 ? "btnView" : "btnEdit";
-
-			let button =
-				officialBusinessStatus != 0 ?
-				`
-            <button class="btn btn-view w-100 btnView" id="${encryptString(officialBusinessID)}"><i class="fas fa-eye"></i> View</button>` :
-				`
-            <button 
-                class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(officialBusinessID)}" 
-                code="${getFormCode("OBF", dateCreated, officialBusinessID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
             <tr class="btnEdit btnView" id="${encryptString(officialBusinessID)}">
                 <td>${getFormCode("OBF", dateCreated, officialBusinessID)}</td>
@@ -762,9 +824,9 @@ $(document).ready(function () {
                         required
                         id="officialBusinessDate"
                         name="officialBusinessDate"
-                        value="${moment(officialBusinessDate || new Date).format("MMMM DD, YYYY")}"
+						value="${moment(moment(officialBusinessDate).isValid() ? officialBusinessDate : new Date).format("MMMM DD, YYYY")}"
 						${disabled}
-						unique="${officialBusinessDate}"
+						unique="${officialBusinessID}"
 						title="Date">
                     <div class="d-block invalid-feedback" id="invalid-officialBusinessDate"></div>
                 </div>
@@ -828,15 +890,9 @@ $(document).ready(function () {
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
-			
-			// if(data){
-			// 	initInputmaskTime(false) 
-			// }else{
-			// 	initInputmaskTime();
-			// $("#officialBusinessDate").val(moment(new Date).format("MMMM DD, YYYY"));
-			// }
-			// var totalminDate = moment().subtract(7,'d').format('YYYY-MM-DD');
-			// $("#officialBusinessDate").data("daterangepicker").minDate = moment(totalminDate);
+
+			$("#officialBusinessDate").data('daterangepicker').setStartDate(moment(officialBusinessDate || new Date).format("MMMM DD, YYYY"));
+			$("#officialBusinessDate").data('daterangepicker').setEndDate(moment(officialBusinessDate || new Date).format("MMMM DD, YYYY"));
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -848,7 +904,8 @@ $(document).ready(function () {
 				$('#btnBack').attr("status", "2");
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
-			return html;
+			// ----- END NOT ALLOWED FOR UPDATE -----
+
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
@@ -860,6 +917,10 @@ $(document).ready(function () {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -873,7 +934,6 @@ $(document).ready(function () {
 
 			headerButton(true, "Add Official Business");
 			headerTabContent();
-			//forApprovalContent();
 			myFormsContent();
 			updateURL();
 		} else {
@@ -885,19 +945,6 @@ $(document).ready(function () {
 	viewDocument();
 	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 	// ----- END PAGE CONTENT -----
-
-	// ----- END PAGE CONTENT ----
-
-	// function getModuleHeaderOptions(clientID = 0) {
-	// 	let getModuleHeader = getTableData("pms_client_tbl", "*", "	clientStatus = 1");
-	// 	let moduleHeaderOptions = `<option ${clientID == 0 && "selected"} disabled>Select Company Name</option>`;
-	// 	getModuleHeader.map(item => {
-	// 		moduleHeaderOptions += `<option value="${item.clientID}" ${item.clientID == clientID && "selected"}>${item.clientName}</option>`;
-	// 	})
-
-	// 	return moduleHeaderOptions;
-
-	// }
 
 	// ----- COMPANY CONTENT ----
 	function getCompanyContent(clientID = false) {
@@ -1028,7 +1075,7 @@ $(document).ready(function () {
 				data["tableData[createdBy]"] 			= sessionID;
 				data["tableData[createdAt]"] 			= dateToday();
 
-				//const approversID = getModuleApprover(58);
+				//const approversID = getModuleApprover(MODULE_ID);
 				if (approversID && method == "submit") {
 					data["tableData[approversID]"] 		= approversID;
 				}
@@ -1107,7 +1154,7 @@ $(document).ready(function () {
 					cancelForm(
 						"save",
 						action,
-						"OFFICIAL BUSINESS",
+						"Official Business",
 						"",
 						"form_official_business",
 						data,
@@ -1120,7 +1167,7 @@ $(document).ready(function () {
 				pageContent();
 	
 				if (employeeID != sessionID) {
-					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+					$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
 				}
 			}
 		} else {
@@ -1132,7 +1179,7 @@ $(document).ready(function () {
 				cancelForm(
 					"save",
 					action,
-					"OFFICIAL BUSINESS",
+					"Official Business",
 					"",
 					"form_official_business",
 					data,
@@ -1158,6 +1205,7 @@ $(document).ready(function () {
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1189,7 +1237,7 @@ $(document).ready(function () {
 		formConfirmation(
 			"save",
 			action,
-			"OFFICIAL BUSINESS",
+			"Official Business",
 			"",
 			"form_official_business",
 			data,
@@ -1231,8 +1279,8 @@ $(document).ready(function () {
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                58,
-					notificationTitle:       "OFFICIAL BUSINESS",
+					moduleID:                MODULE_ID,
+					notificationTitle:       "Official Business",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
@@ -1243,7 +1291,7 @@ $(document).ready(function () {
 				formConfirmation(
 					"submit",
 					action,
-					"OFFICIAL BUSINESS",
+					"Official Business",
 					"",
 					"form_official_business",
 					data,
@@ -1266,7 +1314,7 @@ $(document).ready(function () {
 		formConfirmation(
 			"cancelform",
 			action,
-			"OFFICIAL BUSINESS",
+			"Official Business",
 			"",
 			"form_official_business",
 			data,
@@ -1296,7 +1344,7 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                58,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Official Business",
 					notificationDescription: `${getFormCode("OBF", createdAt, id)}: Your request has been approved.`,
@@ -1306,7 +1354,7 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                58,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Official Business",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -1321,7 +1369,7 @@ $(document).ready(function () {
 				formConfirmation(
 					"approve",
 					"update",
-					"OFFICIAL BUSINESS",
+					"Official Business",
 					"",
 					"form_official_business",
 					data,
@@ -1341,7 +1389,7 @@ $(document).ready(function () {
 		const feedback =  $(this).attr("code") || getFormCode("OBF", dateToday(), id);
 
 		$("#modal_change_schedule_content").html(preloader);
-		$("#modal_change_schedule .page-title").text("DENY OFFICIAL BUSINESS DOCUMENT");
+		$("#modal_change_schedule .page-title").text("DENY Official Business DOCUMENT");
 		$("#modal_change_schedule").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -1388,7 +1436,7 @@ $(document).ready(function () {
 				data["tableData[approversDate]"] = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID: 					58,
+					moduleID: 					MODULE_ID,
 					tableID: 				 	id,
 					notificationTitle: 			"Oficial Business Form",
 					notificationDescription: 	`${getFormCode("OBF", createdAt, id)}: Your request has been denied.`,
@@ -1400,7 +1448,7 @@ $(document).ready(function () {
 				formConfirmation(
 					"reject",
 					"update",
-					"OFFICIAL BUSINESS",
+					"Official Business",
 					"form_official_business",
 					"",
 					data,
@@ -1452,46 +1500,49 @@ $(document).ready(function () {
 		if (tab == "#myFormsTab") {
 			myFormsContent();
 		}
+		if (tab == "#forViewingTab") {
+            forViewingContent();
+        }
 	});
 	// ----- END REJECT DOCUMENT -----
 
 	// ----- APPROVER STATUS -----
-function getApproversStatus(approversID, approversStatus, approversDate) {
-	let html = "";
-	if (approversID) {
-		let idArr = approversID.split("|");
-		let statusArr = approversStatus ? approversStatus.split("|") : [];
-		let dateArr = approversDate ? approversDate.split("|") : [];
-		html += `<div class="row mt-4">`;
+	function getApproversStatus(approversID, approversStatus, approversDate) {
+		let html = "";
+		if (approversID) {
+			let idArr = approversID.split("|");
+			let statusArr = approversStatus ? approversStatus.split("|") : [];
+			let dateArr = approversDate ? approversDate.split("|") : [];
+			html += `<div class="row mt-4">`;
 
-		idArr && idArr.map((item, index) => {
-			let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
-			let status = statusArr[index] ? statusArr[index] : "";
-			let statusBadge = "";
-			if (date && status) {
-				if (status == 2) {
-					statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
-				} else if (status == 3) {
-					statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
+			idArr && idArr.map((item, index) => {
+				let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
+				let status = statusArr[index] ? statusArr[index] : "";
+				let statusBadge = "";
+				if (date && status) {
+					if (status == 2) {
+						statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
+					} else if (status == 3) {
+						statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
+					}
 				}
-			}
 
-			html += `
-			<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
-				<div class="d-flex justify-content-start align-items-center">
-					<span class="font-weight-bold">
-						${employeeFullname(item)}
-					</span>
-					<small>&nbsp;- Level ${index + 1} Approver</small>
-				</div>
-				${statusBadge}
-			</div>`;
-		});
-		html += `</div>`;
+				html += `
+				<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
+					<div class="d-flex justify-content-start align-items-center">
+						<span class="font-weight-bold">
+							${employeeFullname(item)}
+						</span>
+						<small>&nbsp;- Level ${index + 1} Approver</small>
+					</div>
+					${statusBadge}
+				</div>`;
+			});
+			html += `</div>`;
+		}
+		return html;
 	}
-	return html;
-}
-// ----- END APPROVER STATUS -----
+	// ----- END APPROVER STATUS -----
 
 });
 

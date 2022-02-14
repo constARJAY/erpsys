@@ -1,8 +1,12 @@
 $(document).ready(function() {
 
-	let GLOBAL_ADJUSTMENT_ITEMS = [];
+	const MODULE_ID     = 111;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing    = false;
 
-    const allowedUpdate = isUpdateAllowed(111);
+
+	let GLOBAL_ADJUSTMENT_ITEMS = [];
 
 
     // ----- MODULE APPROVER -----
@@ -159,7 +163,7 @@ $(document).ready(function() {
             }
         }
 
-        ["#tableForApproval", "#tableMyForms", "#tablePending", "#tablePayrollAdjustment"].map(elementID => {
+        ["#tableForViewing", "#tableForApproval", "#tableMyForms", "#tablePending", "#tablePayrollAdjustment"].map(elementID => {
             manipulateDataTables(elementID);
         })
 	}
@@ -287,7 +291,7 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(111)) {
+			if (isCreateAllowed(MODULE_ID)) {
 				html = ``;
 			}
 		} else {
@@ -307,10 +311,12 @@ $(document).ready(function() {
 	function headerTabContent(display = true) {
 		if (display) {
 			let forApprovalHTML = "";
-			if (isImModuleApprover("hris_payroll_adjustment_tbl", "approversID")) {
+			if (isImModuleApprover("hris_payroll_adjustment_tbl", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_payroll_adjustment_tbl", "payrollAdjustmentStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
-				forApprovalHTML = `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>`;
+				forApprovalHTML = `
+				${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}  
+				<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>`;
 			}
 			let html = `
 			<div class="bh_divider appendHeader"></div>
@@ -545,6 +551,100 @@ $(document).ready(function() {
 	// ----- END MY FORMS CONTENT -----
 
 
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent").html(preloader);
+
+		let payrollData = getTableData(
+			`hris_payroll_adjustment_tbl AS hpat 
+				LEFT JOIN hris_payroll_tbl AS hpt USING(payrollID)
+				LEFT JOIN hris_employee_list_tbl AS helt ON hpat.employeeID = helt.employeeID`,
+			`hpat.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hpat.createdAt AS dateCreated,
+			payrollStartDate, payrollEndDate`,
+			`hpat.employeeID != ${sessionID} AND payrollAdjustmentStatus != 0 AND payrollAdjustmentStatus != 4 AND payrollAdjustmentStatus = 2`,
+			`FIELD(payrollAdjustmentStatus, 0, 1, 3, 2, 4, 5), hpt.payrollStartDate DESC, COALESCE(hpat.submittedAt, hpat.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
+            <thead>
+                <tr style="white-space: nowrap">
+                    <th>Document No.</th>
+                    <th>Reference No.</th>
+                    <th>Prepared By</th>
+                    <th>Payroll Period</th>
+                    <th>Current Approver</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+		payrollData.map((item) => {
+			let {
+				payrollAdjustmentID,
+				payrollAdjustmentCode,
+                revisePayrollAdjustmentID,
+				payrollCode,
+                employeeID,
+                fullname,
+                payrollStartDate, 
+                payrollEndDate,
+                payrollReason,
+                approversID,
+                approversStatus,
+                approversDate,
+                payrollAdjustmentStatus,
+                payrollAdjustmentRemarks,
+                submittedAt,
+                createdAt,
+			} = item;
+
+			let remarks       = payrollAdjustmentRemarks ? payrollAdjustmentRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = payrollAdjustmentStatus == 2 || payrollAdjustmentStatus == 5 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+            let payrollDate = "-";
+            if (payrollStartDate && payrollEndDate) {
+                payrollStartDate = moment(payrollStartDate).format("MMMM DD, YYYY");
+                payrollEndDate   = moment(payrollEndDate).format("MMMM DD, YYYY");
+                payrollDate      = `${payrollStartDate} - ${payrollEndDate}`;
+            }
+
+			let btnClass = payrollAdjustmentStatus != 0 ? "btnView" : "btnEdit";
+			html += `
+			<tr class="${btnClass}" id="${encryptString(payrollAdjustmentID)}" isForViewing="true">
+				<td>${payrollAdjustmentCode || "-"}</td>
+				<td>${payrollCode || "-"}</td>
+				<td>${fullname || "-"}</td>
+				<td>${payrollDate}</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, payrollAdjustmentStatus, true))}
+				</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">
+					${getStatusStyle(payrollAdjustmentStatus)}
+				</td>
+				<td>${remarks}</td>
+			</tr>`;
+		});
+
+		html += `
+            </tbody>
+        </table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 300);
+	}
+	// ----- END FOR VIEWING CONTENT -----
+
+
 	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
@@ -720,7 +820,6 @@ $(document).ready(function() {
 						status="${payrollAdjustmentStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
-
 					*/
 				} else if (payrollAdjustmentStatus == 3) {
 					// DENIED - FOR REVISE
@@ -2101,6 +2200,10 @@ $(document).ready(function() {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -2428,6 +2531,9 @@ $(document).ready(function() {
 	// ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
+		if (tab == "#forViewingTab") {
+			forViewingContent();
+		}
 		if (tab == "#forApprovalTab") {
 			forApprovalContent();
 		}
@@ -2444,6 +2550,7 @@ $(document).ready(function() {
     // ----- VIEW/EDIT DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		$("#page_content").html(preloader);
 		setTimeout(() => {
 			viewDocument(id, true);
@@ -2508,7 +2615,7 @@ $(document).ready(function() {
 					pageContent();
 		
 					if (employeeID != sessionID) {
-						$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+						$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
 					}
 				}, 10);
 			}
@@ -2774,7 +2881,7 @@ $(document).ready(function() {
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                111,
+					moduleID:                MODULE_ID,
 					notificationTitle:       "Payroll Adjustment",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
@@ -2810,7 +2917,7 @@ $(document).ready(function() {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                111,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Payroll Adjustment",
 					notificationDescription: `${feedback}: Your request has been approved.`,
@@ -2820,7 +2927,7 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                111,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Payroll Adjustment",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -2892,7 +2999,7 @@ $(document).ready(function() {
 				data["updatedBy"] = sessionID;
 
 				let notificationData = {
-					moduleID:                111,
+					moduleID:                MODULE_ID,
 					tableID: 				 id,
 					notificationTitle:       "Payroll Adjustment",
 					notificationDescription: `${feedback}: Your request has been denied.`,

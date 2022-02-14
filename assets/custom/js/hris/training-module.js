@@ -1,5 +1,10 @@
 $(document).ready(function () {
-	const allowedUpdate = isUpdateAllowed(123);
+
+	const MODULE_ID     = 123;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing    = false;
+
 	// ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("Training and Development");
 	// ----- END MODULE APPROVER -----
@@ -100,7 +105,7 @@ $(document).ready(function () {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					const isAllowed = isCreateAllowed(123);
+					const isAllowed = isCreateAllowed(MODULE_ID);
 					pageContent(isAllowed);
 				}
 			}
@@ -131,69 +136,40 @@ $(document).ready(function () {
 
 
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
+		["#tableMyForms", "#tableForApproval", "#tableForViewing"].map(element => {
+			if ($.fn.DataTable.isDataTable(element)) {
+			   $(element).DataTable().destroy();
+			}
 
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
-
-		var table = $("#tableForApprroval")
-			.css({
-				"min-width": "100%"
-			})
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				scrollCollapse: true,
-				sorting: [],
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 300 },
-					{ targets: 4,  width: 130 },
-					{ targets: 5,  width: 90  },
-                    { targets: 6,  width: 150 },
-                    { targets: 7,  width: 300 },
-                    { targets: 8,  width: 80  },
-                    { targets: 9,  width: 200 },
-				],
-			});
-
-		var table = $("#tableMyForms")
-			.css({
-				"min-width": "100%"
-			})
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				scrollCollapse: true,
-				sorting: [],
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 300 },
-					{ targets: 4,  width: 130 },
-					{ targets: 5,  width: 90  },
-                    { targets: 6,  width: 150 },
-                    { targets: 7,  width: 300 },
-                    { targets: 8,  width: 80  },
-                    { targets: 9,  width: 200 },
-				],
-			});
+			var table = $(element)
+				.css({"min-width": "100%"})
+				.removeAttr("width")
+				.DataTable({
+					proccessing: false,
+					serverSide: false,
+					scrollX: true,
+					scrollCollapse: true,
+					sorting: [],
+					columnDefs: [
+						{ targets: 0,  width: 100 },
+						{ targets: 1,  width: 150 },
+						{ targets: 2,  width: 150 },
+						{ targets: 3,  width: 300 },
+						{ targets: 4,  width: 130 },
+						{ targets: 5,  width: 90  },
+						{ targets: 6,  width: 150 },
+						{ targets: 7,  width: 300 },
+						{ targets: 8,  width: 80  },
+						{ targets: 9,  width: 200 },
+					],
+				});
+		})
 	}
 
 	// ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_training_development_module", "approversID")) {
+			if (isImModuleApprover("hris_training_development_module", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_training_development_module", "trainingDevelopmentModuleStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
@@ -201,6 +177,7 @@ $(document).ready(function () {
 				<div class="row clearfix appendHeader">
 					<div class="col-12">
 						<ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}  
 							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
 							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
 						</ul>
@@ -218,9 +195,8 @@ $(document).ready(function () {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(123)) {
-				html = `
-				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(MODULE_ID)) {
+				html = `<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
 			}
 		} else {
 			html = `
@@ -233,6 +209,102 @@ $(document).ready(function () {
 		$("#headerButton").html(html);
 	}
 	// ----- END HEADER BUTTON -----
+
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent").html(preloader);
+		let trainingDevelopmentData = getTableData(
+			`hris_training_development_module AS tdm 
+                LEFT JOIN hris_training_development_setup_tbl AS tdst USING(trainingDevelopmentSetupID)
+				LEFT JOIN hris_employee_list_tbl AS empl ON tdm.employeeID = empl.employeeID
+				LEFT JOIN hris_employee_list_tbl AS empltrainee ON tdst.employeeID =empltrainee.employeeID`,
+			`tdm.*, CONCAT(empl.employeeFirstname,' ',empl.employeeLastname)  AS fullname,
+            CONCAT(empltrainee.employeeFirstname,' ',empltrainee.employeeLastname) AS trainor,
+            IFNULL(tdst.trainingDevelopmentSetupName,'') AS trainingDevelopmentSetupName, tdst.trainingDevelopmentSetupDifficulty`,
+			`tdm.employeeID != ${sessionID} AND trainingDevelopmentModuleStatus != 0 AND trainingDevelopmentModuleStatus != 4 AND trainingDevelopmentModuleStatus = 2`,
+			`FIELD(trainingDevelopmentModuleStatus, 0, 1, 3, 2, 4), COALESCE(tdm.submittedAt, tdm.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
+            <thead>
+                <tr>
+					<th>Document No.</th>
+					<th>Prepared By</th>
+					<th>Training Name</th>
+					<th>Trainees</th>
+                    <th>Trainor</th>
+                    <th>Difficulty</th>
+                    <th>Current Approver</th>
+                    <th>Date</th>
+					<th>Status</th>
+					<th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+            trainingDevelopmentData.map((item) => {
+			let {
+				trainingDevelopmentModuleID ,
+				fullname,
+				trainor,
+				trainingDevelopmentSetupName,
+                trainingDevelopmentModuleTrainee,
+				trainingDevelopmentModuleStatus,
+				trainingDevelopmentModuleRemarks,
+				trainingDevelopmentModuleDifficulty,
+				approversID,
+				approversDate,
+				submittedAt,
+				createdAt,
+			} = item;	
+            var trainees = '';
+			let listOfTrainees    = "";
+			if(trainingDevelopmentModuleTrainee ==""){
+				trainees = '';
+			}else{
+				trainees = 	trainingDevelopmentModuleTrainee.split("|");
+				trainees.map((traineeItems, index)=>{
+					let tableDataTrainee =   getTableData("hris_employee_list_tbl","","employeeID="+traineeItems);
+					let comma                =   trainees.length == (index + 1) ? "": ", ";
+					listOfTrainees          =  tableDataTrainee[0]["employeeFirstname"]+" "+ tableDataTrainee[0]["employeeLastname"]+comma;  
+				});
+			}
+			let remarks       = trainingDevelopmentModuleRemarks ? trainingDevelopmentModuleRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = trainingDevelopmentModuleStatus == 2 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
+			html += `
+			<tr class="btnView btnEdit" id="${encryptString(item.trainingDevelopmentModuleID)}" isForViewing="true">
+				<td>${getFormCode("TRN", dateCreated, trainingDevelopmentModuleID)}</td>
+				<td>${fullname}</td>
+				<td>${trainingDevelopmentSetupName}</td>
+				<td>${listOfTrainees}</td>
+				<td>${trainor}</td>
+				<td>${trainingDevelopmentModuleDifficulty}</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, trainingDevelopmentModuleStatus, true))}
+				</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">${getStatusStyle(trainingDevelopmentModuleStatus)}</td>
+				<td>${remarks}</td>
+			</tr>`;
+		});
+
+		html += `
+            </tbody>
+        </table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 500);
+	}
+	// ----- END FOR VIEWING CONTENT -----
 
 	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
@@ -250,7 +322,7 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
             <thead>
                 <tr>
 					<th>Document No.</th>
@@ -439,7 +511,6 @@ $(document).ready(function () {
 		setTimeout(() => {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
-			return html;
 		}, 500);
 	}
 
@@ -490,7 +561,8 @@ $(document).ready(function () {
 							id="btnCancelForm" 
 							trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
 							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -504,7 +576,8 @@ $(document).ready(function () {
 							id="btnCancelForm" 
 							trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
 							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
-							status="${trainingDevelopmentModuleStatus}"><i class="fas fa-ban"></i> 
+							status="${trainingDevelopmentModuleStatus}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -516,7 +589,8 @@ $(document).ready(function () {
 						id="btnDrop" 
 						trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
 						code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
-						status="${trainingDevelopmentModuleStatus}"><i class="fas fa-ban"></i> 
+						status="${trainingDevelopmentModuleStatus}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
 				} else if (trainingDevelopmentModuleStatus == 3) {
@@ -528,7 +602,8 @@ $(document).ready(function () {
 							id="btnRevise" 
 							trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
 							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
-							status="${trainingDevelopmentModuleStatus}"><i class="fas fa-clone"></i>
+							status="${trainingDevelopmentModuleStatus}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
@@ -555,14 +630,16 @@ $(document).ready(function () {
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
-							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
-							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -583,6 +660,8 @@ $(document).ready(function () {
 		return button;
 	}
 	// ----- END FORM BUTTONS -----
+
+
 	// ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
@@ -622,9 +701,6 @@ $(document).ready(function () {
 		// ----- END GET EMPLOYEE DATA -----
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
-		//let readOnlyMulti = "";
-		
-
 
 		$("#btnBack").attr("trainingDevelopmentModuleID", trainingDevelopmentModuleID);
 		$("#btnBack").attr("code", getFormCode("TRN", moment(createdAt), trainingDevelopmentModuleID));
@@ -649,9 +725,6 @@ $(document).ready(function () {
 				</div>
 			</div>
 		</div>` : "";
-		//let disabledmulti = trainingDevelopmentModuleTrainee ? "disabled" :"";
-		// /let disabled
-		//let button = formButtons(data);
 
 		let target = "", src = "";
 		if (trainingDevelopmentModuleFile) {
@@ -882,7 +955,7 @@ $(document).ready(function () {
 			  </div>
 		  </div>		
            
-            <div class="col-md-12 text-right">
+            <div class="col-md-12 text-right mt-4">
                 ${button}
             </div>
         </div>
@@ -944,6 +1017,10 @@ $(document).ready(function () {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -973,8 +1050,6 @@ $(document).ready(function () {
 	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 	// ----- END PAGE CONTENT -----
 
-	// ----- END PAGE CONTENT ----
-
 	// ----- COMPANY CONTENT ----
 	function getTrainingSetupContent(trainingDevelopmentSetupID = false) {
 		let getModuleHeader = getTableData(`hris_training_development_setup_tbl AS tdst 
@@ -991,8 +1066,6 @@ $(document).ready(function () {
 
 			TrainingName 		= `${item.trainingDevelopmentSetupName}`;
 			TrainingTopic 		= `${item.trainingDevelopmentSetupTopic}`;
-			//console.log(TrainingTopic);
-			//TrainingTopic 		= `${item.trainingDevelopmentSetupTopic}`;
 			TrainingSpeaker 	= `${item.fullname}`;
 			TrainingType 		= `${item.trainingDevelopmentSetupType}`;
 			TrainingModule 		= `${item.trainingDevelopmentSetupModuleFile}`;
@@ -1077,17 +1150,11 @@ $(document).ready(function () {
 			if (submittedAt) data["tableData[submittedAt]"] = submittedAt;
 
 			if (action == "insert") {
-				// data["tableData[officialBusinessCode]"] = generateCode(
-				// 	"TRN",
-				// 	false,
-				// 	"hris_training_development_module",
-				// 	"officialBusinessCode",
-				// );
 				data["tableData[employeeID]"] 			= sessionID;
 				data["tableData[createdBy]"] 			= sessionID;
 				data["tableData[createdAt]"] 			= dateToday();
 
-				//const approversID = getModuleApprover(123);
+				//const approversID = getModuleApprover(MODULE_ID);
 				if (approversID && method == "submit") {
 					data["tableData[approversID]"] 		= approversID;
 				}
@@ -1134,11 +1201,11 @@ $(document).ready(function () {
 			$("#page_content").html(preloader);
 			setTimeout(() => {
 				pageContent();
-			}, 100);
+				if (employeeID != sessionID) {
+					$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
+				}	
 
-			if (employeeID != sessionID) {
-				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-			}	
+			}, 100);
 		} else {
 			const action = id && feedback ? "update" : "insert";
 
@@ -1174,6 +1241,7 @@ $(document).ready(function () {
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1191,24 +1259,20 @@ $(document).ready(function () {
 		const action   = "insert"; 
 		const feedback = getFormCode("TRN", dateToday()); 
 		const data     = getData(action, 0, "save", feedback);
-		
-			//const data = getData(action, 0, "save", feedback);
 
-			formConfirmation(
-				"save",
-				"insert",
-				"TRAINING AND DEVELOPMENT",
-				"",
-				"form_training_module",
-				data,
-				true,
-				myFormsContent
-			);
-		// }
+		formConfirmation(
+			"save",
+			"insert",
+			"TRAINING AND DEVELOPMENT",
+			"",
+			"form_training_module",
+			data,
+			true,
+			myFormsContent
+		);
 	});
 	// ----- END SAVE DOCUMENT -----
 
-	//form_training_module
 	// ----- SUBMIT DOCUMENT -----form_training_module
 	$(document).on("click", "#btnSubmit", function () {
 		const id           = decryptString($(this).attr("trainingDevelopmentModuleID"));
@@ -1238,7 +1302,7 @@ $(document).ready(function () {
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                123,
+					moduleID:                MODULE_ID,
 					notificationTitle:       "Training and Development",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
@@ -1282,52 +1346,6 @@ $(document).ready(function () {
 	});
 	// ----- END CANCEL DOCUMENT -----
 
-	// // ----- CANCEL DOCUMENT -----
-	// $(document).on("click", "#btncancelForm2", function () {
-	// 	const id = $(this).attr("trainingDevelopmentModuleID");
-	// 	const feedback = $(this).attr("code") || getFormCode("TRN", dateToday(), id);
-	// 	const action   = "update";
-	// 	const data     = getData(action, 4, "cancelForm2", feedback, id);
-
-
-	// 	//const feedback = $(this).attr("officialBusinessCode");
-
-	// 	// const validate = validateForm("form_change_schedule");
-	// 	// const validateTime = checkTimeRange(false, true);
-
-	// 	// if (validate && validateTime) {
-
-	// 	// const action = "update";
-	// 	// const data = getData(action, 4, "cancelForm2", feedback, id);
-
-	// 	formConfirmation(
-	// 		"cancelForm2",
-	// 		action,
-	// 		"TRAINING AND DEVELOPMENT",
-	// 		"",
-	// 		"form_training_module",
-	// 		data,
-	// 		true,
-	// 		pageContent
-	// 	);
-	// 	// const action = "update";
-
-	// 	// const data = getData(action, 4, "cancelForm2", feedback, id);
-
-	// 	// formConfirmation(
-	// 	// 	"cancelForm2",
-	// 	// 	action,
-	// 	// 	"OFFICIAL BUSINESS",
-	// 	// 	"",
-	// 	// 	"form_training_module",
-	// 	// 	data,
-	// 	// 	true,
-	// 	// 	pageContent
-	// 	// );
-	// 	// }
-	// });
-	// ----- END CANCEL DOCUMENT -----
-
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancel", function () {
 		const id = $(this).attr("trainingDevelopmentModuleID");
@@ -1335,19 +1353,6 @@ $(document).ready(function () {
 		const feedback = $(this).attr("code") || getFormCode("TRN", dateToday(), id);
 		const action   = id && feedback ? "update" : "insert";
 		const data     = getData(action, 0, "save", feedback, id);
-
-		// const feedback = $(this).attr("officialBusinessCode") ?
-		// 	$(this).attr("officialBusinessCode") :
-		// 	generateCode(
-		// 		"TRN",
-		// 		false,
-		// 		" hris_training_development_module",
-		// 		"officialBusinessCode",
-		// 	);
-
-		// const action = id && feedback ? "update" : "insert";
-
-		// const data = getData(action, 0, "save", feedback, id);
 
 		cancelForm2(
 			"save",
@@ -1361,6 +1366,7 @@ $(document).ready(function () {
 		);
 	});
 	// ----- END CANCEL DOCUMENT -----
+
 	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
 		const id 				= decryptString($(this).attr("trainingDevelopmentModuleID"));
@@ -1401,13 +1407,6 @@ $(document).ready(function () {
 				};
 			}
 			data["tableData[trainingDevelopmentModuleStatus]"] = status;
-
-			// let data = getData("update", 2, "approve", feedback, id);
-			// data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 2);
-			// data["tableData[approversDate]"] = updateApproveDate(approversDate);
-
-			// let status = isImLastApprover(approversID, approversDate) ? 2 : 1;
-			// data["tableData[trainingDevelopmentModuleStatus]"] = status;
 
 			setTimeout(() => {
 				formConfirmation(
@@ -1508,28 +1507,27 @@ $(document).ready(function () {
 	});
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
+		
+		if (tab == "#forViewingTab") {
+			$("#tableForViewingParent").html(preloader);
+			setTimeout(function() {
+				forViewingContent();
+			}, 100)
+		}
 		if (tab == "#forApprovalTab") {
-			forApprovalContent();
+			$("#tableForApprovalParent").html(preloader);
+			setTimeout(function() {
+				forApprovalContent();
+			}, 100)
 		}
 		if (tab == "#myFormsTab") {
-			myFormsContent();
+			$("#tableMyFormsParent").html(preloader);
+			setTimeout(function() {
+				myFormsContent();
+			}, 100)
 		}
 	});
 	// ----- END REJECT DOCUMENT -----
-
-
-	// $(document).on("change", ".officialBusinessDate" ,function(){
-	// 	let thisValue       =   $(this).val();
-	// 	let thisValueSplit  =   thisValue.split(" - ");
-	
-	// 	// from = start.format('YYYY-MM-DD 00:00:00');
-	// 	//               to = end.format('YYYY-MM-DD 23:59:59');
-	
-	// 	let fromDate        =  new Date(thisValueSplit[0]); 	
-	// 	let toDate          =  new Date(thisValueSplit[1]);
-	// 	let numberOfDays    =  Math.round((toDate-fromDate)/(1000*123*123*24));
-	// 	$("#loanFormNoOfDays").val(numberOfDays);
-	// })
 
 	// ----- APPROVER STATUS -----
 function getApproversStatus(approversID, approversStatus, approversDate) {

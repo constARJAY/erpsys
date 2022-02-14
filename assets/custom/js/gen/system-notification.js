@@ -68,9 +68,12 @@ $(document).ready(function() {
                     <div class="col-12">
                         <div class="card">
                             <div class="body">
-                                <div class="w-100 text-center">
-                                    <img src="${base_url}assets/modal/no-notification.svg" alt="No notification" width="300" height="200">
-                                    <h4>No notification found</h4>
+                                <div class="py-5 w-100 h-100 d-flex justify-content-center align-items-center flex-column">
+                                    <img src="${base_url}assets/modal/no-data.gif" style="max-width: 300px;
+                                        width: auto;
+                                        min-width: 100px;
+                                        height: auto;" alt="No data available yet.">
+                                    <span class="font-weight-bold">No data available yet.</span>
                                 </div>
                             </div>
                         </div>
@@ -91,7 +94,7 @@ $(document).ready(function() {
                 tab:  "allTabContent"
             },
             {
-                name: "Human Resource Information System",
+                name: "Human Resources Information System",
                 tab:  "hrisTabContent"
             },
             {

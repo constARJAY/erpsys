@@ -66,6 +66,14 @@ input:checked + .slider:before {
 	cursor: no-drop;
 }
 
-.btnEdit{
+.btnEdit {
 	cursor: pointer;
+}
+
+[redirect="forApprovalTab"] .rounded-circle {
+	padding: 1px 6px;
+}
+
+.menu {
+	margin-top: 0.25rem;
 }

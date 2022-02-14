@@ -38,7 +38,7 @@ $(document).ready(function(){
     function departmentContent(param = false) {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
     const data = getTableData("hris_department_tbl", 
-        "departmentID  ,departmentName", "departmentStatus =1", "");
+        "departmentID  ,departmentName", "departmentStatus =1 AND departmentID <> 1", "");
       
             let html = ` <option value="" disabled selected ${!param && "selected"}>Select Department Name</option>`;
             data.map((item, index, array) => {

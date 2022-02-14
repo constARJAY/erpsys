@@ -103,26 +103,27 @@ $(document).ready(function () {
 
 		if (data.length > 0) {
 			data.map((item, index) => {
-				let checkbox =
-					item.designationID != 1
-						? `
+				let { designationID, permissionStatus, moduleID, moduleName } = item;
+
+				let checkbox = designationID != 1? `
                 <div class="status-toggle">
                     <label class="switch">
-                        <input type="checkbox" class="moduleStatus" roleID=${roleID} moduleID=${
-								item.moduleID
-						  } ${item.permissionStatus == 1 ? "checked" : ""} moduleName="${
-								item.moduleName
-						  }" roleName="${roleName}">
+                        <input type="checkbox" 
+							class="moduleStatus" 
+							roleID="${roleID}" 
+							roleName="${roleName}"
+							moduleID="${moduleID}" 
+							moduleName="${moduleName}" 
+							${permissionStatus == 1 ? "checked" : ""}>
                         <span class="slider round"></span>
                     </label>
-                </div>`
-						: "";
+                </div>` : "";
 
 				html += `
                 <tr ${!checkbox && "style='height: 50px;'"}>
                     <td>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span>${item.moduleName}</span>
+                            <span>${moduleName}</span>
                             ${checkbox}
                         </div>
                     </td>

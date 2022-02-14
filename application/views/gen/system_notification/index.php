@@ -1,3 +1,15 @@
+<style>
+
+    .timeline-item {
+        transition: all 100ms;
+    }    
+
+    .timeline-item:hover {
+        background: rgb(211 211 211 / 24%);
+    }
+
+</style>
+
 <div class="body_area after_bg">
     <div class="block-header pb-0">
 		<div class="container">

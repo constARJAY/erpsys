@@ -1,10 +1,23 @@
 $(document).ready(function() {
-	const allowedUpdate = isUpdateAllowed(132);
+
+	const MODULE_ID     = 132;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing    = false;
+
+	let oldReceiptFilename = [], newReceiptFilename = [], newReceiptFiles = [];
 
 
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("liquidation");
 	// ----- END MODULE APPROVER -----
+
+
+	// ----- GLOBAL VARIABLES -----
+	const dateToday = () => {
+		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
+	};
+	// ----- END GLOBAL VARIABLES -----
 
 
 	// ---- GET EMPLOYEE DATA -----
@@ -25,6 +38,80 @@ $(document).ready(function() {
 		return "-";
 	}
 	// ---- END GET EMPLOYEE DATA -----
+
+
+	// ----- DATATABLES -----
+	function initDataTables() {
+		["#tableMyForms", "#tableForApproval", "#tableForViewing"].map(elementID => {
+			if ($.fn.DataTable.isDataTable(elementID)) {
+				$(elementID).DataTable().destroy();
+			}
+	
+			var table = $(elementID)
+				.css({ "min-width": "100%" })
+				.removeAttr("width")
+				.DataTable({
+					proccessing: false,
+					serverSide: false,
+					scrollX: true,
+					sorting: [],
+					scrollCollapse: true,
+					columnDefs: [
+						{ targets: 0,  width: 100 },
+						{ targets: 1,  width: 150 },
+						{ targets: 2,  width: 100 },
+						{ targets: 3,  width: 250 },
+						{ targets: 4,  width: 150 },
+						{ targets: 5,  width: 300 },
+						{ targets: 6,  width: 80  },
+						{ targets: 7,  width: 300 },
+					],
+				});
+		})
+		
+		if ($.fn.DataTable.isDataTable("#tableLiquidation")) {
+			$("#tableLiquidation").DataTable().destroy();
+		}
+
+		let isReadOnly = $("#tableLiquidation").attr("isReadOnly") == "true";
+		let columnDefs = isReadOnly ? [
+			{ targets: 0,  width: 200 },
+			{ targets: 1,  width: 150 },
+			{ targets: 2,  width: 150 },
+			{ targets: 3,  width: 150 },
+			{ targets: 4,  width: 150 },
+			{ targets: 5,  width: 150 },
+			{ targets: 6,  width: 150 },
+			{ targets: 7,  width: 150 },
+		] : [
+			{ targets: 0,  width: 50  },
+			{ targets: 1,  width: 200 },
+			{ targets: 2,  width: 150 },
+			{ targets: 3,  width: 150 },
+			{ targets: 4,  width: 150 },
+			{ targets: 5,  width: 150 },
+			{ targets: 6,  width: 150 },
+			{ targets: 7,  width: 150 },
+			{ targets: 8,  width: 150 },
+		];
+
+		var table = $("#tableLiquidation")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing:    false,
+				serverSide:     false,
+				scrollX:        true,
+				sorting:        false,
+                searching:      false,
+                paging:         false,
+                ordering:       false,
+                info:           false,
+				scrollCollapse: true,
+				columnDefs
+			});
+	}
+	// ----- END DATATABLES -----
 
 
 	// ----- IS DOCUMENT REVISED -----
@@ -94,34 +181,16 @@ $(document).ready(function() {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
 			let isAdd = url.indexOf("?add");
-			//let pettycashID = "";
 			if (arr.length > 1) {
 				let id = decryptString(arr[1]);
 					id && isFinite(id) && loadData(id);
 			} else if (isAdd != -1) {
 				arr = url.split("?add=");
-				// let liquidationID = url.substring(url.lastIndexOf('=') + 1);				
-				// let itemProjectTableBody = formContent('','','','',liquidationID);
-
-				var url1 	= url.substring(url.lastIndexOf());
-				var ids 	= url1.split('=');
-				let liquidationDataID = ids[1];
-				var pettycashCode = ids[2];
-				var pettyCashDate = ids[3];
-				var pettyCashAmount = ids[4];
-				var pettycashChartOfAccountID =ids[5];
-				var voucherDataID =ids[6];
-				var voucherDescription =ids[7];
-				const regex = /%20/i;
-				var convertvaluedescription = voucherDescription.replace(regex," ");
-				//alert(convertvaluedescription);
-				let itemProjectTableBody = formContent('','','','', liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID, voucherDataID, convertvaluedescription);
-			
 				if (arr.length > 1) {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					const isAllowed = isCreateAllowed(132);
+					const isAllowed = isCreateAllowed(MODULE_ID);
 					pageContent(isAllowed);
 				}
 			}
@@ -145,158 +214,11 @@ $(document).ready(function() {
 	// ----- END VIEW DOCUMENT -----
 
 
-    // GLOBAL VARIABLE - REUSABLE 
-	const dateToday = () => {
-		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
-	};
-
-	const ChartOfAccountList = getTableData(
-		"fms_chart_of_accounts_tbl ", "chartOfAccountID , accountCode, accountName, accountDescription, createdAt",
-		"accountStatus = 1");
-
-	const clientList = getTableData(
-		"pms_client_tbl", 
-		"clientID , clientCode, clientName",
-		"	clientStatus = 1");
-		
-	// END GLOBAL VARIABLE - REUSABLE 
-
-
-    // ----- DATATABLES -----
-	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
-
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
-
-		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 300 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 250 },
-					{ targets: 6,  width: 80 },
-					{ targets: 7,  width: 250 },
-				],
-			});
-
-		var table = $("#tableMyForms")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-                    { targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 300 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 250 },
-					{ targets: 6,  width: 80 },
-					{ targets: 7,  width: 250 },
-				],
-			});
-
-        var table = $("#tableProjectRequestItems")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing:    false,
-                serverSide:     false,
-                scrollX:        true,
-                sorting:        false,
-                searching:      false,
-                paging:         false,
-                ordering:       false,
-                info:           false,
-                scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 200 },
-					{ targets: 1,  width: 100 },
-					{ targets: 2,  width: 100  },
-					{ targets: 3,  width: 280  },
-					{ targets: 4,  width: 280  },
-					{ targets: 5,  width: 250  },
-					{ targets: 6,  width: 150  },
-				],
-			});
-
-		
-
-		var table = $("#tableProjectRequestItems0")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing:    false,
-                serverSide:     false,
-                scrollX:        true,
-                sorting:        false,
-                searching:      false,
-                paging:         false,
-                ordering:       false,
-                info:           false,
-                scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 200 },
-					{ targets: 1,  width: 100 },
-					{ targets: 2,  width: 100  },
-					{ targets: 3,  width: 280  },
-					{ targets: 4,  width: 280  },
-					{ targets: 5,  width: 250  },
-					{ targets: 6,  width: 150  },
-				],
-			});
-	}
-	// ----- END DATATABLES -----
-   
-
-    // ----- HEADER CONTENT -----
-	function headerTabContent(display = true) {
-		if (display) {
-			if (isImModuleApprover("fms_liquidation_tbl", "approversID")) {
-				let count = getCountForApproval("fms_liquidation_tbl", "liquidationStatus");
-				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
-				let html = `
-                <div class="bh_divider appendHeader"></div>
-                <div class="row clearfix appendHeader">
-                    <div class="col-12">
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
-                        </ul>
-                    </div>
-                </div>`;
-				$("#headerContainer").append(html);
-			}
-		} else {
-			$("#headerContainer").find(".appendHeader").remove();
-		}
-	}
-	// ----- END HEADER CONTENT -----
-
-
-    // ----- HEADER BUTTON -----
+	// ----- HEADER BUTTON -----
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(132)) {
+			if (isCreateAllowed(MODULE_ID)) {
 				html = ``;
 			}
 		} else {
@@ -312,21 +234,20 @@ $(document).ready(function() {
 	// ----- END HEADER BUTTON -----
 
 
-    // ----- FOR APPROVAL CONTENT -----
-	function forApprovalContent() {
-		$("#tableForApprovalParent").html(preloader);
-		let pettyCashRequest = getTableData(
-			`fms_liquidation_tbl AS ld 
-			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
-			`ld.*, 
-            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            ld.createdAt AS dateCreated`,
-			`ld.employeeID != ${sessionID} AND liquidationStatus != 0 AND liquidationStatus != 4`,
-			`FIELD(liquidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(ld.submittedAt, ld.createdAt)`
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent").html(preloader);
+
+		let liquidation = getTableData(
+			`fms_liquidation_tbl AS flt
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+			`flt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname`,
+			`flt.employeeID <> ${sessionID} AND liquidationStatus <> 0 AND liquidationStatus <> 4 AND liquidationStatus = 2`,
+			`FIELD(liquidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(flt.submittedAt, flt.createdAt)`
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
@@ -341,22 +262,37 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
 
-		pettyCashRequest.map((item) => {
+		liquidation.map((item) => {
 			let {
 				fullname,
 				liquidationID,
+				liquidationCode,
+				reviseLiquidationID,
+				pettyCashRequestID,
+				pettyCashRequestCode,
+				employeeID,
+				voucherID,
+				chartOfAccountID,
+				liquidationReferenceNumber,
+				liquidationAmount,
+				liquidationVatAmount,
+				liquidationExpenses,
+				liquidationBudget,
+				liquidationExcessOrShortage,
+				liquidationDispositionofExcessOrShortage,
 				approversID,
+				approversStatus,
 				approversDate,
+				liquidationPurpose,
 				liquidationStatus,
 				liquidationRemarks,
 				submittedAt,
+				createdBy,
+				updatedBy,
 				createdAt,
-				liquidationPurpose,
-				liquidationReferenceNumber,
-				ceCreatedAt
+				updatedAt,
 			} = item;
 
-			let remarks       = 	liquidationRemarks ? 	liquidationRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = liquidationStatus == 2 || liquidationStatus == 5 ? approversDate.split("|") : "-";
@@ -365,57 +301,135 @@ $(document).ready(function() {
 			}
 
 			let btnClass = liquidationStatus != 0 ? "btnView" : "btnEdit";
+			html += `
+			<tr class="${btnClass}" id="${encryptString(liquidationID)}" isForViewing="true">
+				<td>${liquidationCode}</td>
+				<td>${fullname}</td>
+				<td>${pettyCashRequestCode}</td>
+				<td>${liquidationPurpose}</td>
+				<td>${employeeFullname(getCurrentApprover(approversID, approversDate, liquidationStatus, true))}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td>${getStatusStyle(liquidationStatus, createdAt == updatedAt)}</td>
+				<td>${liquidationRemarks || "-"}</td>
+			</tr>`;
+		});
 
-			let button = liquidationStatus != 0 ? `
-			<button type="button" class="btn btn-view w-100 btnView" id="${encryptString(liquidationID)}"><i class="fas fa-eye"></i> View</button>` : `
-			<button type="button" 
-				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(liquidationID )}" 
-				code="${getFormCode("LF", createdAt, liquidationID)}"><i class="fas fa-edit"></i> Edit</button>`;
+		html += `
+            </tbody>
+        </table>`;
 
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 300);
+	}
+	// ----- END FOR VIEWING CONTENT -----
+
+
+	// ----- FOR APPROVAL CONTENT -----
+	function forApprovalContent() {
+		$("#tableForApprovalParent").html(preloader);
+
+		let liquidation = getTableData(
+			`fms_liquidation_tbl AS flt
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+			`flt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname`,
+			`flt.employeeID <> ${sessionID} AND liquidationStatus <> 0 AND liquidationStatus <> 4`,
+			`FIELD(liquidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(flt.submittedAt, flt.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
+            <thead>
+                <tr style="white-space: nowrap">
+                    <th>Document No.</th>
+                    <th>Prepared By</th>
+					<th>Reference No.</th>
+					<th>Purpose</th>
+                    <th>Current Approver</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+		liquidation.map((item) => {
+			let {
+				fullname,
+				liquidationID,
+				liquidationCode,
+				reviseLiquidationID,
+				pettyCashRequestID,
+				pettyCashRequestCode,
+				employeeID,
+				voucherID,
+				chartOfAccountID,
+				liquidationReferenceNumber,
+				liquidationAmount,
+				liquidationVatAmount,
+				liquidationExpenses,
+				liquidationBudget,
+				liquidationExcessOrShortage,
+				liquidationDispositionofExcessOrShortage,
+				approversID,
+				approversStatus,
+				approversDate,
+				liquidationPurpose,
+				liquidationStatus,
+				liquidationRemarks,
+				submittedAt,
+				createdBy,
+				updatedBy,
+				createdAt,
+				updatedAt,
+			} = item;
+
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = liquidationStatus == 2 || liquidationStatus == 5 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
+			let btnClass = liquidationStatus != 0 ? "btnView" : "btnEdit";
 			if (isImCurrentApprover(approversID, approversDate, liquidationStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(liquidationID)}">
-					<td>${getFormCode("LF", createdAt, liquidationID)}</td>
+					<td>${liquidationCode}</td>
 					<td>${fullname}</td>
-					<td>${liquidationReferenceNumber}</td>
+					<td>${pettyCashRequestCode}</td>
 					<td>${liquidationPurpose}</td>
-					<td>
-						${employeeFullname(getCurrentApprover(approversID, approversDate, liquidationStatus, true))}
-					</td>
+					<td>${employeeFullname(getCurrentApprover(approversID, approversDate, liquidationStatus, true))}</td>
 					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
-					<td class="text-center">
-						${getStatusStyle(liquidationStatus)}
-					</td>
-					<td>${remarks}</td>
+					<td>${getStatusStyle(liquidationStatus, createdAt == updatedAt)}</td>
+					<td>${liquidationRemarks || "-"}</td>
 				</tr>`;
 			}
 		});
 
 		html += `
-			</tbody>
-		</table>`;
+            </tbody>
+        </table>`;
 
 		setTimeout(() => {
 			$("#tableForApprovalParent").html(html);
 			initDataTables();
-			return html;
 		}, 300);
 	}
 	// ----- END FOR APPROVAL CONTENT -----
 
 
-    // ----- MY FORMS CONTENT -----
+	// ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-		let pettyCashRequest = getTableData(
-			`fms_liquidation_tbl AS cfr 
-			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
-			`cfr.*, 
-            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            cfr.createdAt AS dateCreated`,
-			`cfr.employeeID = ${sessionID}`,
-			`FIELD(liquidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(cfr.submittedAt, cfr.createdAt)`
+
+		let liquidation = getTableData(
+			`fms_liquidation_tbl AS flt
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+			`flt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname`,
+			`flt.employeeID = ${sessionID}`,
+			`FIELD(liquidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(flt.submittedAt, flt.createdAt)`
 		);
 
 		let html = `
@@ -434,22 +448,37 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
 
-		pettyCashRequest.map((item) => {
+		liquidation.map((item) => {
 			let {
 				fullname,
 				liquidationID,
+				liquidationCode,
+				reviseLiquidationID,
+				pettyCashRequestID,
+				pettyCashRequestCode,
+				employeeID,
+				voucherID,
+				chartOfAccountID,
+				liquidationReferenceNumber,
+				liquidationAmount,
+				liquidationVatAmount,
+				liquidationExpenses,
+				liquidationBudget,
+				liquidationExcessOrShortage,
+				liquidationDispositionofExcessOrShortage,
 				approversID,
+				approversStatus,
 				approversDate,
+				liquidationPurpose,
 				liquidationStatus,
 				liquidationRemarks,
 				submittedAt,
+				createdBy,
+				updatedBy,
 				createdAt,
-				liquidationPurpose,
-				liquidationReferenceNumber,
-				ceCreatedAt
+				updatedAt,
 			} = item;
 
-			let remarks       = liquidationRemarks ? liquidationRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = liquidationStatus == 2 || liquidationStatus == 5 ? approversDate.split("|") : "-";
@@ -459,28 +488,17 @@ $(document).ready(function() {
 
 			let btnClass = liquidationStatus != 0 ? "btnView" : "btnEdit";
 
-			let button = liquidationStatus != 0 ? `
-            <button type="button" class="btn btn-view w-100 btnView" id="${encryptString(liquidationID)}"><i class="fas fa-eye"></i> View</button>` : `
-            <button type="button" 
-                class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(liquidationID )}" 
-                code="${getFormCode("LF", createdAt, liquidationID )}"><i class="fas fa-edit"></i> Edit</button>`;
-
 			html += `
-            <tr class="${btnClass}" id="${encryptString(liquidationID )}">
-                <td>${getFormCode("LF", createdAt, liquidationID )}</td>
-                <td>${fullname}</td>
-				<td>${liquidationReferenceNumber}</td>
+			<tr class="${btnClass}" id="${encryptString(liquidationID)}">
+				<td>${liquidationCode}</td>
+				<td>${fullname}</td>
+				<td>${pettyCashRequestCode}</td>
 				<td>${liquidationPurpose}</td>
-                <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, liquidationStatus, true))}
-                </td>
+				<td>${employeeFullname(getCurrentApprover(approversID, approversDate, liquidationStatus, true))}</td>
 				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
-                <td class="text-center">
-                    ${getStatusStyle(liquidationStatus)}
-                </td>
-				<td>${remarks}</td>
-            </tr>`;
+				<td>${getStatusStyle(liquidationStatus, createdAt == updatedAt)}</td>
+				<td>${liquidationRemarks || "-"}</td>
+			</tr>`;
 		});
 
 		html += `
@@ -490,23 +508,49 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
-			return html;
 		}, 300);
 	}
 	// ----- END MY FORMS CONTENT -----
 
 
-    // ----- FORM BUTTONS -----
+	// ----- HEADER CONTENT -----
+	function headerTabContent(display = true) {
+		if (display) {
+			if (isImModuleApprover("fms_liquidation_tbl", "approversID") || allowedShow) {
+				let count = getCountForApproval("fms_liquidation_tbl", "liquidationStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
+				let html = `
+                <div class="bh_divider appendHeader"></div>
+                <div class="row clearfix appendHeader">
+                    <div class="col-12">
+                        <ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}  
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
+                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
+                        </ul>
+                    </div>
+                </div>`;
+				$("#headerContainer").append(html);
+			}
+		} else {
+			$("#headerContainer").find(".appendHeader").remove();
+		}
+	}
+	// ----- END HEADER CONTENT -----
+
+
+	// ----- FORM BUTTONS -----
 	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
-		let button = "";
+		let button = ``;
+
 		if (data) {
 			let {
 				liquidationID     = "",
 				liquidationStatus = "",
-				employeeID            = "",
-				approversID           = "",
-				approversDate         = "",
-				createdAt             = new Date
+				employeeID        = "",
+				approversID       = "",
+				approversDate     = "",
+				createdAt         = new Date
 			} = data && data[0];
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
@@ -563,15 +607,15 @@ $(document).ready(function() {
 					}
 				} else if (liquidationStatus == 2) {
 					// DROP
-					button = `
-					<button type="button" 
-						class="btn btn-cancel px-5 p-2"
-						id="btnDrop" 
-						liquidationID="${encryptString(liquidationID)}"
-						code="${getFormCode("LF", createdAt, liquidationID)}"
-						status="${liquidationStatus}"><i class="fas fa-ban"></i> 
-						Drop
-					</button>`;
+					// button = `
+					// <button type="button" 
+					// 	class="btn btn-cancel px-5 p-2"
+					// 	id="btnDrop" 
+					// 	liquidationID="${encryptString(liquidationID)}"
+					// 	code="${getFormCode("LF", createdAt, liquidationID)}"
+					// 	status="${liquidationStatus}"><i class="fas fa-ban"></i> 
+					// 	Drop
+					// </button>`;
 				} else if (liquidationStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(liquidationID)) {
@@ -633,559 +677,404 @@ $(document).ready(function() {
 				Cancel
 			</button>`;
 		}
+
 		return button;
 	}
 	// ----- END FORM BUTTONS -----
 
 
-	// ----- UPDATE INVENTORYT NAME -----
-	function updateInventoryItemOptions() {
-		let projectItemIDArr = [], companyItemIDArr = []; // 0 IS THE DEFAULT VALUE
-		let projectElementID = [], companyElementID = [];
-		let optionNone = {
-			itemID:              "0",
-			categoryName:        "-",
-			unitOfMeasurementID: "-",
-			itemName:            "N/A",
-
-		};
-
-		$("[name=itemID][project=true]").each(function(i, obj) {
-			projectItemIDArr.push($(this).val());
-			projectElementID.push(`#${this.id}[project=true]`);
-			$(this).val() && $(this).trigger("change");
-		}) 
-		// $("[name=itemID][company=true]").each(function(i, obj) {
-		// 	companyItemIDArr.push($(this).val());
-		// 	companyElementID.push(`#${this.id}[company=true]`);
-		// 	$(this).val() && $(this).trigger("change");
-		// }) 
-
-		projectElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = !projectItemIDArr.includes("0") && $(`.itemProjectTableBody tr`).length > 1 ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
-
-			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
-				return `
-				<option 
-					value           = "${item.chartOfAccountID}" 
-					itemDescription = "${item.accountName}"
-					createdAt       = "${item.createdAt}"
-					${item.chartOfAccountID == projectItemIDArr[index] && "selected"}>
-					${item.accountName}
-				</option>`;
-			})
-			$(element).html(html);
-		});
-
-		// companyElementID.map((element, index) => {
-		// 	let html = `<option selected disabled>Select Item Name</option>`;
-		// 	let itemList = !companyItemIDArr.includes("0") && $(`.itemCompanyTableBody tr`).length > 1 ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
-		// 	html += itemList.filter(item => !companyItemIDArr.includes(item.itemID) || item.itemID == companyItemIDArr[index]).map(item => {
-		// 		return `
-		// 		<option 
-		// 			value           = "${item.chartOfAccountID}"
-		// 			itemDescription = "${item.accountName}"
-		// 			createdAt       = "${item.createdAt}"
-		// 			${item.chartOfAccountID == companyItemIDArr[index] && "selected"}>
-		// 			${item.accountName}
-		// 		</option>`;
-		// 	})
-		// 	$(element).html(html);
-		// });
-	}
-	// ----- END UPDATE INVENTORYT NAME -----
-
-
-	// ----- GET INVENTORY PREFERRED PRICE -----
-	function getInventoryPreferredPrice(id = null, input, executeOnce = false) {
-		const errorMsg = `Please set item code <b>${getFormCode("ITM", dateToday(), id)}</b> into item price list module to proceed in this proccess`;
-		if (id && id != "0") {
-			const price = inventoryPriceList.filter(item => item.itemID == id).map(item => {
-				input && $(input).attr("inventoryVendorID", item.inventoryVendorID);
-				return item.vendorCurrentPrice;
-			});
-			if (price.length > 0) {
-				return price?.[0];
-			}
-			input && $(input).removeAttr("inventoryVendorID");
-			!executeOnce && showNotification("warning2", errorMsg);
-			return false;
-		}
-		input && $(input).removeAttr("inventoryVendorID");
-		id && id != "0" && !executeOnce && showNotification("warning2", errorMsg);
-		return id == "0";
-	}
-	// ----- END GET INVENTORY PREFERRED PRICE -----
-
-
-    // ----- GET INVENTORY ITEM -----
-    function getChartofAccount(id = null, isProject = true, display = true) {
-        let html    = `<option selected disabled>Select Chart of Account</option>`;
-		const attr  = isProject ? "[project=true]" : "[company=true]";
-		const table = isProject ? $(`.itemProjectTableBody tr`).length > 1 : $(`.itemCompanyTableBody tr`).length > 1;
-
-		let itemIDArr = []; // 0 IS THE DEFAULT VALUE
-		$(`[name=chartOfAccountID]${attr}`).each(function(i, obj) {
-			itemIDArr.push($(this).val());
-		}) 
-
-		let optionNone = {
-			chartOfAccountID:       "0",
-			accountName:            "N/A"
-		};
-		// let itemList = [optionNone, ...inventoryItemList];
-		let itemList = !itemIDArr.includes("0") && table ? [...ChartOfAccountList] : [optionNone, ...ChartOfAccountList];
-
-		html += itemList.filter(item => !itemIDArr.includes(item.chartOfAccountID) || item.chartOfAccountID == id).map(item => {
-            return `
-            <option 
-                value           = "${item.chartOfAccountID}" 
-                itemDescription = "${item.accountName}"
-                ${item.chartOfAccountID == id && "selected"}>
-                ${item.accountName}
-            </option>`;
-        })
-		
-        return display ? html : ChartOfAccountList;
-    }
-    // ----- END GET INVENTORY ITEM -----
-
-	    // ----- GET INVENTORY ITEM -----
-		function getClient(id = null, isProject = true, display = true) {
-			//console.log(id);
-			//$("[name=clientID]").select2({ theme: "bootstrap"});
-			let html    = `<option selected disabled>Select Client</option>`;
-			const attr  = isProject ? "[project=true]" : "[company=true]";
-			const table = isProject ? $(`.itemProjectTableBody tr`).length > 1 : $(`.itemCompanyTableBody tr`).length > 1;
-	
-			let itemIDArr = []; // 0 IS THE DEFAULT VALUE
-			$(`[name=clientID]${attr}`).each(function(i, obj) {
-				itemIDArr.push($(this).val());
-			}) 
-			//$(`[name=clientID]`).select2({ theme: "bootstrap"});
-			//$(this).select2({ theme: "bootstrap"});
-			
-			let optionNone = {
-				clientID:       "0",
-				clientName:     "N/A"
-			};
-			
-			// let itemList = [optionNone, ...inventoryItemList];
-			let itemList = !itemIDArr.includes("0") && table ? [...clientList] : [optionNone, ...clientList];
-			
-			html += itemList.filter(item => !itemIDArr.includes(item.clientList) || item.clientList == id).map(item => {
-				return `
-				<option 
-					value           = "${item.clientID}" 
-					itemDescription = "${item.clientName}"
-					${item.clientID == id && "selected"}>
-					${item.clientName}
-				</option>`;
-			})
-			// if ($(`[name=clientID]`).hasClass("select2-hidden-accessible")) {
-			// 	$(this).select2("destroy");
-				
-			// }
-			
-			return display ? html : clientList;
-			
-		
-		}
-		
-		// ----- END GET INVENTORY ITEM -----
-
-
-	// ----- GET NON FORMAT AMOUNT -----
-	const getNonFormattedAmount = (amount = "₱0.00") => {
-		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
-	}
-	// ----- END GET NON FORMAT AMOUNT -----
-
-	var count = 0;
-	// ----- GET ITEM ROW -----
-    function getItemRow(pettyCashID, isProject = true, item = {}, readOnly, pettyCashAmount, voucherDataID, convertvaluedescription) {
-		//alert(pettyCashAmount);
-		
-		// var count  = 0;
-		// const attr[] = isProject ? `` : ``;
-		// const attr1 = isProject ? `${count}` : ``;
-		// for (var i = 0; i <= attr1.length; i++) {
-		// 	alert(attr1[i]);
-		//  }
-		//console.log( _.keys(item).length );
-		// for(var i = 0; i < attr.length; ++i){
-		// 	if(attr[i] == 0)
-		// 		count++;
-				
-		// }
-		// alert(count);
-
-		// $(this).find("select").each(function(x) {
-		// 	if ($(this).hasClass("select2-hidden-accessible")) {
-		// 		$(this).select2({ theme: "bootstrap" });
-		// 	}
-		// })
-		// $(this).find("select").each(function(j) {
-		// 		$(this).select2({ theme: "bootstrap" });
-		// });
-		//var count =0;
-		
+	// ----- ITEM ROW -----
+	function getItemRow(item = false, readOnly = false) {
 		let {
-			liquidationID                    							= "",
-			description                               					= "",
-			voucherID													="",
-			quantity													="",
-			amount                               						= "",
-			clientID													="",
-			srfNumber                               					= "",
-			remark                               						= "",
-			receiptNumber                              					= "",
-			accountName													="",
-			clientName													="",
-			financeRequestID											="",
-			pettyCashRequestID											="",
-			files														="",
+			liquidationItemID,
+			liquidationID,
+			description,
+			vatSales,
+			vat,
+			amount,
+			client,
+			supplier,
+			invoice,
+			remarks,
 		} = item;
-		++count;
-		
-		let html = "";
+
+		let html = ``;
 		if (readOnly) {
-			
-			html += `
-			<td>
-				<div class="description">
-				${description || "-"}
-				</div>
-			</td>
-			<td>
-				<div class="quantity text-center">
-				${quantity || "1"}
-				</div>
-			</td>
-			<td>
-				<div class="text-right">
-				${formatAmount(amount, true) || ""}
-				</div>
-			</td>
-			<td>
-				<div class="client ">
-				${clientName || "-"}
-				</div>
-			</td>
-			<td>
-				<div class="srfNumber">
-				${srfNumber || "-"}
-				</div>
-			</td>
-			<td>	
-				<div class="">
-				${remark || "-"}
-				</div>
-			</td>
-			<td>
-				<div>
-				${receiptNumber || "-"}
-				</div>
-			</td>
+			html = `
+			<tr>
+				<td>${description || ""}</td>
+				<td class="text-right">${formatAmount(amount, true)}</td>
+				<td class="text-right">${formatAmount(vatSales, true)}</td>
+				<td class="text-right">${formatAmount(vat, true)}</td>
+				<td>${client || "-"}</td>
+				<td>${supplier || "-"}</td>
+				<td>${invoice || "-"}</td>
+				<td>${remarks || "-"}</td>
 			</tr>`;
-		}else{
-			var totalamount = '';
-			var voucherdescriptionvalue = '';
-			var checkVoucherValue = '';
-			if(description ==""){				
-				totalamount = pettyCashAmount;
-				voucherdescriptionvalue = convertvaluedescription;
-				checkVoucherValue = voucherDataID;
-				//alert(checkVoucherValue);
-			}else{
-				totalamount = amount;
-				voucherdescriptionvalue = description;
-				checkVoucherValue = voucherID
-			}
-			var checkVoucherCashAmount = pettyCashAmount || "";
-			//alert(checkVoucherCashAmount);
-			//$("[name=clientID]").select2({ theme: "bootstrap"});
-			//$(`[name=clientID]`).select2({ theme: "bootstrap"});
-			//$(`[name=clientID]`).find("select").each(function(i) {
-			//});
-				//$("#totalAmount").val(pettyCashRequestAmount);
-				//$(".itemProjectTableBody tr").each(function(i) {
-				html += `
-				
-			<tr class="itemTableRow">
-                    <td>
-					<div class="description" name="description" id="description" descriptionValue="${voucherdescriptionvalue}" financeRequestID="${financeRequestID || ""}" pettyCashID="${pettyCashRequestID || ""}" voucherID="${checkVoucherValue}">
-							${voucherdescriptionvalue || "-"}
-					</div>
-                   </td> 
-					<td>
-						<div class="quantity text-center" name="quantity" id="quantity">
-								${quantity || "1"}
-						</div>
-					</td>
-					<td>
-					<div class="text-right" name="amount" amountValue="${amount}">
-							${formatAmount(totalamount, true) || ""}
-					</div>
-					</td>
-			<td>
-				<div>
-				<select
-					class="form-control select2 clientID"
-					name="clientID"
-					id="clientID${count}"
-					style="width:100%">
-					${getClient(clientID)}
-				</select>
-					<div class="invalid-feedback d-block" id="invalid-clientID"></div>
-				</div>
-			</td>
-			<td>
-				<div class="srfNumber ">
-					<input 
-						type="text"
-						class="form-control validate"
-						id="srfNumber" 
-						name="srfNumber" 
-						data-allowcharacters="[a-z][A-Z][0-9][-]"
-						value="${srfNumber || ""}">
-					<div class="invalid-feedback d-block" id="invalid-srfNumber"></div>
-				</div>
-			</td>
-			<td>
-				<div class="remark">
-					<textarea 
-						class="form-control validate"
-						data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['']['][-][_][(][)][%][&][*][ ]"
-						minlength="0"
-						maxlength="250"
-						rows="2" 
-						style="resize: none" 
-						class="form-control" 
-						data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
-						id="remark"
-						name="remark">${remark || ""}</textarea>
-				</div>
-				</td>
-			<td>
-				<div class="receiptNumber text-center" name="receiptNumber" id="receiptNumber">
-								${receiptNumber || files}
-				</div>	
-			</td>
-			</tr>`;
-			//$("#totalAmount").text("seds");
-			//$(`#totalAmount`).text(formatAmount(pettyCashRequestAmount, true));
-			//count++;
-		
-		//})
-		}
-		
-
-        return html;
-    }
-
-	
-	$(document).on("keyup", ".liquidationBudget", function() {
-		//console.log("44");
-		var totalbudget = parseFloat(getNonFormattedAmount($("#liquidationBudget").val()) || 0);
-		console.log(totalbudget);
-		//var totalbudget = $("#liquidationBudget").val();
-		var pettyCashAmountValue = parseFloat(getNonFormattedAmount($("#liquidationExpenses").text()) || 0);
-		var munustotal =  pettyCashAmountValue - totalbudget;
-		var totalamount = formatAmount(munustotal, true);
-		$("#liquidationExcessOrShortage").text((totalamount));
-
-	})	
-	
-	// ----- UPDATE DELETE BUTTON -----
-	function updateDeleteButton() {
-		let projectCount = 0, companyCount = 0;
-		$(".checkboxrow[project=true]").each(function() {
-			this.checked && projectCount++;
-		})
-		$(".btnDeleteRow[project=true]").attr("disabled", projectCount == 0);
-		$(".checkboxrow[company=true]").each(function() {
-			this.checked && companyCount++;
-		})
-		$(".btnDeleteRow[company=true]").attr("disabled", companyCount == 0);
-	}
-	// ----- END UPDATE DELETE BUTTON -----
-
-
-	// ----- DELETE TABLE ROW -----
-	function deleteTableRow(isProject = true) {
-		const attr = isProject ? "[project=true]" : "[company=true]";
-		if ($(`.checkboxrow${attr}:checked`).length != $(`.checkboxrow${attr}`).length) {
-			Swal.fire({
-				title:              "DELETE ROWS",
-				text:               "Are you sure to delete these rows?",
-				imageUrl:           `${base_url}assets/modal/delete.svg`,
-				imageWidth:         200,
-				imageHeight:        200,
-				imageAlt:           "Custom image",
-				showCancelButton:   true,
-				confirmButtonColor: "#dc3545",
-				cancelButtonColor:  "#1a1a1a",
-				cancelButtonText:   "No",
-				confirmButtonText:  "Yes"
-			}).then((result) => {
-				if (result.isConfirmed) {
-					$(`.checkboxrow${attr}:checked`).each(function(i, obj) {
-						var tableRow = $(this).closest('tr');
-						tableRow.fadeOut(500, function (){
-							$(this).closest("tr").remove();
-							// $(`[name=chartOfAccountID]${attr}`).each(function(i, obj) {
-							// 	let chartOfAccountID = $(this).val();
-							// 	$(this).html(getInventoryItem(chartOfAccountID, isProject));
-							// }) 
-							updateDeleteButton();
-							updateTotalAmount(isProject);
-							updateInventoryItemOptions();
-						});
-					})
-				}
-			});
-			
 		} else {
-			showNotification("danger", "You must have atleast one or more items.");
+			html = `
+			<tr>
+				<td class="text-center">
+					<input type="checkbox" class="checkboxrow">
+				</td>
+				<td>
+					<div class="form-group mb-0">
+						<input type="text"
+							class="form-control validate"
+							name="description"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][''][-][_][(][)][%][&][*][ ]"
+							minlength="1"
+							maxlength="250"
+							value="${description || ""}"
+							required>
+						<div class="invalid-feedback d-block"></div>
+					</div>
+				</td>
+				<td>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input 
+								type="text" 
+								class="form-control amount text-right"
+								min="0.01" 
+								max="999999" 
+								minlength="1" 
+								maxlength="20"
+								name="amount"
+								value="${amount}"
+								required>
+						</div>
+						<div class="d-block invalid-feedback"></div>
+					</div>
+				</td>
+				<td>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">₱</span>
+							</div>
+							<input 
+								type="text" 
+								class="form-control amount text-right"
+								min="0" 
+								max="999999" 
+								minlength="1" 
+								maxlength="20"
+								value="${vatSales}"
+								name="vatSales"
+								disabled>
+						</div>
+						<div class="d-block invalid-feedback"></div>
+					</div>
+				</td>
+				<td>
+					<div class="form-group mb-0">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<!-- <span class="input-group-text">₱</span> -->
+								<div class="input-group-text">
+									<input type="checkbox" name="hasVat" ${+vat ? "checked" : ""}>
+								</div>
+							</div>
+							<input 
+								type="text" 
+								class="form-control amount text-right"
+								min="0" 
+								max="999999" 
+								minlength="1" 
+								maxlength="20"
+								value="${vat}"
+								name="vat"
+								disabled>
+						</div>
+						<div class="d-block invalid-feedback"></div>
+					</div>
+				</td>
+				<td>
+					<div class="form-group mb-0">
+						<input type="text"
+							class="form-control validate"
+							name="client"
+							data-allowcharacters="[A-Z][a-z][0-9][ ][-][(][)]['][''][.][,][_]"
+							minlength="1"
+							maxlength="250"
+							value="${client || ""}">
+						<div class="d-block invalid-feedback"></div>
+					</div>
+				</td>
+				<td>
+					<div class="form-group mb-0">
+						<input type="text"
+							class="form-control validate"
+							name="supplier"
+							data-allowcharacters="[A-Z][a-z][0-9][ ][-][(][)]['][''][.][,][_]"
+							minlength="1"
+							maxlength="250"
+							value="${supplier || ""}">
+						<div class="d-block invalid-feedback"></div>
+					</div>
+				</td>
+				<td>
+					<div class="form-group mb-0">
+						<input type="text"
+							class="form-control validate"
+							name="invoice"
+							data-allowcharacters="[A-Z][a-z][0-9][ ][-][(][)]['][''][.][,][_]"
+							minlength="1"
+							maxlength="250"
+							value="${invoice || ""}">
+						<div class="d-block invalid-feedback"></div>
+					</div>
+				</td>
+				<td>
+					<div class="form-group mb-0">
+						<input type="text"
+							class="form-control validate"
+							name="remarks"
+							data-allowcharacters="[A-Z][a-z][0-9][ ][-][(][)]['][''][.][,][_]"
+							minlength="1"
+							maxlength="250"
+							value="${remarks || ""}">
+						<div class="d-block invalid-feedback"></div>
+					</div>
+				</td>
+			</tr>`;
 		}
+
+		return html;
 	}
-	// ----- END DELETE TABLE ROW -----
+	// ----- END ITEM ROW -----
 
-	// ----- END GET TABLE MATERIALS AND EQUIPMENT -----
 
-	// ----- SELECT PROJECT LIST -----
-    $(document).on("change", "[name=projectID]", function() {
-        const projectCode = $('option:selected', this).attr("projectCode");
-        const clientCode  = $('option:selected', this).attr("clientCode");
-        const clientName  = $('option:selected', this).attr("clientName");
-        const address     = $('option:selected', this).attr("address");
-
-        $("[name=projectCode]").val(projectCode);
-        $("[name=clientCode]").val(clientCode);
-        $("[name=clientName]").val(clientName);
-        $("[name=clientAddress]").val(address);
-    })
-    // ----- END SELECT PROJECT LIST -----
-
-    // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false,liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID, voucherDataID, convertvaluedescription) {
-		
-		$("#page_content").html(preloader);
-		let pettyCashChartOfAccountID = '0';
-		// if (!$(this).hasClass("select2-hidden-accessible")) {
-		// 	$(this).select2({ theme: "bootstrap" });
-		// }
-		let datewithrecord = moment(pettyCashDate).format("MMMM DD, YYYY");
-		readOnly = isRevise ? false : readOnly;
-		let pettyCashID = '';
-		// 
-
-		
-		//var pcrreadOnly = false;
-	
-		let readPettyCashChartofAccount = false;
-		
+	// ----- LIQUIDATION TABLE -----
+	function getLiquidationTable(data = false, readOnly = false) {
 		let {
-			liquidationID 									= "",
-				reviseLiquidationID 						= "",
-				pettyCashRequestID 							= "",
-				liquidationPurpose 							= "",
-				employeeID 									= "",
-				projectTotalAmount 							= "0",
-				clientFundRequestDate 						= "",
-				companyTotalAmount 							= "0",
-				liquidationRemarks 							= "",
-				approversID 								= "",
-				projectID 									= "",
-				ClientFundRequestAmount 					= "0",
-				liquidationReferenceNumber 					= "",
-				liquidationExpenses 						= "",
-				liquidationBudget 							= "",
-				liquidationExcessOrShortage 				= "",
-				liquidationDispositionofExcessOrShortage 	= "",
-				liquidationDate 							= "",
-				approversStatus 							= "",
-				approversDate 								= "",
-				liquidationVatAmount 						= "0",
-				chartOfAccountID 							= "",
-				clientID 									= "",
-				voucherID									="",
-				liquidationStatus 							= false,
-				submittedAt 								= false,
-				createdAt 									= false,
+			liquidationID,
+			liquidationCode,
+			reviseLiquidationID,
+			reviseLiquidationCode,
+			pettyCashRequestID,
+			pettyCashRequestCode,
+			employeeID,
+			liquidationTotalExpense,
+			liquidationVatSales,
+			liquidationVat,
+			liquidationBudget,
+			liquidationExcessShortage,
+			liquidationDispositionExcessShortage,
+			liquidationReceipt,
+			approversID,
+			approversStatus,
+			approversDate,
+			liquidationPurpose,
+			liquidationStatus,
+			liquidationRemarks,
+			submittedAt,
+			createdBy,
+			updatedBy,
+			createdAt,
 		} = data && data[0];
 
-
-			if(liquidationID){
-				pettyCashID = liquidationID;
-				pettyCashChartOfAccountID = chartOfAccountID;
-			}else{
-				pettyCashID = liquidationDataID;
-				pettyCashChartOfAccountID = pettycashChartOfAccountID;
-				//$('.chartOfAccountID').prop("disabled", true);
+		let tbodyHTML = '';
+		if (data) {
+			let items = getTableData(`fms_liquidation_items_tbl WHERE liquidationID = ${liquidationID}`);
+			if (items && items.length) {
+				items.map(item => {
+					tbodyHTML += getItemRow(item, readOnly);
+				})
+			} else {
+				tbodyHTML = getItemRow();
 			}
-			
-        let clientFundRequestItems = "";
-		
-		let pettycashid = "0";
-		if (liquidationID) {
-		let pettyCashRequestData = getTableData(
-			`fms_liquidation_tbl         	 			AS lt 
-			LEFT JOIN  fms_finance_request_details_tbl 	AS frd ON frd.liquidationID = lt.liquidationID
-			LEFT JOIN fms_chart_of_accounts_tbl			AS fcoa ON frd.chartOfAccountID = fcoa.chartOfAccountID
-			LEFT JOIN pms_client_tbl					AS pct ON  frd.clientID = pct.clientID`,
-			`frd.liquidationID,
-			frd.description,
-			frd.quantity,
-			frd.amount,
-			frd.clientID,
-			frd.srfNumber,
-			frd.remark,
-			lt.voucherID,
-			frd.receiptNumber,
-			fcoa.accountName,
-			pct.clientName,
-			frd.amount,
-			frd.financeRequestID,
-			lt.pettyCashRequestID,
-			frd.description,
-			frd.quantity,
-			frd.files`,
-			`frd.liquidationID  = ${liquidationID} `,``,`financeRequestID`);
-			pettyCashRequestData.map(item => {
-				clientFundRequestItems += getItemRow(pettyCashID, true, item, readOnly)  
-		})  
-		
-		}else{
-			if(voucherDataID !=='0'){
-				clientFundRequestItems += getItemRow(pettyCashID, true, 0, false, pettyCashAmount, voucherDataID, convertvaluedescription);
-			}else{
-				let disposalItemsData = getTableData(
-					`fms_finance_request_details_tbl`,
-						`financeRequestID,
-						clientFundRequestID,
-						pettyCashRequestID,	
-						voucherID,
-						description,
-						quantity,
-						amount,
-						liquidationID,
-						pettyCashRequestID,
-						srfNumber,
-						remark,
-						voucherID,
-						receiptNumber,
-						files`,
-						 `pettyCashRequestID = ${pettyCashID}`);
-						 disposalItemsData.map(item => {
-					clientFundRequestItems += getItemRow(pettyCashID, true, item, false, 0, 0, 0);
-					})
+		} else {
+			tbodyHTML = getItemRow();
+		}
 
-			}		
-		} 
-		// $(".clientID").select2({ theme: "bootstrap"});
+		let tableCheckbox = !readOnly ? `<th class="text-center"><input type="checkbox" class="checkboxall"></th>` : "";
+		let tfootHTML = !readOnly ? `
+		<tfoot>
+			<tr>
+				<td colspan="${readOnly ? 8 : 9}">
+					<button class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
+					<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+				</td>
+			</tr>
+		</tfoot>` : "";
+
+		let html = `
+		<div class="card my-3">
+			<div class="card-header bg-dark text-white">
+				<h5 class="font-weight-bold mb-0">Liquidation</h5>
+			</div>
+			<div class="card-body">
+				<table class="table table-bordered table-striped table-hover" id="tableLiquidation" isReadOnly="${readOnly}">
+					<thead>
+						<tr>
+							${tableCheckbox}
+							<th>Description ${!readOnly ? "<code>*</code>" : ""}</th>
+							<th>Amount ${!readOnly ? "<code>*</code>" : ""}</th>
+							<th>VAT Sales</th>
+							<th>VAT</th>
+							<th>Client</th>
+							<th>Supplier</th>
+							<th>Invoice No.</th>
+							<th>Remarks</th>
+						</tr>
+					</thead>
+					<tbody id="tableLiquidationTbody">
+						${tbodyHTML}
+					</tbody>
+					${tfootHTML}
+				</table>
+
+				<div class="row mt-2">
+					<div class="offset-md-8 col-md-4 col-sm-12">
+						<div class="d-flex justify-content-between align-items-center">
+							<div>Total Expenses</div>
+							<div class="font-weight-bold" id="liquidationTotalExpense">${formatAmount(liquidationTotalExpense, true)}</div>
+						</div>
+					</div>
+					<div class="offset-md-8 col-md-4 col-sm-12">
+						<div class="d-flex justify-content-between align-items-center">
+							<div>VAT Sales</div>
+							<div class="font-weight-bold" id="liquidationVatSales">${formatAmount(liquidationVatSales, true)}</div>
+						</div>
+					</div>
+					<div class="offset-md-8 col-md-4 col-sm-12">
+						<div class="d-flex justify-content-between align-items-center">
+							<div>VAT</div>
+							<div class="font-weight-bold" id="liquidationVat">${formatAmount(liquidationVat, true)}</div>
+						</div>
+					</div>
+					<div class="offset-md-8 col-md-4 col-sm-12">
+						<div class="d-flex justify-content-between align-items-center">
+							<div>Budget</div>
+							<div class="font-weight-bold" id="liquidationBudget">${formatAmount(liquidationBudget, true)}</div>
+						</div>
+					</div>
+					<div class="offset-md-8 col-md-4 col-sm-12">
+						<div class="d-flex justify-content-between align-items-center">
+							<div>Excess/Shortage</div>
+							<div class="font-weight-bold" id="liquidationExcessShortage">${formatAmount(liquidationExcessShortage, true)}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+
+		return html;
+	}
+	// ----- END LIQUIDATION TABLE -----
+
+
+	// ----- PETTY CASH VOUCHER -----
+	function getPettyCashVoucher(data = false) {
+		let { pettyCashVoucherID } = data && data[0];
+
+		let pettyCashVoucher = getTableData(`fms_petty_cash_voucher_tbl WHERE pettyCashVoucherID = ${pettyCashVoucherID}`);
+		let {
+			pettyCashVoucherCode,
+			requestedAmount,
+			totalAmount,
+			remainingBalance,
+			pettyCashVoucherReason,
+		} = pettyCashVoucher && pettyCashVoucher[0];
+
+		let html = `
+		<div class="card my-3">
+			<div class="card-header bg-dark text-white">
+				<div class="d-flex justify-content-between align-items-center">
+					<h5 class="font-weight-bold mb-0">Petty Cash Voucher</h5>
+					<div class="font-weight-bold" style="letter-spacing: 1.2px;">${pettyCashVoucherCode || "-"}</div>
+				</div>
+			</div>
+			<div class="card-body">
+				<div class="row">
+					<div class="col-md-12 col-sm-12">
+						<div class="form-group">
+							<label>Description</label>
+							<textarea class="form-control"
+								name="pettyCashVoucherReason"
+								style="resize: none;"
+								disabled>${pettyCashVoucherReason || "-"}</textarea>
+						</div>
+					</div>
+					<div class="col-md-4 col-sm-12">
+						<div class="form-group">
+							<label>Requested Amount</label>
+							<input type="text"
+								class="form-control text-right"
+								name="requestedAmount"
+								value="${requestedAmount ? formatAmount(requestedAmount, true) : "-"}"
+								disabled>
+						</div>
+					</div>
+					<div class="col-md-4 col-sm-12">
+						<div class="form-group">
+							<label>Total Amount</label>
+							<input type="text"
+								class="form-control text-right"
+								name="totalAmount"
+								value="${totalAmount ? formatAmount(totalAmount, true) : "-"}"
+								disabled>
+						</div>
+					</div>
+					<div class="col-md-4 col-sm-12">
+						<div class="form-group">
+							<label>Balance</label>
+							<input type="text"
+								class="form-control text-right"
+								name="remainingBalance"
+								value="${remainingBalance ? formatAmount(remainingBalance, true) : "-"}"
+								disabled>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+		return html;
+	}
+	// ----- END PETTY CASH VOUCHER -----
+
+
+	// ----- FORM CONTENT -----
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		oldReceiptFilename = [], newReceiptFilename = [], newReceiptFiles = [];
+
+		$("#page_content").html(preloader);
+		readOnly = isRevise ? false : readOnly;
+		
+		let {
+			liquidationID,
+			liquidationCode,
+			reviseLiquidationID,
+			reviseLiquidationCode,
+			pettyCashRequestID,
+			pettyCashRequestCode,
+			employeeID,
+			liquidationTotalExpense,
+			liquidationVatSales,
+			liquidationVat,
+			liquidationBudget,
+			liquidationExcessShortage,
+			liquidationDispositionExcessShortage,
+			liquidationReceipt,
+			approversID,
+			approversStatus,
+			approversDate,
+			liquidationPurpose,
+			liquidationStatus,
+			liquidationRemarks,
+			submittedAt,
+			createdBy,
+			updatedBy,
+			createdAt,
+			updatedAt,
+		} = data && data[0];
+
+		// ----- GET EMPLOYEE DATA -----
 		let {
 			fullname:    employeeFullname    = "",
 			department:  employeeDepartment  = "",
@@ -1196,21 +1085,13 @@ $(document).ready(function() {
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("liquidationID", encryptString(liquidationID));
+		$("#btnBack").attr("code", getFormCode("LF", moment(createdAt), liquidationID));
 		$("#btnBack").attr("status", liquidationStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
-		let disabled          = readOnly ? "disabled" : "";
-		let billingVat = !readOnly ? `
-        <input type="checkbox" 
-            id="billingVat" 
-            ${liquidationVatAmount > 0 ? "checked" : ""}>` : "";
-        
-        let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
-        
+		let disabled = readOnly ? "disabled" : "";
 
-		//let disabledReference = billMaterialID && billMaterialID != "0" ? "disabled" : disabled;
-		
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? liquidationID : reviseLiquidationID;
@@ -1227,6 +1108,15 @@ $(document).ready(function() {
 				</div>
 			</div>
 		</div>` : "";
+
+		let inputReceipt = !disabled ? `
+		<input type="file"
+			name="liquidationReceipt"
+			id="liquidationReceipt"
+			class="form-control"
+			accept="image/*, .pdf, .docx, .doc"
+			multiple="multiple"
+			filename="${liquidationReceipt}">` : "";
 
 		let html = `
         <div class="row px-2">
@@ -1246,7 +1136,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${liquidationStatus && !isRevise ? getStatusStyle(liquidationStatus) : "---"}
+							${liquidationStatus && !isRevise ? getStatusStyle(liquidationStatus, createdAt == updatedAt) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1296,243 +1186,122 @@ $(document).ready(function() {
                 </div>
             </div>
         </div>
-            <div class="row" id="form_liquidation">
-				<div class="col-md-4 col-sm-12">
-					<div class="form-group">
-						<label class="text-dark">Reference Number</label>
-						<input type="text" class="form-control liquidationReferenceNumber" id="liquidationReferenceNumber" 
-						name="liquidationReferenceNumber" value="${liquidationReferenceNumber || `${pettycashCode}`}" disabled>
-					</div>
-				</div>
-                <div class="col-md-4 col-sm-12">
-                    <div class="form-group">
-                        <label class="text-dark">Requestor</label>
-                        <input type="text" class="form-control" disabled value="${employeeFullname}">
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-12">
-                    <div class="form-group">
-                        <label class="text-dark">Position</label>
-                        <input type="text" class="form-control" disabled value="${employeeDesignation}">
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label class="text-dark">Department</label>
-                    <input type="text" class="form-control" disabled value="${employeeDepartment}">
-                </div>
-            </div>
-				<div class="col-md-4 col-sm-12">
+
+		<div class="row" id="form_liquidation">
+			<div class="col-md-3 col-sm-12">
 				<div class="form-group">
-				   <label>Date</label>
-				   <input type="button" 
-					   class="form-control text-left"
-					   required
-					   id="liquidationDate"
-					   name="liquidationDate"
-					   value="${liquidationDate || `${datewithrecord}`}"
-					   disabled>
-			   </div>	
+					<label class="text-dark">Reference No.</label>
+					<input type="text" class="form-control" disabled value="${pettyCashRequestCode || "-"}">
+				</div>
 			</div>
-				<div class="col-md-4 col-sm-12">
+			<div class="col-md-3 col-sm-12">
 				<div class="form-group">
-					<label>Purpose ${!disabled ? "<code>*</code>" : ""}</label>
-					<textarea class="form-control validate" 
-						data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
-						minlength="2" 
-						maxlength="325" 
-						id="liquidationPurpose" 
-						name="liquidationPurpose" 
-						required 
-						rows="2" 
-						style="resize:none;"
-						${disabled}>${liquidationPurpose}</textarea>
-					<div class="d-block invalid-feedback" id="invalid-liquidationPurpose"></div>
+					<label class="text-dark">Requestor</label>
+					<input type="text" class="form-control" disabled value="${employeeFullname}">
 				</div>
-				</div>
-			
-				<div class="col-md-6 col-sm-12">
-					<div class="form-group">
-					<label>Chart of Account</label>
-						<select
-							class="form-control select2 chartOfAccountID"
-							name="chartOfAccountID"
-							disabled
-							id="chartOfAccountID"
-							style="width: 100%"
-							${disabled}>
-							${getChartofAccount(pettyCashChartOfAccountID)}
-						</select>
-						<div class="invalid-feedback d-block" id="invalid-chartOfAccountID"></div>
-					</div>
-				</div>
-				<div class="col-md-6 col-sm-12">
+			</div>
+			<div class="col-md-3 col-sm-12">
 				<div class="form-group">
-					<label>Disposition of Excess/(Shortage)</label>
-					<textarea class="form-control validate" 
-						data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
-						minlength="0" 
-						maxlength="325" 
-						id="liquidationDispositionofExcessOrShortage" 
-						name="liquidationDispositionofExcessOrShortage" 
-						rows="2" 
-						style="resize:none;"
-						${disabled}>${liquidationDispositionofExcessOrShortage}</textarea>
-					<div class="d-block invalid-feedback" id="invalid-liquidationDispositionofExcessOrShortage"></div>
+					<label class="text-dark">Position</label>
+					<input type="text" class="form-control" disabled value="${employeeDesignation}">
 				</div>
+			</div>
+			<div class="col-md-3 col-sm-12">
+				<div class="form-group">
+					<label class="text-dark">Department</label>
+					<input type="text" class="form-control" disabled value="${employeeDepartment}">
 				</div>
-                <div class="w-100">
-                <hr class="pb-1">
-				<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Liquidation</div>
-                <table class="table table-striped" id="${tableProjectRequestItemsName}">
-                    <thead>
-                        <tr style="white-space: nowrap">
-                            <th>Description ${!disabled ? "<code>*</code>" : ""}</th>
-							<th>Quantity</th>
-                            <th>Amount</th>
-							<th>Client</th>
-							<th>SRF Number</th>
-							<th>Remarks</th>
-							<th>Reference</th>
-                        </tr>
-                    </thead>
-                    <tbody class="itemProjectTableBody" project="true">
-                        ${clientFundRequestItems}
-                    </tbody>
-                </table>
-                <div class="w-100 d-flex justify-content-between align-items-center py-2">
-                    <div>
-                       
-                    </div>
-					<div class="col-12">
-                    <div class="row py-2">
-					<div class="offset-lg-7 col-lg-6 offset-md-3 col-md-9 col-sm-12 pt-3 pb-2">
-						<div class="row pb-1" style="font-size: 1.1rem;">
-							<div class="col-7 col-lg-5 text-left">Total Expenses:</div>
-							<span class="col-7 col-lg-5 text-right text-dark" id="liquidationExpenses" name="liquidationExpenses" style="font-size: 1.05em">${formatAmount(liquidationExpenses || `${pettyCashAmount}`, true)} 
-							</span>
-						</div>
-						<div class="row pb-1" style="font-size: 1.1rem">
-                        <div class="col-7 col-lg-5 text-left">${billingVat} 12% VAT: </div>
-                        <div class="col-7 col-lg-5 text-right text-dark">
-                            <span id="liquidationVatAmount">${formatAmount(liquidationVatAmount, true)}</span>
-                        </div>
-                    </div>
-						<div class="row pb-1" style="font-size: 1.1rem;">
-							<div class="col-7 col-lg-5 text-left">Budget:</div>
-							<div class="col-7 col-lg-5 text-right text-dark">
-							<div class="input-group-prepend">
-							<span class="input-group-text text-dark">₱</span>
-							<input type="text" class="form-control-plaintext amount py-0 text-dark border-bottom liquidationBudget"  pettyCashAmountValue="${pettyCashAmount}"
-							min="0" 
-							max="9999999999"
-							minlength="1"
-							maxlength="20" 
-							id="liquidationBudget" 
-							name="liquidationBudget" 
-							value="${liquidationBudget}"
-							${disabled}>
-							</div>
-							</div>
-						</div>
-						<div class="row pb-1" style="font-size: 1.1rem;">
-							<div class="col-7 col-lg-5 text-left">Excess(Shortage):</div>
-							<spn class="col-7 col-lg-5 text-right text-dark" id="liquidationExcessOrShortage" name="liquidationExcessOrShortage" style="font-size: 1.05em">
-							${formatAmount(liquidationExcessOrShortage, true)}
-							</span>
-						</div>	
-							</div>
-						</div>
-					</div>
-				</div>
-				</div>
+			</div>
+			<div class="col-md-12 col-sm-12">
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control validate"
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+                        minlength="1"
+                        maxlength="200"
+                        id="liquidationPurpose"
+                        name="liquidationPurpose"
+                        required
+                        rows="4"
+                        style="resize:none;"
+						${disabled}>${liquidationPurpose || ""}</textarea>
+                    <div class="d-block invalid-feedback" id="invalid-liquidationPurpose"></div>
+                </div>
             </div>
+			<div class="col-12">
+				<div class="form-group">
+					<label>Upload Receipt ${!disabled ? "<code>*</code>" : ""}</label>
+					${inputReceipt}
+					<div class="d-block invalid-feedback" id="invalid-liquidationReceipt"></div>
+					<div class="row display-image-parent" id="displayFile">
+						${displayFile(liquidationReceipt, readOnly)}
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12">${getLiquidationTable(data, readOnly)}</div>
+
+			<div class="col-12">
+				<div class="form-group">
+					<label>Disposition of Excess/Shortage</label>
+					<textarea class="form-control validate"
+						name="liquidationDispositionExcessShortage"
+						data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][''][-][_][(][)][%][&][*][ ]"
+						minlength="0"
+						maxlength="255"
+						style="resize: none;"
+						id="liquidationDispositionExcessShortage"
+						${disabled}>${liquidationDispositionExcessShortage || ""}</textarea>
+					<div class="d-block invalid-feedback" id="invalid-liquidationDispositionExcessShortage"></div>
+				</div>
+			</div>
+
+			<div class="col-12">${getPettyCashVoucher(data)}</div>
+
             <div class="col-md-12 text-right mt-3">
                 ${button}
             </div>
         </div>
+
 		<div class="approvers">
 			${!isRevise  ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
 
+
 		setTimeout(() => {
 			$("#page_content").html(html);
-			
-			initDataTables();
-			
-			// $(".clientID").find("select").each(function(i) {
-			// 	if ($(this).hasClass("select2-hidden-accessible")) {
-			// 		$(this).select2("destroy");
-			// 	}
-			//$(".clientID").val(clientID).trigger("change");
-			
 			initAll();
-			updateInventoryItemOptions();
-			//!liquidationID && liquidationID == 0 && $("#liquidationDate").val(moment(new Date).format("MMMM DD, YYYY"));
-            projectID && projectID != 0 && $("[name=projectID]").trigger("change");
-			// clientID && clientID != 0 && $("[name=clientID]").trigger("change");
-			// $(".clientID").select2({ theme: "bootstrap"});
-			
-			// $(".clientID").find("select").each(function(i) {
-			// 	if ($(this).hasClass("select2-hidden-accessible")) {
-			// 		$(this).select2({ theme: "bootstrap" });
-			// 	}
-			// });
-			// if ($(this).hasClass("select2-hidden-accessible")) {
-			// 	// 		$(this).select2({ theme: "bootstrap" });
-			// 	// 	}
-			
-			// })
-			// if (billMaterialID || projectID) {
-			// 	$("[name=projectID]").val(projectID).trigger("change");
-			// }
+			initDataTables();
+			updateTableInputs();
 
 			// ----- NOT ALLOWED FOR UPDATE -----
-			// if (!allowedUpdate) {
-			// 	$("#page_content").find(`input, select, textarea`).each(function() {
-			// 		if (this.type != "search") {
-			// 			$(this).attr("disabled", true);
-			// 		}
-			// 	})
-			// 	$('#btnBack').attr("status", "2");
-			// 	$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm`).hide();
-			// }
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
-			return html;
-		}, 300);
+
+		}, 100);
 	}
 	// ----- END FORM CONTENT -----
 
-	    // ----- CLICK VATABLE -----
-		$(document).on("change", `#billingVat`, function() {
-			updateTotalAmount();
-			
-		})
-		// ----- END CLICK VATABLE -----
-	  // ----- UPDATE TOTAL AMOUNT -----
-	  function updateTotalAmount() {
-		  var quantity = 0;
-		  var amount = 0;
-		  var totalamount = parseFloat(getNonFormattedAmount($("#liquidationExpenses").text()) || 0);
-		// $(".itemProjectTableBody tr").each(function(){
-		// 	 quantity  += parseFloat($(this).find('[name=quantity]').text() || 0);
-		// 	 amount  += parseFloat(getNonFormattedAmount($(this).find('[name=amount]').text()) || 0);
-		// });	
-		//alert(totalamount);
-		//var totalbasequantityandamount = quantity * amount;
-        const isChecked = $(`#billingVat`).prop("checked");
-        const vatAmount = isChecked ? (totalamount / 1.12 * 0.12) : 0;
-        $("#liquidationVatAmount").text(formatAmount(vatAmount, true));
-		
-	}
 
-    // ----- PAGE CONTENT -----
+	// ----- PAGE CONTENT -----
 	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -1544,17 +1313,14 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Petty Cash Request");
+			headerButton(true, "Add Liquidation");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
-			
 		} else {
 			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
 			formContent(data, readOnly, isRevise, isFromCancelledDocument);
-			//$("name=clientID").select2({ theme: "bootstrap"});
-			
 		}
 	}
 	viewDocument();
@@ -1562,215 +1328,366 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-	// ----- GET PURCHASE REQUEST DATA -----
-	function getLiquidationData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	// ----- UPDATE TABLE INPUTS -----
+	function updateTableInputs() {
+		$("#tableLiquidation").find(`input, select, textarea`).each(function(i) {
+			$parent  = $(this).closest(".form-group");
+			$invalid = $parent.find(".invalid-feedback");
 
-		/**
-		 * ----- ACTION ---------
-		 *    > insert
-		 *    > update
-		 * ----- END ACTION -----
-		 * 
-		 * ----- STATUS ---------
-		 *    0. Draft
-		 *    1. For Approval
-		 *    2. Approved
-		 *    3. Denied
-		 *    4. Cancelled
-		 * ----- END STATUS -----
-		 * 
-		 * ----- METHOD ---------
-		 *    > submit
-		 *    > save
-		 *    > deny
-		 *    > approve
-		 * ----- END METHOD -----
-		 */
+			let name = $(this).attr("name");
+			$(this).attr("id", name+i);
+			$parent.attr("id", `invalid-${name+i}`);
+		})
+	}
+	// ----- END UPDATE TABLE INPUTS -----
 
-		let data = { items: [] }, formData = new FormData;
+
+	// ----- UPDATE DELETE BUTTON -----
+	function updateDeleteButton() {
+		let count = 0;
+		$(".checkboxrow").each(function() {
+			this.checked && count++;
+		})
+		$(".btnDeleteRow").attr("disabled", count == 0);
+	}
+	// ----- END UPDATE DELETE BUTTON -----
+
+
+	// ----- DELETE TABLE ROW -----
+	function deleteTableRow() {
+		if ($(`.checkboxrow:checked`).length != $(`.checkboxrow`).length) {
+			Swal.fire({
+				title:              "DELETE ROWS",
+				text:               "Are you sure to delete these rows?",
+				imageUrl:           `${base_url}assets/modal/delete.svg`,
+				imageWidth:         200,
+				imageHeight:        200,
+				imageAlt:           "Custom image",
+				showCancelButton:   true,
+				confirmButtonColor: "#dc3545",
+				cancelButtonColor:  "#1a1a1a",
+				cancelButtonText:   "No",
+				confirmButtonText:  "Yes"
+			}).then((result) => {
+				if (result.isConfirmed) {
+					$(`.checkboxrow:checked`).each(function(i, obj) {
+						var tableRow = $(this).closest('tr');
+						tableRow.fadeOut(500, function (){
+							$(this).closest("tr").remove();
+							updateTableInputs();
+							updateDeleteButton();
+							updateCostSummary();
+						});
+					})
+				}
+			});
+			
+		} else {
+			showNotification("danger", "You must have atleast one or more items.");
+		}
+	}
+	// ----- END DELETE TABLE ROW -----
+
+
+	// ----- UPDATE COST SUMMARY -----
+	function updateCostSummary() {
+		let totalVatSales = [...$(`[name="vatSales"]`).map((i, x) => +x.value.replaceAll(",", ""))].reduce((a,b) => a+b, 0);
+		let totalVat      = [...$(`[name="vat"]`).map((i, x) => +x.value.replaceAll(",", ""))].reduce((a,b) => a+b, 0);
+		let totalAmount   = [...$(`[name="amount"]`).map((i, x) => +x.value.replaceAll(",", ""))].reduce((a,b) => a+b, 0);
+		let totalBudget   = +$("#liquidationBudget").text().trim().replaceAll(",", "").replaceAll("₱", "");
+		let totalExcessShortage = totalBudget - totalAmount;
+
+		$("#liquidationTotalExpense").text(formatAmount(totalAmount, true));
+		$("#liquidationVatSales").text(formatAmount(totalVatSales, true));
+		$("#liquidationVat").text(formatAmount(totalVat, true));
+		$("#liquidationExcessShortage").text(formatAmount(totalExcessShortage, true));
+	}
+	// ----- END UPDATE COST SUMMARY -----
+
+
+	// ----- DISPLAY FILE -----
+    function displayFile(file = null, readOnly = false, blob = "", link = true, oldFiles = true) {
+        let html = ``;
+        if (file && file != null && file != "null") {
+			let fileArr = file.split("|");
+			fileArr.forEach(receiptFile => {
+				if (oldFiles) oldReceiptFilename.push(receiptFile);
+				
+				let fileType = receiptFile.split(".");
+					fileType = fileType[fileType.length-1].toLowerCase();
+				let imageExtensions = ["jpg", "png", "jpeg", "gif"];
+				let isFileImage = imageExtensions.includes(fileType);
+				let targetAttr = isFileImage ? `display="true" blob="${blob}"` : (oldFiles ? `target="_blank"` : "");
+
+				let otherAttr = link ? `href="${base_url+"assets/upload-files/liquidation/"+receiptFile}"` : `href="javascript:void(0)"`;
+				let buttonRemove = !readOnly ? `
+				<span class="btnRemoveFile pr-2 display-image-remove"
+					filename="${receiptFile}">
+					<i class="fas fa-close"></i>
+				</span>` : "";
+
+				html += `
+				<div class="col-md-4 col-sm-12 display-image-content">
+					<div class="display-image">
+						<div class="d-flex justify-content-start align-items-center p-0">
+							${buttonRemove}
+							<a class="filename display-image-filename"
+								title="${receiptFile}"
+								${otherAttr}
+								${targetAttr}>
+								${receiptFile}
+							</a>
+						</div>
+					</div>
+				</div>`;
+			})
+        }
+        return html;
+    }
+    // ----- END DISPLAY FILE -----
+
+
+	// ----- GET LIQUIDATION DATA -----
+	function getLiquidationData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0") {
+
+		let data = new FormData();
 		const approversID = method != "approve" && moduleApprover;
 
-		//const ceID = $(`[name="billMaterialID"]`).val();
-
 		if (id) {
-			data["liquidationID"] = id;
-			formData.append("liquidationID", id);
+			data.append("liquidationID", id);
 
 			if (status != "2") {
-				data["liquidationStatus"] = status;
-				formData.append("liquidationStatus", status);
+				data.append("liquidationStatus", status);
 			}
 		}
 
-		data["action"]                = action;
-		data["method"]                = method;
-		data["updatedBy"]             = sessionID;
+		data.append("action", action);
+		data.append("method", method);
+		data.append("updatedBy", sessionID);
 
-		formData.append("action", action);
-		formData.append("method", method);
-		formData.append("updatedBy", sessionID);
-
-		if (currentStatus == "0" && method != "approve") {
+		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
 			
-			data["employeeID"]            										= sessionID;
-            data["projectID"]    	   											= $("[name=projectID]").val() || null;
-			data['liquidationReferenceNumber']									= $("#liquidationReferenceNumber").val();
-			data['liquidationDate']												= $("#liquidationDate").val();
-			data['chartOfAccountID']											= $("#chartOfAccountID").val();
-			data["liquidationPurpose"] 											= $("[name=liquidationPurpose]").val()?.trim();
-			data['liquidationAmount']											= getNonFormattedAmount($("#liquidationAmount").text());
-			data['liquidationVatAmount']										= getNonFormattedAmount($("#liquidationVatAmount").text());
-			data['liquidationExpenses'] 										= getNonFormattedAmount($("#liquidationExpenses").text());
-			data['liquidationBudget']											= getNonFormattedAmount($("#liquidationBudget").val());
-			data['liquidationExcessOrShortage'] 								= getNonFormattedAmount($("#liquidationExcessOrShortage").text());
-			data['liquidationDispositionofExcessOrShortage'] 					= $("#liquidationDispositionofExcessOrShortage").val();
-			data["pettyCashRequestID"] 											= $(".description").attr("pettyCashID");
-			data["voucherID"] 													= $(".description").attr("voucherID");
-			//alert($(".description").attr("voucherID"));
-			//alert(getNonFormattedAmount($("#liquidationBudget").val()));
-			formData.append("employeeID", sessionID);
-            formData.append("projectID", $("[name=projectID]").val() || null);
-			formData.append("liquidationAmount", getNonFormattedAmount($("#liquidationAmount").text()));
-			formData.append("liquidationVatAmount", getNonFormattedAmount($("#liquidationVatAmount").text()));
-			formData.append("liquidationExpenses", getNonFormattedAmount($("#liquidationExpenses").text()));
-			formData.append("liquidationDate", $("#liquidationDate").val());
-			formData.append("chartOfAccountID", $("#chartOfAccountID").val());
-			formData.append("liquidationReferenceNumber", $("#liquidationReferenceNumber").val());
-			formData.append("liquidationBudget", getNonFormattedAmount($("#liquidationBudget").val()));
-			formData.append("liquidationExcessOrShortage", getNonFormattedAmount($("#liquidationExcessOrShortage").text()));
-			formData.append("liquidationDispositionofExcessOrShortage", $("#liquidationDispositionofExcessOrShortage").val());
-			formData.append("liquidationPurpose", $("[name=liquidationPurpose]").val()?.trim());
-			formData.append("pettyCashRequestID", $(".description").attr("pettyCashID"));
-			//formData.append("voucherID", $(".description").attr("voucherID"));
+			data.append("employeeID", sessionID);
+			data.append("liquidationPurpose", $(`[name="liquidationPurpose"]`).val()?.trim());
+			data.append("liquidationDispositionExcessShortage", $(`[name="liquidationDispositionExcessShortage"]`).val()?.trim());
+			data.append("liquidationTotalExpense", $(`#liquidationTotalExpense`).text()?.trim().replaceAll(",", "").replaceAll("₱", ""));
+			data.append("liquidationVatSales", $(`#liquidationVatSales`).text()?.trim().replaceAll(",", "").replaceAll("₱", ""));
+			data.append("liquidationVat", $(`#liquidationVat`).text()?.trim().replaceAll(",", "").replaceAll("₱", ""));
+			data.append("liquidationBudget", $(`#liquidationBudget`).text()?.trim().replaceAll(",", "").replaceAll("₱", ""));
+			data.append("liquidationExcessShortage", $(`#liquidationExcessShortage`).text()?.trim().replaceAll(",", "").replaceAll("₱", ""));
+
 			if (action == "insert") {
-				data["createdBy"]   = sessionID;
-				data["createdAt"]   = dateToday();
-
-				formData.append("createdBy", sessionID);
-				formData.append("createdAt", dateToday());
+				data.append("createdBy", sessionID);
+				data.append("createdAt", dateToday());
 			} else if (action == "update") {
-				data["liquidationID"] = id;
-
-				formData.append("liquidationID", id);
+				data.append("liquidationID", id);
 			}
 
 			if (method == "submit") {
-				data["submittedAt"] = dateToday();
-				formData.append("submittedAt", dateToday());
+				data.append("submittedAt", dateToday());
 				if (approversID) {
-					data["approversID"]           = approversID;
-					data["liquidationStatus"] = 1;
-
-					formData.append("approversID", approversID);
-					formData.append("liquidationStatus", 1);
+					data.append("approversID", approversID);
+					data.append("liquidationStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-					data["approversID"]           = sessionID;
-					data["approversStatus"]       = 2;
-					data["approversDate"]         = dateToday();
-					data["liquidationStatus"] = 2;
-
-					formData.append("approversID", sessionID);
-					formData.append("approversStatus", 2);
-					formData.append("approversDate", dateToday());
-					formData.append("liquidationStatus", 2);
+					data.append("approversID", sessionID);
+					data.append("approversStatus", 2);
+					data.append("approversDate", dateToday());
+					data.append("liquidationStatus", 2);
 				}
 			}
 
-			$(".itemTableRow").each(function(i, obj) {
-				const liquidationID = $(this).attr('liquidationID');
-				const categoryType = 
-				$(this).closest("tbody").attr("project") == "true" ? "project" : "company";
-				const description    						= $("td [name=description]", this).text();
-				const quantity    							= $("td [name=quantity]", this).text();
-				const amount   		 						= getNonFormattedAmount($("td [name=amount]", this).text());
-				// const vatSales 								= $("td [name=vatSales]", this).val();
-				// const vat 									= $("td [name=vat]", this).val();	
-				const clientID 								= $("td [name=clientID]", this).val();
-				const srfNumber 							= $("td [name=srfNumber]", this).val();
-				// const chartOfAccountID 						= $("td [name=chartOfAccountID]", this).val();
-				const remark 								= $("td [name=remark]", this).val();
-				const receiptNumber 						= $("td [name=receiptNumber]", this).text();
-				//const totalAmount = 		getNonFormattedAmount($("td [name=basequantityandamount ]", this).text()); 
-				
-				
+			$("#tableLiquidation tbody tr").each(function(i) {
+				let description = $(`[name="description"]`, this).val()?.trim();
+				let vatSales    = $(`[name="vatSales"]`, this).val()?.trim().replaceAll(",", "").replaceAll("₱", "");
+				let vat         = $(`[name="vat"]`, this).val()?.trim().replaceAll(",", "").replaceAll("₱", "");
+				let amount      = $(`[name="amount"]`, this).val()?.trim().replaceAll(",", "").replaceAll("₱", "");
+				let client      = $(`[name="client"]`, this).val()?.trim();
+				let supplier    = $(`[name="supplier"]`, this).val()?.trim();
+				let invoice     = $(`[name="invoice"]`, this).val()?.trim();
+				let remarks     = $(`[name="remarks"]`, this).val()?.trim();
 
-				let temp = {
-					description, amount, clientID, srfNumber, remark
-				};
-
-				//formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
-				formData.append(`items[${i}][description]`, description);
-				formData.append(`items[${i}][quantity]`, quantity);
-				formData.append(`items[${i}][amount]`, amount);
-				// formData.append(`items[${i}][vatSales]`, vatSales);
-				// formData.append(`items[${i}][vat]`, vat);
-				formData.append(`items[${i}][clientID]`, clientID);
-				formData.append(`items[${i}][srfNumber]`, srfNumber);
-				// formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
-				formData.append(`items[${i}][remark]`, remark);
-				formData.append(`items[${i}][receiptNumber]`, receiptNumber);
-				formData.append(`items[${i}][createdBy]`, sessionID);
-				formData.append(`items[${i}][updatedBy]`, sessionID);
-
-				data["items"].push(temp);
-			});
+				data.append(`items[${i}][description]`, description);
+				data.append(`items[${i}][vatSales]`, vatSales);
+				data.append(`items[${i}][vat]`, vat);
+				data.append(`items[${i}][amount]`, amount);
+				data.append(`items[${i}][client]`, client);
+				data.append(`items[${i}][supplier]`, supplier);
+				data.append(`items[${i}][invoice]`, invoice);
+				data.append(`items[${i}][remarks]`, remarks);
+			})
 		} 
 
-		
+		// ----- FILES -----
+		data.append("uploadFileFolder", "liquidation");
+		data.append("uploadFileColumnName[0]", "liquidationReceipt");
+		data.append("uploadFileNewFilename[0]", newReceiptFilename.join("|"));
+		data.append("uploadFileOldFilename[0]", oldReceiptFilename.join("|"));
+		newReceiptFiles.map((file, index) => {
+			data.append(`uploadFiles[0][${index}]`, file);
+		})
+		// ----- FILES -----
 
-		return isObject ? data : formData;
+		return data;
 	}
-	// ----- END GET PURCHASE REQUEST DATA -----
+	// ----- END GET LIQUIDATION DATA -----
 
 
-	// ----- VALIDATE INVENTORY ITEM PRICE LIST -----
-	function validateItemPrice() {
-		// let flag = 0;
-		// $(`[name="chartOfAccountID"]`).each(function(i) {
-		// 	const chartOfAccountID = $(this).val();
-		// 	const price = getInventoryPreferredPrice(chartOfAccountID, this);
-		// 	if (!price) {
-		// 		flag++;
-		// 	}
-		// })
-		// return flag > 0 ? false : true;
+	// ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated").removeClass("is-valid").removeClass("no-error");
+		$(`[name="liquidationReceipt"]`).removeClass("validated").removeClass("is-valid").removeClass("no-error");
 	}
-	// ----- END VALIDATE INVENTORY ITEM PRICE LIST -----
+	// ----- END REMOVE IS-VALID IN TABLE -----
 
 
-    // ----- OPEN ADD FORM -----
-	$(document).on("click", "#btnAdd", function () {
-		pageContent(true);
-		updateURL(null, true);
-	});
-	// ----- END OPEN ADD FORM -----
-
-
-    // ----- OPEN EDIT FORM -----
-	$(document).on("click", ".btnEdit", function () {
-		const id = decryptString($(this).attr("id"));
-		viewDocument(id);
-	});
-	// ----- END OPEN EDIT FORM -----
-
-
-    // ----- VIEW DOCUMENT -----
+	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
-    // ----- REVISE DOCUMENT -----
+	// ----- OPEN EDIT MODAL -----
+	$(document).on("click", ".btnEdit", function () {
+		const id = decryptString($(this).attr("id"));
+		viewDocument(id);
+	});
+	// ----- END OPEN EDIT MODAL -----
+
+
+	// ----- BUTTON ADD ROW -----
+    $(document).on("click", ".btnAddRow", function() {
+        let row = getItemRow();
+		updateTableInputs();
+		$("#tableLiquidation tbody").append(row);
+		updateTableInputs();
+		initAmount();
+    })
+    // ----- END BUTTON ADD ROW -----
+
+
+	// ----- CHECKBOX -----
+	$(document).on("click", "[type=checkbox]", function() {
+		updateDeleteButton();
+	})
+	// ----- END CHECKBOX -----
+
+
+	// ----- CHECK ALL -----
+	$(document).on("change", ".checkboxall", function() {
+		const isChecked = $(this).prop("checked");
+		$(".checkboxrow").each(function(i, obj) {
+			$(this).prop("checked", isChecked);
+		});
+		updateDeleteButton();
+	})
+	// ----- END CHECK ALL -----
+
+
+	// ----- BUTTON DELETE ROW -----
+	$(document).on("click", ".btnDeleteRow", function(){
+		deleteTableRow();
+	})
+	// ----- END BUTTON DELETE ROW -----
+
+
+	// ----- KEYUP AMOUNT -----
+	function updateVatAmount($parent = '') {
+		let amount = +$parent.find(`[name="amount"]`).val()?.replaceAll(",", "");
+		let hasVat = $parent.find(`[name="hasVat"]`).prop("checked");
+		let vatAmount = hasVat ? (amount * 0.12) : 0;
+		let vatSales  = hasVat ? (amount - vatAmount) : amount;
+		$parent.find(`[name="vat"]`).val(formatAmount(vatAmount));
+		$parent.find(`[name="vatSales"]`).val(formatAmount(vatSales));
+		updateCostSummary();
+	}
+
+	$(document).on("change", `[name="hasVat"]`, function() {
+		$parent = $(this).closest("tr");
+		updateVatAmount($parent);
+	})
+
+	$(document).on("keyup", `[name="amount"], [name="vatSales"], [name="vat"]`, function() {
+		$parent = $(this).closest("tr");
+		updateVatAmount($parent);
+		updateCostSummary();
+	})
+	// ----- END KEYUP AMOUNT -----
+
+
+	// ----- UPLOAD RECEIPT -----
+	$(document).on("change", `[name="liquidationReceipt"]`, function() {
+		let countFiles = oldReceiptFilename.length + newReceiptFilename.length;
+		if (this.files && this.files[0]) {
+			let files = this.files;
+			let filesLength = this.files.length;
+			for (var i=0; i<filesLength; i++) {
+				countFiles++;
+
+				const filesize = files[i].size/1024/1024; // Size in MB
+				const filetype = files[i].type;
+				const filename = files[i].name;
+				const fileArr  = filename.split(".");
+				const name     = fileArr?.[0];
+				const type     = fileArr?.[fileArr.length-1]?.toLowerCase();
+				const displayName = `${name}${countFiles}.${type}`;
+				if (filesize > 10) {
+					showNotification("danger", `${filename} - File size must be less than or equal to <b>10mb</b>`);
+				} else if (!["png", "jpg", "jpeg", "doc", "docx", "pdf"].includes(type)) {
+					showNotification("danger", `${filename} - <b>Invalid file type</b>`);
+				} else {
+					newReceiptFilename.push(displayName);
+					newReceiptFiles.push(files[i]);
+					let blob = URL.createObjectURL(files[i]);
+					$(`#displayFile`).append(displayFile(displayName, false, blob, true, false));
+				}
+			}
+			$(this).val("");
+        }
+	})
+	// ----- END UPLOAD RECEIPT -----
+
+
+	// ----- MODAL IMAGE -----
+	$(document).on("click", `.display-image-filename`, function(e) {
+		let display = $(this).attr("display") == "true";
+		let source  = $(this).attr("blob") || $(this).attr("href");
+		if (display) {
+			e.preventDefault();
+			$("#display-image-preview").attr("src", source);
+			$("#display-image-modal").modal("show");
+		}
+	})
+	// ----- END MODAL IMAGE -----
+
+
+	// ----- REMOVE FILE -----
+	$(document).on("click", `.btnRemoveFile`, function() {
+		const filename     = $(this).attr("filename");
+		const newFileIndex = newReceiptFilename.indexOf(filename);
+		const oldFileIndex = oldReceiptFilename.indexOf(filename);
+
+		newFileIndex != -1 && newReceiptFilename.splice(newFileIndex, 1);
+		newFileIndex != -1 && newReceiptFiles.splice(newFileIndex, 1);
+		oldFileIndex != -1 && oldReceiptFilename.splice(oldFileIndex, 1);
+
+		$display = $(this).closest(".display-image-content");
+		$display.fadeOut(500, function() {
+			$display.remove();
+		})
+    })
+    // ----- END REMOVE FILE -----
+
+
+    // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
 		const id                    = decryptString($(this).attr("liquidationID"));
 		const fromCancelledDocument = $(this).attr("cancel") == "true";
 		viewDocument(id, false, true, fromCancelledDocument);
-		//const fromCancelledDocument = $(this).attr("cancel") == "true";
-		//viewDocument(id, false, true);
 	});
-	// ----- END REVISE DOCUMENT -----
+	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
@@ -1796,16 +1713,18 @@ $(document).ready(function() {
 					data.delete("action");
 					data.append("action", "update");
 				}
-
-				//validateItemPrice();
+	
 				saveLiquidation(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
-				pageContent();
-	
-				if (employeeID != sessionID) {
-					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-				}
+
+				setTimeout(() => {
+					pageContent();
+		
+					if (employeeID != sessionID) {
+						$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
+					}
+				}, 10);
 			}
 
 		} else {
@@ -1813,14 +1732,13 @@ $(document).ready(function() {
 			const data   = getLiquidationData(action, "save", "0", id);
 			data.append("liquidationStatus", 0);
 
-			//validateItemPrice()
 			saveLiquidation(data, "save", null, pageContent);
 		}
 	});
 	// ----- END SAVE CLOSE FORM -----
 
 
-    // ----- SAVE DOCUMENT -----
+	// ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
 		const id       = decryptString($(this).attr("liquidationID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
@@ -1828,7 +1746,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("LF", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getLiquidationData(action, "save", "0", id);
-		data.append("liquidationStatus", 0);
+		data["liquidationStatus"] = 0;
 
 		if (revise) {
 			if (!isFromCancelledDocument) {
@@ -1841,31 +1759,21 @@ $(document).ready(function() {
 			}
 		}
 
-		//validateItemPrice();
 		saveLiquidation(data, "save", null, pageContent);
 	});
 	// ----- END SAVE DOCUMENT -----
 
-	
-	// ----- REMOVE IS-VALID IN TABLE -----
-	function removeIsValid(element = "table") {
-		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
-		.removeClass("is-valid").removeClass("no-error");
-	}
-	// ----- END REMOVE IS-VALID IN TABLE -----
 
-
-    // ----- SUBMIT DOCUMENT -----
+	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id            = decryptString($(this).attr("liquidationID"));
+		const id           = decryptString($(this).attr("liquidationID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
-		const revise        = $(this).attr("revise") == "true";
-		const validate      = validateForm("form_liquidation");
-		//let validateamount = $("[name=totalAmount]").attr("totalvalue");
-		//const validatePrice = validateItemPrice();
-		//const validateItems = validateTableItems();
-		removeIsValid("#tableProjectRequestItems");
-		//removeIsValid("#tableCompanyRequestItems");
+		const revise       = $(this).attr("revise") == "true";
+		const validate     = validateForm("form_liquidation");
+		let countFiles = oldReceiptFilename.length + newReceiptFilename.length;
+		removeIsValid();
+		
+		if (countFiles) {
 			if (validate) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getLiquidationData(action, "submit", "1", id);
@@ -1887,7 +1795,7 @@ $(document).ready(function() {
 				let notificationData = false;
 				if (employeeID != sessionID) {
 					notificationData = {
-						moduleID:                132,
+						moduleID:                MODULE_ID,
 						notificationTitle:       "Liquidation",
 						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 						notificationType:        2,
@@ -1895,9 +1803,12 @@ $(document).ready(function() {
 					};
 				}
 	
-				saveLiquidation(data, "submit", notificationData, pageContent);
+				saveLiquidation(data, "submit", notificationData, pageContent);	
 			}
-		
+		} else {
+			showNotification("danger", "Please upload a receipts.");
+			$(`[name="liquidationReceipt"]`).focus();
+		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
 
@@ -1929,14 +1840,14 @@ $(document).ready(function() {
 
 			let data = getLiquidationData("update", "approve", "2", id);
 			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
-			let dateApproved = updateApproveDate(approversDate)
+			let dateApproved = updateApproveDate(approversDate);
 			data.append("approversDate", dateApproved);
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                132,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Liquidation",
 					notificationDescription: `${feedback}: Your request has been approved.`,
@@ -1946,7 +1857,7 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                132,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Liquidation",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -1976,7 +1887,7 @@ $(document).ready(function() {
 			<div class="form-group">
 				<label>Remarks <code>*</code></label>
 				<textarea class="form-control validate"
-					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+					data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
 					minlength="2"
 					maxlength="250"
 					id="liquidationRemarks"
@@ -1988,10 +1899,10 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button type="button" class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			liquidationID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button type="button" class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_liquidation_content").html(html);
 	});
@@ -2000,7 +1911,7 @@ $(document).ready(function() {
 		const id       = decryptString($(this).attr("liquidationID"));
 		const feedback = $(this).attr("code") || getFormCode("LF", dateToday(), id);
 
-		const validate = validateForm("modal_liquidation_content");
+		const validate = validateForm("modal_liquidation");
 		if (validate) {
 			let tableData = getTableData("fms_liquidation_tbl", "", "liquidationID = " + id);
 			if (tableData) {
@@ -2008,7 +1919,7 @@ $(document).ready(function() {
 				let approversDate   = tableData[0].approversDate;
 				let employeeID      = tableData[0].employeeID;
 
-				let data = new FormData;
+				let data = new FormData();
 				data.append("action", "update");
 				data.append("method", "deny");
 				data.append("liquidationID", id);
@@ -2018,7 +1929,7 @@ $(document).ready(function() {
 				data.append("updatedBy", sessionID);
 
 				let notificationData = {
-					moduleID:                132,
+					moduleID:                MODULE_ID,
 					tableID: 				 id,
 					notificationTitle:       "Liquidation",
 					notificationDescription: `${feedback}: Your request has been denied.`,
@@ -2037,7 +1948,7 @@ $(document).ready(function() {
 	// ----- DROP DOCUMENT -----
 	$(document).on("click", "#btnDrop", function() {
 		const id = decryptString($(this).attr("liquidationID"));
-		let data = new FormData;
+		let data = new FormData();
 		data.append("liquidationID", id);
 		data.append("action", "update");
 		data.append("method", "drop");
@@ -2051,6 +1962,9 @@ $(document).ready(function() {
     // ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
+		if (tab == "#forViewingTab") {
+			forViewingContent();
+		}
 		if (tab == "#forApprovalTab") {
 			forApprovalContent();
 		}
@@ -2061,215 +1975,185 @@ $(document).ready(function() {
 	// ----- END NAV LINK -----
 
 
-    // ----- APPROVER STATUS -----
-	function getApproversStatus(approversID, approversStatus, approversDate) {
-		let html = "";
-		if (approversID) {
-			let idArr = approversID.split("|");
-			let statusArr = approversStatus ? approversStatus.split("|") : [];
-			let dateArr = approversDate ? approversDate.split("|") : [];
-			html += `<div class="row mt-4">`;
-	
-			idArr && idArr.map((item, index) => {
-				let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
-				let status = statusArr[index] ? statusArr[index] : "";
-				let statusBadge = "";
-				if (date && status) {
-					if (status == 2) {
-						statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
-					} else if (status == 3) {
-						statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
-					}
-				}
-	
-				html += `
-				<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
-					<div class="d-flex justify-content-start align-items-center">
-						<span class="font-weight-bold">
-							${employeeFullname(item)}
-						</span>
-						<small>&nbsp;- Level ${index + 1} Approver</small>
-					</div>
-					${statusBadge}
-				</div>`;
-			});
-			html += `</div>`;
+
+
+
+	// --------------- DATABASE RELATION ---------------
+	function getConfirmation(method = "submit") {
+		const title = "Liquidation";
+		let swalText, swalImg;
+
+		$("#modal_liquidation").text().length > 0 && $("#modal_liquidation").modal("hide");
+
+		switch (method) {
+			case "save":
+				swalTitle = `SAVE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to save this document?";
+				swalImg   = `${base_url}assets/modal/draft.svg`;
+				break;
+			case "submit":
+				swalText  = "Are you sure to submit this liquidation?";
+				swalTitle = `SUBMIT ${title.toUpperCase()}`;
+				swalImg   = `${base_url}assets/modal/add.svg`;
+				break;
+			case "approve":
+				swalTitle = `APPROVE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to approve this document?";
+				swalImg   = `${base_url}assets/modal/approve.svg`;
+				break;
+			case "deny":
+				swalTitle = `DENY ${title.toUpperCase()}`;
+				swalText  = "Are you sure to deny this document?";
+				swalImg   = `${base_url}assets/modal/reject.svg`;
+				break;
+			case "cancelform":
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
+				swalText  = "Are you sure to cancel this document?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
+			case "drop":
+				swalTitle = `DROP ${title.toUpperCase()}`;
+				swalText  = "Are you sure to drop this document?";
+				swalImg   = `${base_url}assets/modal/drop.svg`;
+				break;
+			default:
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
+				swalText  = "Are you sure that you want to cancel this process?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
 		}
-		return html;
+		return Swal.fire({
+			title:              swalTitle,
+			html:               swalText,
+			imageUrl:           swalImg,
+			imageWidth:         200,
+			imageHeight:        200,
+			imageAlt:           "Custom image",
+			showCancelButton:   true,
+			confirmButtonColor: "#dc3545",
+			cancelButtonColor:  "#1a1a1a",
+			cancelButtonText:   "No",
+			confirmButtonText:  "Yes"
+		})
 	}
-	// ----- END APPROVER STATUS --
-})
 
-// --------------- DATABASE RELATION ---------------
-function getConfirmation(method = "submit") {
-	const title = "Liquidation";
-	let swalText, swalImg;
+	function saveLiquidation(data = null, method = "submit", notificationData = null, callback = null) {
+		if (data) {
+			const confirmation = getConfirmation(method);
+			confirmation.then(res => {
+				if (res.isConfirmed) {
+					$("#loader").show();
 
-	$("#modal_liquidation").text().length > 0 && $("#modal_liquidation").modal("hide");
-
-	switch (method) {
-		case "save":
-			swalTitle = `SAVE ${title.toUpperCase()}`;
-			swalText  = "Are you sure to save this document?";
-			swalImg   = `${base_url}assets/modal/draft.svg`;
-			break;
-		case "submit":
-			swalTitle = `SUBMIT ${title.toUpperCase()}`;
-			swalText  = "Are you sure to submit this document?";
-			swalImg   = `${base_url}assets/modal/add.svg`;
-			break;
-		case "approve":
-			swalTitle = `APPROVE ${title.toUpperCase()}`;
-			swalText  = "Are you sure to approve this document?";
-			swalImg   = `${base_url}assets/modal/approve.svg`;
-			break;
-		case "deny":
-			swalTitle = `DENY ${title.toUpperCase()}`;
-			swalText  = "Are you sure to deny this document?";
-			swalImg   = `${base_url}assets/modal/reject.svg`;
-			break;
-		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()}`;
-			swalText  = "Are you sure to cancel this document?";
-			swalImg   = `${base_url}assets/modal/cancel.svg`;
-			break;
-		case "drop":
-			swalTitle = `DROP ${title.toUpperCase()}`;
-			swalText  = "Are you sure to drop this document?";
-			swalImg   = `${base_url}assets/modal/drop.svg`;
-			break;
-		default:
-			swalTitle = `CANCEL ${title.toUpperCase()}`;
-			swalText  = "Are you sure that you want to cancel this process?";
-			swalImg   = `${base_url}assets/modal/cancel.svg`;
-			break;
-	}
-	return Swal.fire({
-		title:              swalTitle,
-		text:               swalText,
-		imageUrl:           swalImg,
-		imageWidth:         200,
-		imageHeight:        200,
-		imageAlt:           "Custom image",
-		showCancelButton:   true,
-		confirmButtonColor: "#dc3545",
-		cancelButtonColor:  "#1a1a1a",
-		cancelButtonText:   "No",
-		confirmButtonText:  "Yes"
-	})
-}
-
-function saveLiquidation(data = null, method = "submit", notificationData = null, callback = null) {
-	if (data) {
-		const confirmation = getConfirmation(method);
-		confirmation.then(res => {
-			if (res.isConfirmed) {
-				$.ajax({
-					method:      "POST",
-					url:         `liquidation/saveLiquidation`,
-					data,
-					processData: false,
-					contentType: false,
-					global:      false,
-					cache:       false,
-					async:       false,
-					dataType:    "json",
-					beforeSend: function() {
-						$("#loader").show();
-					},
-					success: function(data) {
-						let result = data.split("|");
-		
-						let isSuccess   = result[0];
-						let message     = result[1];
-						let insertedID  = result[2];
-						let dateCreated = result[3];
-
-						let swalTitle;
-						if (method == "submit") {
-							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} submitted successfully!`;
-						} else if (method == "save") {
-							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} saved successfully!`;
-						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} cancelled successfully!`;
-						} else if (method == "approve") {
-							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} approved successfully!`;
-						} else if (method == "deny") {
-							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} denied successfully!`;
-						} else if (method == "drop") {
-							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} dropped successfully!`;
-						}	
-		
-						if (isSuccess == "true") {
-							setTimeout(() => {
-								// ----- SAVE NOTIFICATION -----
-								if (notificationData) {
-									if (Object.keys(notificationData).includes("tableID")) {
-										insertNotificationData(notificationData);
-									} else {
-										notificationData["tableID"] = insertedID;
-										insertNotificationData(notificationData);
-									}
-								}
-								// ----- END SAVE NOTIFICATION -----
-
-								$("#loader").hide();
-								closeModals();
-								Swal.fire({
-									icon:              "success",
-									title:             swalTitle,
-									showConfirmButton: false,
-									timer:             2000,
-								});
-								callback && callback();
-
-								if (method == "approve" || method == "deny") {
-									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-								}
-							}, 500);
-						} else {
-							setTimeout(() => {
-								$("#loader").hide();
-								Swal.fire({
-									icon:              "danger",
-									title:             message,
-									showConfirmButton: false,
-									timer:             2000,
-								});
-							}, 500);
-						}
-					},
-					error: function() {
-						setTimeout(() => {
-							$("#loader").hide();
-							showNotification("danger", "System error: Please contact the system administrator for assistance!");
-						}, 500);
-					}
-				}).done(function() {
 					setTimeout(() => {
-						$("#loader").hide();
-					}, 500);
-				})
-			} else {
-				if (res.dismiss == "cancel" && method != "submit") {
-					if (method != "deny") {
-						if (method != "cancelform") {
-							callback && callback();
+						$.ajax({
+							method:      "POST",
+							url:         `liquidation/saveLiquidation`,
+							data,
+							processData: false,
+							contentType: false,
+							global:      false,
+							cache:       false,
+							async:       false,
+							dataType:    "json",
+							beforeSend: function() {
+								$("#loader").show();
+							},
+							success: function(data) {
+								let result = data.split("|");
+				
+								let isSuccess   = result[0];
+								let message     = result[1];
+								let insertedID  = result[2];
+								let dateCreated = result[3];
+	
+								let swalTitle;
+								if (method == "submit") {
+									swalTitle = `${getFormCode("LF", dateCreated, insertedID)} submitted successfully!`;
+								} else if (method == "save") {
+									swalTitle = `${getFormCode("LF", dateCreated, insertedID)} saved successfully!`;
+								} else if (method == "cancelform") {
+									swalTitle = `${getFormCode("LF", dateCreated, insertedID)} cancelled successfully!`;
+								} else if (method == "approve") {
+									swalTitle = `${getFormCode("LF", dateCreated, insertedID)} approved successfully!`;
+								} else if (method == "deny") {
+									swalTitle = `${getFormCode("LF", dateCreated, insertedID)} denied successfully!`;
+								} else if (method == "drop") {
+									swalTitle = `${getFormCode("LF", dateCreated, insertedID)} dropped successfully!`;
+								}	
+				
+								if (isSuccess == "true") {
+									setTimeout(() => {
+										// ----- SAVE NOTIFICATION -----
+										if (notificationData) {
+											if (Object.keys(notificationData).includes("tableID")) {
+												insertNotificationData(notificationData);
+											} else {
+												notificationData["tableID"] = insertedID;
+												insertNotificationData(notificationData);
+											}
+										}
+										// ----- END SAVE NOTIFICATION -----
+	
+										$("#loader").hide();
+										closeModals();
+										Swal.fire({
+											icon:              "success",
+											title:             swalTitle,
+											showConfirmButton: false,
+											timer:             2000,
+										}).then(function() {
+											callback && callback();
+		
+											if (method == "approve" || method == "deny") {
+												$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+											}
+										});
+									}, 500);
+								} else {
+									setTimeout(() => {
+										$("#loader").hide();
+										Swal.fire({
+											icon:              "danger",
+											title:             message,
+											showConfirmButton: false,
+											timer:             2000,
+										});
+									}, 500);
+								}
+							},
+							error: function() {
+								setTimeout(() => {
+									$("#loader").hide();
+									showNotification("danger", "System error: Please contact the system administrator for assistance!");
+								}, 500);
+							}
+						}).done(function() {
+							setTimeout(() => {
+								$("#loader").hide();
+							}, 500);
+						})
+					}, 10);					
+				} else {
+					if (res.dismiss === "cancel" && method != "submit") {
+						if (method != "deny") {
+							if (method != "cancelform") {
+								callback && callback();
+							}
+						} else {
+							$("#modal_liquidation").text().length > 0 && $("#modal_liquidation").modal("show");
 						}
-					} else {
-						$("#modal_liquidation").text().length > 0 && $("#modal_liquidation").modal("show");
-					}
-				} else if (res.isDismissed) {
-					if (method == "deny") {
-						$("#modal_liquidation").text().length > 0 && $("#modal_liquidation").modal("show");
+					} else if (res.isDismissed) {
+						if (method == "deny") {
+							$("#modal_liquidation").text().length > 0 && $("#modal_liquidation").modal("show");
+						}
 					}
 				}
-			}
-		});
+			});
 
-		
+			
+		}
+		return false;
 	}
-	return false;
-}
+	// --------------- END DATABASE RELATION ---------------
 
-// --------------- END DATABASE RELATION ---------------
+})

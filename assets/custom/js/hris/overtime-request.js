@@ -1,5 +1,11 @@
 $(document).ready(function () {
 
+	const MODULE_ID = 56;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing = false;
+
+
 	// ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("overtime request");
 	// ----- END MODULE APPROVER -----
@@ -115,12 +121,10 @@ $(document).ready(function () {
 		$("[name=overtimeRequestProjectID]").each(function(i, obj) {
 			projectIDArr.push($(this).val());
 			projectElementID.push(`#${this.id}`);
-			// $(this).val() && $(this).trigger("change");
 		}) 
 
 		projectElementID.map((element, index) => {
 			let html = `<option selected disabled>Please select a project</option>`;
-			// let itemList = [...inventoryStorageList];
 			html += projectList.map(project => {
 				return `
 				<option 
@@ -224,9 +228,6 @@ $(document).ready(function () {
 				}
 
 				if (isAllowed) {
-					// pageContent(true, tableData, isReadOnly);
-					// updateURL(encryptString(id));
-
 					if (isRevise && employeeID == sessionID) {
 						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
@@ -246,11 +247,8 @@ $(document).ready(function () {
 		}
 
 		if (view_id) {
-				// let id = decryptString(view_id);
-				// id && isFinite(id) && loadData(id);
-				let id = view_id;
-				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
-
+			let id = view_id;
+			id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -259,7 +257,14 @@ $(document).ready(function () {
 				let id = decryptString(arr[1]);
 					id && isFinite(id) && loadData(id);
 			} else if (isAdd != -1) {
-				pageContent(true);
+				arr = url.split("?add=");
+				if (arr.length > 1) {
+					let id = decryptString(arr[1]);
+						id && isFinite(id) && loadData(id, true);
+				} else {
+					const isAllowed = isCreateAllowed(MODULE_ID);
+					pageContent(isAllowed);
+				}
 			}
 		}
 		
@@ -289,53 +294,33 @@ $(document).ready(function () {
 
 	// ----- DATATABLES -----
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
+		$('[data-toggle="tooltip"]').tooltip();
 
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
-
-		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0, width: 100 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 250 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 300 },
-					{ targets: 5, width: 80  },
-					{ targets: 6, width: 200 },
-				],
-			});
-
-		var table = $("#tableMyForms")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0, width: 100 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 250 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 300 },
-					{ targets: 5, width: 80  },
-					{ targets: 6, width: 200 },
-				],
-			});
+		["#tableForApproval", "#tableMyForms", "#tableForViewing"].map(element => {
+			if ($.fn.DataTable.isDataTable(element)) {
+				$(element).DataTable().destroy();
+			}
+			
+			var table = $(element)
+				.css({ "min-width": "100%" })
+				.removeAttr("width")
+				.DataTable({
+					proccessing: false,
+					serverSide: false,
+					scrollX: true,
+					sorting: [],
+					scrollCollapse: true,
+					columnDefs: [
+						{ targets: 0, width: 100 },
+						{ targets: 1, width: 150 },
+						{ targets: 2, width: 250 },
+						{ targets: 3, width: 150 },
+						{ targets: 4, width: 300 },
+						{ targets: 5, width: 80  },
+						{ targets: 6, width: 200 },
+					],
+				});
+		});
 	}
 	// ----- END DATATABLES -----
 
@@ -343,7 +328,7 @@ $(document).ready(function () {
 	// ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_overtime_request_tbl", "approversID")) {
+			if (isImModuleApprover("hris_overtime_request_tbl", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_overtime_request_tbl", "overtimeRequestStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
@@ -351,6 +336,7 @@ $(document).ready(function () {
 				<div class="row clearfix appendHeader">
 					<div class="col-12">
 						<ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}	
 							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
 							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
 						</ul>
@@ -385,19 +371,19 @@ $(document).ready(function () {
 	// ----- END HEADER BUTTON -----
 
 
-	// ----- FOR APPROVAL CONTENT -----
-	function forApprovalContent() {
-		$("#tableForApprovalParent").html(preloader);
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent").html(preloader);
 
-		let scheduleData = getTableData(
+		let overtimeRequestData = getTableData(
 			"hris_overtime_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
 			"hris_overtime_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
-			`employeeID != ${sessionID} AND overtimeRequestStatus != 0 AND overtimeRequestStatus != 4`,
+			`employeeID != ${sessionID} AND overtimeRequestStatus != 0 AND overtimeRequestStatus != 4 AND overtimeRequestStatus = 2`,
 			`FIELD(overtimeRequestStatus, 0, 1, 3, 2, 4), COALESCE(hris_overtime_request_tbl.submittedAt, hris_overtime_request_tbl.createdAt)`
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
@@ -411,7 +397,86 @@ $(document).ready(function () {
             </thead>
             <tbody>`;
 
-		scheduleData.map((schedule) => {
+		overtimeRequestData.map((schedule) => {
+			let {
+				fullname,
+				overtimeRequestID,
+				approversID,
+				approversDate,
+				overtimeRequestDate,
+				overtimeRequestReason,
+				overtimeRequestStatus,
+				overtimeRequestRemarks,
+				submittedAt,
+				createdAt,
+			} = schedule;
+
+			let remarks       = overtimeRequestRemarks ? overtimeRequestRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = overtimeRequestStatus == 2 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
+			html += `
+			<tr class="btnView btnEdit" id="${encryptString(overtimeRequestID)}" isForViewing="true">
+				<td>${getFormCode("OTR", dateCreated, overtimeRequestID)}</td>
+				<td>${fullname}</td>
+				<td>
+					<div>${moment(overtimeRequestDate).isValid() ? moment(overtimeRequestDate).format("MMMM DD, YYYY") : "-"}</div>
+					<small>${overtimeRequestReason || ""}</small>
+				</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, overtimeRequestStatus, true))}
+				</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">
+					${getStatusStyle(overtimeRequestStatus)}
+				</td>
+				<td>${remarks}</td>
+			</tr>`;
+		});
+
+		html += `
+            </tbody>
+        </table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 300);
+	}
+	// ----- END FOR VIEWING CONTENT -----
+
+
+	// ----- FOR APPROVAL CONTENT -----
+	function forApprovalContent() {
+		$("#tableForApprovalParent").html(preloader);
+
+		let overtimeRequestData = getTableData(
+			"hris_overtime_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+			"hris_overtime_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
+			`employeeID != ${sessionID} AND overtimeRequestStatus != 0 AND overtimeRequestStatus != 4`,
+			`FIELD(overtimeRequestStatus, 0, 1, 3, 2, 4), COALESCE(hris_overtime_request_tbl.submittedAt, hris_overtime_request_tbl.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
+            <thead>
+                <tr style="white-space: nowrap">
+                    <th>Document No.</th>
+                    <th>Employee Name</th>
+					<th>Reason</th>
+					<th>Current Approver</th>
+					<th>Date</th>
+                    <th>Status</th>
+					<th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+		overtimeRequestData.map((schedule) => {
 			let {
 				fullname,
 				overtimeRequestID,
@@ -464,7 +529,6 @@ $(document).ready(function () {
 		setTimeout(() => {
 			$("#tableForApprovalParent").html(html);
 			initDataTables();
-			return html;
 		}, 300);
 	}
 	// ----- END FOR APPROVAL CONTENT -----
@@ -473,7 +537,7 @@ $(document).ready(function () {
 	// ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-		let scheduleData = getTableData(
+		let overtimeRequestData = getTableData(
 			"hris_overtime_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
 			"hris_overtime_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_overtime_request_tbl.createdAt AS dateCreated",
 			`hris_overtime_request_tbl.employeeID = ${sessionID}`,
@@ -495,7 +559,7 @@ $(document).ready(function () {
             </thead>
             <tbody>`;
 
-		scheduleData.map((item) => {
+		overtimeRequestData.map((item) => {
 			let {
 				fullname,
 				overtimeRequestID,
@@ -880,7 +944,7 @@ $(document).ready(function () {
                     <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
@@ -896,7 +960,7 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestDate"></div>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12">
+            <div class="col-md-2 col-sm-12">
                 <div class="form-group">
                     <label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="time" 
@@ -910,7 +974,7 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestTimeIn"></div>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12">
+            <div class="col-md-2 col-sm-12">
                 <div class="form-group">
                     <label>Time Out ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="time" 
@@ -923,6 +987,22 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestTimeOut"></div>
                 </div>
             </div>
+            <div class="col-md-1 col-sm-12">
+                <div class="form-group">
+                    <label>
+						Duration <i class="fal fa-info-circle" 
+						style="color:#007bff;" 
+						data-toggle="tooltip" 
+						title="Overtime must be whole number" 
+						data-original-title="Overtime must be whole number"></i>
+					</label>
+                    <input type="text" 
+						class="form-control text-center"
+						name="duration"
+						value="0"
+						disabled>
+                </div>
+            </div>
 
 			<div class="col-md-1 col-sm-12">
                 <div class="form-group">
@@ -931,6 +1011,7 @@ $(document).ready(function () {
                         class="form-control input-hours text-center" 
                         id="overtimeRequestBreak" 
                         name="overtimeRequestBreak" 
+						min="0"
                         value="${formatAmount(overtimeRequestBreak || 0)}"
 						${disabled}>
                     <div class="d-block invalid-feedback" id="invalid-overtimeRequestBreak"></div>
@@ -1023,31 +1104,14 @@ $(document).ready(function () {
 			${disabled ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
 
-		// <div class="col-md-2 col-sm-12">
-        //         <div class="form-group">
-        //             <label>Status ${!disabled ? "<code>*</code>" : ""}</label>
-		// 			<select class="form-control validate select2 autoSaved" name="overtimeRequestProjectStatus"  id="overtimeRequestProjectStatus" ${disabled} required>
-		// 				<option disabled selected>Select Status</option>
-		// 				<option value="Pending" ${overtimeRequestProjectStatus == "Pending" ? "selected" : ""}>
-		// 					Pending
-		// 				</option>
-		// 				<option value="Done" ${overtimeRequestProjectStatus == "Done" ? "selected" : ""}>
-		// 					Done
-		// 				</option>
-		// 				<option value="Overdue" ${overtimeRequestProjectStatus == "Overdue" ? "selected" : ""}>
-		// 					Overdue
-		// 				</option>
-		// 			</select>
-        //             <div class="d-block invalid-feedback" id="invalid-overtimeRequestProjectStatus"></div>
-        //         </div>
-        //     </div>
-
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
 			updateClientOptions();
 			!disabled && updateProjectOptions();
+			updateDuration();
+			
 			if (data) {
 				initInputmaskTime(false);
 				disabled != "disabled" ? overtimeRequestDateRange(overtimeRequestDate) : "";
@@ -1058,7 +1122,18 @@ $(document).ready(function () {
 
 			(!overtimeRequestID || overtimeRequestDate == "0000-00-00") && $("#overtimeRequestDate").val("");
 			
-			return html;
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
+			
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
@@ -1107,6 +1182,10 @@ $(document).ready(function () {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -1176,11 +1255,10 @@ $(document).ready(function () {
 		}
 	}
 
-	// // CHECK SCHEDULE OF EMPLOYEE IN THIS DOCUMENT//
-	$(document).on("change",'#overtimeRequestDate,#overtimeRequestTimeIn',function(){
+	// CHECK SCHEDULE OF EMPLOYEE IN THIS DOCUMENT//
+	$(document).on("change",'#overtimeRequestDate, #overtimeRequestTimeIn',function(){
 
 		let condition = $(this).attr("condition") || false;
-
 		if(condition == "true"){
 			validateTimeInOvertime();
 		}else{
@@ -1188,6 +1266,31 @@ $(document).ready(function () {
 			$("#overtimeRequestTimeIn").attr("condition","true");
 		}
 	});
+
+
+	function updateDuration() {
+		let duration = 0;
+		let timeIn  = $("#overtimeRequestTimeIn").val();
+		let timeOut = $("#overtimeRequestTimeOut").val();
+		if (timeIn && timeOut) {
+			duration = +moment.duration(moment("2021-01-01 "+timeOut).diff(moment("2021-01-01 "+timeIn))).asHours();
+		}
+		$(`[name="overtimeRequestBreak"]`).attr("max", duration);
+		$(`[name="duration"]`).val(duration);
+	}
+
+
+	$(document).on("focusout", `#overtimeRequestTimeIn, #overtimeRequestTimeOut`, function() {
+		let time    = $(this).val();
+		let arr     = time?.split(":");
+		let hours   = +arr[0];
+			hours   = `${hours}`.length == 1 ? `0${hours}` : hours;
+		let minutes = '00';
+		time = `${hours}:${minutes}`;
+		$(this).val(time).trigger("change");
+
+		updateDuration();
+	})
 
 
 	// ----- CUSTOM INPUTMASK -----
@@ -1370,7 +1473,7 @@ $(document).ready(function () {
 				pageContent();
 	
 				if (employeeID != sessionID) {
-					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+					$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
 				}
 			}
 		} else {
@@ -1416,8 +1519,7 @@ $(document).ready(function () {
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
-		// const tableData = getTableData("hris_overtime_request_tbl", "", "overtimeRequestID=" + id);
-		// pageContent(true, tableData, true);
+		isForViewing = $(this).attr("isForViewing") == "true";
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1840,6 +1942,9 @@ $(document).ready(function () {
 		}
 		if (tab == "#myFormsTab") {
 			myFormsContent();
+		}
+		if (tab == "#forViewingTab") {
+			forViewingContent();
 		}
 	});
 	// ----- END NAV LINK -----

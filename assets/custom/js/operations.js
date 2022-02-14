@@ -654,11 +654,13 @@ function getEmployeePermission(moduleID, method) {
 		let _sessionID = $(`.page-loader-wrapper`).attr("session");
 		const data = getTableData(
 			"hris_employee_permission_tbl",
-			"createStatus, readStatus, updateStatus, deleteStatus, printStatus",
+			"showStatus, createStatus, readStatus, updateStatus, deleteStatus, printStatus",
 			`employeeID = ${_sessionID} AND moduleID = ${moduleID}`
 		);
 		if (data.length > 0) {
 			switch (method) {
+				case "show":
+					return data[0].showStatus == 1 ? true : false;
 				case "create":
 					return data[0].createStatus == 1 ? true : false;
 				case "read":
@@ -677,6 +679,10 @@ function getEmployeePermission(moduleID, method) {
 		}
 	}
 	return false;
+};
+
+function isShowAllowed(moduleID = 60) {
+	return getEmployeePermission(moduleID, "show");
 };
 
 function isCreateAllowed(moduleID = 60) {

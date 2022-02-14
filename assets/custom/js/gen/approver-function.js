@@ -162,6 +162,9 @@ function formConfirmation(
 			} else {
 				containerID && $("#" + containerID).show();
 				modalID && $("#" + modalID).modal("show");
+				if (method == "save" && result.dismiss == "cancel") {
+					callback && callback();
+				}
 			}
 		});
 	} else {
@@ -314,13 +317,25 @@ function isImModuleApprover(tableName = false, columnName = false) {
 }
 // ----- END IS IM APPROVER -----
 
+// ----- IS IM FIRST APPROVER -----
+function isImFirstApprover(approversID = null) {
+	if (approversID) {
+		return approversID?.split("|")?.[0] == sessionID;
+	}
+	return false;
+}
+// ----- END IS IM FIRST APPROVER -----
+
 // ----- IS IM LAST APPROVER -----
-function isImLastApprover(approversID = null, approversDate = null) {
+function isImLastApprover(approversID = null, approversDate = null, inSession = false) {
 	if (approversID) {
 		let idArr = approversID.split("|");
 		let idLength = idArr.length;
 		let dateArr = approversDate ? approversDate.split("|") : [];
 		let dateLength = dateArr.length + 1;
+		if (inSession) {
+			return idLength == dateLength && idArr[idArr.length-1] == sessionID;
+		}
 		return idLength == dateLength;
 	}
 	return false;

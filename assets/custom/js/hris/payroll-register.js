@@ -1,10 +1,13 @@
 $(document).ready(function () {
 
-    const allowedUpdate = isUpdateAllowed(113);
+	const MODULE_ID     = 113;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing    = false;
 
 
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover(113);
+	const moduleApprover = getModuleApprover(MODULE_ID);
 	// ----- END MODULE APPROVER -----
 
 
@@ -109,7 +112,6 @@ $(document).ready(function () {
                         ],
                         fixedColumns: {
                             leftColumns:  1,
-                            // rightColumns: 1,
                         }
                     }
                 }
@@ -121,7 +123,7 @@ $(document).ready(function () {
             }
         }
 
-        ["#tableForApproval", "#tableMyForms", "#tablePayrollRegister"].map(elementID => {
+        ["#tableForViewing", "#tableForApproval", "#tableMyForms", "#tablePayrollRegister"].map(elementID => {
             manipulateDataTables(elementID);
         })
 	}
@@ -222,7 +224,7 @@ $(document).ready(function () {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					const isAllowed = isCreateAllowed(110);
+					const isAllowed = isCreateAllowed(MODULE_ID);
 					pageContent(isAllowed);
 				}
 			}
@@ -250,7 +252,7 @@ $(document).ready(function () {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(110)) {
+			if (isCreateAllowed(MODULE_ID)) {
 				html = ``;
 			}
 		} else {
@@ -269,7 +271,7 @@ $(document).ready(function () {
     // ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_payroll_register_tbl", "approversID")) {
+			if (isImModuleApprover("hris_payroll_register_tbl", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_payroll_register_tbl", "payrollRegisterStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
@@ -277,6 +279,7 @@ $(document).ready(function () {
 				<div class="row clearfix appendHeader">
 					<div class="col-12">
 						<ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}  
 							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
 							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
 						</ul>
@@ -289,6 +292,98 @@ $(document).ready(function () {
 		}
 	}
 	// ----- END HEADER CONTENT -----
+
+
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent .loader").length == 0 && $("#tableForViewingParent").html(preloader);
+		let payrollRegisterData = getTableData(
+			`hris_payroll_register_tbl AS hprt 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)
+                LEFT JOIN hris_payroll_tbl AS hpt ON hprt.payrollID = hpt.payrollID`,
+			`hprt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hprt.createdAt AS dateCreated,
+            payrollStartDate, payrollEndDate`,
+			`hprt.employeeID <> ${sessionID} AND payrollRegisterStatus <> 0 AND payrollRegisterStatus <> 4 AND payrollRegisterStatus = 2`,
+			`FIELD(payrollRegisterStatus, 0, 1, 3, 2, 4, 5), hpt.payrollStartDate DESC, COALESCE(hprt.submittedAt, hprt.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
+            <thead>
+                <tr style="white-space: nowrap">
+                    <th>Document No.</th>
+					<th>Reference No.</th>
+                    <th>Prepared By</th>
+                    <th>Payroll Period</th>
+                    <th>Current Approver</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+		payrollRegisterData.map((item) => {
+			let {
+				payrollRegisterID,
+				payrollRegisterCode,
+				payrollCode,
+                employeeID,
+                fullname,
+                payrollStartDate, 
+                payrollEndDate,
+                payrollRegisterReason,
+                approversID,
+                approversStatus,
+                approversDate,
+                payrollRegisterStatus,
+                payrollRegisterRemarks,
+                submittedAt,
+                createdAt,
+			} = item;
+
+			let remarks       = payrollRegisterRemarks ? payrollRegisterRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = payrollRegisterStatus == 2 || payrollRegisterStatus == 5 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+            let payrollDate = "-";
+            if (payrollStartDate && payrollEndDate) {
+                payrollStartDate = moment(payrollStartDate).format("MMMM DD, YYYY");
+                payrollEndDate   = moment(payrollEndDate).format("MMMM DD, YYYY");
+                payrollDate      = `${payrollStartDate} - ${payrollEndDate}`;
+            }
+
+			html += `
+			<tr class="btnView" id="${encryptString(payrollRegisterID)}" isForViewing="true">
+				<td>${payrollRegisterCode}</td>
+				<td>${payrollCode || "-"}</td>
+				<td>${fullname || "-"}</td>
+				<td>${payrollDate}</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, payrollRegisterStatus, true))}
+				</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">
+					${getStatusStyle(payrollRegisterStatus, employeeID != 0)}
+				</td>
+				<td>${remarks}</td>
+			</tr>`;
+		});
+		
+
+		html += `
+            </tbody>
+        </table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 300);
+	}
+	// ----- END FOR VIEWING CONTENT -----
 
 
 	// ----- FOR APPROVAL CONTENT -----
@@ -946,7 +1041,7 @@ $(document).ready(function () {
 		let disabled = readOnly ? "disabled" : "";
 		let button = adjustment != 1 ? formButtons(data, isRevise, isFromCancelledDocument) : "";
 
-		let referenceNo = `<br><a href="${base_url}hris/payroll_module?view_id=${encryptString(payrollID)}" target="_blank">${payrollCode}</a>`;
+		let referenceNo = `<br><a href="${base_url}hris/payroll_module?view_id=${encryptString(payrollID)}" target="_blank" class="font-weight-bold">${payrollCode}</a>`;
 
 		let startDate   = moment(payrollStartDate).format("MMMM DD, YYYY");
 		let endDate     = moment(payrollEndDate).format("MMMM DD, YYYY");
@@ -1134,6 +1229,10 @@ $(document).ready(function () {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -1196,6 +1295,7 @@ $(document).ready(function () {
     // ----- VIEW/EDIT DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		$("#page_content").html(preloader);
 		setTimeout(() => {
 			viewDocument(id, true);
@@ -1236,7 +1336,7 @@ $(document).ready(function () {
 					pageContent();
 		
 					if (employeeID != sessionID) {
-						$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+						$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
 					}
 				}, 10);
 			}
@@ -1404,7 +1504,7 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                113,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Payroll Register",
 					notificationDescription: `${feedback}: Your request has been approved.`,
@@ -1414,7 +1514,7 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                113,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Payroll Register",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -1442,6 +1542,9 @@ $(document).ready(function () {
 	// ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
+		if (tab == "#forViewingTab") {
+			forViewingContent();
+		}
 		if (tab == "#forApprovalTab") {
 			forApprovalContent();
 		}

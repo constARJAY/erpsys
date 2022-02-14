@@ -21,11 +21,16 @@ function writeToFile(messages = []) {
 $(document).ready(function() {
 
 	let createdTimekeeping = [], approvedTimekeepingPeriod = [], disableDates = [];
-	const allowedUpdate = isUpdateAllowed(109);
+
+
+	const MODULE_ID     = 109;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing    = false;
 
 
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("timekeeping module");
+	const moduleApprover = getModuleApprover(MODULE_ID);
 	// ----- END MODULE APPROVER -----
 
 
@@ -126,7 +131,7 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					const isAllowed = isCreateAllowed(109);
+					const isAllowed = isCreateAllowed(MODULE_ID);
 					pageContent(isAllowed);
 				}
 			}
@@ -176,57 +181,35 @@ $(document).ready(function() {
 	function initDataTables() {
 		$('[data-toggle="tooltip"]').tooltip();
 
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
+		["#tableMyForms", "#tableForApproval", "#tableForViewing"].map(element => {
+			if ($.fn.DataTable.isDataTable(element)) {
+			   $(element).DataTable().destroy();
+			}
 
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
+			var table = $(element)
+				.css({ "min-width": "100%" })
+				.removeAttr("width")
+				.DataTable({
+					proccessing: false,
+					serverSide: false,
+					scrollX: true,
+					sorting: [],
+					scrollCollapse: true,
+					columnDefs: [
+						{ targets: 0,  width: 100 },
+						{ targets: 1,  width: 150 },
+						{ targets: 2,  width: 300 },
+						{ targets: 3,  width: 150 },
+						{ targets: 4,  width: 300 },
+						{ targets: 5,  width: 80  },
+						{ targets: 6,  width: 200 }, 	
+					],
+				});
+		})
 
 		if ($.fn.DataTable.isDataTable("#tableTimekeeping")) {
 			$("#tableTimekeeping").DataTable().destroy();
 		}
-
-		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 300 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 300 },
-					{ targets: 5,  width: 80  },
-					{ targets: 6,  width: 200 }, 	
-				],
-			});
-
-		var table = $("#tableMyForms")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 300 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 300 },
-					{ targets: 5,  width: 80  },
-					{ targets: 6,  width: 200 }, 	
-				],
-			});
 
         var table = $("#tableTimekeeping")
 			.css({ "min-width": "100%" })
@@ -268,7 +251,7 @@ $(document).ready(function() {
     // ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_timekeeping_tbl", "approversID")) {
+			if (isImModuleApprover("hris_timekeeping_tbl", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_timekeeping_tbl", "timekeepingStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
@@ -276,6 +259,7 @@ $(document).ready(function() {
 				<div class="row clearfix appendHeader">
 					<div class="col-12">
 						<ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}  
 							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
 							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
 						</ul>
@@ -294,9 +278,8 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(109)) {
-				html = `
-				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(MODULE_ID)) {
+				html = `<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
 			}
 		} else {
 			html = `
@@ -309,6 +292,93 @@ $(document).ready(function() {
 		$("#headerButton").html(html);
 	}
 	// ----- END HEADER BUTTON -----
+
+
+    // ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent .loader").length == 0 && $("#tableForViewingParent").html(preloader);
+
+		let timekeepingData = getTableData(
+			`hris_timekeeping_tbl AS htt 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
+			"htt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, htt.createdAt AS dateCreated",
+			`htt.employeeID <> ${sessionID} AND timekeepingStatus <> 0 AND timekeepingStatus <> 4 AND timekeepingStatus = 2`,
+			`FIELD(timekeepingStatus, 0, 1, 3, 2, 4, 5), timekeepingStartDate DESC, COALESCE(htt.submittedAt, htt.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
+            <thead>
+                <tr style="white-space: nowrap">
+                    <th>Document No.</th>
+                    <th>Prepared By</th>
+                    <th>Timekeeping Period</th>
+                    <th>Current Approver</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+		timekeepingData.map((item) => {
+            let {
+				timekeepingID,
+                reviseTimekeepingID,
+                employeeID,
+                fullname,
+                timekeepingStartDate, 
+                timekeepingEndDate,
+                timekeepingReason,
+                approversID,
+                approversStatus,
+                approversDate,
+                timekeepingStatus,
+                timekeepingRemarks,
+                submittedAt,
+                createdAt,
+			} = item;
+
+			let remarks       = timekeepingRemarks ? timekeepingRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = timekeepingStatus == 2 || timekeepingStatus == 5 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+            let timekeepingDate = "-";
+            if (timekeepingStartDate && timekeepingEndDate) {
+                timekeepingStartDate = moment(timekeepingStartDate).format("MMMM DD, YYYY");
+                timekeepingEndDate   = moment(timekeepingEndDate).format("MMMM DD, YYYY");
+                timekeepingDate      = `${timekeepingStartDate} - ${timekeepingEndDate}`;
+            }
+			let btnClass = timekeepingStatus != 0 ? "btnView" : "btnEdit";
+			html += `
+			<tr class="${btnClass}" id="${encryptString(timekeepingID)}" isForViewing="true">
+				<td>${getFormCode("TMK", createdAt, timekeepingID )}</td>
+				<td>${fullname}</td>
+				<td>${timekeepingDate}</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, timekeepingStatus, true))}
+				</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">
+					${getStatusStyle(timekeepingStatus)}
+				</td>
+				<td>${remarks}</td>
+			</tr>`;
+		});
+
+		html += `
+			</tbody>
+		</table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 300);
+	}
+	// ----- END FOR VIEWING CONTENT -----
 
 
     // ----- FOR APPROVAL CONTENT -----
@@ -324,7 +394,7 @@ $(document).ready(function() {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
@@ -1587,6 +1657,10 @@ $(document).ready(function() {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+				</div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -2204,6 +2278,7 @@ $(document).ready(function() {
     // ----- VIEW/EDIT DOCUMENT -----
 	$(document).on("click", ".btnView, .btnEdit", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		$("#page_content").html(preloader);
 		setTimeout(() => {
 			viewDocument(id, true);
@@ -2253,7 +2328,7 @@ $(document).ready(function() {
 					pageContent();
 		
 					if (employeeID != sessionID) {
-						$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+						$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
 					}
 				}, 10);
 			}
@@ -2321,7 +2396,7 @@ $(document).ready(function() {
 		if (cutOff == 1) {
 			if (cutOffStart > cutOffEnd) {
 				firstMonth = firstMonth == 1 ? 12 : (month - 1);
-				firstYear  = firstYear - 1;
+				firstYear  = firstMonth == 12 ? (firstYear - 1) : firstYear;
 			}
 			secondMonth = month;
 		}
@@ -2387,7 +2462,7 @@ $(document).ready(function() {
 				let notificationData = false;
 				if (employeeID != sessionID) {
 					notificationData = {
-						moduleID:                109,
+						moduleID:                MODULE_ID,
 						notificationTitle:       "Timekeeping Process",
 						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 						notificationType:        2,
@@ -2438,17 +2513,17 @@ $(document).ready(function() {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                109,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Timekeeping Process",
-					notificationDescription: `${feedback}: Your request has been approved.`,
+					notificationDescription: `${feedback}: Your request has been approved. You may now proceed to the next step of the process (Payroll Process)`,
 					notificationType:        7,
 					employeeID,
 				};
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                109,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Timekeeping Process",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -2520,7 +2595,7 @@ $(document).ready(function() {
 				data["updatedBy"] = sessionID;
 
 				let notificationData = {
-					moduleID:                109,
+					moduleID:                MODULE_ID,
 					tableID: 				 id,
 					notificationTitle:       "Timekeeping",
 					notificationDescription: `${feedback}: Your request has been denied.`,
@@ -2553,6 +2628,9 @@ $(document).ready(function() {
     // ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
+		if (tab == "#forViewingTab") {
+			forViewingContent();
+		}
 		if (tab == "#forApprovalTab") {
 			forApprovalContent();
 		}

@@ -168,7 +168,7 @@ const generateNewRolesPermission =() => {
 
     $.ajax({
         method: "POST",
-        url: `${base_url}roles_permission/generateNewRolesPermission`,
+        url: `${base_url}operations/generateNewRolesPermission`,
         data: {roleID},
         dataType: "json",
         success: function(data) {}

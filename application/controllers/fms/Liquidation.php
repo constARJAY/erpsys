@@ -19,61 +19,107 @@ class Liquidation extends CI_Controller {
         $this->load->view("template/footer");
     }
 
+
+    public function getUploadedMultipleFiles() 
+    {
+        $data = [];
+        $columNames  = $this->input->post("uploadFileColumnName") ?? null;
+        $oldFilename = $this->input->post("uploadFileOldFilename") ?? null;
+        $folderName  = $this->input->post("uploadFileFolder") ?? "uploads";
+
+        if ($columNames && !empty($columNames) && is_array($columNames)) {
+            foreach($columNames as $index => $columnName) {
+                $mixedFileName = $oldFilename[$index] ?? "";
+
+                $uploadFiles = $_FILES["uploadFiles"]["name"][$index] ?? null;
+                if ($uploadFiles) {
+                    $countFiles = count($uploadFiles);
+                    for ($i=0; $i<$countFiles; $i++) {
+                        $fileName    = $_FILES["uploadFiles"]["name"][$index][$i];
+                        $fileType    = $_FILES["uploadFiles"]["type"][$index][$i];
+                        $fileTmpName = $_FILES["uploadFiles"]["tmp_name"][$index][$i];
+
+                        $targetDir = "assets/upload-files/$folderName/";
+                        if (!is_dir($targetDir)) {
+                            mkdir($targetDir);
+                        }
+
+                        if (!file_exists($targetDir."index.html")) {
+                            copy('assets/index.html', $targetDir."index.html");
+                        }
+
+                        $fileKeyArr  = explode(".", $fileName);
+                        $fileKeyName = $fileKeyArr[0];
+                        $fileKeyType = $fileKeyArr[1];
+
+                        $targetFileName = $fileKeyName.$i.time().'.'.$fileKeyType;
+                        $targetFile     = $targetDir.$targetFileName;
+                        if (move_uploaded_file($fileTmpName, $targetFile)) {
+                            $mixedFileName = $mixedFileName ? $mixedFileName."|".$targetFileName : $targetFileName;
+                        }
+                    }
+                }
+
+                $data[$columnName] = $mixedFileName;
+            }
+        }
+        return $data;
+    }
+
+
     public function saveLiquidation()
     {
-        $action                                             = $this->input->post("action");
-        $method                                             = $this->input->post("method");
-        $liquidationID                                      = $this->input->post("liquidationID") ?? null;
-        $pettyCashRequestID                                 = $this->input->post("pettyCashRequestID") ?? null;
-        $voucherID                                          = $this->input->post("voucherID") ?? null;
-        $reviseLiquidationID                                = $this->input->post("reviseLiquidationID") ?? null;
-        $liquidationDate                                    = $this->input->post("liquidationDate") ?? null;
-        $chartOfAccountID                                   = $this->input->post("chartOfAccountID") ?? null;
-        $liquidationReferenceNumber                         = $this->input->post("liquidationReferenceNumber") ?? null;
-        $liquidationAmount                                  = $this->input->post("liquidationAmount") ?? null;
-        $liquidationVatAmount                               = $this->input->post("liquidationVatAmount") ?? null;
-        $liquidationExpenses                                = $this->input->post("liquidationExpenses") ?? null;
-        $liquidationBudget                                  = $this->input->post("liquidationBudget") ?? null;
-        $liquidationExcessOrShortage                        = $this->input->post("liquidationExcessOrShortage") ?? null;
-        $liquidationDispositionofExcessOrShortage           = $this->input->post("liquidationDispositionofExcessOrShortage") ?? null;
-        $employeeID                                         = $this->input->post("employeeID");
-        $approversID                                        = $this->input->post("approversID") ?? null;
-        $approversStatus                                    = $this->input->post("approversStatus") ?? null;
-        $approversDate                                      = $this->input->post("approversDate") ?? null;
-        $liquidationPurpose                                 = $this->input->post("liquidationPurpose");
-        $liquidationStatus                                  = $this->input->post("liquidationStatus");
-        $liquidationRemarks                                 = $this->input->post("liquidationRemarks") ?? null;
-        $submittedAt                                        = $this->input->post("submittedAt") ?? null;
-        $createdBy                                          = $this->input->post("createdBy");
-        $updatedBy                                          = $this->input->post("updatedBy");
-        $createdAt                                          = $this->input->post("createdAt");
-        $items                                              = $this->input->post("items") ?? null;
+        $action                               = $this->input->post("action");
+        $method                               = $this->input->post("method");
+        $liquidationID                        = $this->input->post("liquidationID");
+        $reviseLiquidationID                  = $this->input->post("reviseLiquidationID");
+        $employeeID                           = $this->input->post("employeeID");
+        $liquidationPurpose                   = $this->input->post("liquidationPurpose");
+        $liquidationTotalExpense              = $this->input->post("liquidationTotalExpense");
+        $liquidationVatSales                  = $this->input->post("liquidationVatSales");
+        $liquidationVat                       = $this->input->post("liquidationVat");
+        $liquidationBudget                    = $this->input->post("liquidationBudget");
+        $liquidationExcessShortage            = $this->input->post("liquidationExcessShortage");
+        $liquidationDispositionExcessShortage = $this->input->post("liquidationDispositionExcessShortage");
+        $approversID                          = $this->input->post("approversID");
+        $approversStatus                      = $this->input->post("approversStatus");
+        $approversDate                        = $this->input->post("approversDate");
+        $liquidationStatus                    = $this->input->post("liquidationStatus");
+        $liquidationRemarks                   = $this->input->post("liquidationRemarks");
+        $submittedAt                          = $this->input->post("submittedAt");
+        $createdBy                            = $this->input->post("createdBy");
+        $updatedBy                            = $this->input->post("updatedBy");
+        $createdAt                            = $this->input->post("createdAt");
+        $items                                = $this->input->post("items") ?? [];
 
-        $liquidationData = [
-            "reviseLiquidationID"                               => $reviseLiquidationID,
-            "employeeID"                                        => $employeeID,
-            "pettyCashRequestID"                                => $pettyCashRequestID,
-            "voucherID"                                         => $voucherID,
-            "liquidationDate"                                   => $liquidationDate,
-            "liquidationReferenceNumber"                        => $liquidationReferenceNumber,
-            "approversID"                                       => $approversID,
-            "approversStatus"                                   => $approversStatus,
-            "approversDate"                                     => $approversDate,
-            "chartOfAccountID"                                  => $chartOfAccountID,
-            "liquidationAmount"                                 => $liquidationAmount,
-            "liquidationVatAmount"                              => $liquidationVatAmount,
-            "liquidationExpenses"                               => $liquidationExpenses,
-            "liquidationBudget"                                 => $liquidationBudget,
-            "liquidationExcessOrShortage"                       => $liquidationExcessOrShortage,
-            "liquidationDispositionofExcessOrShortage"          => $liquidationDispositionofExcessOrShortage,
-            "liquidationPurpose"                                => $liquidationPurpose,
-            "liquidationStatus"                                 => $liquidationStatus,
-            "liquidationRemarks"                                => $liquidationRemarks,
-            "submittedAt"                                       => $submittedAt,
-            "createdBy"                                         => $createdBy,
-            "updatedBy"                                         => $updatedBy,
-            "createdAt"                                         => $createdAt
+        $liquidationData = [                    
+            "reviseLiquidationID"                  => $reviseLiquidationID,
+            "employeeID"                           => $employeeID,
+            "liquidationPurpose"                   => $liquidationPurpose,
+            "liquidationTotalExpense"              => $liquidationTotalExpense,
+            "liquidationVatSales"                  => $liquidationVatSales,
+            "liquidationVat"                       => $liquidationVat,
+            "liquidationBudget"                    => $liquidationBudget,
+            "liquidationExcessShortage"            => $liquidationExcessShortage,
+            "liquidationDispositionExcessShortage" => $liquidationDispositionExcessShortage,
+            "approversID"                          => $approversID,
+            "approversStatus"                      => $approversStatus,
+            "approversDate"                        => $approversDate,
+            "liquidationStatus"                    => $liquidationStatus,
+            "liquidationRemarks"                   => $liquidationRemarks,
+            "submittedAt"                          => $submittedAt,
+            "createdBy"                            => $createdBy,
+            "updatedBy"                            => $updatedBy,
+            "createdAt"                            => $createdAt,                         
         ];
+
+        $uploadedMultipleFiles = $this->getUploadedMultipleFiles();
+        if ($uploadedMultipleFiles && !empty($uploadedMultipleFiles)) {
+            foreach ($uploadedMultipleFiles as $fileKey => $fileValue) {
+                unset($liquidationData[$fileKey]);
+                $liquidationData[$fileKey] = $fileValue;
+            }
+        }
 
         if ($action == "update") {
             unset($liquidationData["reviseLiquidationID"]);
@@ -87,52 +133,64 @@ class Liquidation extends CI_Controller {
                 ];
             } else if ($method == "approve") {
                 $liquidationData = [
-                    "approversStatus"       => $approversStatus,
-                    "approversDate"         => $approversDate,
+                    "approversStatus"   => $approversStatus,
+                    "approversDate"     => $approversDate,
                     "liquidationStatus" => $liquidationStatus,
-                    "updatedBy"             => $updatedBy,
+                    "updatedBy"         => $updatedBy,
                 ];
               
             } else if ($method == "deny") {
                 $liquidationData = [
-                    "approversStatus"        => $approversStatus,
-                    "approversDate"          => $approversDate,
+                    "approversStatus"    => $approversStatus,
+                    "approversDate"      => $approversDate,
                     "liquidationStatus"  => 3,
                     "liquidationRemarks" => $liquidationRemarks,
-                    "updatedBy"              => $updatedBy,
+                    "updatedBy"          => $updatedBy,
                 ];
             } else if ($method == "drop") {
                 $liquidationData = [
                     "reviseLiquidationID" => $reviseLiquidationID,
                     "liquidationStatus"   => 5,
-                    "updatedBy"               => $updatedBy,
+                    "updatedBy"           => $updatedBy,
                 ]; 
             }
         }
 
-        $saveliquidationData = $this->liquidation->saveliquidationData($action, $liquidationData, $liquidationID, $pettyCashRequestID, $voucherID);
-        if ($saveliquidationData) {
-            $result = explode("|", $saveliquidationData);
+        // ADD REVISE CODE
+        if ($reviseLiquidationID) {
+            $liquidation = $this->liquidation->getLiquidationData($reviseLiquidationID);
+            if ($liquidation) {
+                $liquidationData["reviseLiquidationCode"] = $liquidation->liquidationCode;
+                $liquidationData["pettyCashRequestID"]    = $liquidation->pettyCashRequestID;
+                $liquidationData["pettyCashRequestCode"]  = $liquidation->pettyCashRequestCode;
+                $liquidationData["pettyCashVoucherID"]    = $liquidation->pettyCashVoucherID;
+                $liquidationData["pettyCashVoucherCode"]  = $liquidation->pettyCashVoucherCode;
+                $liquidationData["liquidationPurpose"]    = $liquidation->liquidationPurpose;
+            }
+        }
+
+        $saveLiquidationData = $this->liquidation->saveLiquidationData($action, $liquidationData, $liquidationID);
+        if ($saveLiquidationData) {
+            $result = explode("|", $saveLiquidationData);
 
             if ($result[0] == "true") {
                 $liquidationID = $result[2];
 
-                if ($items) {
+                if ($items && !empty($items)) {
                     $liquidationItems = [];
                     foreach($items as $index => $item) {
                         $temp = [
-                            // "requestItemID"     => $item["requestItemID"] != "null" ? $item["requestItemID"] : null,pettyCashRequestDetailsID
                             "liquidationID" => $liquidationID,
-                           // "chartOfAccountID"  => $item["chartOfAccountID"] != "null" ? $item["chartOfAccountID"] : null,
-                            "description"         => $item["description"] != "null" ? $item["description"] : null,
-                            "quantity"            => $item["quantity"] != "null" ? $item["quantity"] : null,
-                            "amount"              => $item["amount"] != "null" ? $item["amount"] : null,
-                            "clientID"            => $item["clientID"] != "null" ? $item["clientID"] : null,
-                            "srfNumber"           => $item["srfNumber"] != "null" ? $item["srfNumber"] : null,
-                            "remark"              => $item["remark"] != "null" ? $item["remark"] : null,
-                            "receiptNumber"       => $item["receiptNumber"] != "null" ? $item["receiptNumber"] : null,
-                            "createdBy"           => $item["createdBy"],
-                            "updatedBy"           => $item["updatedBy"],
+                            "description"   => $item["description"] ?? null,
+                            "vatSales"      => $item["vatSales"] ?? null,
+                            "vat"           => $item["vat"] ?? null,
+                            "amount"        => $item["amount"] ?? null,
+                            "client"        => $item["client"] ?? null,
+                            "supplier"      => $item["supplier"] ?? null,
+                            "invoice"       => $item["invoice"] ?? null,
+                            "remarks"       => $item["remarks"] ?? null,
+                            "createdBy"     => $updatedBy,
+                            "updatedBy"     => $updatedBy,
                         ];
                         array_push($liquidationItems, $temp);
                     }
@@ -140,47 +198,17 @@ class Liquidation extends CI_Controller {
                     $saveLiquidationItems = $this->liquidation->saveLiquidationItems($action, $liquidationItems, $liquidationID);
                 }
 
+
+                // ----- UPDATE PETTY CASH VOUCHER -----
+                if ($liquidationData['liquidationStatus'] == 2 || $liquidationData['liquidationStatus'] == '2') {
+                    $this->liquidation->updatePettyCashVoucher($liquidationID);
+                }
+                // ----- END UPDATE PETTY CASH VOUCHER -----
             }
             
         }
-        echo json_encode($saveliquidationData);
+        echo json_encode($saveLiquidationData);
     }
-
-
-
-    // public function getTableData() 
-    // {
-    //     $tableName    = $this->input->post("tableName");
-    //     $columnName   = $this->input->post("columnName"); 
-    //     $searchFilter = $this->input->post("searchFilter");
-    //     $orderBy      = $this->input->post("orderBy");
-    //     echo json_encode($this->company_setup->getTableData($tableName, $columnName, $searchFilter, $orderBy));
-    // }
-
-    // public function updateTableData()
-    // {
-    //     $tableName   = $this->input->post("tableName") ? $this->input->post("tableName") : null;
-    //     $tableData   = $this->input->post("tableData") ? $this->input->post("tableData") : false;
-    //     $whereFilter = $this->input->post("whereFilter") ? $this->input->post("whereFilter") : false;
-    //     $feedback    = $this->input->post("feedback")  ? $this->input->post("feedback") : null;
-    //     $data = array();
-
-    //     // $uploadedFiles = $this->getUploadedFiles();
-    //     // if ($uploadedFiles) {
-    //     //     foreach ($uploadedFiles as $fileKey => $fileValue) {
-    //     //         $data[$fileKey] = $fileValue;
-    //     //     }
-    //     // }
-        
-    //     if ($tableName && $tableData && $whereFilter) {
-    //         foreach ($tableData as $key => $value) {
-    //             $data[$key] = $value;
-    //         }
-    //         echo json_encode($this->company_setup->updateTableData($tableName, $data, $whereFilter, $feedback));
-    //     } else {
-    //         echo json_encode("false|Invalid arguments");
-    //     }
-    // }
 
 }
 ?>

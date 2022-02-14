@@ -1,9 +1,12 @@
 $(document).ready(function () {
-	const allowedUpdate = isUpdateAllowed(60);
+	const MODULE_ID     = 60;
+	const allowedUpdate = isUpdateAllowed(MODULE_ID);
+	const allowedShow   = isShowAllowed(MODULE_ID);
+	let isForViewing    = false;
 
 
 	// ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("change schedule");
+	const moduleApprover = getModuleApprover(MODULE_ID);
 	// ----- END MODULE APPROVER -----
 
 
@@ -177,53 +180,31 @@ $(document).ready(function () {
 
 	// ----- DATATABLES -----
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
+		["#tableMyForms", "#tableForApproval", "#tableForViewing"].map(element => {
+            if ($.fn.DataTable.isDataTable(element)) {
+                $(element).DataTable().destroy();
+            }
 
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
-		}
-
-		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0, width: 100 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 350 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 300 },
-					{ targets: 5, width: 80  },
-					{ targets: 6, width: 200 },
-				],
-			});
-
-		var table = $("#tableMyForms")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0, width: 100 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 350 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 300 },
-					{ targets: 5, width: 80  },
-					{ targets: 6, width: 200 },
-				],
-			});
+			var table = $(element)
+				.css({ "min-width": "100%" })
+				.removeAttr("width")
+				.DataTable({
+					proccessing: false,
+					serverSide: false,
+					scrollX: true,
+					sorting: [],
+					scrollCollapse: true,
+					columnDefs: [
+						{ targets: 0, width: 100 },
+						{ targets: 1, width: 150 },
+						{ targets: 2, width: 350 },
+						{ targets: 3, width: 150 },
+						{ targets: 4, width: 300 },
+						{ targets: 5, width: 80  },
+						{ targets: 6, width: 200 },
+					],
+				});
+		})
 	}
 	// ----- END DATATABLES -----
 
@@ -231,7 +212,7 @@ $(document).ready(function () {
 	// ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_change_schedule_tbl", "approversID")) {
+			if (isImModuleApprover("hris_change_schedule_tbl", "approversID") || allowedShow) {
 				let count = getCountForApproval("hris_change_schedule_tbl", "changeScheduleStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
@@ -239,6 +220,7 @@ $(document).ready(function () {
 				<div class="row clearfix appendHeader">
 					<div class="col-12">
 						<ul class="nav nav-tabs">
+							${allowedShow ? `<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forViewingTab" redirect="forViewingTab">For Viewing</a></li>` : ""}  
 							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
 							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
 						</ul>
@@ -257,7 +239,7 @@ $(document).ready(function () {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(60)) {
+			if (isCreateAllowed(MODULE_ID)) {
 				html = `
 				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
 			}
@@ -274,6 +256,91 @@ $(document).ready(function () {
 	// ----- END HEADER BUTTON -----
 
 
+	// ----- FOR VIEWING CONTENT -----
+	function forViewingContent() {
+		$("#tableForViewingParent").html(preloader);
+
+		let scheduleData = getTableData(
+			`hris_change_schedule_tbl 
+				LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
+			"hris_change_schedule_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
+			`employeeID != ${sessionID} AND changeScheduleStatus != 0 AND changeScheduleStatus != 4 AND changeScheduleStatus = 2`,
+			`FIELD(changeScheduleStatus, 0, 1, 3, 2, 4, 5), COALESCE(hris_change_schedule_tbl.submittedAt, hris_change_schedule_tbl.createdAt)`
+		);
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableForViewing">
+            <thead>
+                <tr style="white-space: nowrap">
+                    <th>Document No.</th>
+                    <th>Employee Name</th>
+                    <th>Description</th>
+					<th>Current Approver</th>
+					<th>Date</th>
+                    <th>Status</th>
+					<th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+		scheduleData.map((schedule) => {
+			let {
+				fullname,
+				changeScheduleID,
+				changeScheduleDate,
+				changeScheduleTimeIn,
+				changeScheduleTimeOut,
+				approversID,
+				approversDate,
+				changeScheduleStatus,
+				changeScheduleReason,
+				changeScheduleRemarks,
+				submittedAt,
+				createdAt,
+			} = schedule;
+
+			let remarks       = changeScheduleRemarks ? changeScheduleRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = changeScheduleStatus == 2 || changeScheduleStatus == 5 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
+			let description = `
+				<div>${moment(changeScheduleDate).format("MMMM DD, YYYY")} | ${changeScheduleTimeIn} - ${changeScheduleTimeOut}</div>
+				<small>${changeScheduleReason || "-"}</small>`;
+
+			let btnClass = changeScheduleStatus != 0 ? "btnView" : "btnEdit";
+
+			html += `
+			<tr class="${btnClass}" id="${encryptString(changeScheduleID)}" isForViewing="true">
+				<td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
+				<td>${fullname}</td>
+				<td>${description}</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, changeScheduleStatus, true))}
+				</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td class="text-center">
+					${getStatusStyle(changeScheduleStatus)}
+				</td>
+				<td>${remarks}</td>
+			</tr>`;
+		});
+
+		html += `
+            </tbody>
+        </table>`;
+
+		setTimeout(() => {
+			$("#tableForViewingParent").html(html);
+			initDataTables();
+		}, 300);
+	}
+	// ----- END FOR VIEWING CONTENT -----
+
+
 	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
@@ -287,7 +354,7 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
@@ -448,7 +515,6 @@ $(document).ready(function () {
 		setTimeout(() => {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
-			return html;
 		}, 300);
 	}
 	// ----- END MY FORMS CONTENT -----
@@ -810,8 +876,9 @@ $(document).ready(function () {
 			initDataTables();
 			initInputmaskTime(data ? true : false);
 
+			$("#changeScheduleDate").data('daterangepicker').setStartDate(moment(changeScheduleDate || new Date).format("MMMM DD, YYYY"));
+			$("#changeScheduleDate").data('daterangepicker').setEndDate(moment(changeScheduleDate || new Date).format("MMMM DD, YYYY"));
 
-			// $("#changeScheduleDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			$("#changeScheduleDate").daterangepicker({
 				autoUpdateInput: false,
 				singleDatePicker: true,
@@ -866,6 +933,10 @@ $(document).ready(function () {
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forViewingTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForViewingParent">
+                    </div>
+                </div>
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                     <div class="table-responsive" id="tableForApprovalParent">
                     </div>
@@ -1002,6 +1073,7 @@ $(document).ready(function () {
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
+		isForViewing = $(this).attr("isForViewing") == "true";
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1058,7 +1130,7 @@ $(document).ready(function () {
 				pageContent();
 	
 				if (employeeID != sessionID) {
-					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+					$("[redirect=forApprovalTab]").length && (isForViewing ? $("[redirect=forViewingTab]").trigger("click") : $("[redirect=forApprovalTab]").trigger("click"));
 				}
 			}
 		} else {
@@ -1161,7 +1233,7 @@ $(document).ready(function () {
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                60,
+					moduleID:                MODULE_ID,
 					notificationTitle:       "Change Schedule",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
@@ -1230,7 +1302,7 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                60,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Change Schedule",
 					notificationDescription: `${getFormCode("SCH", createdAt, id)}: Your request has been approved.`,
@@ -1240,7 +1312,7 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                60,
+					moduleID:                MODULE_ID,
 					tableID:                 id,
 					notificationTitle:       "Change Schedule",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -1323,7 +1395,7 @@ $(document).ready(function () {
 				data["tableData[approversDate]"]         = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID:                60,
+					moduleID:                MODULE_ID,
 					tableID: 				 id,
 					notificationTitle:       "Change Schedule",
 					notificationDescription: `${getFormCode("SCH", createdAt, id)}: Your request has been denied.`,
@@ -1385,6 +1457,9 @@ $(document).ready(function () {
 	// ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
+		if (tab == "#forViewingTab") {
+			forViewingContent();
+		}
 		if (tab == "#forApprovalTab") {
 			forApprovalContent();
 		}

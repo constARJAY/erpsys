@@ -71,7 +71,7 @@ class RolesPermission_model extends CI_Model {
             $data = [];
             foreach ($getModules as $module) {
                 $moduleID = $module["moduleID"];
-                $status = $designationID == 1 ? 1 : 0; 
+                $status = $designationID == 1 || in_array($moduleID, [88, 144, 108, 3]) ? 1 : 0; 
                 $temp = [
                     "designationID"    => $designationID,
                     "moduleID"         => $moduleID,

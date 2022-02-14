@@ -1777,14 +1777,14 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                 <select class="badge  statusBadge form-control " name="taskStatus" label="status">
                     <option value="">---</option>
                     <option class="badge badge-primary" value="1" ${taskStatus == 1 ? "selected" : ""}>ON HOLD DEVELOPMENT</option>
-                    <option class="badge badge-info" value="2" ${taskStatus == 2 ? "selected" : ""}>ON DEVELOPMENT</option>
+                    <option class="badge badge-info" value="2" ${taskStatus == 2 ? "selected" : ""}>STARTED NOT COMPLETED</option>
                     <option class="badge badge-warning" value="3" ${taskStatus == 3 ? "selected" : ""}>FOR TESTING</option>
                     <option class="badge badge-outline-secondary" value="4" ${taskStatus == 4 ? "selected" : ""}>ON HOLD TESTING</option>
                     <option class="badge badge-outline-warning" value="5" ${taskStatus == 5 ? "selected" : ""}>ON TESTING</option>
                     <option class="badge badge badge-danger" value="6" ${taskStatus == 6 ? "selected" : ""}>FAILED</option>
-                    <option class="badge badge-success" value="7" ${taskStatus == 7 ? "selected" : ""}>PASSED</option>
+                    <option class="badge badge-success" value="7" ${taskStatus == 7 ? "selected" : ""}>COMPLETED</option>
                     <option class="badge badge-outline-primary" value="8" ${taskStatus == 8 ? "selected" : ""}>TODO</option>
-                    <option class="badge badge-outline-info" value="9" ${taskStatus == 9 ? "selected" : ""}>PENDING</option>
+                    <option class="badge badge-outline-info" value="9" ${taskStatus == 9 ? "selected" : ""}>NOT YET STARTED</option>
                 </select>
                 </div>
             </div>
